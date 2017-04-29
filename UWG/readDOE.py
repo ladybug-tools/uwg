@@ -3,6 +3,9 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
+import clr
+clr.AddReference("Microsoft.Office.Interop.Excel")
+
 def readDOE():
     """
     Read Excel files of DOE buildings
@@ -57,14 +60,17 @@ def readDOE():
         'Pst80',
         'New']
     
-    print bldType
+
+    # Building (Type,Era,Zone), Type = 1-16, Era = 1-3, Zone = 1-16
+    #refDOE (16,3,16) = Building;
+    #Schedule (16,3,16) = SchDef;
+    #refBEM (16,3,16) = BEMDef;
+    
+    #Nested loop = 16 types, 3 era, 16 zones 
+    #Therefore time complexity O(n*m*k) = 768
+    #optimization: change order: era, type, zone, break once found, use dict rather then list
     
     """
-    % Building (Type,Era,Zone), Type = 1-16, Era = 1-3, Zone = 1-16
-    refDOE (16,3,16) = Building;
-    Schedule (16,3,16) = SchDef;
-    refBEM (16,3,16) = BEMDef;
-    
     for i = 1:16
         file = strcat('C:\Sim\UWG4.1\data\DOERefBuildings\BLD',num2str(i),'.xlsx');
     
@@ -75,7 +81,7 @@ def readDOE():
         hCeiling = num(6,4:6);
         ver2hor = num(8,4:6);
         AreaRoof = num(9,4:6);
-    
+
         % Read zone summary (Sheet 2)
         [num, ~, ~] = xlsread(file,2);
         AreaFloor = num(3:5,6);
