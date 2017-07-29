@@ -4,7 +4,7 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
-import os
+import csv
 
 def readDOE():
     """
@@ -70,26 +70,33 @@ def readDOE():
 
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
+    dir_doe_name = "DOERefBuildings"
     for i in xrange(1):#16
-        print i
-        #print os.listdir(cwd)
-        file_doe_name = "DOERefBuildings\\BLD1\\BLD1.xlsx - 1.csv"
-        #print os.listdir(filename2)
-        #file = strcat('C:\Sim\UWG4.1\data\DOERefBuildings\BLD',num2str(i),'.xlsx');
-        fdoe = open(file_doe_name,"r")
-        for line in fdoe:
-            print line
+        print "BLD", i+1
+        #Read building summary (Sheet 1)
+        #make this a readwrite function, keep hierarchy flat
+        file_doe_name = "{x}\\BLD{y}\\BLD{y}.xlsx - {y}.csv".format(x=dir_doe_name,y=i+1)
+        file_doe = open(file_doe_name,"r")
+        gen_doe = csv.reader(file_doe, delimiter=",")
+        list_doe = map(lambda r: r,gen_doe)
+        file_doe.close()
 
-        fdoe.close()
+        for i,row in enumerate(list_doe):
+            print '[{:d}]'.format(i),
+            for j,col in enumerate(row):
+                print '[{:d}]'.format(j), col, ",",
+            print ''
+        print '--'
+        nFloor = list_doe[3][3:]        # Number of Floors
+        glazing = list_doe[4][3:]       # [?] Total
+        hCeiling = list_doe[5][3:]      # [m] Ceiling height
+        ver2hor = list_doe[7][3:]       # Wall to Skin Ratio
+        AreaRoof = list_doe[8][3:]      # [m2] Gross Dimensions - Total area
+
+
+        # Read zone summary (Sheet 2)
+
         """
-        % Read building summary (Sheet 1)
-        [num, ~, ~] = xlsread(file,1);
-        nFloor = num(4,4:6);
-        glazing = num(5,4:6);
-        hCeiling = num(6,4:6);
-        ver2hor = num(8,4:6);
-        AreaRoof = num(9,4:6);
-
         % Read zone summary (Sheet 2)
         [num, ~, ~] = xlsread(file,2);
         AreaFloor = num(3:5,6);
