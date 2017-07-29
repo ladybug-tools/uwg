@@ -1,10 +1,10 @@
+
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
-import clr
-clr.AddReference("Microsoft.Office.Interop.Excel")
+import os
 
 def readDOE():
     """
@@ -20,9 +20,10 @@ def readDOE():
     returns:
         ...
     """
-    
+
     # DOE Building Types
-    bldType = ['FullServiceRestaurant',
+    bldType = [
+        'FullServiceRestaurant',
         'Hospital',
         'LargeHotel',
         'LargeOffice',
@@ -38,8 +39,9 @@ def readDOE():
         'StripMall',
         'SuperMarket',
         'WareHouse']
-    
-    zoneType = ['1A (Miami)',
+
+    zoneType = [
+        '1A (Miami)',
         '2A (Houston)',
         '2B (Phoenix)',
         '3A (Atlanta)',
@@ -55,25 +57,31 @@ def readDOE():
         '6B (Helena)',
         '7 (Duluth)',
         '8 (Fairbanks)']
-    
+
     builtEra = ['Pre80',
         'Pst80',
         'New']
-    
+
 
     # Building (Type,Era,Zone), Type = 1-16, Era = 1-3, Zone = 1-16
     #refDOE (16,3,16) = Building;
     #Schedule (16,3,16) = SchDef;
     #refBEM (16,3,16) = BEMDef;
-    
-    #Nested loop = 16 types, 3 era, 16 zones 
+
+    #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
-    #optimization: change order: era, type, zone, break once found, use dict rather then list
-    
-    """
-    for i = 1:16
-        file = strcat('C:\Sim\UWG4.1\data\DOERefBuildings\BLD',num2str(i),'.xlsx');
-    
+    for i in xrange(1):#16
+        print i
+        #print os.listdir(cwd)
+        file_doe_name = "DOERefBuildings\\BLD1\\BLD1.xlsx - 1.csv"
+        #print os.listdir(filename2)
+        #file = strcat('C:\Sim\UWG4.1\data\DOERefBuildings\BLD',num2str(i),'.xlsx');
+        fdoe = open(file_doe_name,"r")
+        for line in fdoe:
+            print line
+
+        fdoe.close()
+        """
         % Read building summary (Sheet 1)
         [num, ~, ~] = xlsread(file,1);
         nFloor = num(4,4:6);
@@ -95,7 +103,7 @@ def readDOE():
         SHW = num(3:5,16);      % litres/hour
         Infil = num(3:5,21);    % ACH
         Vent = num(3:5,18);     % L/s/m^2
-        
+
         % Read location summary (Sheet 3)
         [num, text, ~] = xlsread(file,3);
         TypeWall = [text(4,5:20); text(15,5:20); text(26,5:20)];
@@ -109,7 +117,7 @@ def readDOE():
         COP = [num(12,5:20); num(23,5:20); num(34,5:20)];
         EffHeat = [num(13,5:20); num(24,5:20); num(35,5:20)];
         FanFlow = [num(14,5:20); num(25,5:20); num(36,5:20)];
-        
+
         % Read schedule (Sheet 4)
         [num, text, ~] = xlsread(file,4);
         SchEquip = num(2:4,7:30);
@@ -119,7 +127,7 @@ def readDOE():
         SetHeat = num(14:16,7:30);
         SchGas = num(17:19,7:30);
         SchSWH = num(20:22,7:30);
-        
+
         for j = 1:3
             for k = 1:16
                 refDOE (i,j,k) = Building(hCeiling(j),...  % floorHeight
@@ -141,12 +149,12 @@ def readDOE():
                     HVAC(j,k)*1000/AreaFloor(j),... % coolCap (refDOE in kW)
                     EffHeat(j,k),...                % heatEff
                     293);                           % initialTemp
-                
+
                 refDOE(i,j,k).heatCap = HEAT(j,k)*1000/AreaFloor(j);
                 refDOE(i,j,k).Type = bldType(i);
                 refDOE(i,j,k).Era = builtEra(j);
                 refDOE(i,j,k).Zone = zoneType(k);
-    
+
                 % Define wall, roof, road, and mass
                 % Material (thermalCond, volHeat = specific heat * density);
                 Stucco = Material (0.6918, 837.0 * 1858.0);
@@ -154,7 +162,7 @@ def readDOE():
                 Insulation = Material (0.049, 836.8 * 265.0);
                 Gypsum = Material (0.16, 830.0 * 784.9);
                 Wood = Material (0.11,1210.0*544.62);
-                                        
+
                 % Wall (1 in stucco, concrete, insulation, gypsum)
                 if strcmp(TypeWall(j,k),'MassWall')
                     % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
@@ -168,9 +176,9 @@ def readDOE():
                         thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;0.0127];
                         layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Gypsum];
                     end
-    
+
                     wall = Element(0.08,0.92,thickness,layers,0,293,0);
-                    
+
                     % If mass wall, assume mass foor (4" concrete)
                     % Mass (assume 4" concrete);
                     alb = 0.2;
@@ -178,13 +186,13 @@ def readDOE():
                     thickness = [0.054;0.054];
                     concrete = Material (1.31,2240.0*836.8);
                     mass = Element(alb,emis,thickness,[concrete;concrete],0,293,1);
-                                                    
+
                 elseif strcmp(TypeWall(j,k),'WoodFrame')
                     % 0.01m wood siding, tbd insulation, 1/2" gypsum
                     Rbase = 0.170284091;    % based on wood siding, gypsum
                     Rins = RvalWall(j,k) - Rbase;
                     D_ins = Rins * Insulation.thermalCond;
-                    
+
                     if D_ins > 0.01
                         thickness = [0.01;D_ins;0.0127];
                         layers = [Wood;Insulation;Gypsum];
@@ -193,14 +201,14 @@ def readDOE():
                         layers = [Wood;Gypsum];
                     end
                     wall = Element(0.22,0.92,thickness,layers,0,293,0);
-    
+
                     % If wood frame wall, assume wooden floor
                     alb = 0.2;
                     emis = 0.9;
                     thickness = 0.05 * ones (2,1);
                     wood = Material (1.31,2240.0*836.8);
                     mass = Element(alb,emis,thickness,[wood;wood],0,293,1);
-                    
+
                 elseif strcmp(TypeWall(j,k),'SteelFrame')
                     % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
                     Rbase = 0.271087; % based on stucco, concrete, gypsum
@@ -214,44 +222,44 @@ def readDOE():
                         layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Gypsum];
                     end
                     wall = Element(0.15,0.92,thickness,layers,0,293,0);
-                    
+
     %                 wall = Element(0.2,0.92,thickness,layers,0,293,0); % Singapore case
-    
+
     %                 % TOULOUS case
     %                 thickness = [0.05;0.05;0.05;0.05;0.05;0.05;0.03;0.0127];
     %                 layers = [Concrete;Concrete;Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
     %                 wall = Element(0.25,0.93,thickness,layers,0,293,0);
-    % 
+    %
     %                 % BUBBLE case
     %                 thickness = [0.05;0.05;0.05;0.05;0.03;0.0127];
     %                 layers = [Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
     %                 wall = Element(0.15,0.93,thickness,layers,0,293,0);
-    
+
                     % If mass wall, assume mass foor
                     % Mass (assume 4" concrete);
                     alb = 0.2;      % Adjusted for Bubble/Toulouse case (0.08 per Energy Plus)
                     emis = 0.93;
-                    thickness = 0.05 * ones (2,1); 
-    %                thickness = 0.102*ones(2,1);       % for Bubble 
+                    thickness = 0.05 * ones (2,1);
+    %                thickness = 0.102*ones(2,1);       % for Bubble
                     mass = Element(alb,emis,thickness,[Concrete;Concrete],0,293,1);
-                    
+
                 elseif strcmp(TypeWall(j,k),'MetalWall')
-    
+
                     % metal siding, insulation, 1/2" gypsum
                     alb = 0.2;
                     emis = 0.9;
-                    D_ins = max((RvalWall(j,k) * Insulation.thermalCond)/2,0.01);                
+                    D_ins = max((RvalWall(j,k) * Insulation.thermalCond)/2,0.01);
                     wall = Element(alb,emis,[D_ins;D_ins;0.0127],[Insulation;Insulation;Gypsum],0,293,0);
-    
+
                     % Mass (assume 4" concrete);
                     alb = 0.2;
                     emis = 0.9;
                     thickness = 0.05 * ones (2,1);
                     concrete = Material (1.31,2240.0*836.8);
                     mass = Element(alb,emis,thickness,[concrete;concrete],0,293,1);
-    
+
                 end
-                
+
                 % Roof
                 if strcmp(TypeRoof(j,k),'IEAD')
                     % IEAD-> membrane, insulation, decking
@@ -259,20 +267,20 @@ def readDOE():
                      emis = 0.93;
                      D_ins = max(RvalRoof(j,k) * Insulation.thermalCond / 2,0.01);
                      roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
-                    
+
     %                 % TOULOUS/BUBBLE Case
     %                 alb = 0.15;
     %                 emis = 0.93;
     %                 thickness = [0.06;0.05;0.05;0.05;0.05;0.03];
     %                 roof = Element(alb,emis,thickness,[Concrete;Wood;Wood;Wood;Wood;Insulation],0,293,0);
-                
+
                 elseif strcmp(TypeRoof(j,k),'Attic')
                     % IEAD-> membrane, insulation, decking
                     alb = 0.2;
                     emis = 0.9;
                     D_ins = max(RvalRoof(j,k) * Insulation.thermalCond/2,0.01);
                     roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
-                    
+
                 elseif strcmp(TypeRoof(j,k),'MetalRoof')
                     % IEAD-> membrane, insulation, decking
                     alb = 0.2;
@@ -280,11 +288,11 @@ def readDOE():
                     D_ins = max(RvalRoof(j,k) * Insulation.thermalCond/2,0.01);
                     roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
                 end
-                            
+
                 % Define bulding energy model, set fraction to zero
                 refBEM(i,j,k) = BEMDef(refDOE(i,j,k),mass,wall,roof,0);
                 refBEM(i,j,k).building.FanMax = FanFlow(j,k);
-                
+
                 Schedule(i,j,k).Elec = SchEquip;   % 3x24 matrix of schedule for electricity (WD,Sat,Sun)
                 Schedule(i,j,k).Light = SchLight;  % 3x24 matrix of schedule for light (WD,Sat,Sun)
                 Schedule(i,j,k).Gas = SchGas;      % 3x24 matrix of schedule for gas (WD,Sat,Sun)
@@ -292,26 +300,26 @@ def readDOE():
                 Schedule(i,j,k).Cool = SetCool;    % 3x24 matrix of schedule for cooling temp (WD,Sat,Sun) % off for BUBBLE case
                 Schedule(i,j,k).Heat = SetHeat;    % 3x24 matrix of schedule for heating temp (WD,Sat,Sun)
                 Schedule(i,j,k).SWH = SchSWH;      % 3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                
+
                 Schedule(i,j,k).Qelec = Elec(j);         % W/m^2 (max) for electrical plug process
                 Schedule(i,j,k).Qlight = Light(j);       % W/m^2 (max) for light
                 Schedule(i,j,k).Nocc = Occupant(j)/AreaFloor(j); % Person/m^2
                 Schedule(i,j,k).Qgas = Gas(j);           % W/m^2 (max) for gas
                 Schedule(i,j,k).Vent = Vent(j)/1000;     % m^3/m^2 per person
                 Schedule(i,j,k).Vswh = SHW(j)/AreaFloor(j);    % litres per hour per m^2 of floor
-                
+
             end
         end
     end
-    
+
     % % BUBBLE/TOULOUSE adjustment Case
     % refBEM(6,2,5).building.glazingRatio = 0.3;
-    
+
     % % Singapore adjustment Case
     % refBEM(6,2,1).building.glazingRatio = 0.3;
-    
+
     save ('RefDOE.mat','refDOE','refBEM','Schedule');
-    
+
     % wall & roof definition based on material
     % Material,
     %     1/2IN Gypsum,            !- Name
@@ -323,7 +331,7 @@ def readDOE():
     %     0.9000,                  !- Thermal Absorptance
     %     0.9200,                  !- Solar Absorptance
     %     0.9200;                  !- Visible Absorptance
-    % 
+    %
     % Material,
     %     1IN Stucco,              !- Name
     %     Smooth,                  !- Roughness
@@ -334,7 +342,7 @@ def readDOE():
     %     0.9000,                  !- Thermal Absorptance
     %     0.9200,                  !- Solar Absorptance
     %     0.9200;                  !- Visible Absorptance
-    % 
+    %
     % Material,
     %     8IN CONCRETE HW,  !- Name
     %     Rough,                   !- Roughness
@@ -367,7 +375,7 @@ def readDOE():
     %     0.9000000,               !- Thermal Absorptance
     %     0.7000000,               !- Solar Absorptance
     %     0.7000000;               !- Visible Absorptance! Common Materials
-    % 
+    %
     % Material,
     %     Wood Siding,             !- Name
     %     MediumSmooth,            !- Roughness
@@ -379,9 +387,7 @@ def readDOE():
     %     0.7800,                  !- Solar Absorptance
     %     0.7800;                  !- Visible Absorptance
     """
-    
-
-readDOE()
 
 
-
+if __name__ == "__main__":
+    readDOE()
