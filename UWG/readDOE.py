@@ -68,49 +68,56 @@ def readDOE():
     #Schedule (16,3,16) = SchDef;
     #refBEM (16,3,16) = BEMDef;
 
-    #Nested loop = 16 types, 3 era, 16 zones
-    #Therefore time complexity O(n*m*k) = 768
-    dir_doe_name = "DOERefBuildings"
-    for i in xrange(1):#16
-        print "BLD", i+1
-        #Read building summary (Sheet 1)
-        #make this a readwrite function, keep hierarchy flat
-        file_doe_name = "{x}\\BLD{y}\\BLD{y}.xlsx - {y}.csv".format(x=dir_doe_name,y=i+1)
-        file_doe = open(file_doe_name,"r")
+    def read_doe_csv(file_doe_name_):
+        file_doe = open(file_doe_name_,"r")
         gen_doe = csv.reader(file_doe, delimiter=",")
         list_doe = map(lambda r: r,gen_doe)
         file_doe.close()
+        return list_doe
 
-        for i,row in enumerate(list_doe):
-            print '[{:d}]'.format(i),
-            for j,col in enumerate(row):
-                print '[{:d}]'.format(j), col, ",",
-            print ''
-        print '--'
-        nFloor = list_doe[3][3:]        # Number of Floors
-        glazing = list_doe[4][3:]       # [?] Total
-        hCeiling = list_doe[5][3:]      # [m] Ceiling height
-        ver2hor = list_doe[7][3:]       # Wall to Skin Ratio
-        AreaRoof = list_doe[8][3:]      # [m2] Gross Dimensions - Total area
+    #Purpose: Loop through every DOE reference csv and extract building data
+    #Nested loop = 16 types, 3 era, 16 zones
+    #Therefore time complexity O(n*m*k) = 768
+    debug = False
+    dir_doe_name = "DOERefBuildings"
+    for i in xrange(1):#16
+        print "BLD", i+1
+        # Read building summary (Sheet 1)
+        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
+        list_doe = read_doe_csv(file_doe_name_bld)
 
+        nFloor      = map(lambda n: float(n), list_doe[3][3:])      # Number of Floors
+        glazing     = map(lambda n: float(n), list_doe[4][3:])      # [?] Total
+        hCeiling    = map(lambda n: float(n), list_doe[5][3:])      # [m] Ceiling height
+        ver2hor     = map(lambda n: float(n), list_doe[7][3:])      # Wall to Skin Ratio
+        AreaRoof    = map(lambda n: float(n), list_doe[8][3:])      # [m2] Gross Dimensions - Total area
 
         # Read zone summary (Sheet 2)
+        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
+        list_doe = read_doe_csv(file_doe_name_zone)
+
+        AreaFloor   = map(lambda n: float(n), [list_doe[2][5],list_doe[3][5],list_doe[4][5]])       # [m2]
+        Volume      = map(lambda n: float(n), [list_doe[2][6],list_doe[3][6],list_doe[4][6]])       # [m3]
+        AreaWall    = map(lambda n: float(n), [list_doe[2][8],list_doe[3][8],list_doe[4][8]])       # [m2]
+        AreaWindow  = map(lambda n: float(n), [list_doe[2][9],list_doe[3][9],list_doe[4][9]])       # [m2]
+        Occupant    = map(lambda n: float(n), [list_doe[2][11],list_doe[3][11],list_doe[4][11]])    # Number of People
+        Lights      = map(lambda n: float(n), [list_doe[2][12],list_doe[3][12],list_doe[4][12]])    # [W/m2]
+        Elec        = map(lambda n: float(n), [list_doe[2][13],list_doe[3][13],list_doe[4][13]])    # [W/m2] Electric Plug and Process
+        Gas         = map(lambda n: float(n), [list_doe[2][14],list_doe[3][14],list_doe[4][14]])    # [W/m2] Gas Plug and Process
+        SHW         = map(lambda n: float(n), [list_doe[2][15],list_doe[3][15],list_doe[4][15]])    # [Litres/hr] Peak Service Hot Water
+        Vent        = map(lambda n: float(n), [list_doe[2][17],list_doe[3][17],list_doe[4][17]])    # [L/s/m2] Ventilation
+        Infil       = map(lambda n: float(n), [list_doe[2][20],list_doe[3][20],list_doe[4][20]])    # Air Changes Per Hour (ACH) Infiltration
+
+        # Read location summary (Sheet 3)
+        if debug:
+            for i,row in enumerate(list_doe):
+                print 'ROW {:d}:'.format(i),
+                for j,col in enumerate(row):
+                    print '[{:d}]'.format(j), col, ",",
+                print ''
+            print '--'
 
         """
-        % Read zone summary (Sheet 2)
-        [num, ~, ~] = xlsread(file,2);
-        AreaFloor = num(3:5,6);
-        Volume = num(3:5,7);
-        AreaWall = num(3:5,9);
-        AreaWindow = num(3:5,10);
-        Occupant = num(3:5,12);
-        Light = num(3:5,13);
-        Elec = num(3:5,14);
-        Gas = num(3:5,15);
-        SHW = num(3:5,16);      % litres/hour
-        Infil = num(3:5,21);    % ACH
-        Vent = num(3:5,18);     % L/s/m^2
-
         % Read location summary (Sheet 3)
         [num, text, ~] = xlsread(file,3);
         TypeWall = [text(4,5:20); text(15,5:20); text(26,5:20)];
