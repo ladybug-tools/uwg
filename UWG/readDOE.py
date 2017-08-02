@@ -109,14 +109,17 @@ def readDOE():
         Infil       = map(lambda n: float(n), [list_doe[2][20],list_doe[3][20],list_doe[4][20]])    # Air Changes Per Hour (ACH) Infiltration
 
         # Read location summary (Sheet 3)
-        if debug:
+        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
+        list_doe = read_doe_csv(file_doe_name_zone)
+
+        if debug==False:
             for i,row in enumerate(list_doe):
                 print 'ROW {:d}:'.format(i),
                 for j,col in enumerate(row):
                     print '[{:d}]'.format(j), col, ",",
                 print ''
             print '--'
-
+        TypeWall    = 
         """
         % Read location summary (Sheet 3)
         [num, text, ~] = xlsread(file,3);
