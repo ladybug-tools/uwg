@@ -6,6 +6,42 @@ Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 
 import csv
 
+class UWG_Unit_Test:
+    def __init__(self):
+        self.fail = 0
+        self.success = 0
+        self.total = self._get_total()
+        self.test_history = "Test Results:\n"
+    def __repr__(self):
+        return "{a} successful and {b} failed tests".format(a=self.success,b=self.fail)
+    def test_results(self):
+        return self.test_history + self.__repr__()
+    def _get_total(self):
+        return self.fail + self.success
+    def test_equality(self,a,b,toggle=True):
+        if a == b:
+            s = "test_equality: {y} == {z} success\n".format(y=a,z=b)
+            self.success += 1
+        else:
+            s = "test_equality: {y} != {z} fail\n".format(y=a,z=b)
+            self.fail += 1
+        if toggle:
+            self.test_history += s
+    def test_in_string(self,a,b,toggle=True):
+        if type(a)!=type("") or type(b)!=type(""):
+            s = "test_in_string: {y} or {z} not a string\n".format(y=b,z=a)
+            self.fail += 1
+        else:
+            if b in a:
+                s = "test_in_string:: {y} in {z} success\n".format(y=b,z=a)
+                self.success += 1
+            else:
+                s = "test_in_string: {y} in {z} fail\n".format(y=b,z=a)
+                self.fail += 1
+        if toggle:
+            self.test_history += s
+
+
 def readDOE():
     """
     Read Excel files of DOE buildings
@@ -20,6 +56,10 @@ def readDOE():
     returns:
         ...
     """
+
+    #Make a test object
+    test_readDOE = UWG_Unit_Test()
+    test_readDOE.toggle = True
 
     # DOE Building Types
     bldType = [
@@ -78,48 +118,56 @@ def readDOE():
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
-    debug = False
     dir_doe_name = "DOERefBuildings"
     for i in xrange(1):#16
         print "BLD", i+1
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe = read_doe_csv(file_doe_name_bld)
+        list_doe1 = read_doe_csv(file_doe_name_bld)
 
-        nFloor      = map(lambda n: float(n), list_doe[3][3:])      # Number of Floors
-        glazing     = map(lambda n: float(n), list_doe[4][3:])      # [?] Total
-        hCeiling    = map(lambda n: float(n), list_doe[5][3:])      # [m] Ceiling height
-        ver2hor     = map(lambda n: float(n), list_doe[7][3:])      # Wall to Skin Ratio
-        AreaRoof    = map(lambda n: float(n), list_doe[8][3:])      # [m2] Gross Dimensions - Total area
+        nFloor      = map(lambda n: float(n), list_doe1[3][3:])      # Number of Floors
+        glazing     = map(lambda n: float(n), list_doe1[4][3:])      # [?] Total
+        hCeiling    = map(lambda n: float(n), list_doe1[5][3:])      # [m] Ceiling height
+        ver2hor     = map(lambda n: float(n), list_doe1[7][3:])      # Wall to Skin Ratio
+        AreaRoof    = map(lambda n: float(n), list_doe1[8][3:])      # [m2] Gross Dimensions - Total area
+
+        #Tests for sheet 1
+        test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe = read_doe_csv(file_doe_name_zone)
+        list_doe2 = read_doe_csv(file_doe_name_zone)
 
-        AreaFloor   = map(lambda n: float(n), [list_doe[2][5],list_doe[3][5],list_doe[4][5]])       # [m2]
-        Volume      = map(lambda n: float(n), [list_doe[2][6],list_doe[3][6],list_doe[4][6]])       # [m3]
-        AreaWall    = map(lambda n: float(n), [list_doe[2][8],list_doe[3][8],list_doe[4][8]])       # [m2]
-        AreaWindow  = map(lambda n: float(n), [list_doe[2][9],list_doe[3][9],list_doe[4][9]])       # [m2]
-        Occupant    = map(lambda n: float(n), [list_doe[2][11],list_doe[3][11],list_doe[4][11]])    # Number of People
-        Lights      = map(lambda n: float(n), [list_doe[2][12],list_doe[3][12],list_doe[4][12]])    # [W/m2]
-        Elec        = map(lambda n: float(n), [list_doe[2][13],list_doe[3][13],list_doe[4][13]])    # [W/m2] Electric Plug and Process
-        Gas         = map(lambda n: float(n), [list_doe[2][14],list_doe[3][14],list_doe[4][14]])    # [W/m2] Gas Plug and Process
-        SHW         = map(lambda n: float(n), [list_doe[2][15],list_doe[3][15],list_doe[4][15]])    # [Litres/hr] Peak Service Hot Water
-        Vent        = map(lambda n: float(n), [list_doe[2][17],list_doe[3][17],list_doe[4][17]])    # [L/s/m2] Ventilation
-        Infil       = map(lambda n: float(n), [list_doe[2][20],list_doe[3][20],list_doe[4][20]])    # Air Changes Per Hour (ACH) Infiltration
+        AreaFloor   = map(lambda n: float(n), [list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
+        Volume      = map(lambda n: float(n), [list_doe2[2][6],list_doe2[3][6],list_doe2[4][6]])       # [m3]
+        AreaWall    = map(lambda n: float(n), [list_doe2[2][8],list_doe2[3][8],list_doe2[4][8]])       # [m2]
+        AreaWindow  = map(lambda n: float(n), [list_doe2[2][9],list_doe2[3][9],list_doe2[4][9]])       # [m2]
+        Occupant    = map(lambda n: float(n), [list_doe2[2][11],list_doe2[3][11],list_doe2[4][11]])    # Number of People
+        Lights      = map(lambda n: float(n), [list_doe2[2][12],list_doe2[3][12],list_doe2[4][12]])    # [W/m2]
+        Elec        = map(lambda n: float(n), [list_doe2[2][13],list_doe2[3][13],list_doe2[4][13]])    # [W/m2] Electric Plug and Process
+        Gas         = map(lambda n: float(n), [list_doe2[2][14],list_doe2[3][14],list_doe2[4][14]])    # [W/m2] Gas Plug and Process
+        SHW         = map(lambda n: float(n), [list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
+        Vent        = map(lambda n: float(n), [list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
+        Infil       = map(lambda n: float(n), [list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
+
+        #Tests sheet 2
+        test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe = read_doe_csv(file_doe_name_zone)
+        list_doe3 = read_doe_csv(file_doe_name_location)
 
-        if debug==False:
-            for i,row in enumerate(list_doe):
+
+        if not test_readDOE.toggle:
+            for i,row in enumerate(list_doe3):
                 print 'ROW {:d}:'.format(i),
                 for j,col in enumerate(row):
                     print '[{:d}]'.format(j), col, ",",
                 print ''
             print '--'
-        TypeWall    = 
+
+
+        #TypeWall =  [3][]
         """
         % Read location summary (Sheet 3)
         [num, text, ~] = xlsread(file,3);
@@ -134,7 +182,11 @@ def readDOE():
         COP = [num(12,5:20); num(23,5:20); num(34,5:20)];
         EffHeat = [num(13,5:20); num(24,5:20); num(35,5:20)];
         FanFlow = [num(14,5:20); num(25,5:20); num(36,5:20)];
+        """
+        #Test sheet 3
+        test_readDOE.test_equality(list_doe3[0][2],"Location Summary")
 
+        """
         % Read schedule (Sheet 4)
         [num, text, ~] = xlsread(file,4);
         SchEquip = num(2:4,7:30);
@@ -404,6 +456,8 @@ def readDOE():
     %     0.7800,                  !- Solar Absorptance
     %     0.7800;                  !- Visible Absorptance
     """
+
+    print test_readDOE.test_results()
 
 
 if __name__ == "__main__":
