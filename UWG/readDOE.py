@@ -27,6 +27,16 @@ class UWG_Unit_Test:
             self.fail += 1
         if toggle:
             self.test_history += s
+    def test_equality_tol(self,a,b,toggle=True):
+        tol = 0.001
+        if abs(a-b) < 0.001:
+            s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
+            self.success += 1
+        else:
+            s = "test_equality_tol: {y} != {z} fail\n".format(y=a,z=b)
+            self.fail += 1
+        if toggle:
+            self.test_history += s
     def test_in_string(self,a,b,toggle=True):
         if type(a)!=type("") or type(b)!=type(""):
             s = "test_in_string: {y} or {z} not a string\n".format(y=b,z=a)
@@ -41,6 +51,25 @@ class UWG_Unit_Test:
         if toggle:
             self.test_history += s
 
+def to_fl(x):
+    #Recurses through lists and converts lists of string to float
+    fl_lst = []
+    if isinstance(x[0], basestring):
+        return map(lambda s: float(s), x)
+    elif type(x[0]) == type([]):
+        for xi in xrange(len(x)):
+            fl_lst.append(to_fl(x[xi]))
+        return fl_lst
+    else:
+        print 'Fail to convert to list of floats; type error {a} is {b}'.format(a=x[0], b=type(x[0]))
+        return False
+
+def read_doe_csv(file_doe_name_):
+    file_doe = open(file_doe_name_,"r")
+    gen_doe = csv.reader(file_doe, delimiter=",")
+    list_doe = map(lambda r: r,gen_doe)
+    file_doe.close()
+    return list_doe
 
 def readDOE():
     """
@@ -108,13 +137,6 @@ def readDOE():
     #Schedule (16,3,16) = SchDef;
     #refBEM (16,3,16) = BEMDef;
 
-    def read_doe_csv(file_doe_name_):
-        file_doe = open(file_doe_name_,"r")
-        gen_doe = csv.reader(file_doe, delimiter=",")
-        list_doe = map(lambda r: r,gen_doe)
-        file_doe.close()
-        return list_doe
-
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
@@ -125,66 +147,69 @@ def readDOE():
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
 
-        nFloor      = map(lambda n: float(n), list_doe1[3][3:])      # Number of Floors
-        glazing     = map(lambda n: float(n), list_doe1[4][3:])      # [?] Total
-        hCeiling    = map(lambda n: float(n), list_doe1[5][3:])      # [m] Ceiling height
-        ver2hor     = map(lambda n: float(n), list_doe1[7][3:])      # Wall to Skin Ratio
-        AreaRoof    = map(lambda n: float(n), list_doe1[8][3:])      # [m2] Gross Dimensions - Total area
+        nFloor      = to_fl(list_doe1[3][3:])      # Number of Floors
+        glazing     = to_fl(list_doe1[4][3:])      # [?] Total
+        hCeiling    = to_fl(list_doe1[5][3:])      # [m] Ceiling height
+        ver2hor     = to_fl(list_doe1[7][3:])      # Wall to Skin Ratio
+        AreaRoof    = to_fl(list_doe1[8][3:])      # [m2] Gross Dimensions - Total area
 
         #Tests for sheet 1
         test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
+        test_readDOE.test_equality(len(nFloor),3,toggle=False)
+        test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=False)
+        if i==0: test_readDOE.test_equality_tol(AreaRoof[0],570.0)
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe2 = read_doe_csv(file_doe_name_zone)
 
-        AreaFloor   = map(lambda n: float(n), [list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
-        Volume      = map(lambda n: float(n), [list_doe2[2][6],list_doe2[3][6],list_doe2[4][6]])       # [m3]
-        AreaWall    = map(lambda n: float(n), [list_doe2[2][8],list_doe2[3][8],list_doe2[4][8]])       # [m2]
-        AreaWindow  = map(lambda n: float(n), [list_doe2[2][9],list_doe2[3][9],list_doe2[4][9]])       # [m2]
-        Occupant    = map(lambda n: float(n), [list_doe2[2][11],list_doe2[3][11],list_doe2[4][11]])    # Number of People
-        Lights      = map(lambda n: float(n), [list_doe2[2][12],list_doe2[3][12],list_doe2[4][12]])    # [W/m2]
-        Elec        = map(lambda n: float(n), [list_doe2[2][13],list_doe2[3][13],list_doe2[4][13]])    # [W/m2] Electric Plug and Process
-        Gas         = map(lambda n: float(n), [list_doe2[2][14],list_doe2[3][14],list_doe2[4][14]])    # [W/m2] Gas Plug and Process
-        SHW         = map(lambda n: float(n), [list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
-        Vent        = map(lambda n: float(n), [list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
-        Infil       = map(lambda n: float(n), [list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
+        AreaFloor   = to_fl([list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
+        Volume      = to_fl([list_doe2[2][6],list_doe2[3][6],list_doe2[4][6]])       # [m3]
+        AreaWall    = to_fl([list_doe2[2][8],list_doe2[3][8],list_doe2[4][8]])       # [m2]
+        AreaWindow  = to_fl([list_doe2[2][9],list_doe2[3][9],list_doe2[4][9]])       # [m2]
+        Occupant    = to_fl([list_doe2[2][11],list_doe2[3][11],list_doe2[4][11]])    # Number of People
+        Lights      = to_fl([list_doe2[2][12],list_doe2[3][12],list_doe2[4][12]])    # [W/m2]
+        Elec        = to_fl([list_doe2[2][13],list_doe2[3][13],list_doe2[4][13]])    # [W/m2] Electric Plug and Process
+        Gas         = to_fl([list_doe2[2][14],list_doe2[3][14],list_doe2[4][14]])    # [W/m2] Gas Plug and Process
+        SHW         = to_fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
+        Vent        = to_fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
+        Infil       = to_fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
 
         #Tests sheet 2
         test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
+        test_readDOE.test_equality(len(Elec),3,toggle=False)
+        test_readDOE.test_equality_tol(Vent[0],5.34)
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe3 = read_doe_csv(file_doe_name_location)
 
 
-        if not test_readDOE.toggle:
-            for i,row in enumerate(list_doe3):
-                print 'ROW {:d}:'.format(i),
-                for j,col in enumerate(row):
-                    print '[{:d}]'.format(j), col, ",",
-                print ''
-            print '--'
+        #list_doe3[][]: [20 types pre80, 20 types pst80, 20 types new]
+        TypeWall    = [list_doe3[3][4:],list_doe3[14][4:],list_doe3[25][4:]]            # Construction type
+        RValWall    = to_fl([list_doe3[4][4:],list_doe3[15][4:],list_doe3[26][4:]])     # [m2*K/W] R-value
+        TypeRoof    = [list_doe3[5][4:],list_doe3[16][4:],list_doe3[27][4:]]            # Construction type
+        RValRoof    = to_fl([list_doe3[6][4:],list_doe3[17][4:],list_doe3[28][4:]])     # [m2*K/W] R-value
+        Uwindow     = to_fl([list_doe3[7][4:],list_doe3[18][4:],list_doe3[29][4:]])     # [W/m2*K] U-factor
+        SHGC        = to_fl([list_doe3[8][4:],list_doe3[19][4:],list_doe3[30][4:]])     # [-] coefficient
+        HVAC        = to_fl([list_doe3[9][4:],list_doe3[20][4:],list_doe3[31][4:]])     # [kW] Air Conditioning
+        HEAT        = to_fl([list_doe3[10][4:],list_doe3[21][4:],list_doe3[32][4:]])    # [kW] Heating
+        COP         = to_fl([list_doe3[11][4:],list_doe3[22][4:],list_doe3[33][4:]])    # [-] Air Conditioning COP
+        EffHeat     = to_fl([list_doe3[12][4:],list_doe3[23][4:],list_doe3[34][4:]])    # [%] eating Efficiency
+        FanFlow     = to_fl([list_doe3[13][4:],list_doe3[24][4:],list_doe3[35][4:]])    # [m3/s] Fan Max Flow Rate
 
-
-        #TypeWall =  [3][]
-        """
-        % Read location summary (Sheet 3)
-        [num, text, ~] = xlsread(file,3);
-        TypeWall = [text(4,5:20); text(15,5:20); text(26,5:20)];
-        RvalWall = [num(5,5:20); num(16,5:20); num(27,5:20)];
-        TypeRoof = [text(6,5:20); text(17,5:20); text(28,5:20)];
-        RvalRoof = [num(7,5:20); num(18,5:20); num(29,5:20)];
-        Uwindow = [num(8,5:20); num(19,5:20); num(30,5:20)];
-        SHGC = [num(9,5:20); num(20,5:20); num(31,5:20)];
-        HVAC = [num(10,5:20); num(21,5:20); num(32,5:20)];
-        HEAT = [num(11,5:20); num(22,5:20); num(33,5:20)];
-        COP = [num(12,5:20); num(23,5:20); num(34,5:20)];
-        EffHeat = [num(13,5:20); num(24,5:20); num(35,5:20)];
-        FanFlow = [num(14,5:20); num(25,5:20); num(36,5:20)];
-        """
         #Test sheet 3
         test_readDOE.test_equality(list_doe3[0][2],"Location Summary")
+        test_readDOE.test_equality(16,len(TypeWall[0]),toggle=False)
+        test_readDOE.test_equality(16,len(TypeWall[1]),toggle=False)
+        test_readDOE.test_equality(16,len(TypeWall[2]),toggle=False)
+        test_readDOE.test_equality(16,len(RValWall[0]),toggle=False)
+        if i==0: test_readDOE.test_in_string('SteelFrame',TypeWall[0][0])
+        if i==0: test_readDOE.test_equality_tol(RValWall[0][0],0.77)
+        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=False)
+        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=False)
+        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=False)
+        if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=False)
 
         """
         % Read schedule (Sheet 4)
