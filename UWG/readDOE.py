@@ -74,12 +74,42 @@ def read_doe_csv(file_doe_name_):
 
 def readDOE():
     """
-    Read Excel files of DOE buildings
+    First read csv files of DOE buildings
     Sheet 1 = BuildingSummary
     Sheet 2 = ZoneSummary
     Sheet 3 = LocationSummary
     Sheet 4 = Schedules
     Note BLD8 & 10 = school
+
+
+    Then make matrix of ref data as nested nested lists [16, 3, 16]:
+    matrix refDOE = Building objs
+    matrix Schedule = SchDef objs
+    matrix refBEM (16,3,16) = BEMDef
+    where:
+        [16,3,16] is Type = 1-16, Era = 1-3, Zone = 1-16
+
+    ...honestly a 3d numpy array would make a lot of sense here
+    but limitation with ironpython entail followig structure:
+    [
+        type1[
+            era1[z1...z9...z16]
+            era2[z1...z9...z16]
+            era3[z1...z9...z16]
+            ]
+        ...
+        type9[
+            era1[z1...z9...z16]
+            era2[z1...z9...z16]
+            era3[z1...z9...z16]
+            ]
+        ...
+        type16[
+            era1[z1...z9...z16]
+            era2[z1...z9...z16]
+            era3[z1...z9...z16]
+            ]
+    ]
 
     args:
         ...
@@ -132,11 +162,10 @@ def readDOE():
         'Pst80',
         'New']
 
-
-    # Building (Type,Era,Zone), Type = 1-16, Era = 1-3, Zone = 1-16
-    #refDOE (16,3,16) = Building;
-    #Schedule (16,3,16) = SchDef;
-    #refBEM (16,3,16) = BEMDef;
+    #Nested, nested lists of Building, SchDef, BEMDef objects
+    refDOE = []     #refDOE(16,3,16) = Building;
+    Schedule = []   #Schedule (16,3,16) = SchDef;
+    refBEM = []     #refBEM (16,3,16) = BEMDef;
 
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones
@@ -237,8 +266,8 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
         if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
 
-        B = Building()
-        print B
+        #B = Building()
+        #print B
         """
         for j = 1:3
             for k = 1:16
