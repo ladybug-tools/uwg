@@ -5,6 +5,7 @@ Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
 import csv
+from building import Building
 
 class UWG_Unit_Test:
     def __init__(self):
@@ -236,6 +237,8 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
         if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
 
+        B = Building()
+        print B
         """
         for j = 1:3
             for k = 1:16
