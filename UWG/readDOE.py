@@ -8,18 +8,24 @@ import csv
 from building import Building
 
 class UWG_Unit_Test:
-    def __init__(self):
+    def __init__(self,test_name,run_test):
         self.fail = 0
         self.success = 0
         self.total = self._get_total()
-        self.test_history = "Test Results:\n"
+        self.test_history = ""
+        self.test_name = test_name
+        self.run_test = run_test
     def __repr__(self):
         return "{a} successful and {b} failed tests".format(a=self.success,b=self.fail)
     def test_results(self):
-        return self.test_history + self.__repr__()
+        if not self.run_test:
+            return "\nTEST: " + self.test_name + " NOT RUN."
+        else:
+            return "\n-----START" + self.test_name + "TEST RESULTS-----\n" + self.test_history + self.__repr__() + "\n-----END" + self.test_name + "TEST RESULTS-----\n"
     def _get_total(self):
         return self.fail + self.success
     def test_equality(self,a,b,toggle=True):
+        if not self.run_test: return None
         if a == b:
             s = "test_equality: {y} == {z} success\n".format(y=a,z=b)
             self.success += 1
@@ -29,6 +35,7 @@ class UWG_Unit_Test:
         if toggle:
             self.test_history += s
     def test_equality_tol(self,a,b,toggle=True):
+        if not self.run_test: return None
         tol = 0.001
         if abs(a-b) < 0.001:
             s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
@@ -39,6 +46,7 @@ class UWG_Unit_Test:
         if toggle:
             self.test_history += s
     def test_in_string(self,a,b,toggle=True):
+        if not self.run_test: return None
         if type(a)!=type("") or type(b)!=type(""):
             s = "test_in_string: {y} or {z} not a string\n".format(y=b,z=a)
             self.fail += 1
@@ -90,36 +98,27 @@ def readDOE():
         [16,3,16] is Type = 1-16, Era = 1-3, Zone = 1-16
 
     ...honestly a 3d numpy array would make a lot of sense here
-    but limitation with ironpython entail followig structure:
-    [
-        type1[
-            era1[z1...z9...z16]
-            era2[z1...z9...z16]
-            era3[z1...z9...z16]
-            ]
-        ...
-        type9[
-            era1[z1...z9...z16]
-            era2[z1...z9...z16]
-            era3[z1...z9...z16]
-            ]
-        ...
-        type16[
-            era1[z1...z9...z16]
-            era2[z1...z9...z16]
-            era3[z1...z9...z16]
-            ]
-    ]
+    but limitation with ironpython entail followig tree structure:
 
+    [TYPE_1:
+        ERA_1:
+            ZONE_1
+            ...
+            ZONE_16
+        ERA_2:
+            ZONE_1
+            ...
+            ZONE_16
+        ...
+        ERA_3:
+            ZONE_1
+            ...
+            ZONE_16]
     args:
         ...
     returns:
         ...
     """
-
-    #Make a test object
-    test_readDOE = UWG_Unit_Test()
-    test_readDOE.toggle = True
 
     # DOE Building Types
     bldType = [
@@ -161,6 +160,9 @@ def readDOE():
     builtEra = ['Pre80',
         'Pst80',
         'New']
+
+    #Make a test object for reading csv files
+    test_readDOE = UWG_Unit_Test("read_DOE_csv", False)
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = []     #refDOE(16,3,16) = Building;
@@ -266,8 +268,50 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
         if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
 
+
+
+        #Nested, nested lists of Building, SchDef, BEMDef objects
+        #refDOE = []     #refDOE(16,3,16) = Building;
+        #Schedule = []   #Schedule (16,3,16) = SchDef;
+        #refBEM = []     #refBEM (16,3,16) = BEMDef;
+
+        #Make a test object making matrix of Building, Schedule, refBEM objs
+        test_treeDOE = UWG_Unit_Test("tree_DOE", True)
+
         #B = Building()
         #print B
+
+        #i = 16 types of buildings
+        for j in xrange(3):
+            print '\tera: ', j
+            era_lst = [] #3 eras
+            for k in xrange(16):
+                #print '\t\tzone: ', k
+                zone_lst = [] #16 zone types
+                B = Building(
+                    hCeiling[j],                  # floorHeight
+                    1,                            # intHeatNight
+                    1,                            # intHeatDay
+                    0.1,                          # intHeatFRad
+                    0.1,                          # intHeatFLat
+                    Infil[j],                     # infil (ACH)
+                    Vent[j]/1000,                 # vent (m^3/s/m^2)
+                    glazing[j],                   # glazing ratio
+                    Uwindow[j][k],                 # uValue
+                    SHGC[j][k],                    # shgc
+                    'AIR',                        # a/c type
+                    COP[j][k],                     # cop
+                    297,                          # coolSetpointDay
+                    297,                          # coolSetpointNight
+                    293,                          # heatSetpointDay
+                    293,                          # heatSetpointNight
+                    HVAC[j][k]*1000/AreaFloor[j], # coolCap (refDOE in kW)
+                    EffHeat[j][k],                # heatEff
+                    293)                          # initialTemp
+
+            era_lst.append(zone_lst)
+        refDOE.append(era_lst)
+
         """
         for j = 1:3
             for k = 1:16
@@ -530,7 +574,7 @@ def readDOE():
     """
 
     print test_readDOE.test_results()
-
+    print test_treeDOE.test_results()
 
 if __name__ == "__main__":
     readDOE()
