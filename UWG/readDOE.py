@@ -143,6 +143,8 @@ def readDOE():
     dir_doe_name = "DOERefBuildings"
     for i in xrange(1):#16
         print "BLD", i+1
+
+
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
@@ -158,6 +160,7 @@ def readDOE():
         test_readDOE.test_equality(len(nFloor),3,toggle=False)
         test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=False)
         if i==0: test_readDOE.test_equality_tol(AreaRoof[0],570.0)
+
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
@@ -180,10 +183,10 @@ def readDOE():
         test_readDOE.test_equality(len(Elec),3,toggle=False)
         test_readDOE.test_equality_tol(Vent[0],5.34)
 
+
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe3 = read_doe_csv(file_doe_name_location)
-
 
         #list_doe3[][]: [20 types pre80, 20 types pst80, 20 types new]
         TypeWall    = [list_doe3[3][4:],list_doe3[14][4:],list_doe3[25][4:]]            # Construction type
@@ -211,17 +214,29 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=False)
         if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=False)
 
-        """
-        % Read schedule (Sheet 4)
-        [num, text, ~] = xlsread(file,4);
-        SchEquip = num(2:4,7:30);
-        SchLight = num(5:7,7:30);
-        SchOcc = num(8:10,7:30);
-        SetCool = num(11:13,7:30);
-        SetHeat = num(14:16,7:30);
-        SchGas = num(17:19,7:30);
-        SchSWH = num(20:22,7:30);
 
+        # Read location summary (Sheet 3)
+        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=dir_doe_name,y=i+1)
+        list_doe4 = read_doe_csv(file_doe_name_schedules)
+
+        #Test sheet 3
+        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
+
+        #listof(weekday 24 fraction, sat 24 fractions, sun 24 fractions)
+        SchEquip    = to_fl([list_doe4[1][6:],list_doe4[2][6:],list_doe4[3][6:]])      # Equipment Schedule 24 hrs
+        SchLight    = to_fl([list_doe4[4][6:],list_doe4[5][6:],list_doe4[6][6:]])      # Light Schedule 24 hrs; Wkday=Sat=Sun=Hol
+        SchOcc      = to_fl([list_doe4[7][6:],list_doe4[8][6:],list_doe4[9][6:]])      # Occupancy Schedule 24 hrs
+        SetCool     = to_fl([list_doe4[10][6:],list_doe4[11][6:],list_doe4[12][6:]])   # Cooling Setpoint Schedule 24 hrs
+        SetHeat     = to_fl([list_doe4[13][6:],list_doe4[14][6:],list_doe4[15][6:]])   # Heating Setpoint Schedule 24 hrs; summer design
+        SchGas      = to_fl([list_doe4[16][6:],list_doe4[17][6:],list_doe4[18][6:]])   # Gas Equipment Schedule 24 hrs; wkday=sat
+        SchSWH      = to_fl([list_doe4[19][6:],list_doe4[20][6:],list_doe4[21][6:]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
+
+        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
+        test_readDOE.test_equality_tol(len(SchEquip[0]),24)
+        if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
+        if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
+
+        """
         for j = 1:3
             for k = 1:16
                 refDOE (i,j,k) = Building(hCeiling(j),...  % floorHeight
