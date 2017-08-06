@@ -1,3 +1,6 @@
+
+
+
 class BEMDef(object):
 
     """
@@ -32,9 +35,9 @@ class BEMDef(object):
     """
 
 
-    def __init__(building,mass,wall,roof,frac):
-        obj.building = building
-        obj.mass = mass
-        obj.wall = wall
-        obj.roof = roof
-        obj.frac = frac
+    def __init__(self,building,mass,wall,roof,frac):
+        self.building = building
+        self.mass = mass
+        self.wall = wall
+        self.roof = roof
+        self.frac = frac

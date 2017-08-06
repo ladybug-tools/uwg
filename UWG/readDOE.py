@@ -8,6 +8,7 @@ from uwg_test import UWG_Test
 from building import Building
 from material import Material
 from element import Element
+from BEMDef import BEMDef
 
 def to_fl(x):
     #Recurses through lists and converts lists of string to float
@@ -118,9 +119,11 @@ def readDOE():
 
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
-    refDOE = [None]*16     #refDOE(16,3,16) = Building;
-    Schedule = [None]*16   #Schedule (16,3,16) = SchDef;
-    refBEM = [None]*16     #refBEM (16,3,16) = BEMDef;
+    refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
+    Schedule = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)   #Schedule (16,3,16) = SchDef;
+    refBEM = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refBEM (16,3,16) = BEMDef;
+
+
 
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones
@@ -216,13 +219,10 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
         if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
 
-
         #i = 16 types of buildings
         #print "type: ", bldType[i]
-        era_lst = [None]*3 # for 3 eras
         for j in xrange(3):
             #print '\tera: ', builtEra[j]
-            climate_lst = [None]*16 # 16 climat zone
             for k in xrange(16):
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
@@ -250,82 +250,17 @@ def readDOE():
                 B.Type = bldType[i]
                 B.Era = builtEra[j]
                 B.Zone = zoneType[k]
-                climate_lst[k] = B
+                refDOE[i][j][k] = B
                 #print '\t\t', B
 
                 # Test for treeDOE
-                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96)
-                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244)
+                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96,toggle=False)
+                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244,toggle=False)
                 if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=False)
+                if i==1 and j==2 and k==15: test_treeDOE.test_equality_tol(refDOE[i][j][k].vent,1.8/1000.0,toggle=False)
 
                 # Define wall, mass(floor), roof
-                # Referece from E+ for conductivity, thickness
-                # wall & roof definition based on material
-                # Material,
-                #     1/2IN Gypsum,            !- Name
-                #     Smooth,                  !- Roughness
-                #     0.0127,                  !- Thickness {m}
-                #     0.1600,                  !- Conductivity {W/m-K}
-                #     784.9000,                !- Density {kg/m3}
-                #     830.0000,                !- Specific Heat {J/kg-K}
-                #     0.9000,                  !- Thermal Absorptance
-                #     0.9200,                  !- Solar Absorptance
-                #     0.9200;                  !- Visible Absorptance
-                #
-                # Material,
-                #     1IN Stucco,              !- Name
-                #     Smooth,                  !- Roughness
-                #     0.0253,                  !- Thickness
-                #     0.6918,                  !- Conductivity
-                #     1858.0000,               !- Density
-                #     837.0000,                !- Specific Heat
-                #     0.9000,                  !- Thermal Absorptance
-                #     0.9200,                  !- Solar Absorptance
-                #     0.9200;                  !- Visible Absorptance
-                #
-                # Material,
-                #     8IN CONCRETE HW,  !- Name
-                #     Rough,                   !- Roughness
-                #     0.2032,                  !- Thickness {m}
-                #     1.3110,                  !- Conductivity {W/m-K}
-                #     2240.0000,               !- Density {kg/m3}
-                #     836.8000,                !- Specific Heat {J/kg-K}
-                #     0.9000,                  !- Thermal Absorptance
-                #     0.7000,                  !- Solar Absorptance
-                #     0.7000;                  !- Visible Absorptance
-                #
-                # Material,
-                #     Mass NonRes Wall Insulation, !- Name
-                #     MediumRough,             !- Roughness
-                #     0.0484268844343858,      !- Thickness {m}
-                #     0.049,                   !- Conductivity {W/m-K}
-                #     265.0000,                !- Density {kg/m3}
-                #     836.8000,                !- Specific Heat {J/kg-K}
-                #     0.9000,                  !- Thermal Absorptance
-                #     0.7000,                  !- Solar Absorptance
-                #     0.7000;                  !- Visible Absorptance
-                #
-                # Material,
-                #     Std Wood 6inch,          !- Name
-                #     MediumSmooth,            !- Roughness
-                #     0.15,                    !- Thickness {m}
-                #     0.12,                    !- Conductivity {W/m-K}
-                #     540.0000,                !- Density {kg/m3}
-                #     1210,                    !- Specific Heat {J/kg-K}
-                #     0.9000000,               !- Thermal Absorptance
-                #     0.7000000,               !- Solar Absorptance
-                #     0.7000000;               !- Visible Absorptance! Common Materials
-                #
-                # Material,
-                #     Wood Siding,             !- Name
-                #     MediumSmooth,            !- Roughness
-                #     0.0100,                  !- Thickness {m}
-                #     0.1100,                  !- Conductivity {W/m-K}
-                #     544.6200,                !- Density {kg/m3}
-                #     1210.0000,               !- Specific Heat {J/kg-K}
-                #     0.9000,                  !- Thermal Absorptance
-                #     0.7800,                  !- Solar Absorptance
-                #     0.7800;                  !- Visible Absorptance
+                # Referece from E+ for conductivity, thickness (reference below)
 
                 # Material: (thermalCond, volHeat = specific heat * density)
                 Concrete = Material (1.311, 836.8 * 2240)
@@ -440,10 +375,13 @@ def readDOE():
                     D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
 
-                # Define bulding energy model, set fraction to zero
+                # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 #refBEM(i,j,k) = BEMDef(refDOE(i,j,k),mass,wall,roof,0);
                 #refBEM(i,j,k).building.FanMax = FanFlow(j,k);
+                refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
+                refBEM[i][j][k].building.FanMax = FanFlow[j][k]
 
+                if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
 
 
                 """
@@ -463,9 +401,6 @@ def readDOE():
                 Schedule(i,j,k).Vswh = SHW(j)/AreaFloor(j);    % litres per hour per m^2 of floor
 
             """
-            era_lst[j] = climate_lst
-        refDOE[i] = era_lst
-
 
     #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
@@ -474,3 +409,69 @@ def readDOE():
 
 if __name__ == "__main__":
     readDOE()
+
+# Material ref from E+
+#     1/2IN Gypsum,            !- Name
+#     Smooth,                  !- Roughness
+#     0.0127,                  !- Thickness {m}
+#     0.1600,                  !- Conductivity {W/m-K}
+#     784.9000,                !- Density {kg/m3}
+#     830.0000,                !- Specific Heat {J/kg-K}
+#     0.9000,                  !- Thermal Absorptance
+#     0.9200,                  !- Solar Absorptance
+#     0.9200;                  !- Visible Absorptance
+#
+# Material,
+#     1IN Stucco,              !- Name
+#     Smooth,                  !- Roughness
+#     0.0253,                  !- Thickness
+#     0.6918,                  !- Conductivity
+#     1858.0000,               !- Density
+#     837.0000,                !- Specific Heat
+#     0.9000,                  !- Thermal Absorptance
+#     0.9200,                  !- Solar Absorptance
+#     0.9200;                  !- Visible Absorptance
+#
+# Material,
+#     8IN CONCRETE HW,  !- Name
+#     Rough,                   !- Roughness
+#     0.2032,                  !- Thickness {m}
+#     1.3110,                  !- Conductivity {W/m-K}
+#     2240.0000,               !- Density {kg/m3}
+#     836.8000,                !- Specific Heat {J/kg-K}
+#     0.9000,                  !- Thermal Absorptance
+#     0.7000,                  !- Solar Absorptance
+#     0.7000;                  !- Visible Absorptance
+#
+# Material,
+#     Mass NonRes Wall Insulation, !- Name
+#     MediumRough,             !- Roughness
+#     0.0484268844343858,      !- Thickness {m}
+#     0.049,                   !- Conductivity {W/m-K}
+#     265.0000,                !- Density {kg/m3}
+#     836.8000,                !- Specific Heat {J/kg-K}
+#     0.9000,                  !- Thermal Absorptance
+#     0.7000,                  !- Solar Absorptance
+#     0.7000;                  !- Visible Absorptance
+#
+# Material,
+#     Std Wood 6inch,          !- Name
+#     MediumSmooth,            !- Roughness
+#     0.15,                    !- Thickness {m}
+#     0.12,                    !- Conductivity {W/m-K}
+#     540.0000,                !- Density {kg/m3}
+#     1210,                    !- Specific Heat {J/kg-K}
+#     0.9000000,               !- Thermal Absorptance
+#     0.7000000,               !- Solar Absorptance
+#     0.7000000;               !- Visible Absorptance! Common Materials
+#
+# Material,
+#     Wood Siding,             !- Name
+#     MediumSmooth,            !- Roughness
+#     0.0100,                  !- Thickness {m}
+#     0.1100,                  !- Conductivity {W/m-K}
+#     544.6200,                !- Density {kg/m3}
+#     1210.0000,               !- Specific Heat {J/kg-K}
+#     0.9000,                  !- Thermal Absorptance
+#     0.7800,                  !- Solar Absorptance
+#     0.7800;                  !- Visible Absorptance
