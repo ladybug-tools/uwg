@@ -4,7 +4,7 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Chris Mackey (chris@mackeyarchitecture.com) and Saeran Vasanthakumar (saeranv@gmail.com) - August 2017
 """
 
-class Building:
+class Building(object):
     """
     Building building class of specified building characteristics.
 

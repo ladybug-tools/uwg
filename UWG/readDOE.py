@@ -1,4 +1,3 @@
-
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
@@ -6,59 +5,8 @@ Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 
 import csv
 from building import Building
-
-class UWG_Unit_Test:
-    def __init__(self,test_name,run_test):
-        self.fail = 0
-        self.success = 0
-        self.total = self._get_total()
-        self.test_history = ""
-        self.test_name = test_name
-        self.run_test = run_test
-    def __repr__(self):
-        return "{a} successful and {b} failed tests".format(a=self.success,b=self.fail)
-    def test_results(self):
-        if not self.run_test:
-            return "\nTEST: '" + self.test_name + "' NOT RUN."
-        else:
-            return "\n-----START '" + self.test_name + "' TEST RESULTS-----\n" + self.test_history + self.__repr__() + "\n-----END" + self.test_name + "TEST RESULTS-----\n"
-    def _get_total(self):
-        return self.fail + self.success
-    def test_equality(self,a,b,toggle=True):
-        if not self.run_test: return None
-        if a == b:
-            s = "test_equality: {y} == {z} success\n".format(y=a,z=b)
-            self.success += 1
-        else:
-            s = "test_equality: {y} != {z} fail\n".format(y=a,z=b)
-            self.fail += 1
-        if toggle:
-            self.test_history += s
-    def test_equality_tol(self,a,b,toggle=True):
-        if not self.run_test: return None
-        tol = 0.001
-        if abs(a-b) < 0.001:
-            s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
-            self.success += 1
-        else:
-            s = "test_equality_tol: {y} != {z} fail\n".format(y=a,z=b)
-            self.fail += 1
-        if toggle:
-            self.test_history += s
-    def test_in_string(self,a,b,toggle=True):
-        if not self.run_test: return None
-        if type(a)!=type("") or type(b)!=type(""):
-            s = "test_in_string: {y} or {z} not a string\n".format(y=b,z=a)
-            self.fail += 1
-        else:
-            if b in a:
-                s = "test_in_string:: {y} in {z} success\n".format(y=b,z=a)
-                self.success += 1
-            else:
-                s = "test_in_string: {y} in {z} fail\n".format(y=b,z=a)
-                self.fail += 1
-        if toggle:
-            self.test_history += s
+from material import Material
+from uwg_test import UWG_Test
 
 def to_fl(x):
     #Recurses through lists and converts lists of string to float
@@ -96,6 +44,9 @@ def readDOE():
     matrix refBEM (16,3,16) = BEMDef
     where:
         [16,3,16] is Type = 1-16, Era = 1-3, climate zone = 1-16
+        i.e.
+        Type: FullServiceRestaurant, Era: Pre80, Zone: 6A Minneapolis
+    Nested tree:
     [TYPE_1:
         ERA_1:
             CLIMATE_ZONE_1
@@ -158,7 +109,7 @@ def readDOE():
         'New']
 
     #Make a test object for reading csv files
-    test_readDOE = UWG_Unit_Test("read_DOE_csv", False)
+    test_readDOE = UWG_Test("read_DOE_csv", False)
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = [None]*16     #refDOE(16,3,16) = Building;
@@ -267,7 +218,7 @@ def readDOE():
         #refBEM = []     #refBEM (16,3,16) = BEMDef;
 
         #Make a test object making matrix of Building, Schedule, refBEM objs
-        test_treeDOE = UWG_Unit_Test("tree_DOE", True)
+        test_treeDOE = UWG_Test("tree_DOE", True)
 
         #B = Building()
         #print B
@@ -300,32 +251,34 @@ def readDOE():
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
+                #Not sure why this isn't in the constructor...
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 B.Type = bldType[i]
                 B.Era = builtEra[j]
                 B.Zone = zoneType[k]
                 climate_lst[k] = B
                 #print '\t\t', B
-            era_lst[j] = climate_lst
-        refDOE[i] = era_lst
 
+                # Test for treeDOE
+                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96)
+                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244)
+                if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=False)
 
+                # Define wall roof, road and mass
+                # Material: (thermalCond, volHeat = specific heat * density)
+                Concrete = Material (1.311, 836.8 * 2240)
+                Insulation = Material (0.049, 836.8 * 265.0)
+                Gypsum = Material (0.16, 830.0 * 784.9)
+                Wood = Material (0.11, 1210.0 * 544.62)
+                Stucco = Material(0.6918,  837.0 * 1859.0)
 
-        """
-                % Define wall, roof, road, and mass
-                % Material (thermalCond, volHeat = specific heat * density);
-                Stucco = Material (0.6918, 837.0 * 1858.0);
-                Concrete = Material (1.311, 836.8 * 2240);
-                Insulation = Material (0.049, 836.8 * 265.0);
-                Gypsum = Material (0.16, 830.0 * 784.9);
-                Wood = Material (0.11,1210.0*544.62);
-
-                % Wall (1 in stucco, concrete, insulation, gypsum)
-                if strcmp(TypeWall(j,k),'MassWall')
-                    % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
-                    Rbase = 0.271087; % based on stucco, concrete, gypsum
-                    Rins = RvalWall(j,k) - Rbase;
-                    D_ins = Rins * Insulation.thermalCond;
+                # Wall (1 in stucco, concrete, insulation, gypsum)
+                # Check TypWall by era, by climate
+                if TypeWall[j][k] == "MassWall":
+                    # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
+                    Rbase = 0.271087 # R val based on stucco, concrete, gypsum
+                    Rins = RvalWall[j][k] - Rbase
+                    D_ins = Rins * Insulation.thermalCond
                     if D_ins > 0.01
                         thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;D_ins;0.0127];
                         layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
@@ -336,6 +289,11 @@ def readDOE():
 
                     wall = Element(0.08,0.92,thickness,layers,0,293,0);
 
+                """
+                % Wall (1 in stucco, concrete, insulation, gypsum)
+                if strcmp(TypeWall(j,k),'MassWall')
+                    % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
+                    ...
                     % If mass wall, assume mass foor (4" concrete)
                     % Mass (assume 4" concrete);
                     alb = 0.2;
@@ -465,9 +423,11 @@ def readDOE():
                 Schedule(i,j,k).Vent = Vent(j)/1000;     % m^3/m^2 per person
                 Schedule(i,j,k).Vswh = SHW(j)/AreaFloor(j);    % litres per hour per m^2 of floor
 
-            end
-        end
-    end
+            """
+            era_lst[j] = climate_lst
+        refDOE[i] = era_lst
+
+    """
 
     % % BUBBLE/TOULOUSE adjustment Case
     % refBEM(6,2,5).building.glazingRatio = 0.3;
