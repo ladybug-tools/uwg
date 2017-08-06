@@ -3,16 +3,24 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
-import csv
+from csv import reader as csv_reader
+from uwg_test import UWG_Test
 from building import Building
 from material import Material
-from uwg_test import UWG_Test
+from element import Element
 
 def to_fl(x):
     #Recurses through lists and converts lists of string to float
+    def helper_to_fl(s_):
+        if s_ == "":
+            return "null"
+        if "," in s_:
+            s_ = s_.replace(",","")
+        return float(s_)
+
     fl_lst = []
     if isinstance(x[0], basestring):
-        return map(lambda s: float(s), x)
+        return map(lambda s: helper_to_fl(s), x)
     elif type(x[0]) == type([]):
         for xi in xrange(len(x)):
             fl_lst.append(to_fl(x[xi]))
@@ -23,7 +31,7 @@ def to_fl(x):
 
 def read_doe_csv(file_doe_name_):
     file_doe = open(file_doe_name_,"r")
-    gen_doe = csv.reader(file_doe, delimiter=",")
+    gen_doe = csv_reader(file_doe, delimiter=",")
     list_doe = map(lambda r: r,gen_doe)
     file_doe.close()
     return list_doe
@@ -108,8 +116,9 @@ def readDOE():
         'Pst80',
         'New']
 
-    #Make a test object for reading csv files
-    test_readDOE = UWG_Test("read_DOE_csv", False)
+    test_readDOE = UWG_Test("read_DOE_csv", True) #Make a test object for reading csv files
+    test_treeDOE = UWG_Test("tree_DOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
+
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = [None]*16     #refDOE(16,3,16) = Building;
@@ -120,12 +129,12 @@ def readDOE():
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
     dir_doe_name = "DOERefBuildings"
-    for i in xrange(1):#16
+    for i in xrange(2):#16
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
         #listof(listof 3 era values)
-        nFloor      = to_fl(list_doe1[3][3:])      # Number of Floors
+        nFloor      = list_doe1[3][3:]             # Number of Floors
         glazing     = to_fl(list_doe1[4][3:])      # [?] Total
         hCeiling    = to_fl(list_doe1[5][3:])      # [m] Ceiling height
         ver2hor     = to_fl(list_doe1[7][3:])      # Wall to Skin Ratio
@@ -165,7 +174,7 @@ def readDOE():
         list_doe3 = read_doe_csv(file_doe_name_location)
         #(listof (listof 3 eras (listof 16 climate types)))
         TypeWall    = [list_doe3[3][4:],list_doe3[14][4:],list_doe3[25][4:]]            # Construction type
-        RValWall    = to_fl([list_doe3[4][4:],list_doe3[15][4:],list_doe3[26][4:]])     # [m2*K/W] R-value
+        RvalWall    = to_fl([list_doe3[4][4:],list_doe3[15][4:],list_doe3[26][4:]])     # [m2*K/W] R-value
         TypeRoof    = [list_doe3[5][4:],list_doe3[16][4:],list_doe3[27][4:]]            # Construction type
         RValRoof    = to_fl([list_doe3[6][4:],list_doe3[17][4:],list_doe3[28][4:]])     # [m2*K/W] R-value
         Uwindow     = to_fl([list_doe3[7][4:],list_doe3[18][4:],list_doe3[29][4:]])     # [W/m2*K] U-factor
@@ -181,9 +190,9 @@ def readDOE():
         test_readDOE.test_equality(16,len(TypeWall[0]),toggle=False)
         test_readDOE.test_equality(16,len(TypeWall[1]),toggle=False)
         test_readDOE.test_equality(16,len(TypeWall[2]),toggle=False)
-        test_readDOE.test_equality(16,len(RValWall[0]),toggle=False)
+        test_readDOE.test_equality(16,len(RvalWall[0]),toggle=False)
         if i==0: test_readDOE.test_in_string('SteelFrame',TypeWall[0][0])
-        if i==0: test_readDOE.test_equality_tol(RValWall[0][0],0.77)
+        if i==0: test_readDOE.test_equality_tol(RvalWall[0][0],0.77)
         if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=False)
         if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=False)
         if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=False)
@@ -210,18 +219,6 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
         if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
 
-
-
-        #Nested, nested lists of Building, SchDef, BEMDef objects
-        #refDOE = []     #refDOE(16,3,16) = Building;
-        #Schedule = []   #Schedule (16,3,16) = SchDef;
-        #refBEM = []     #refBEM (16,3,16) = BEMDef;
-
-        #Make a test object making matrix of Building, Schedule, refBEM objs
-        test_treeDOE = UWG_Test("tree_DOE", True)
-
-        #B = Building()
-        #print B
 
         #i = 16 types of buildings
         #print "type: ", bldType[i]
@@ -275,25 +272,22 @@ def readDOE():
                 # Wall (1 in stucco, concrete, insulation, gypsum)
                 # Check TypWall by era, by climate
                 if TypeWall[j][k] == "MassWall":
+                    #Construct wall based on R value of Wall from refDOE and properties defined above
                     # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
                     Rbase = 0.271087 # R val based on stucco, concrete, gypsum
-                    Rins = RvalWall[j][k] - Rbase
-                    D_ins = Rins * Insulation.thermalCond
-                    if D_ins > 0.01
-                        thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;D_ins;0.0127];
-                        layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
-                    else
-                        thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;0.0127];
-                        layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Gypsum];
-                    end
+                    Rins = RvalWall[j][k] - Rbase #find insulation value
+                    D_ins = Rins * Insulation.thermalCond # depth of ins from m2*K/W * W/m*K = m
+                    if D_ins > 0.01:
+                        thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,D_ins,0.0127]
+                        layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Insulation,Gypsum]
+                    else:
+                        #if it's less then 1 cm don't include in layers
+                        thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,0.0127]
+                        layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Gypsum]
 
-                    wall = Element(0.08,0.92,thickness,layers,0,293,0);
+                    wall = Element(0.08,0.92,thickness,layers,0.,293.,0.)
 
                 """
-                % Wall (1 in stucco, concrete, insulation, gypsum)
-                if strcmp(TypeWall(j,k),'MassWall')
-                    % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
-                    ...
                     % If mass wall, assume mass foor (4" concrete)
                     % Mass (assume 4" concrete);
                     alb = 0.2;

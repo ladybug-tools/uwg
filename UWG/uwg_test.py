@@ -13,7 +13,7 @@ class UWG_Test(object):
             return "\n-----TEST '" + self.test_name + "' NOT RUN-----"
         else:
             return "\n-----TEST '" + self.test_name + "' RESULT-----\n" + self.test_history + self.__repr__() +\
-             "\n-----TEST '" + self.test_name + "' RESULTS-----\n"
+             "\n-----TEST '" + self.test_name + "' RESULTS-----"
     def _get_total(self):
         return self.fail + self.success
     def test_equality(self,a,b,toggle=True):
