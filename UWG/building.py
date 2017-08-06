@@ -102,6 +102,15 @@ class Building:
             self.heatCap = 999     # Default heat capacity value
             self.copAdj = cop
 
+            self.Type = "null"
+            self.Era = "null"
+            self.Zone = "null"
+
+    def __repr__(self):
+        s = "Type: {:s}, Era: {:s}, Zone: {:s};".format(self.Type,self.Era,self.Zone)
+        s += " @ Ti: {a}, Wi: {b}".format(a=self.indoorTemp,b=self.indoorHum)
+        return s
+
 
     """
         function obj = BEMCalc(obj,UCM,BEM,forc,parameter,simTime)

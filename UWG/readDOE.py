@@ -19,9 +19,9 @@ class UWG_Unit_Test:
         return "{a} successful and {b} failed tests".format(a=self.success,b=self.fail)
     def test_results(self):
         if not self.run_test:
-            return "\nTEST: " + self.test_name + " NOT RUN."
+            return "\nTEST: '" + self.test_name + "' NOT RUN."
         else:
-            return "\n-----START" + self.test_name + "TEST RESULTS-----\n" + self.test_history + self.__repr__() + "\n-----END" + self.test_name + "TEST RESULTS-----\n"
+            return "\n-----START '" + self.test_name + "' TEST RESULTS-----\n" + self.test_history + self.__repr__() + "\n-----END" + self.test_name + "TEST RESULTS-----\n"
     def _get_total(self):
         return self.fail + self.success
     def test_equality(self,a,b,toggle=True):
@@ -95,25 +95,21 @@ def readDOE():
     matrix Schedule = SchDef objs
     matrix refBEM (16,3,16) = BEMDef
     where:
-        [16,3,16] is Type = 1-16, Era = 1-3, Zone = 1-16
-
-    ...honestly a 3d numpy array would make a lot of sense here
-    but limitation with ironpython entail followig tree structure:
-
+        [16,3,16] is Type = 1-16, Era = 1-3, climate zone = 1-16
     [TYPE_1:
         ERA_1:
-            ZONE_1
+            CLIMATE_ZONE_1
             ...
-            ZONE_16
+            CLIMATE_ZONE_16
         ERA_2:
-            ZONE_1
+            CLIMATE_ZONE_1
             ...
-            ZONE_16
+            CLIMATE_ZONE_16
         ...
         ERA_3:
-            ZONE_1
+            CLIMATE_ZONE_1
             ...
-            ZONE_16]
+            CLIMATE_ZONE_16]
     args:
         ...
     returns:
@@ -165,22 +161,19 @@ def readDOE():
     test_readDOE = UWG_Unit_Test("read_DOE_csv", False)
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
-    refDOE = []     #refDOE(16,3,16) = Building;
-    Schedule = []   #Schedule (16,3,16) = SchDef;
-    refBEM = []     #refBEM (16,3,16) = BEMDef;
+    refDOE = [None]*16     #refDOE(16,3,16) = Building;
+    Schedule = [None]*16   #Schedule (16,3,16) = SchDef;
+    refBEM = [None]*16     #refBEM (16,3,16) = BEMDef;
 
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
     dir_doe_name = "DOERefBuildings"
     for i in xrange(1):#16
-        print "BLD", i+1
-
-
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
-
+        #listof(listof 3 era values)
         nFloor      = to_fl(list_doe1[3][3:])      # Number of Floors
         glazing     = to_fl(list_doe1[4][3:])      # [?] Total
         hCeiling    = to_fl(list_doe1[5][3:])      # [m] Ceiling height
@@ -197,7 +190,7 @@ def readDOE():
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe2 = read_doe_csv(file_doe_name_zone)
-
+        #listof(listof 3 eras)
         AreaFloor   = to_fl([list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
         Volume      = to_fl([list_doe2[2][6],list_doe2[3][6],list_doe2[4][6]])       # [m3]
         AreaWall    = to_fl([list_doe2[2][8],list_doe2[3][8],list_doe2[4][8]])       # [m2]
@@ -219,8 +212,7 @@ def readDOE():
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe3 = read_doe_csv(file_doe_name_location)
-
-        #list_doe3[][]: [20 types pre80, 20 types pst80, 20 types new]
+        #(listof (listof 3 eras (listof 16 climate types)))
         TypeWall    = [list_doe3[3][4:],list_doe3[14][4:],list_doe3[25][4:]]            # Construction type
         RValWall    = to_fl([list_doe3[4][4:],list_doe3[15][4:],list_doe3[26][4:]])     # [m2*K/W] R-value
         TypeRoof    = [list_doe3[5][4:],list_doe3[16][4:],list_doe3[27][4:]]            # Construction type
@@ -247,14 +239,11 @@ def readDOE():
         if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=False)
 
 
-        # Read location summary (Sheet 3)
+        # Read Schedules (Sheet 4)
         file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=dir_doe_name,y=i+1)
         list_doe4 = read_doe_csv(file_doe_name_schedules)
 
-        #Test sheet 3
-        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
-
-        #listof(weekday 24 fraction, sat 24 fractions, sun 24 fractions)
+        #listof(listof weekday, sat, sun (list of 24 fractions)))
         SchEquip    = to_fl([list_doe4[1][6:],list_doe4[2][6:],list_doe4[3][6:]])      # Equipment Schedule 24 hrs
         SchLight    = to_fl([list_doe4[4][6:],list_doe4[5][6:],list_doe4[6][6:]])      # Light Schedule 24 hrs; Wkday=Sat=Sun=Hol
         SchOcc      = to_fl([list_doe4[7][6:],list_doe4[8][6:],list_doe4[9][6:]])      # Occupancy Schedule 24 hrs
@@ -263,6 +252,8 @@ def readDOE():
         SchGas      = to_fl([list_doe4[16][6:],list_doe4[17][6:],list_doe4[18][6:]])   # Gas Equipment Schedule 24 hrs; wkday=sat
         SchSWH      = to_fl([list_doe4[19][6:],list_doe4[20][6:],list_doe4[21][6:]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
+        #Test sheet 4
+        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
         test_readDOE.test_equality(list_doe4[0][2],"Schedule")
         test_readDOE.test_equality_tol(len(SchEquip[0]),24)
         if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
@@ -282,64 +273,45 @@ def readDOE():
         #print B
 
         #i = 16 types of buildings
+        #print "type: ", bldType[i]
+        era_lst = [None]*3 # for 3 eras
         for j in xrange(3):
-            print '\tera: ', j
-            era_lst = [] #3 eras
+            #print '\tera: ', builtEra[j]
+            climate_lst = [None]*16 # 16 climat zone
             for k in xrange(16):
-                #print '\t\tzone: ', k
-                zone_lst = [] #16 zone types
                 B = Building(
-                    hCeiling[j],                  # floorHeight
-                    1,                            # intHeatNight
-                    1,                            # intHeatDay
-                    0.1,                          # intHeatFRad
-                    0.1,                          # intHeatFLat
-                    Infil[j],                     # infil (ACH)
-                    Vent[j]/1000,                 # vent (m^3/s/m^2)
-                    glazing[j],                   # glazing ratio
-                    Uwindow[j][k],                 # uValue
-                    SHGC[j][k],                    # shgc
-                    'AIR',                        # a/c type
-                    COP[j][k],                     # cop
-                    297,                          # coolSetpointDay
-                    297,                          # coolSetpointNight
-                    293,                          # heatSetpointDay
-                    293,                          # heatSetpointNight
-                    HVAC[j][k]*1000/AreaFloor[j], # coolCap (refDOE in kW)
-                    EffHeat[j][k],                # heatEff
-                    293)                          # initialTemp
+                    hCeiling[j],                        # floorHeight by era
+                    1,                                  # intHeatNight
+                    1,                                  # intHeatDay
+                    0.1,                                # intHeatFRad
+                    0.1,                                # intHeatFLat
+                    Infil[j],                           # infil (ACH) by era
+                    Vent[j]/1000,                       # vent (m^3/s/m^2) by era, converted from liters
+                    glazing[j],                         # glazing ratio by era
+                    Uwindow[j][k],                      # uValue by era, by climate type
+                    SHGC[j][k],                         # SHGC, by era, by climate type
+                    'AIR',                              # a/c type
+                    COP[j][k],                          # cop by era, climate type
+                    297,                                # coolSetpointDay = 24 C
+                    297,                                # coolSetpointNight
+                    293,                                # heatSetpointDay = 20 C
+                    293,                                # heatSetpointNight
+                    (HVAC[j][k]*1000.0)/AreaFloor[j],   # cooling Capacity converted to W/m2 by era, climate type
+                    EffHeat[j][k],                      # heatEff by era, climate type
+                    293)                                # initialTemp at 20 C
 
-            era_lst.append(zone_lst)
-        refDOE.append(era_lst)
+                B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
+                B.Type = bldType[i]
+                B.Era = builtEra[j]
+                B.Zone = zoneType[k]
+                climate_lst[k] = B
+                #print '\t\t', B
+            era_lst[j] = climate_lst
+        refDOE[i] = era_lst
+
+
 
         """
-        for j = 1:3
-            for k = 1:16
-                refDOE (i,j,k) = Building(hCeiling(j),...  % floorHeight
-                    1,...                           % intHeatNight
-                    1,...                           % intHeatDay
-                    0.1,...                         % intHeatFRad
-                    0.1,...                         % intHeatFLat
-                    Infil(j),...                    % infil (ACH)
-                    Vent(j)/1000,...                % vent (m^3/s/m^2)
-                    glazing(j),...                  % glazing ratio
-                    Uwindow(j,k),...                % uValue
-                    SHGC(j,k),...                   % shgc
-                    'AIR',...                       % a/c type
-                    COP(j,k),...                    % cop
-                    297,...                         % coolSetpointDay
-                    297,...                         % coolSetpointNight
-                    293,...                         % heatSetpointDay
-                    293,...                         % heatSetpointNight
-                    HVAC(j,k)*1000/AreaFloor(j),... % coolCap (refDOE in kW)
-                    EffHeat(j,k),...                % heatEff
-                    293);                           % initialTemp
-
-                refDOE(i,j,k).heatCap = HEAT(j,k)*1000/AreaFloor(j);
-                refDOE(i,j,k).Type = bldType(i);
-                refDOE(i,j,k).Era = builtEra(j);
-                refDOE(i,j,k).Zone = zoneType(k);
-
                 % Define wall, roof, road, and mass
                 % Material (thermalCond, volHeat = specific heat * density);
                 Stucco = Material (0.6918, 837.0 * 1858.0);
