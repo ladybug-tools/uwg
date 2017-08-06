@@ -69,10 +69,7 @@ def readDOE():
             CLIMATE_ZONE_1
             ...
             CLIMATE_ZONE_16]
-    args:
-        ...
-    returns:
-        ...
+
     """
 
     # DOE Building Types
@@ -134,11 +131,11 @@ def readDOE():
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
         #listof(listof 3 era values)
-        nFloor      = list_doe1[3][3:]             # Number of Floors
-        glazing     = to_fl(list_doe1[4][3:])      # [?] Total
-        hCeiling    = to_fl(list_doe1[5][3:])      # [m] Ceiling height
-        ver2hor     = to_fl(list_doe1[7][3:])      # Wall to Skin Ratio
-        AreaRoof    = to_fl(list_doe1[8][3:])      # [m2] Gross Dimensions - Total area
+        nFloor      = list_doe1[3][3:6]             # Number of Floors
+        glazing     = to_fl(list_doe1[4][3:6])      # [?] Total
+        hCeiling    = to_fl(list_doe1[5][3:6])      # [m] Ceiling height
+        ver2hor     = to_fl(list_doe1[7][3:6])      # Wall to Skin Ratio
+        AreaRoof    = to_fl(list_doe1[8][3:6])      # [m2] Gross Dimensions - Total area
 
         #Tests for sheet 1
         test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
@@ -166,24 +163,24 @@ def readDOE():
         #Tests sheet 2
         test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
         test_readDOE.test_equality(len(Elec),3,toggle=False)
-        test_readDOE.test_equality_tol(Vent[0],5.34)
+        if i==0: test_readDOE.test_equality_tol(Vent[0],5.34)
 
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe3 = read_doe_csv(file_doe_name_location)
         #(listof (listof 3 eras (listof 16 climate types)))
-        TypeWall    = [list_doe3[3][4:],list_doe3[14][4:],list_doe3[25][4:]]            # Construction type
-        RvalWall    = to_fl([list_doe3[4][4:],list_doe3[15][4:],list_doe3[26][4:]])     # [m2*K/W] R-value
-        TypeRoof    = [list_doe3[5][4:],list_doe3[16][4:],list_doe3[27][4:]]            # Construction type
-        RValRoof    = to_fl([list_doe3[6][4:],list_doe3[17][4:],list_doe3[28][4:]])     # [m2*K/W] R-value
-        Uwindow     = to_fl([list_doe3[7][4:],list_doe3[18][4:],list_doe3[29][4:]])     # [W/m2*K] U-factor
-        SHGC        = to_fl([list_doe3[8][4:],list_doe3[19][4:],list_doe3[30][4:]])     # [-] coefficient
-        HVAC        = to_fl([list_doe3[9][4:],list_doe3[20][4:],list_doe3[31][4:]])     # [kW] Air Conditioning
-        HEAT        = to_fl([list_doe3[10][4:],list_doe3[21][4:],list_doe3[32][4:]])    # [kW] Heating
-        COP         = to_fl([list_doe3[11][4:],list_doe3[22][4:],list_doe3[33][4:]])    # [-] Air Conditioning COP
-        EffHeat     = to_fl([list_doe3[12][4:],list_doe3[23][4:],list_doe3[34][4:]])    # [%] eating Efficiency
-        FanFlow     = to_fl([list_doe3[13][4:],list_doe3[24][4:],list_doe3[35][4:]])    # [m3/s] Fan Max Flow Rate
+        TypeWall    = [list_doe3[3][4:20],list_doe3[14][4:20],list_doe3[25][4:20]]            # Construction type
+        RvalWall    = to_fl([list_doe3[4][4:20],list_doe3[15][4:20],list_doe3[26][4:20]])     # [m2*K/W] R-value
+        TypeRoof    = [list_doe3[5][4:20],list_doe3[16][4:20],list_doe3[27][4:20]]            # Construction type
+        RvalRoof    = to_fl([list_doe3[6][4:20],list_doe3[17][4:20],list_doe3[28][4:20]])     # [m2*K/W] R-value
+        Uwindow     = to_fl([list_doe3[7][4:20],list_doe3[18][4:20],list_doe3[29][4:20]])     # [W/m2*K] U-factor
+        SHGC        = to_fl([list_doe3[8][4:20],list_doe3[19][4:20],list_doe3[30][4:20]])     # [-] coefficient
+        HVAC        = to_fl([list_doe3[9][4:20],list_doe3[20][4:20],list_doe3[31][4:20]])     # [kW] Air Conditioning
+        HEAT        = to_fl([list_doe3[10][4:20],list_doe3[21][4:20],list_doe3[32][4:20]])    # [kW] Heating
+        COP         = to_fl([list_doe3[11][4:20],list_doe3[22][4:20],list_doe3[33][4:20]])    # [-] Air Conditioning COP
+        EffHeat     = to_fl([list_doe3[12][4:20],list_doe3[23][4:20],list_doe3[34][4:20]])    # [%] eating Efficiency
+        FanFlow     = to_fl([list_doe3[13][4:20],list_doe3[24][4:20],list_doe3[35][4:20]])    # [m3/s] Fan Max Flow Rate
 
         #Test sheet 3
         test_readDOE.test_equality(list_doe3[0][2],"Location Summary")
@@ -204,13 +201,13 @@ def readDOE():
         list_doe4 = read_doe_csv(file_doe_name_schedules)
 
         #listof(listof weekday, sat, sun (list of 24 fractions)))
-        SchEquip    = to_fl([list_doe4[1][6:],list_doe4[2][6:],list_doe4[3][6:]])      # Equipment Schedule 24 hrs
-        SchLight    = to_fl([list_doe4[4][6:],list_doe4[5][6:],list_doe4[6][6:]])      # Light Schedule 24 hrs; Wkday=Sat=Sun=Hol
-        SchOcc      = to_fl([list_doe4[7][6:],list_doe4[8][6:],list_doe4[9][6:]])      # Occupancy Schedule 24 hrs
-        SetCool     = to_fl([list_doe4[10][6:],list_doe4[11][6:],list_doe4[12][6:]])   # Cooling Setpoint Schedule 24 hrs
-        SetHeat     = to_fl([list_doe4[13][6:],list_doe4[14][6:],list_doe4[15][6:]])   # Heating Setpoint Schedule 24 hrs; summer design
-        SchGas      = to_fl([list_doe4[16][6:],list_doe4[17][6:],list_doe4[18][6:]])   # Gas Equipment Schedule 24 hrs; wkday=sat
-        SchSWH      = to_fl([list_doe4[19][6:],list_doe4[20][6:],list_doe4[21][6:]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
+        SchEquip    = to_fl([list_doe4[1][6:30],list_doe4[2][6:30],list_doe4[3][6:30]])      # Equipment Schedule 24 hrs
+        SchLight    = to_fl([list_doe4[4][6:30],list_doe4[5][6:30],list_doe4[6][6:30]])      # Light Schedule 24 hrs; Wkday=Sat=Sun=Hol
+        SchOcc      = to_fl([list_doe4[7][6:30],list_doe4[8][6:30],list_doe4[9][6:30]])      # Occupancy Schedule 24 hrs
+        SetCool     = to_fl([list_doe4[10][6:30],list_doe4[11][6:30],list_doe4[12][6:30]])   # Cooling Setpoint Schedule 24 hrs
+        SetHeat     = to_fl([list_doe4[13][6:30],list_doe4[14][6:30],list_doe4[15][6:30]])   # Heating Setpoint Schedule 24 hrs; summer design
+        SchGas      = to_fl([list_doe4[16][6:30],list_doe4[17][6:30],list_doe4[18][6:30]])   # Gas Equipment Schedule 24 hrs; wkday=sat
+        SchSWH      = to_fl([list_doe4[19][6:30],list_doe4[20][6:30],list_doe4[21][6:30]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
         #Test sheet 4
         test_readDOE.test_equality(list_doe4[0][2],"Schedule")
@@ -261,7 +258,75 @@ def readDOE():
                 if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244)
                 if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=False)
 
-                # Define wall roof, road and mass
+                # Define wall, mass(floor), roof
+                # Referece from E+ for conductivity, thickness
+                # wall & roof definition based on material
+                # Material,
+                #     1/2IN Gypsum,            !- Name
+                #     Smooth,                  !- Roughness
+                #     0.0127,                  !- Thickness {m}
+                #     0.1600,                  !- Conductivity {W/m-K}
+                #     784.9000,                !- Density {kg/m3}
+                #     830.0000,                !- Specific Heat {J/kg-K}
+                #     0.9000,                  !- Thermal Absorptance
+                #     0.9200,                  !- Solar Absorptance
+                #     0.9200;                  !- Visible Absorptance
+                #
+                # Material,
+                #     1IN Stucco,              !- Name
+                #     Smooth,                  !- Roughness
+                #     0.0253,                  !- Thickness
+                #     0.6918,                  !- Conductivity
+                #     1858.0000,               !- Density
+                #     837.0000,                !- Specific Heat
+                #     0.9000,                  !- Thermal Absorptance
+                #     0.9200,                  !- Solar Absorptance
+                #     0.9200;                  !- Visible Absorptance
+                #
+                # Material,
+                #     8IN CONCRETE HW,  !- Name
+                #     Rough,                   !- Roughness
+                #     0.2032,                  !- Thickness {m}
+                #     1.3110,                  !- Conductivity {W/m-K}
+                #     2240.0000,               !- Density {kg/m3}
+                #     836.8000,                !- Specific Heat {J/kg-K}
+                #     0.9000,                  !- Thermal Absorptance
+                #     0.7000,                  !- Solar Absorptance
+                #     0.7000;                  !- Visible Absorptance
+                #
+                # Material,
+                #     Mass NonRes Wall Insulation, !- Name
+                #     MediumRough,             !- Roughness
+                #     0.0484268844343858,      !- Thickness {m}
+                #     0.049,                   !- Conductivity {W/m-K}
+                #     265.0000,                !- Density {kg/m3}
+                #     836.8000,                !- Specific Heat {J/kg-K}
+                #     0.9000,                  !- Thermal Absorptance
+                #     0.7000,                  !- Solar Absorptance
+                #     0.7000;                  !- Visible Absorptance
+                #
+                # Material,
+                #     Std Wood 6inch,          !- Name
+                #     MediumSmooth,            !- Roughness
+                #     0.15,                    !- Thickness {m}
+                #     0.12,                    !- Conductivity {W/m-K}
+                #     540.0000,                !- Density {kg/m3}
+                #     1210,                    !- Specific Heat {J/kg-K}
+                #     0.9000000,               !- Thermal Absorptance
+                #     0.7000000,               !- Solar Absorptance
+                #     0.7000000;               !- Visible Absorptance! Common Materials
+                #
+                # Material,
+                #     Wood Siding,             !- Name
+                #     MediumSmooth,            !- Roughness
+                #     0.0100,                  !- Thickness {m}
+                #     0.1100,                  !- Conductivity {W/m-K}
+                #     544.6200,                !- Density {kg/m3}
+                #     1210.0000,               !- Specific Heat {J/kg-K}
+                #     0.9000,                  !- Thermal Absorptance
+                #     0.7800,                  !- Solar Absorptance
+                #     0.7800;                  !- Visible Absorptance
+
                 # Material: (thermalCond, volHeat = specific heat * density)
                 Concrete = Material (1.311, 836.8 * 2240)
                 Insulation = Material (0.049, 836.8 * 265.0)
@@ -287,121 +352,101 @@ def readDOE():
 
                     wall = Element(0.08,0.92,thickness,layers,0.,293.,0.)
 
+                    # If mass wall, assume mass floor (4" concrete)
+                    # Mass (assume 4" concrete);
+                    alb = 0.2
+                    emis = 0.9
+                    thickness = [0.054,0.054]
+                    concrete = Material (1.31, 2240.0*836.8)
+                    mass = Element(alb,emis,thickness,[concrete,concrete],0,293,1)
+
+                elif TypeWall[j][k] == "WoodFrame":
+                    # 0.01m wood siding, tbd insulation, 1/2" gypsum
+                    Rbase = 0.170284091    # based on wood siding, gypsum
+                    Rins = RvalWall[j][k] - Rbase
+                    D_ins = Rins * Insulation.thermalCond #depth of insulatino
+
+                    if D_ins > 0.01:
+                        thickness = [0.01,D_ins,0.0127]
+                        layers = [Wood,Insulation,Gypsum]
+                    else:
+                        thickness = [0.01,0.0127]
+                        layers = [Wood,Gypsum]
+
+                    wall = Element(0.22,0.92,thickness,layers,0.,293.,0.)
+
+                    # If wood frame wall, assume wooden floor
+                    alb = 0.2
+                    emis = 0.9
+                    thickness = [0.05,0.05]
+                    wood = Material(1.31, 2240.0*836.8)
+                    mass = Element(alb,emis,thickness,[wood,wood],0.,293.,1.)
+
+                elif TypeWall[j][k] == "SteelFrame":
+                    # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
+                    Rbase = 0.271087 # based on stucco, concrete, gypsum
+                    Rins = RvalWall[j][k] - Rbase
+                    D_ins = Rins * Insulation.thermalCond
+                    if D_ins > 0.01:
+                        thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,D_ins,0.0127]
+                        layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Insulation,Gypsum]
+                    else:    # If insulation is too thin, assume no insulation
+                        thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,0.0127]
+                        layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Gypsum]
+                    wall = Element(0.15,0.92,thickness,layers,0.,293.,0.)
+
+                    # If mass wall, assume mass foor
+                    # Mass (assume 4" concrete),
+                    alb = 0.2
+                    emis = 0.93
+                    thickness = [0.05,0.05]
+                    mass = Element(alb,emis,thickness,[Concrete,Concrete],0.,293.,1.)
+
+                elif TypeWall[j][k] == "MetalWall":
+                    # metal siding, insulation, 1/2" gypsum
+                    alb = 0.2
+                    emis = 0.9
+                    D_ins = max((RvalWall[j][k] * Insulation.thermalCond)/2, 0.01) #use derived insul thickness or 0.01 based on max
+                    thickness = [D_ins,D_ins,0.0127]
+                    materials = [Insulation,Insulation,Gypsum]
+                    wall = Element(alb,emis,thickness,materials,0,293,0)
+
+                    # Mass (assume 4" concrete);
+                    alb = 0.2
+                    emis = 0.9
+                    thickness = [0.05, 0.05]
+                    concrete = Material(1.31, 2240.0*836.8)
+                    mass = Element(alb,emis,thickness,[concrete,concrete],0.,293.,1.)
+
+                # Roof
+                if TypeRoof[j][k] == "IEAD": #Insulation Entirely Above Deck
+                    # IEAD-> membrane, insulation, decking
+                     alb = 0.2
+                     emis = 0.93
+                     D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01);
+                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+
+                elif TypeRoof[j][k] == "Attic":
+                    # IEAD-> membrane, insulation, decking
+                    alb = 0.2
+                    emis = 0.9
+                    D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+
+                elif TypeRoof[j][k] == "MetalRoof":
+                    # IEAD-> membrane, insulation, decking
+                    alb = 0.2
+                    emis = 0.9
+                    D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+
+                # Define bulding energy model, set fraction to zero
+                #refBEM(i,j,k) = BEMDef(refDOE(i,j,k),mass,wall,roof,0);
+                #refBEM(i,j,k).building.FanMax = FanFlow(j,k);
+
+
+
                 """
-                    % If mass wall, assume mass foor (4" concrete)
-                    % Mass (assume 4" concrete);
-                    alb = 0.2;
-                    emis = 0.9;
-                    thickness = [0.054;0.054];
-                    concrete = Material (1.31,2240.0*836.8);
-                    mass = Element(alb,emis,thickness,[concrete;concrete],0,293,1);
-
-                elseif strcmp(TypeWall(j,k),'WoodFrame')
-                    % 0.01m wood siding, tbd insulation, 1/2" gypsum
-                    Rbase = 0.170284091;    % based on wood siding, gypsum
-                    Rins = RvalWall(j,k) - Rbase;
-                    D_ins = Rins * Insulation.thermalCond;
-
-                    if D_ins > 0.01
-                        thickness = [0.01;D_ins;0.0127];
-                        layers = [Wood;Insulation;Gypsum];
-                    else
-                        thickness = [0.01;0.0127];
-                        layers = [Wood;Gypsum];
-                    end
-                    wall = Element(0.22,0.92,thickness,layers,0,293,0);
-
-                    % If wood frame wall, assume wooden floor
-                    alb = 0.2;
-                    emis = 0.9;
-                    thickness = 0.05 * ones (2,1);
-                    wood = Material (1.31,2240.0*836.8);
-                    mass = Element(alb,emis,thickness,[wood;wood],0,293,1);
-
-                elseif strcmp(TypeWall(j,k),'SteelFrame')
-                    % 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
-                    Rbase = 0.271087; % based on stucco, concrete, gypsum
-                    Rins = RvalWall(j,k) - Rbase;
-                    D_ins = Rins * Insulation.thermalCond;
-                    if D_ins > 0.01
-                        thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;D_ins;0.0127];
-                        layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
-                    else    % If insulation is too thin, assume no insulation
-                        thickness = [0.0254;0.0508;0.0508;0.0508;0.0508;0.0127];
-                        layers = [Stucco;Concrete;Concrete;Concrete;Concrete;Gypsum];
-                    end
-                    wall = Element(0.15,0.92,thickness,layers,0,293,0);
-
-    %                 wall = Element(0.2,0.92,thickness,layers,0,293,0); % Singapore case
-
-    %                 % TOULOUS case
-    %                 thickness = [0.05;0.05;0.05;0.05;0.05;0.05;0.03;0.0127];
-    %                 layers = [Concrete;Concrete;Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
-    %                 wall = Element(0.25,0.93,thickness,layers,0,293,0);
-    %
-    %                 % BUBBLE case
-    %                 thickness = [0.05;0.05;0.05;0.05;0.03;0.0127];
-    %                 layers = [Concrete;Concrete;Concrete;Concrete;Insulation;Gypsum];
-    %                 wall = Element(0.15,0.93,thickness,layers,0,293,0);
-
-                    % If mass wall, assume mass foor
-                    % Mass (assume 4" concrete);
-                    alb = 0.2;      % Adjusted for Bubble/Toulouse case (0.08 per Energy Plus)
-                    emis = 0.93;
-                    thickness = 0.05 * ones (2,1);
-    %                thickness = 0.102*ones(2,1);       % for Bubble
-                    mass = Element(alb,emis,thickness,[Concrete;Concrete],0,293,1);
-
-                elseif strcmp(TypeWall(j,k),'MetalWall')
-
-                    % metal siding, insulation, 1/2" gypsum
-                    alb = 0.2;
-                    emis = 0.9;
-                    D_ins = max((RvalWall(j,k) * Insulation.thermalCond)/2,0.01);
-                    wall = Element(alb,emis,[D_ins;D_ins;0.0127],[Insulation;Insulation;Gypsum],0,293,0);
-
-                    % Mass (assume 4" concrete);
-                    alb = 0.2;
-                    emis = 0.9;
-                    thickness = 0.05 * ones (2,1);
-                    concrete = Material (1.31,2240.0*836.8);
-                    mass = Element(alb,emis,thickness,[concrete;concrete],0,293,1);
-
-                end
-
-                % Roof
-                if strcmp(TypeRoof(j,k),'IEAD')
-                    % IEAD-> membrane, insulation, decking
-                     alb = 0.2;
-                     emis = 0.93;
-                     D_ins = max(RvalRoof(j,k) * Insulation.thermalCond / 2,0.01);
-                     roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
-
-    %                 % TOULOUS/BUBBLE Case
-    %                 alb = 0.15;
-    %                 emis = 0.93;
-    %                 thickness = [0.06;0.05;0.05;0.05;0.05;0.03];
-    %                 roof = Element(alb,emis,thickness,[Concrete;Wood;Wood;Wood;Wood;Insulation],0,293,0);
-
-                elseif strcmp(TypeRoof(j,k),'Attic')
-                    % IEAD-> membrane, insulation, decking
-                    alb = 0.2;
-                    emis = 0.9;
-                    D_ins = max(RvalRoof(j,k) * Insulation.thermalCond/2,0.01);
-                    roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
-
-                elseif strcmp(TypeRoof(j,k),'MetalRoof')
-                    % IEAD-> membrane, insulation, decking
-                    alb = 0.2;
-                    emis = 0.9;
-                    D_ins = max(RvalRoof(j,k) * Insulation.thermalCond/2,0.01);
-                    roof = Element(alb,emis,[D_ins;D_ins],[Insulation;Insulation],0,293,0);
-                end
-
-                % Define bulding energy model, set fraction to zero
-                refBEM(i,j,k) = BEMDef(refDOE(i,j,k),mass,wall,roof,0);
-                refBEM(i,j,k).building.FanMax = FanFlow(j,k);
-
                 Schedule(i,j,k).Elec = SchEquip;   % 3x24 matrix of schedule for electricity (WD,Sat,Sun)
                 Schedule(i,j,k).Light = SchLight;  % 3x24 matrix of schedule for light (WD,Sat,Sun)
                 Schedule(i,j,k).Gas = SchGas;      % 3x24 matrix of schedule for gas (WD,Sat,Sun)
@@ -421,83 +466,8 @@ def readDOE():
             era_lst[j] = climate_lst
         refDOE[i] = era_lst
 
-    """
 
-    % % BUBBLE/TOULOUSE adjustment Case
-    % refBEM(6,2,5).building.glazingRatio = 0.3;
-
-    % % Singapore adjustment Case
-    % refBEM(6,2,1).building.glazingRatio = 0.3;
-
-    save ('RefDOE.mat','refDOE','refBEM','Schedule');
-
-    % wall & roof definition based on material
-    % Material,
-    %     1/2IN Gypsum,            !- Name
-    %     Smooth,                  !- Roughness
-    %     0.0127,                  !- Thickness {m}
-    %     0.1600,                  !- Conductivity {W/m-K}
-    %     784.9000,                !- Density {kg/m3}
-    %     830.0000,                !- Specific Heat {J/kg-K}
-    %     0.9000,                  !- Thermal Absorptance
-    %     0.9200,                  !- Solar Absorptance
-    %     0.9200;                  !- Visible Absorptance
-    %
-    % Material,
-    %     1IN Stucco,              !- Name
-    %     Smooth,                  !- Roughness
-    %     0.0253,                  !- Thickness
-    %     0.6918,                  !- Conductivity
-    %     1858.0000,               !- Density
-    %     837.0000,                !- Specific Heat
-    %     0.9000,                  !- Thermal Absorptance
-    %     0.9200,                  !- Solar Absorptance
-    %     0.9200;                  !- Visible Absorptance
-    %
-    % Material,
-    %     8IN CONCRETE HW,  !- Name
-    %     Rough,                   !- Roughness
-    %     0.2032,                  !- Thickness {m}
-    %     1.3110,                  !- Conductivity {W/m-K}
-    %     2240.0000,               !- Density {kg/m3}
-    %     836.8000,                !- Specific Heat {J/kg-K}
-    %     0.9000,                  !- Thermal Absorptance
-    %     0.7000,                  !- Solar Absorptance
-    %     0.7000;                  !- Visible Absorptance
-    %
-    % Material,
-    %     Mass NonRes Wall Insulation, !- Name
-    %     MediumRough,             !- Roughness
-    %     0.0484268844343858,      !- Thickness {m}
-    %     0.049,                   !- Conductivity {W/m-K}
-    %     265.0000,                !- Density {kg/m3}
-    %     836.8000,                !- Specific Heat {J/kg-K}
-    %     0.9000,                  !- Thermal Absorptance
-    %     0.7000,                  !- Solar Absorptance
-    %     0.7000;                  !- Visible Absorptance
-    %
-    % Material,
-    %     Std Wood 6inch,          !- Name
-    %     MediumSmooth,            !- Roughness
-    %     0.15,                    !- Thickness {m}
-    %     0.12,                    !- Conductivity {W/m-K}
-    %     540.0000,                !- Density {kg/m3}
-    %     1210,                    !- Specific Heat {J/kg-K}
-    %     0.9000000,               !- Thermal Absorptance
-    %     0.7000000,               !- Solar Absorptance
-    %     0.7000000;               !- Visible Absorptance! Common Materials
-    %
-    % Material,
-    %     Wood Siding,             !- Name
-    %     MediumSmooth,            !- Roughness
-    %     0.0100,                  !- Thickness {m}
-    %     0.1100,                  !- Conductivity {W/m-K}
-    %     544.6200,                !- Density {kg/m3}
-    %     1210.0000,               !- Specific Heat {J/kg-K}
-    %     0.9000,                  !- Thermal Absorptance
-    %     0.7800,                  !- Solar Absorptance
-    %     0.7800;                  !- Visible Absorptance
-    """
+    #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
     print test_readDOE.test_results()
     print test_treeDOE.test_results()

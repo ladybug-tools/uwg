@@ -37,6 +37,8 @@ class Element(object):
             self.albedo = alb
             self.emissivity = emis
             self.layerThickness = Thickness
+            #TO DO:
+            # translate rest of constructor
             """
             self.layerThermalCond = zeros(numel(Material),1)
             self.layerVolHeat = zeros(numel(Material),1)
