@@ -129,7 +129,7 @@ def readDOE():
     #Nested loop = 16 types, 3 era, 16 zones
     #Therefore time complexity O(n*m*k) = 768
     dir_doe_name = "DOERefBuildings"
-    for i in xrange(2):#16
+    for i in xrange(16):#16
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)

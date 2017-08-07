@@ -1,0 +1,5 @@
+2,,Zone Summary,,,,,,,,,,,,,,,,,,
+BLD,UWG,Zone Name,Conditioned (Y/N),Multiplier,Area (m2),Volume (m3),Floor-to-Ceiling Height (m),Gross Wall Area  (m2),Window Glass Area (m2),People (m2/per),People,Lights (W/m2),Elec Plug and Process (W/m2),Gas Plug and Process (W/m2),SWH (L/h),Ventilation (L/s/Person),Ventilation (L/s/m2),Ventilation Total (L/s),Exhaust (L/s),Infiltration (ACH)
+BDL7PRE,Total,Total Conditioned Zones,,,"3,089","11,932",,"1,634",308,,399,18.9,23.8,3.2,113.562,10,1.318587959,,,0.8
+BDL7PRE,Total,Total Conditioned Zones,,,"3,089","11,932",,"1,634",308,,399,18.9,23.8,3.2,113.562,10,1.318587959,,,0.8
+BDL7PRE,Total,Total Conditioned Zones,,,"3,089","11,932",,"1,634",308,,399,13.5,23.8,3.2,113.562,10,1.318587959,,,0.2

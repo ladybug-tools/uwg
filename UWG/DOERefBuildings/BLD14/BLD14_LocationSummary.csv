@@ -1,0 +1,36 @@
+3,,Location Summary,,,,,,,,,,,,,,,,,
+BLD,UWG,,,Miami,Houston,Phoenix,Atlanta,Los Angeles,Las Vegas,San Francisco,Baltimore,Albuquerque,Seattle,Chicago,Boulder,Minneapolis,Helena,Duluth,Fairbanks
+BLD14PRE,Zone,,ASHRAE 90.1-2004 Climate Zone,1A,2A,2B,3A,3B-CA,3B,3C,4A,4B,4C,5A,5B,6A,6B,7,8
+BLD14PRE,TypeWall,,Construction Type,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame
+BLD14PRE,RvalWall,,R-value (m2·K / W),0.77,0.77,0.77,0.78,0.77,0.77,0.79,0.99,0.96,1.01,1.13,1.09,1.22,1.22,1.30,1.41
+BLD14PRE,TypeRoof,,Construction Type,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD
+BLD14PRE,RvalRoof,,R-value (m2·K / W),1.76,1.76,1.76,1.76,1.76,1.76,1.76,2.04,1.98,2.07,2.50,2.37,2.99,2.99,2.93,2.99
+BLD14PRE,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,3.53,3.53,3.53,3.53,3.53,3.53
+BLD14PRE,SHGC,,SHGC,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.41,0.41,0.41,0.41,0.41,0.41
+BLD14PRE,HVAC,,Air Conditioning (kW),350.42,367.73,362.34,359.04,254.77,307.74,193.93,338.96,237.82,216.99,350.02,251.38,391.41,286.08,404.95,383.71
+BLD14PRE,HEAT,,Heating (kW),128.88,266.70,202.92,323.73,156.93,254.32,201.10,371.35,300.88,285.53,474.63,392.00,534.23,501.94,562.43,765.22
+BLD14PRE,COP,,Air Conditioning (COP),3.41,3.42,3.42,3.42,3.46,3.43,3.55,3.43,3.53,3.55,3.41,3.49,3.40,3.43,3.41,3.39
+BLD14PRE,EffHeat,,Heating Efficiency (%),0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.79,0.80,0.79,0.79,0.79,0.79
+BLD14PRE,Fan,,Fan Max Flow Rate (m3/s ),14.32,15.05,15.93,15.23,12.89,15.37,11.38,13.96,13.99,12.25,14.32,14.37,16.09,17.07,17.38,23.18
+BLD14PST,TypeWall,,Construction Type,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame
+BLD14PST,RvalWall,,R-value (m2·K / W),0.32,1.17,0.73,1.36,0.80,1.10,1.36,1.98,1.76,1.92,2.15,2.15,2.71,2.44,3.04,3.91
+BLD14PST,TypeRoof,,Construction Type,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD
+BLD14PST,RvalRoof,,R-value (m2·K / W),2.38,2.67,3.83,2.44,1.76,3.66,2.00,3.03,2.99,2.75,3.38,3.51,3.97,3.65,4.41,5.75
+BLD14PST,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,4.09,5.84,5.84,4.09,3.35,4.09,4.09,3.35,3.35,2.96,2.96,2.96,2.96
+BLD14PST,SHGC,,SHGC,0.25,0.25,0.25,0.26,0.44,0.25,0.39,0.36,0.36,0.39,0.39,0.39,0.39,0.39,0.49,0.62
+BLD14PST,HVAC,,Air Conditioning (kW),357.70,308.75,297.86,303.86,248.87,249.85,166.54,271.92,196.60,182.75,322.74,232.87,344.52,268.13,376.36,348.73
+BLD14PST,HEAT,,Heating (kW),134.26,248.60,190.21,299.56,156.33,232.45,189.28,343.04,275.74,266.76,450.81,365.69,506.61,477.69,530.15,717.36
+BLD14PST,COP,,Air Conditioning (COP),3.41,3.43,3.43,3.43,3.50,3.50,3.61,3.46,3.53,3.61,3.43,3.56,3.41,3.43,3.41,3.43
+BLD14PST,EffHeat,,Heating Efficiency (%),0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.79,0.80,0.79,0.79,0.79,0.79
+BLD14PST,Fan,,Fan Max Flow Rate (m3/s ),14.93,12.49,12.67,12.55,12.52,11.63,9.60,11.22,11.24,9.93,13.26,12.85,14.92,15.88,15.90,21.06
+BLD14NEW,TypeWall,,Construction Type,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame,Steel-frame
+BLD14NEW,RvalWall,,R-value (m2·K / W),1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,2.10,2.10,2.10,2.10,2.75,2.75
+BLD14NEW,TypeRoof,,Construction Type,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD
+BLD14NEW,RvalRoof,,R-value (m2·K / W),2.79,2.79,2.79,2.79,2.79,2.79,2.79,2.79,2.79,2.79,2.85,2.85,2.85,2.85,2.79,3.72
+BLD14NEW,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,3.24,3.24,3.24,5.84,3.24,3.24,3.24,3.24,3.24,3.24,3.24,3.24,2.62
+BLD14NEW,SHGC,,SHGC,0.25,0.25,0.25,0.25,0.25,0.25,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.49,0.30
+BLD14NEW,HVAC,,Air Conditioning (kW),194.57,198.05,190.88,193.96,148.32,168.94,108.66,186.42,135.29,121.90,174.30,126.30,172.49,116.41,156.12,132.24
+BLD14NEW,HEAT,,Heating (kW),123.01,163.37,137.01,180.26,127.94,150.11,141.41,209.07,170.59,171.18,268.69,223.11,307.44,291.61,320.38,420.45
+BLD14NEW,COP,,Air Conditioning (COP),3.57,3.57,3.61,3.57,3.61,3.61,3.64,3.61,3.61,3.64,3.61,3.64,3.61,3.64,3.61,3.61
+BLD14NEW,EffHeat,,Heating Efficiency (%),0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.79
+BLD14NEW,Fan,,Fan Max Flow Rate (m3/s ),7.85,7.97,7.71,7.82,6.68,7.15,5.88,7.5,7.36,6.18,7,6.75,6.95,6.8,6.36,7.97

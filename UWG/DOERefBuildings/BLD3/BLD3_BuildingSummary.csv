@@ -1,0 +1,10 @@
+1,Building Summary Large Hotel pre-1980 construction,,,,,
+UWG,,,PRE80,PST80,NEW,
+areaFloor,,Total Floor Area (m2),"11,345","11,345","11,345",
+nFloor,,Number of Floors,6,6,6,* Basement not counted
+glazing,,Total,0.27,0.27,0.27,
+hCeiling,,Floor to Floor Height (m),3.20,3.20,3.20,Average of 6 floors (not including basement)
+areaWall,,Gross Dimensions - Total Area (m2),"4,463","4,463","4,463",
+ver2hor,,Wall to Skin Ratio,0.75,0.75,0.75,
+areaRoof,,Gross Dimensions - Total Area (m2),"1,478","1,478","1,478",
+areaWindow,,Total Area (m2),"1,214.1","1,214.1","1,214.1",
