@@ -1,0 +1,10 @@
+1,Building Summary Large Office pre-1980 construction,,,,,
+UWG,,,PRE80,PST80,NEW,
+areaFloor,,Total Floor Area (m2),"46,320","46,320","46,320",
+nFloor,,Number of Floors,12,12,12,* Not including basement
+glazing,,Total,0.38,0.38,0.38,
+hCeiling,,Floor to Ceiling Height (m),2.74,2.74,2.74,
+areaWall,,Gross Dimensions - Total Area (m2),"11,590","11,590","11,590",
+ver2hor,,Wall to Skin Ratio,0.77,0.77,0.77,
+areaRoof,,Gross Dimensions - Total Area (m2),"3,563","3,563","3,563",
+areaWindow,,Total Area (m2),"4,636","4,636","4,636",

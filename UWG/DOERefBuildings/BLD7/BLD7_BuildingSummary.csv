@@ -1,0 +1,10 @@
+1,Building Summary Outpatient Health Care pre-1980 construction,,,,
+UWG,,,Value,Value,Value
+areaFloor,,Total Floor Area (m2),"3,804","3,804","3,804"
+nFloor,,Number of Floors,3,3,3
+glazing,,Total,0.20,0.20,0.20
+hCeiling,,Floor to Ceiling Height (m),3.05,3.05,3.05
+areaWall,,Gross Dimensions - Total Area (m2),"1,553","1,553","1,553"
+ver2hor,,Wall to Skin Ratio,0.53,0.53,0.53
+areaRoof,,Gross Dimensions - Total Area (m2),"1,373","1,373","1,373"
+areaWindow,,Total Area (m2),308.3,308.3,308.3

@@ -1,0 +1,36 @@
+3.00,,Location Summary,,,,,,,,,,,,,,,,,
+Building,UWG,,,Miami,Houston,Phoenix,Atlanta,Los Angeles,Las Vegas,San Francisco,Baltimore,Albuquerque,Seattle,Chicago,Boulder,Minneapolis,Helena,Duluth,Fairbanks
+BLD12PRE,Zone,,ASHRAE 90.1-2004 Climate Zone,1A,2A,2B,3A,3B-CA,3B,3C,4A,4B,4C,5A,5B,6A,6B,7,8
+BLD12PRE,TypeWall,,Construction Type,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame,SteelFrame
+BLD12PRE,RvalWall,,R-value (m2·K / W),0.77,0.77,0.77,0.78,0.77,0.77,0.79,0.99,0.96,1.01,1.13,1.09,1.22,1.22,1.30,1.41
+BLD12PRE,TypeRoof,,Construction Type,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD
+BLD12PRE,RvalRoof,,R-value (m2·K / W),1.76,1.76,1.76,1.76,1.76,1.76,1.76,2.04,1.98,2.07,2.50,2.37,2.99,2.99,2.93,2.99
+BLD12PRE,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,3.53,3.53,3.53,3.53,3.53,3.53
+BLD12PRE,SHGC,,SHGC,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.41,0.41,0.41,0.41,0.41,0.41
+BLD12PRE,HVAC,,Air Conditioning (kW),71.01,72.73,72.68,70.55,58.11,67.50,51.89,67.88,63.07,55.71,72.50,64.41,76.97,71.34,75.81,89.16
+BLD12PRE,HEAT,,Heating (kW),90.75,96.92,97.72,97.12,84.61,93.16,77.99,95.16,80.33,84.71,98.15,84.36,106.01,99.99,109.54,142.87
+BLD12PRE,COP,,Air Conditioning (COP),3.39,3.39,3.39,3.39,3.39,3.39,3.39,3.39,3.39,3.39,3.38,3.39,3.38,3.39,3.38,3.38
+BLD12PRE,EffHeat,,Heating Efficiency (%),0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78
+BLD12PRE,Fan,,Fan Max Flow Rate (m3/s ),3.75,3.89,4.16,3.96,3.47,4.05,3.14,3.70,3.82,3.36,3.76,3.90,4.07,4.32,4.29,5.39
+BLD12PST,TypeWall,,Construction Type,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall
+BLD12PST,RvalWall,,R-value (m2·K / W),0.42,0.52,0.43,0.61,0.42,0.61,0.42,1.47,0.93,1.76,1.76,1.26,2.48,2.23,2.89,3.75
+BLD12PST,TypeRoof,,Construction Type,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic
+BLD12PST,RvalRoof,,R-value attic floor (m2·K / W),2.38,2.67,3.83,2.45,1.76,3.67,2.00,3.04,2.99,2.75,3.32,3.45,3.91,3.59,4.40,5.68
+BLD12PST,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,4.09,5.84,5.84,4.09,3.35,4.09,4.09,3.35,3.35,2.96,2.96,2.96,2.96
+BLD12PST,SHGC,,SHGC,0.25,0.25,0.25,0.26,0.44,0.25,0.39,0.36,0.36,0.39,0.39,0.39,0.39,0.39,0.49,0.62
+BLD12PST,HVAC,,Air Conditioning (kW),50.45,46.84,44.70,45.47,42.19,39.45,33.38,41.68,38.83,35.22,43.24,40.88,42.50,42.28,41.70,47.02
+BLD12PST,HEAT,,Heating (kW),63.40,64.32,61.80,63.42,62.45,57.15,52.27,61.26,52.59,56.61,67.02,57.47,69.62,64.89,69.79,85.11
+BLD12PST,COP,,PSZ-AC:1_COOLC DXCOIL,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07,3.07
+BLD12PST,EffHeat,,PSZ-AC:1_HEATC,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80
+BLD12PST,Fan,,Fan Max Flow Rate (m3/s ),2.56,2.47,2.53,2.46,2.52,2.37,2.01,2.22,2.34,2.13,2.39,2.47,2.44,2.55,2.47,2.84
+BLD12NEW,TypeWall,,Construction Type,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall
+BLD12NEW,RvalWall,,R-value (m2·K / W),0.42,0.42,0.42,1.17,1.17,1.17,1.17,1.17,1.17,1.17,1.43,1.43,1.69,1.69,1.96,2.20
+BLD12NEW,TypeRoof,,Construction Type,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic
+BLD12NEW,RvalRoof,,R-value attic floor (m2·K / W),5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,6.52,6.52,6.52,6.52
+BLD12NEW,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,3.24,3.24,3.24,5.84,3.24,3.24,3.24,3.24,3.24,3.24,3.24,3.24,2.62
+BLD12NEW,SHGC,,SHGC,0.25,0.25,0.25,0.25,0.25,0.25,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.49,0.30
+BLD12NEW,HVAC,,Air Conditioning (kW),38.66,36.03,37.21,33.60,26.97,28.35,26.55,33.75,30.00,27.27,32.96,29.20,32.08,29.05,29.34,26.76
+BLD12NEW,HEAT,,Heating (kW),50.50,52.89,51.36,49.83,41.82,43.36,42.70,53.46,42.49,45.71,55.31,44.13,55.75,48.94,53.81,57.37
+BLD12NEW,COP,,PSZ-AC:1_COOLC DXCOIL,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67,3.67
+BLD12NEW,EffHeat,,PSZ-AC:1_HEATC,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80
+BLD12NEW,Fan,,Fan Max Flow Rate (m3/s ),2.02,1.98,2.07,1.84,1.62,1.72,1.61,1.87,1.81,1.65,1.86,1.77,1.81,1.77,1.75,1.62
