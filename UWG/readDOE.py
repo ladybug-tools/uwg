@@ -9,6 +9,7 @@ from building import Building
 from material import Material
 from element import Element
 from BEMDef import BEMDef
+from schdef import SchDef
 
 def to_fl(x):
     #Recurses through lists and converts lists of string to float
@@ -17,8 +18,10 @@ def to_fl(x):
             return "null"
         if "," in s_:
             s_ = s_.replace(",","")
-        return float(s_)
-
+        try:
+            return float(s_)
+        except:
+            return (s_)
     fl_lst = []
     if isinstance(x[0], basestring):
         return map(lambda s: helper_to_fl(s), x)
@@ -39,7 +42,7 @@ def read_doe_csv(file_doe_name_):
 
 def readDOE():
     """
-    First read csv files of DOE buildings
+    Read csv files of DOE buildings
     Sheet 1 = BuildingSummary
     Sheet 2 = ZoneSummary
     Sheet 3 = LocationSummary
@@ -114,8 +117,9 @@ def readDOE():
         'Pst80',
         'New']
 
-    test_readDOE = UWG_Test("read_DOE_csv", True) #Make a test object for reading csv files
-    test_treeDOE = UWG_Test("tree_DOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
+    #For Testing only
+    test_readDOE = UWG_Test("read_DOE_csv", False) #Make a test object for reading csv files
+    test_treeDOE = UWG_Test("tree_DOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
 
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
@@ -134,7 +138,7 @@ def readDOE():
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
         list_doe1 = read_doe_csv(file_doe_name_bld)
         #listof(listof 3 era values)
-        nFloor      = list_doe1[3][3:6]             # Number of Floors
+        nFloor      = to_fl(list_doe1[3][3:6])      # Number of Floors, this will be list of floats and str if "basement"
         glazing     = to_fl(list_doe1[4][3:6])      # [?] Total
         hCeiling    = to_fl(list_doe1[5][3:6])      # [m] Ceiling height
         ver2hor     = to_fl(list_doe1[7][3:6])      # Wall to Skin Ratio
@@ -376,31 +380,27 @@ def readDOE():
                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
-                #refBEM(i,j,k) = BEMDef(refDOE(i,j,k),mass,wall,roof,0);
-                #refBEM(i,j,k).building.FanMax = FanFlow(j,k);
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k]
 
                 if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
 
+                Elec = SchEquip;   # 3x24 matrix of schedule for electricity (WD,Sat,Sun)
+                Light = SchLight;  # 3x24 matrix of schedule for light (WD,Sat,Sun)
+                Gas = SchGas;      # 3x24 matrix of schedule for gas (WD,Sat,Sun)
+                Occ = SchOcc;      # 3x24 matrix of schedule for occupancy (WD,Sat,Sun)
+                Cool = SetCool;    # 3x24 matrix of schedule for cooling temp (WD,Sat,Sun)
+                Heat = SetHeat;    # 3x24 matrix of schedule for heating temp (WD,Sat,Sun)
+                SWH = SchSWH;      # 3x24 matrix of schedule for SWH (WD,Sat,Sun)
 
-                """
-                Schedule(i,j,k).Elec = SchEquip;   % 3x24 matrix of schedule for electricity (WD,Sat,Sun)
-                Schedule(i,j,k).Light = SchLight;  % 3x24 matrix of schedule for light (WD,Sat,Sun)
-                Schedule(i,j,k).Gas = SchGas;      % 3x24 matrix of schedule for gas (WD,Sat,Sun)
-                Schedule(i,j,k).Occ = SchOcc;      % 3x24 matrix of schedule for occupancy (WD,Sat,Sun)
-                Schedule(i,j,k).Cool = SetCool;    % 3x24 matrix of schedule for cooling temp (WD,Sat,Sun) % off for BUBBLE case
-                Schedule(i,j,k).Heat = SetHeat;    % 3x24 matrix of schedule for heating temp (WD,Sat,Sun)
-                Schedule(i,j,k).SWH = SchSWH;      % 3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                Schedule[i][j][k] = SchDef(Elec,Gas,Light,Occ,Cool,Heat,SWH)
 
-                Schedule(i,j,k).Qelec = Elec(j);         % W/m^2 (max) for electrical plug process
-                Schedule(i,j,k).Qlight = Light(j);       % W/m^2 (max) for light
-                Schedule(i,j,k).Nocc = Occupant(j)/AreaFloor(j); % Person/m^2
-                Schedule(i,j,k).Qgas = Gas(j);           % W/m^2 (max) for gas
-                Schedule(i,j,k).Vent = Vent(j)/1000;     % m^3/m^2 per person
-                Schedule(i,j,k).Vswh = SHW(j)/AreaFloor(j);    % litres per hour per m^2 of floor
-
-            """
+                Schedule[i][j][k].Qelec = Elec[j]                   # W/m^2 (max) for electrical plug process
+                Schedule[i][j][k].Qlight = Light[j]                 # W/m^2 (max) for light
+                Schedule[i][j][k].Nocc = Occupant[j]/AreaFloor[j]   # Person/m^2
+                Schedule[i][j][k].Qgas = Gas[j]                     # W/m^2 (max) for gas
+                Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
+                Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
     #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
