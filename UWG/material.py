@@ -12,3 +12,6 @@ class Material(object):
         self.name = name
         self.thermalCond = thermalCond
         self.volHeat = volHeat
+
+    def __repr__(self):
+        return "Name: {a}, k={b}, spec vol={c}".format(a=self.name,b=self.thermalCond,c=self.volHeat)

@@ -1,0 +1,36 @@
+3,,Location Summary,,,,,,,,,,,,,,,,,
+Building,UWG,,,Miami,Houston,Phoenix,Atlanta,Los Angeles,Las Vegas,San Francisco,Baltimore,Albuquerque,Seattle,Chicago,Boulder,Minneapolis,Helena,Duluth,Fairbanks
+BLD9PRE,Zone,,ASHRAE 90.1-2004 Climate Zone,1A,2A,2B,3A,3B-CA,3B,3C,4A,4B,4C,5A,5B,6A,6B,7,8
+BLD9PRE,TypeWall,,Construction Type,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall,MassWall
+BLD9PRE,RvalWall,,R-value (m2·K / W),0.77,0.77,0.77,0.78,0.77,0.77,0.79,0.99,0.96,1.01,1.13,1.09,1.22,1.22,1.30,1.41
+BLD9PRE,TypeRoof,,Construction Type,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD,IEAD
+BLD9PRE,RvalRoof,,R-value (m2·K / W),1.76,1.76,1.76,1.76,1.76,1.76,1.76,2.04,1.98,2.07,2.50,2.37,2.99,2.99,2.93,2.99
+BLD9PRE,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,5.84,3.53,3.53,3.53,3.53,3.53,3.53
+BLD9PRE,SHGC,,SHGC,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.54,0.41,0.41,0.41,0.41,0.41,0.41
+BLD9PRE,HVAC,,Air Conditioning (kW),59.48,61.05,64.31,61.99,54.29,63.62,42.23,59.44,51.94,48.00,58.23,51.43,59.83,46.10,58.89,49.08
+BLD9PRE,HEAT,,Heating (kW),79.64,100.92,91.22,107.63,79.74,95.04,84.80,114.78,94.71,99.99,134.90,112.58,151.75,143.17,157.91,230.83
+BLD9PRE,COP,,Air Conditioning (COP),3.41,3.41,3.36,3.41,3.56,3.41,3.56,3.41,3.56,3.56,3.50,3.50,3.50,3.50,3.50,3.50
+BLD9PRE,EffHeat,,Heating Efficiency (%),0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78,0.78
+BLD9PRE,Fan,,Fan Max Flow Rate (m3/s ),3.95,4.00,4.14,4.05,3.85,4.12,3.78,3.94,4.08,3.87,3.89,4.01,3.96,4.05,3.92,4.52
+BLD9PST,TypeWall,,Construction Type,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame
+BLD9PST,RvalWall,,R-value (m2·K / W),0.32,1.17,0.73,1.36,0.80,1.10,1.36,1.98,1.76,1.92,2.15,2.15,2.71,2.44,3.04,3.91
+BLD9PST,TypeRoof,,Construction Type,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic
+BLD9PST,RvalRoof,,R-value attic floor (m2·K / W),2.38,2.67,3.83,2.45,1.76,3.67,2.00,3.04,2.99,2.75,3.32,3.45,3.91,3.59,4.40,5.68
+BLD9PST,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,4.09,5.84,5.84,4.09,3.35,4.09,4.09,3.35,3.35,2.96,2.96,2.96,2.96
+BLD9PST,SHGC,,SHGC,0.25,0.25,0.25,0.26,0.44,0.25,0.39,0.36,0.36,0.39,0.39,0.39,0.39,0.39,0.49,0.62
+BLD9PST,HVAC,,Air Conditioning (kW),56.78,50.31,51.71,50.22,50.53,50.89,36.27,47.73,40.83,38.92,47.73,39.40,46.88,33.72,39.65,30.22
+BLD9PST,HEAT,,Heating (kW),78.58,90.36,78.77,96.20,75.03,83.07,77.49,103.97,86.05,90.87,119.92,99.36,128.10,117.77,129.70,158.99
+BLD9PST,COP,,Air Conditioning (COP),3.50,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.57,3.56,3.55,3.67
+BLD9PST,EffHeat,,Heating Efficiency (%),0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.79,0.80,0.79,0.79,0.79,0.78
+BLD9PST,Fan,,Fan Max Flow Rate (m3/s ),3.84,3.57,3.63,3.57,3.64,3.60,3.46,3.47,3.64,3.47,3.47,3.56,3.44,3.49,3.39,3.37
+BLD9NEW,TypeWall,,Construction Type,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame,WoodFrame
+BLD9NEW,RvalWall,,R-value (m2·K / W),1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,1.98,3.45
+BLD9NEW,TypeRoof,,Construction Type,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic,Attic
+BLD9NEW,RvalRoof,,R-value attic floor (m2·K / W),5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,5.18,6.52,6.52,6.52,6.52
+BLD9NEW,Uwindow,,U-Factor (W / m2·K),5.84,5.84,5.84,3.24,3.24,3.24,5.84,3.24,3.24,3.24,3.24,3.24,3.24,3.24,3.24,2.62
+BLD9NEW,SHGC,,SHGC,0.25,0.25,0.25,0.25,0.25,0.25,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.49,0.30
+BLD9NEW,HVAC,,Air Conditioning (kW),47.89,48.30,48.77,47.70,43.96,44.32,35.05,47.43,38.21,34.94,47.73,38.64,47.79,34.75,41.29,29.07
+BLD9NEW,HEAT,,Heating (kW),68.84,88.50,76.15,93.95,69.30,80.40,77.75,103.68,85.38,89.37,119.91,99.96,128.92,118.65,131.13,157.11
+BLD9NEW,COP,,Air Conditioning (COP),3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.56,3.55,3.56,3.56,3.55,3.56,3.56,3.55,3.67
+BLD9NEW,EffHeat,,Heating Efficiency (%),0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.79,0.80,0.79,0.79,0.79,0.78
+BLD9NEW,Fan,,Fan Max Flow Rate (m3/s ),3.48,3.49,3.51,3.47,3.39,3.47,3.47,3.46,3.6,3.4,3.47,3.6,3.47,3.54,3.45,3.29
