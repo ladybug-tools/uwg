@@ -404,11 +404,17 @@ def readDOE():
 
     #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
-    print test_readDOE.test_results()
-    print test_treeDOE.test_results()
+    #print test_readDOE.test_results()
+    #print test_treeDOE.test_results()
+
+    #type, era, climatezone
+    #5, 10, 2
+    #"MidRiseApartment", "5AChicago", "New"
+    return refBEM[5][2][10]
 
 if __name__ == "__main__":
     readDOE()
+
 
 # Material ref from E+
 #     1/2IN Gypsum,            !- Name

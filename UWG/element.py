@@ -37,8 +37,6 @@ class Element(object):
             self.albedo = alb
             self.emissivity = emis
             self.layerThickness = Thickness
-            #TO DO:
-            # translate rest of constructor
             """
             self.layerThermalCond = zeros(numel(Material),1)
             self.layerVolHeat = zeros(numel(Material),1)
@@ -58,7 +56,7 @@ class Element(object):
         return "Element: depth={z}, e={a}, k={b}, Cp*dens={c}".format(\
             z=self.layerThickness, a=self.emissivity,b=str(self.ThermalConductivity),c=str(self.volHeat))
 
-"""
+        """
 
         function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
 

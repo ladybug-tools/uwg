@@ -458,3 +458,15 @@ function [ z ] = logn(x,y)
 end
 
 """
+
+if __name__ == "__main__":
+    #This is just for testing, b/c UWG.py not finished delete after we write UWG.py
+    from readDOE import readDOE
+
+    testBEM = readDOE()
+    print testBEM.building
+    #UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,...
+    #T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural);
+    #forc = Forcing()
+    
+    #testBEM.BEMCalc(UCM,testBEM,forc,parameter,simTime)
