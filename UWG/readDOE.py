@@ -3,13 +3,13 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
-from csv import reader as csv_reader
 from uwg_test import UWG_Test
 from building import Building
 from material import Material
 from element import Element
 from BEMDef import BEMDef
 from schdef import SchDef
+from utlities import read_csv
 
 def to_fl(x):
     #Recurses through lists and converts lists of string to float
@@ -32,13 +32,6 @@ def to_fl(x):
     else:
         print 'Fail to convert to list of floats; type error {a} is {b}'.format(a=x[0], b=type(x[0]))
         return False
-
-def read_doe_csv(file_doe_name_):
-    file_doe = open(file_doe_name_,"r")
-    gen_doe = csv_reader(file_doe, delimiter=",")
-    list_doe = map(lambda r: r,gen_doe)
-    file_doe.close()
-    return list_doe
 
 def readDOE():
     """
@@ -75,6 +68,14 @@ def readDOE():
             CLIMATE_ZONE_16]
 
     """
+
+
+    #For Testing only
+    test_readDOE = UWG_Test("test_readDOE", False) #Make a test object for reading csv files
+    test_treeDOE = UWG_Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
+
+    #Define constants
+    DIR_DOE_NAME = "data\\DOERefBuildings"
 
     # DOE Building Types
     bldType = [
@@ -115,12 +116,7 @@ def readDOE():
 
     builtEra = ['Pre80',
         'Pst80',
-        'New']
-
-    #For Testing only
-    test_readDOE = UWG_Test("test_readDOE", False) #Make a test object for reading csv files
-    test_treeDOE = UWG_Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
-
+    'New']
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
@@ -130,13 +126,12 @@ def readDOE():
 
 
     #Purpose: Loop through every DOE reference csv and extract building data
-    #Nested loop = 16 types, 3 era, 16 zones
-    #Therefore time complexity O(n*m*k) = 768
-    dir_doe_name = "DOERefBuildings"
+    #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
+
     for i in xrange(16):#16
         # Read building summary (Sheet 1)
-        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe1 = read_doe_csv(file_doe_name_bld)
+        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        list_doe1 = read_csv(file_doe_name_bld)
         #listof(listof 3 era values)
         nFloor      = to_fl(list_doe1[3][3:6])      # Number of Floors, this will be list of floats and str if "basement"
         glazing     = to_fl(list_doe1[4][3:6])      # [?] Total
@@ -152,8 +147,8 @@ def readDOE():
 
 
         # Read zone summary (Sheet 2)
-        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe2 = read_doe_csv(file_doe_name_zone)
+        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        list_doe2 = read_csv(file_doe_name_zone)
         #listof(listof 3 eras)
         AreaFloor   = to_fl([list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
         Volume      = to_fl([list_doe2[2][6],list_doe2[3][6],list_doe2[4][6]])       # [m3]
@@ -174,8 +169,8 @@ def readDOE():
 
 
         # Read location summary (Sheet 3)
-        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=dir_doe_name,y=i+1)
-        list_doe3 = read_doe_csv(file_doe_name_location)
+        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        list_doe3 = read_csv(file_doe_name_location)
         #(listof (listof 3 eras (listof 16 climate types)))
         TypeWall    = [list_doe3[3][4:20],list_doe3[14][4:20],list_doe3[25][4:20]]            # Construction type
         RvalWall    = to_fl([list_doe3[4][4:20],list_doe3[15][4:20],list_doe3[26][4:20]])     # [m2*K/W] R-value
@@ -204,8 +199,8 @@ def readDOE():
 
 
         # Read Schedules (Sheet 4)
-        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=dir_doe_name,y=i+1)
-        list_doe4 = read_doe_csv(file_doe_name_schedules)
+        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=DIR_DOE_NAME,y=i+1)
+        list_doe4 = read_csv(file_doe_name_schedules)
 
         #listof(listof weekday, sat, sun (list of 24 fractions)))
         SchEquip    = to_fl([list_doe4[1][6:30],list_doe4[2][6:30],list_doe4[3][6:30]])      # Equipment Schedule 24 hrs

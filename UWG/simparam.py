@@ -2,7 +2,7 @@ class SimParam(object):
     """
     SimParam
     Calculates simulation time parameters based on initial date
-    and weather data time step
+    and weather data time step, and simulation timestep
 
     properties
         dt            % Simulation time-step
@@ -33,7 +33,7 @@ class SimParam(object):
         self.timeDay = 24*3600/timefor #how many times weather senses in a day
         self.timeSim = self.timeDay*days #how many steps in simulation
         self.timeMax = 24.*3600.*days
-        self.nt = int(round(self.timeMax/self.dt+1))
+        self.nt = int(round(self.timeMax/self.dt+1)) #total number of timesteps
         self.inobis = [0,31,59,90,120,151,181,212,243,273,304,334]
         self.julian = self.inobis[self.month] + DAY - 1
         H1 = (self.inobis[self.month]+DAY-1) * self.timeDay

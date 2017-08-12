@@ -9,9 +9,9 @@ from element import Element
 from BEMDef import BEMDef
 from schdef import SchDef
 from simparam import SimParam
+from weather import Weather
 
-if __name__ == "__main__":
-
+def sim_singapore():
     test_singapore = UWG_Test("singapore_test", True)
 
     # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
@@ -57,8 +57,12 @@ if __name__ == "__main__":
 
 
     # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
-    #climate_data = char('data/rural_weather_data_changi.epw'),
-    #weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal),
+    #climate_file = "rural_weather_data_changi.epw"
+    climate_file = "SGP_Singapore.486980_IWEC.epw"
+    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
+    print weather_
+    for i in xrange(3):
+        print weather_.climate_data[i]
 
     """
     # Building definitions
@@ -103,3 +107,18 @@ if __name__ == "__main__":
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
 
     print test_singapore.test_results()
+
+if __name__ == "__main__":
+    """
+    The main goal with these commits is to translate UWGParameter.m in order to continually test the code while we write the other classes (i.e building.py which is the next big one on my plate). UWGParameter.py documents
+    all necessary parameters to run UWG for Singapore.
+    Associated classes:
+    - SimParam
+    - Weather
+    - Building
+    - Element
+    - Material
+    - BEMDef
+    - SchDef
+    """
+    sim_singapore()

@@ -25,13 +25,13 @@ class Element(object):
         flux;            % external surface heat flux
     """
 
+    THICKNESS_EQ_MATERIAL_MSG = \
+    "-----------------------------------------\n"   +\
+    "ERROR: the number of layer thickness must\n"   +\
+    "match the number of layer materials\n"         +\
+    "-----------------------------------------"
     def __init__(self, alb, emis, Thickness, Material, vegCoverage, T_init, horizontal):
         if len(Thickness) != len(Material):
-            self.THICKNESS_EQ_MATERIAL_MSG = \
-            "-----------------------------------------\n"   +\
-            "ERROR: the number of layer thickness must\n"   +\
-            "match the number of layer materials\n"         +\
-            "-----------------------------------------"
             raise Exception(self.THICKNESS_EQ_MATERIAL_MSG)
         else:
             self.albedo = alb
