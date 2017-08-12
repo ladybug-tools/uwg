@@ -118,8 +118,8 @@ def readDOE():
         'New']
 
     #For Testing only
-    test_readDOE = UWG_Test("read_DOE_csv", False) #Make a test object for reading csv files
-    test_treeDOE = UWG_Test("tree_DOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
+    test_readDOE = UWG_Test("test_readDOE", False) #Make a test object for reading csv files
+    test_treeDOE = UWG_Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
 
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
@@ -407,10 +407,6 @@ def readDOE():
     #print test_readDOE.test_results()
     #print test_treeDOE.test_results()
 
-    #type, era, climatezone
-    #5, 10, 2
-    #"MidRiseApartment", "1AMiami", "Pst80s"
-    return refBEM[0][1][10]
 
 if __name__ == "__main__":
     readDOE()
