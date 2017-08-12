@@ -41,21 +41,21 @@ class SimParam(object):
         self.timeFinal = H1 + self.timeDay*self.days - 1 + 8
         self.secDay = 0
         self.hourDay = 0
-        """
-        # update date
+
+
         #TODO: needs to be unit tested
         def UpdateDate(self):
             self.secDay = self.secDay + self.dt
-            if self.secDay == 3600*24
+            if self.secDay == 3600*24:
                 self.day = self.day + 1
                 self.julian = self.julian + 1
                 self.secDay = 0
                 for j in xrange(12):
-                    if self.julian == self.inobis(j)
+                    if self.julian == self.inobis[j]:
                         self.month = self.month + 1
                         self.day = 1
             self.hourDay = floor(self.secDay/3600)       # 0 - 23hr
-        """
+
     def __repr__(self):
         return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(a=self.month,\
             b=self.day, c=self.timeSim, d=self.days)

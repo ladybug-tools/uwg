@@ -51,14 +51,18 @@ if __name__ == "__main__":
 
     # Create simulation class (SimParam.m)
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
-    print simTime
-    """
-    # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
-    climate_data = char('data/rural_weather_data_changi.epw'),
-    weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal),
+    test_singapore.test_equality_tol(simTime.timeSim,168)
+    test_singapore.test_equality_tol(simTime.timeMax,604800)
+    test_singapore.test_equality_tol(simTime.nt,2017)
 
-    % Building definitions
-    % Residential building with AC
+
+    # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
+    #climate_data = char('data/rural_weather_data_changi.epw'),
+    #weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal),
+
+    """
+    # Building definitions
+    # Residential building with AC
     res_wAC = Building(3.0,... % floorHeight
         4.0,...               % nighttime internal heat gains (W m-2 floor)
         4.0,...               % daytime internal heat gains (W m-2 floor)
@@ -97,3 +101,5 @@ if __name__ == "__main__":
     """
 
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
+
+    print test_singapore.test_results()
