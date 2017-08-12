@@ -409,8 +409,8 @@ def readDOE():
 
     #type, era, climatezone
     #5, 10, 2
-    #"MidRiseApartment", "5AChicago", "New"
-    return refBEM[5][2][10]
+    #"MidRiseApartment", "1AMiami", "Pst80s"
+    return refBEM[0][1][10]
 
 if __name__ == "__main__":
     readDOE()

@@ -465,8 +465,12 @@ if __name__ == "__main__":
 
     testBEM = readDOE()
     print testBEM.building
-    #UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,...
+    #From singapore case study in Yang thesis for unit testing
+    bldHeight = 26
+    bldDensity =
+    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,...
     #T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural);
+    weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal)
     #forc = Forcing()
-    
+
     #testBEM.BEMCalc(UCM,testBEM,forc,parameter,simTime)
