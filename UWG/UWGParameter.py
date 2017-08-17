@@ -45,7 +45,7 @@ def sim_singapore():
     monthName = 'July'       # For plot/printing
     MONTH = 7                # Begin month
     DAY = 30                 # Begin day of the month
-    NUM_DAYS = 7             # Number of days of simulation
+    NUM_DAYS = 1#7             # Number of days of simulation
     autosize = 0             # Autosize HVAC
     ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
 
@@ -61,8 +61,8 @@ def sim_singapore():
     climate_file = "SGP_Singapore.486980_IWEC.epw"
     weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
     print weather_
-    for i in xrange(3):
-        print weather_.climate_data[i]
+    #for i in xrange(3):
+    #    print weather_.climate_data[i]
 
     """
     # Building definitions

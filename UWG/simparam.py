@@ -36,6 +36,7 @@ class SimParam(object):
         self.nt = int(round(self.timeMax/self.dt+1)) #total number of timesteps
         self.inobis = [0,31,59,90,120,151,181,212,243,273,304,334]
         self.julian = self.inobis[self.month] + DAY - 1
+        #H1: (julian day * number of timesteps in a day) == sensor data index in epw
         H1 = (self.inobis[self.month]+DAY-1) * self.timeDay
         self.timeInitial = H1 + 8
         self.timeFinal = H1 + self.timeDay*self.days - 1 + 8

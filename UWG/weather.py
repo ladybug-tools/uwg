@@ -21,8 +21,20 @@ class Weather(object):
 
     DIR_EPW_NAME = "data\\epw\\"
     def __init__(self,climate_file,HI,HF):
+        print self.DIR_EPW_NAME + climate_file
         self.climate_data = read_csv(self.DIR_EPW_NAME + climate_file)
         self.location = self.climate_data[0][1]
+        print 'HI: ', HI #"July 30th, timestep = hourly"
+        print 'HF:', HF # 7X24 = 168
+        print HF - HI + 1
+        #H1 and HF define the row we want
+        #HI = Initial sensor data index for row
+        #H2 = final sensor data index for row
+        #M = csvread(filename,R1,C1,[R1 C1 R2 C2]) reads only the range bounded by row offsets R1 and R2 and column offsets C1 and C2.
+        stemp = map(lambda r: r[6], self.climate_data[HI:HF+1])
+
+        for i,st in enumerate(stemp):
+            print i, st
         """
         self.staTemp = csvread(climate_data,HI,6,[HI,6,HF,6])
         self.staRhum = csvread(climate_data,HI,8,[HI,8,HF,8])
