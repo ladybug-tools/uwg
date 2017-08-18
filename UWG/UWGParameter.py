@@ -49,18 +49,17 @@ def sim_singapore():
     autosize = 0             # Autosize HVAC
     ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
 
+    #climate_file = "rural_weather_data_changi.epw
+    climate_file = "SGP_Singapore.486980_IWEC.epw"
+
     # Create simulation class (SimParam.m)
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
     test_singapore.test_equality_tol(simTime.timeSim,168)
     test_singapore.test_equality_tol(simTime.timeMax,604800)
     test_singapore.test_equality_tol(simTime.nt,2017)
 
-
     # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
-    #climate_file = "rural_weather_data_changi.epw"
-    climate_file = "SGP_Singapore.486980_IWEC.epw"
-    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
-    print weather_
     #for i in xrange(3):
     #    print weather_.climate_data[i]
 

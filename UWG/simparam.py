@@ -35,14 +35,13 @@ class SimParam(object):
         self.timeMax = 24.*3600.*days
         self.nt = int(round(self.timeMax/self.dt+1)) #total number of timesteps
         self.inobis = [0,31,59,90,120,151,181,212,243,273,304,334]
-        self.julian = self.inobis[self.month] + DAY - 1
+        self.julian = self.inobis[self.month - 1] + DAY - 1
         #H1: (julian day * number of timesteps in a day) == sensor data index in epw
-        H1 = (self.inobis[self.month]+DAY-1) * self.timeDay
+        H1 = (self.inobis[self.month - 1] + DAY - 1) * self.timeDay
         self.timeInitial = H1 + 8
-        self.timeFinal = H1 + self.timeDay*self.days - 1 + 8
+        self.timeFinal = H1 + self.timeDay * self.days - 1 + 8
         self.secDay = 0
         self.hourDay = 0
-
 
         #TODO: needs to be unit tested
         def UpdateDate(self):

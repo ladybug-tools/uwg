@@ -17,3 +17,25 @@ def read_csv(file_name_):
     list_ = map(lambda r: r,gen_)
     file_.close()
     return list_
+
+def str2fl(x):
+    #Recurses through lists and converts lists of string to float
+    def helper_to_fl(s_):
+        if s_ == "":
+            return "null"
+        if "," in s_:
+            s_ = s_.replace(",","")
+        try:
+            return float(s_)
+        except:
+            return (s_)
+    fl_lst = []
+    if isinstance(x[0], basestring):
+        return map(lambda s: helper_to_fl(s), x)
+    elif type(x[0]) == type([]):
+        for xi in xrange(len(x)):
+            fl_lst.append(str2fl(x[xi]))
+        return fl_lst
+    else:
+        print 'Fail to convert to list of floats; type error {a} is {b}'.format(a=x[0], b=type(x[0]))
+        return False
