@@ -12,7 +12,7 @@ from simparam import SimParam
 from weather import Weather
 
 def sim_singapore():
-    test_singapore = UWG_Test("singapore_test", True)
+    test_uwg_param = UWG_Test("singapore_test", True)
 
     # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
     bldMat = Material(0.67,1.2e6)      # material (concrete? reference?)
@@ -45,7 +45,7 @@ def sim_singapore():
     monthName = 'July'       # For plot/printing
     MONTH = 7                # Begin month
     DAY = 30                 # Begin day of the month
-    NUM_DAYS = 1#7             # Number of days of simulation
+    NUM_DAYS = 7             # Number of days of simulation
     autosize = 0             # Autosize HVAC
     ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
 
@@ -54,14 +54,29 @@ def sim_singapore():
 
     # Create simulation class (SimParam.m)
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
-    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
-    test_singapore.test_equality_tol(simTime.timeSim,168)
-    test_singapore.test_equality_tol(simTime.timeMax,604800)
-    test_singapore.test_equality_tol(simTime.nt,2017)
+
+    # Simulation Parameters tests
+    test_uwg_param.test_equality_tol(simTime.timeSim,168,True)
+    test_uwg_param.test_equality_tol(simTime.timeMax,604800,True)
+    test_uwg_param.test_equality_tol(simTime.nt,2017,True)
 
     # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
-    #for i in xrange(3):
-    #    print weather_.climate_data[i]
+    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
+    print weather_
+    # Weather Tests
+    test_uwg_param.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
+    test_uwg_param.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
+    test_uwg_param.test_equality_tol(len(weather_.staTemp),simTime.timeFinal - simTime.timeInitial + 1,False)
+    if climate_file == "SGP_Singapore.486980_IWEC.epw":
+        test_uwg_param.test_equality_tol(weather_.staTemp[3],24.+273.15,False)
+        test_uwg_param.test_equality_tol(weather_.staTemp[-1],27.+273.15,False)
+        test_uwg_param.test_equality_tol(weather_.staPres[10],100600.,False)
+        test_uwg_param.test_equality_tol(weather_.staInfra[13],428.,False)
+        test_uwg_param.test_equality_tol(weather_.staDif[6],0.,False)
+        test_uwg_param.test_equality_tol(weather_.staDif[8],95.,False)
+        test_uwg_param.test_equality_tol(weather_.staUdir[2],270,False)  # 270 deg
+        test_uwg_param.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
+        test_uwg_param.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
     """
     # Building definitions
@@ -105,7 +120,7 @@ def sim_singapore():
 
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
 
-    print test_singapore.test_results()
+    print test_uwg_param.test_results()
 
 if __name__ == "__main__":
     """
