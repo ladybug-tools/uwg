@@ -25,20 +25,18 @@ class Element(object):
         flux;            % external surface heat flux
     """
 
+    THICKNESS_EQ_MATERIAL_MSG = \
+    "-----------------------------------------\n"   +\
+    "ERROR: the number of layer thickness must\n"   +\
+    "match the number of layer materials\n"         +\
+    "-----------------------------------------"
     def __init__(self, alb, emis, Thickness, Material, vegCoverage, T_init, horizontal):
         if len(Thickness) != len(Material):
-            self.THICKNESS_EQ_MATERIAL_MSG = \
-            "-----------------------------------------\n"   +\
-            "ERROR: the number of layer thickness must\n"   +\
-            "match the number of layer materials\n"         +\
-            "-----------------------------------------"
             raise Exception(self.THICKNESS_EQ_MATERIAL_MSG)
         else:
             self.albedo = alb
             self.emissivity = emis
             self.layerThickness = Thickness
-            #TO DO:
-            # translate rest of constructor
             """
             self.layerThermalCond = zeros(numel(Material),1)
             self.layerVolHeat = zeros(numel(Material),1)
@@ -58,7 +56,7 @@ class Element(object):
         return "Element: depth={z}, e={a}, k={b}, Cp*dens={c}".format(\
             z=self.layerThickness, a=self.emissivity,b=str(self.ThermalConductivity),c=str(self.volHeat))
 
-"""
+        """
 
         function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
 
