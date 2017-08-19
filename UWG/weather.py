@@ -4,7 +4,7 @@ from math import pow, log, exp
 class Weather(object):
     """
     Weather
-    Read a epw file
+    Read epw file
 
     properties
         location  # location name
@@ -45,7 +45,7 @@ class Weather(object):
             self.staHum[i] = staHum
 
     def __repr__(self):
-        return "Weather @ {a}, HI Tdb:{b}, HF Tdb:{c}".format(a=self.location,\
+        return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(a=self.location,\
                                         b=self.staTemp[0]-273.15, c=self.staTemp[-1]-273.15)
 
     def HumFromRHumTemp(self,RH,T,P):

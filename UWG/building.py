@@ -30,6 +30,7 @@ class Building(object):
         coolCap;            % rated cooling system capacity (W m-2)
         heatCap;            % rated heating system capacity (W m-2)
         heatEff;            % heating system efficiency (-)
+        canyon_fraction     # fraction of waste heat released to canyon, default = 1
         mSys;               % HVAC supply mass flowrate (kg s-1 m-2)
         indoorTemp;         % indoor air temperature (K)
         indoorHum;          % indoor specific humidity (kg / kg)
@@ -78,12 +79,12 @@ class Building(object):
             heatSetpointDay,heatSetpointNight,coolCap,heatEff,initialTemp):
 
             self.floorHeight = floorHeight
-            self.intHeat = intHeatNight
-            self.intHeatNight = intHeatNight
-            self.intHeatDay = intHeatDay
-            self.intHeatFRad = intHeatFRad
-            self.intHeatFLat = intHeatFLat
-            self.infil = infil # ACH
+            self.intHeat = intHeatNight         # timetep internal gains
+            self.intHeatNight = intHeatNight    # nighttime internal heat gains [W m-2]
+            self.intHeatDay = intHeatDay        # nighttime internal heat gains [W m-2]
+            self.intHeatFRad = intHeatFRad      # internal gain radiant fraction
+            self.intHeatFLat = intHeatFLat      # internal gain latent fraction
+            self.infil = infil                  # ACH
             self.vent = vent
             self.glazingRatio = glazingRatio
             self.uValue = uValue
@@ -101,14 +102,15 @@ class Building(object):
             self.indoorHum = 0.012
             self.heatCap = 999     # Default heat capacity value
             self.copAdj = cop
+            self.canyon_fraction = 1.0 # Default canyon fraction
 
             self.Type = "null"
             self.Era = "null"
             self.Zone = "null"
 
     def __repr__(self):
-        s = "Type: {:s}, Era: {:s}, Zone: {:s};".format(self.Type,self.Era,self.Zone)
-        s += " @ Ti: {a}, Wi: {b}".format(a=self.indoorTemp,b=self.indoorHum)
+        s = "Building: Type: {:s}, Era: {:s}, Zone: {:s};".format(self.Type,self.Era,self.Zone)
+        s += " @ Ti: {a}, WWR: {b}".format(a=self.indoorTemp-273.15,b=self.glazingRatio)
         return s
 
 

@@ -78,42 +78,47 @@ def sim_singapore():
         test_uwg_param.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
         test_uwg_param.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
-    """
+
     # Building definitions
     # Residential building with AC
-    res_wAC = Building(3.0,... % floorHeight
-        4.0,...               % nighttime internal heat gains (W m-2 floor)
-        4.0,...               % daytime internal heat gains (W m-2 floor)
-        0.2,...               % radiant fraction of internal gains
-        0.2,...               % latent fraction of internal gains
-        0.5,...               % Infiltration (ACH)
-        0.0,...               % Ventilation (ACH)
-        0.3,...               % glazing ratio
-        2.715,...             % window U-value (W m-2 K)
-        0.75,...              % window solar heat gain coefficient
-        'AIR',...             % cooling condensation system type {'AIR','WATER'}
-        2.5,...               % COP of the cooling system
-        1.0,...               % fraction of waste heat released into the canyon
-        297.,...              % daytime indoor cooling set-point (K)
-        297.,...              % nighttime indoor cooling set-point (K)
-        293.,...              % daytime indoor heating set-point (K)
-        293.,...              % nighttime indoor heating set-point (K)
-        225.,...              % rated cooling system capacity (W m-2 bld)
-        0.9,...               % heating system efficiency (-)
-        300.),                % intial indoor temp (K)
+    res_wAC = Building(3.0,     # floorHeight
+        4.0,                    # nighttime internal heat gains (W m-2 floor)
+        4.0,                    # daytime internal heat gains (W m-2 floor)
+        0.2,                    # radiant fraction of internal gains
+        0.2,                    # latent fraction of internal gains
+        0.5,                    # Infiltration (ACH)
+        0.0,                    # Ventilation (ACH)
+        0.3,                    # glazing ratio
+        2.715,                  # window U-value (W m-2 K)
+        0.75,                   # SHGC window solar heat gain coefficient
+        'AIR',                  # cooling condensation system type {'AIR','WATER'}
+        2.5,                    # COP of the cooling system
+        297.,                   # 24 C daytime indoor cooling set-point (K)
+        297.,                   # 24 C nighttime indoor cooling set-point (K)
+        293.,                   # 20 C daytime indoor heating set-point (K)
+        293.,                   # 20 C nighttime indoor heating set-point (K)
+        225.,                   # rated cooling system capacity (W m-2 bld)
+        0.9,                    # heating system efficiency (-)
+        300.)                   # 26.85 C intial indoor temp (K)
 
-    % -------------------------------------------------------------------------
-    % Urban Area Definitions (%% need to re-do this!)
-    % -------------------------------------------------------------------------
+    #Add this b/c doesn't appear in current building.py
+    res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
+    print res_wAC
 
-    % Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
+    
+    # -------------------------------------------------------------------------
+    # Urban Area Definitions (re-do this?)
+    # -------------------------------------------------------------------------
+
+    # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
+    """
     RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
 
     T_init = weather.staTemp(1),
     Hum_init = weather.staHum(1),
     Wind_init = weather.staUmod(1),
 
-    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,...
+    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
         T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural),
     UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
     """
@@ -123,6 +128,7 @@ def sim_singapore():
     print test_uwg_param.test_results()
 
 if __name__ == "__main__":
+
     """
     The main goal with these commits is to translate UWGParameter.m in order to continually test the code while we write the other classes (i.e building.py which is the next big one on my plate). UWGParameter.py documents
     all necessary parameters to run UWG for Singapore.
