@@ -105,22 +105,21 @@ def sim_singapore():
     res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
     print res_wAC
 
-    
     # -------------------------------------------------------------------------
     # Urban Area Definitions (re-do this?)
     # -------------------------------------------------------------------------
 
+    #TODO: Doesn't appear in UWGParameter... why is this here?
     # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
-    """
-    RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
+    #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
 
-    T_init = weather.staTemp(1),
-    Hum_init = weather.staHum(1),
-    Wind_init = weather.staUmod(1),
+    T_init = weather.staTemp(1)     # start dry bulb
+    Hum_init = weather.staHum(1),   # start relative humidity
+    Wind_init = weather.staUmod(1), # wind speed
 
     UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
         T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural),
-    UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
+    #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
     """
 
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
