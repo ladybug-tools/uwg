@@ -117,6 +117,7 @@ def sim_singapore():
     Hum_init = weather.staHum(1),   # start relative humidity
     Wind_init = weather.staUmod(1), # wind speed
 
+    #TODO: need to add parameter to __init__ here
     UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
         T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural),
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
@@ -125,19 +126,7 @@ def sim_singapore():
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
 
     print test_uwg_param.test_results()
-
+    """
 if __name__ == "__main__":
 
-    """
-    The main goal with these commits is to translate UWGParameter.m in order to continually test the code while we write the other classes (i.e building.py which is the next big one on my plate). UWGParameter.py documents
-    all necessary parameters to run UWG for Singapore.
-    Associated classes:
-    - SimParam
-    - Weather
-    - Building
-    - Element
-    - Material
-    - BEMDef
-    - SchDef
-    """
     sim_singapore()

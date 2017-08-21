@@ -1,4 +1,6 @@
 
+from math import sqrt, pow
+
 class UCMDef(object):
     """
     Definition of Urban Canopy - Building Energy Model Class
@@ -72,50 +74,57 @@ class UCMDef(object):
 
     def __init__(self,bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
             initialTemp,initialHum,initialWind,parameter,r_glaze,SHGC,alb_wall,road):
-        self.road = road;
-        self.bldHeight = bldHeight;
-        self.verToHor = verToHor;            # for building only?
-        self.bldDensity = bldDensity;
-        self.treeCoverage = treeCoverage;
-        self.sensAnthrop = sensAnthrop;
-        self.latAnthrop = latAnthrop;
-        self.roadShad = min(treeCoverage/(1-bldDensity),1);
-        self.bldWidth = 4*bldHeight*bldDensity/verToHor;
-        d = self.bldWidth/(bldDensity^0.5);
-        self.canWidth = d - self.bldWidth;
-        self.canAspect = bldHeight/self.canWidth;
-        self.roadConf = ((self.canAspect)^2+1)^(1/2)-self.canAspect;
-        self.wallConf = 0.5*(self.canAspect+1-...
-            ((self.canAspect)^2+1)^(1/2))/(self.canAspect);
-        self.facArea = 4*self.bldWidth*bldHeight;
-        self.roadArea = d^2 - (self.bldWidth)^2;
-        self.roofArea = (self.bldWidth)^2;
-        self.canTemp = initialTemp;
-        self.roadTemp = initialTemp;
-        self.canHum = initialHum;
-        self.ublWind = max(initialWind,parameter.windMin);
-        self.canWind = initialWind;
-        self.ustar = 0.1*initialWind;
-        self.ustarMod = 0.1*initialWind;
-        frontDens = verToHor/4.;
-        if frontDens < 0.15
-          self.z0u = frontDens*self.bldHeight;
-        else
-          self.z0u = 0.15*self.bldHeight;
-        end
-        if frontDens < 0.05
-          self.l_disp = 3*frontDens*self.bldHeight;
-        elseif frontDens < 0.15
-          self.l_disp = (0.15+5.5*(frontDens-0.05))*self.bldHeight;
-        elseif frontDens < 1
-          self.l_disp = (0.7+0.35*(frontDens-0.15))*self.bldHeight;
-        else
-          self.l_disp = 0.5*self.bldHeight;
-        end
-        self.alb_wall = alb_wall;
-        self.facAbsor = (1-r_glaze)*(1-alb_wall)+r_glaze*(1-0.75*SHGC);
-        self.roadAbsor = (1-road.vegCoverage)*(1-road.albedo);
-        self.sensHeat = 0.;
+            self.road = road                                            # Road element class (moved from BEM)
+            self.bldHeight = bldHeight                                  # average building height (m)
+            self.verToHor = verToHor                                    # vertical-to-horizontal urban area ratio (facade area/urban area)
+            self.bldDensity = bldDensity                                # horizontal building density (footprint/total_area)
+            self.treeCoverage = treeCoverage                            # horizontal tree density (footprint)
+            self.sensAnthrop = sensAnthrop                              # sensible anthropogenic heat (other than from buildings) (W m-2)
+            self.latAnthrop = latAnthrop                                # latent anthropogenic heat (other than from buildings) (W m-2)
+            self.roadShad = min(treeCoverage/(1-bldDensity),1)          # fraction of road not building shadowed
+            # Key to understanding next few formulas is that UWG_Matlab assumes bld_area = square, so sqrt(bld_area) = side length
+            self.bldWidth = 4*bldHeight*bldDensity/verToHor             # bld width (side length) derived from bldDensity and verToHor (m)
+            d = self.bldWidth/(sqrt(bldDensity))                        # urban area width == sqrt(bldDensity) == ratio of bld footprint_width / urban area footprint
+            self.canWidth = d - self.bldWidth                           # canyon width (m) = urban area width - building width
+            self.canAspect = bldHeight/self.canWidth                    # canyon aspect ratio
+            self.roadConf = pow(pow(self.canAspect,2)+1),0.5)
+                - self.canAspect                                        # road-sky configuration factors ??
+            self.wallConf = 0.5 * (self.canAspect + 1 -
+                pow(pow(self.canAspect,2)+1,0.5))
+                / (self.canAspect)                                      # wall-sky configuration factors ??
+            self.facArea = 4*self.bldWidth*bldHeight                    # bld width [m]
+            self.roadArea = d*d - pow(self.bldWidth,2)                  # road area [m2] = urban_area_ - bld_area
+            self.roofArea = pow(self.bldWidth,2)                        # roof area [m2]
+            self.canTemp = initialTemp                                  # canyon air temperature (db) (K)
+            self.roadTemp = initialTemp                                 # average road temperature (K)
+            self.canHum = initialHum                                    # canyon specific humidity (kg kg-1)
+            self.ublWind = max(initialWind,parameter.windMin)           # urban boundary layer wind volocity (m s-1)
+            self.canWind = initialWind                                  # urban canyon wind velocity (m s-1)
+            self.ustar = 0.1*initialWind                                # friction velocity (m s-1)
+            self.ustarMod = 0.1*initialWind                             # modified friction velocity (m s-1)
+
+            # Calculate z0u = urban roughness length (m)
+            frontDens = verToHor/4.                                     # density of just street facing facade
+            if frontDens < 0.15:
+              self.z0u = frontDens * self.bldHeight
+            else:
+              self.z0u = 0.15 * self.bldHeight
+
+            # Calculate l_dsp = urban displacement length (m)
+            if frontDens < 0.05:
+              self.l_disp = 3 * frontDens * self.bldHeight
+            elseif frontDens < 0.15:
+              self.l_disp = (0.15+5.5*(frontDens-0.05))*self.bldHeight
+            elseif frontDens < 1:
+              self.l_disp = (0.7+0.35*(frontDens-0.15))*self.bldHeight
+            else:
+              self.l_disp = 0.5*self.bldHeight
+
+            self.alb_wall = alb_wall                                    # average wall albedo (-)
+            self.facAbsor = (1-r_glaze)*(1-alb_wall) +
+                r_glaze*(1-0.75*SHGC)                                   # avg facade absorptivity (-) == wall_mat_fraction * absorption + window_frac * non_solar_heat_gain
+            self.roadAbsor = (1-road.vegCoverage)*(1-road.albedo)       # average road absorptivity
+            self.sensHeat = 0.0                                         # urban sensible heat [W m-2]
 
     """
         function obj = UCModel(obj,BEM,T_ubl,forc,parameter)
