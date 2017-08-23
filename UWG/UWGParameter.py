@@ -121,8 +121,8 @@ def sim_singapore():
     UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
         T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural),
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
-    """
 
+    """
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
 
     print test_uwg_param.test_results()
