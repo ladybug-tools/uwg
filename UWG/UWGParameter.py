@@ -112,13 +112,42 @@ def sim_singapore():
     # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
     #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
 
-    T_init = weather.staTemp(1)     # start dry bulb
-    Hum_init = weather.staHum(1),   # start relative humidity
-    Wind_init = weather.staUmod(1), # wind speed
+    T_init = weather_.staTemp[0]     # start dry bulb
+    Hum_init = weather_.staHum[0]    # start relative humidity
+    Wind_init = weather_.staUmod[0]  # wind speed
 
-    #TODO: need to add parameter to __init__ here
-    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
-        T_init,Hum_init,Wind_init,param,r_glaze,SHGC,alb_wall,road,rural),
+    # Urban microclimate parameters from initialize.uwg
+    h_ubl1 = 1000.          # ubl height - day (m)
+    h_ubl2 = 80.            # ubl height - night (m)
+    h_ref = 150.            # inversion height
+    h_temp = 2.             # temperature height
+    h_wind = 10.            # wind height
+    c_circ = 1.2            # circulation coefficient
+    c_exch = 1.0            # exchange coefficient
+    maxDay = 150.           # max day threshhold
+    maxNight = 20.          # max night threshhold
+    windMin = 1.0           # min wind speed (m/s)
+    h_obs = 0.1             # rural average obstacle height
+
+     # Vegetatin parameters
+    vegCover = 0.2          # urban area veg coverage ratio
+    treeCoverage = 0.1      # urban area tree coverage ratio
+    vegStart = 4.           # vegetation start month
+    vegEnd = 10.            # vegetation end month
+    albVeg = 0.25           # Vegetation albedo
+    latGrss = 0.5           # latent fraction of grass
+    latTree = 0.5           # latent fraction of tree
+    rurVegCover = 0.9       # rural vegetation cover
+
+    nightStart = 18         # begin hour for night thermal set point schedule
+    nightEnd = 8            # end hour for night thermal set point schedule
+
+    #geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
+    #    latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
+    #    g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
+
+    #UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
+    #    T_init,Hum_init,Wind_init,geo_param,r_glaze,SHGC,alb_wall,road,rural),
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
     """
