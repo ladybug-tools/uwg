@@ -109,7 +109,6 @@ def sim_singapore():
     # Urban Area Definitions (re-do this?)
     # -------------------------------------------------------------------------
 
-    #TODO: Doesn't appear in UWGParameter... why is this here?
     # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
     #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
 
