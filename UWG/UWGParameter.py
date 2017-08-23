@@ -118,7 +118,7 @@ def sim_singapore():
 
     #TODO: need to add parameter to __init__ here
     UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
-        T_init,Hum_init,Wind_init,r_glaze,SHGC,alb_wall,road,rural),
+        T_init,Hum_init,Wind_init,param,r_glaze,SHGC,alb_wall,road,rural),
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
     """
