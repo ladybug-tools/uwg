@@ -9,6 +9,7 @@ from simparam import SimParam
 from weather import Weather
 from param import Param
 from UCMDef import UCMDef
+from forcing import Forcing
 
 from math import pow, pi
 
@@ -95,9 +96,9 @@ def sim_singapore():
         print '\t', simTime
 
     # Simulation Parameters tests
-    test_uwg_param.test_equality_tol(simTime.timeSim,168,True)
-    test_uwg_param.test_equality_tol(simTime.timeMax,604800,True)
-    test_uwg_param.test_equality_tol(simTime.nt,2017,True)
+    test_uwg_param.test_equality_tol(simTime.timeSim,168,False)
+    test_uwg_param.test_equality_tol(simTime.timeMax,604800,False)
+    test_uwg_param.test_equality_tol(simTime.nt,2017,False)
 
     # -------------------------------------------------------------------------
     # Weather
@@ -227,6 +228,7 @@ def sim_singapore():
     SHGC = 0.75       # from Building
     alb_wall = 0.2    # from wall Element
 
+    #UCM needs to be tested
     UCM_ = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
         T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
 
@@ -234,17 +236,24 @@ def sim_singapore():
         print "INIT UCM"
         print '\t', UCM_
 
-
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
     # -------------------------------------------------------------------------
-    # Method Testing
+    # FORCING
     # -------------------------------------------------------------------------
-    """
-    #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
+    forc = Forcing(weather_.staTemp, weather_)
 
-    print test_uwg_param.test_results()
-    """
+    if test_uwg_param.run_test==True:
+        print "INIT FORCING"
+        print '\t', forc
+
+    # -------------------------------------------------------------------------
+    # BEMCALC()
+    # -------------------------------------------------------------------------
+    res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
+
+    #print test_uwg_param.test_results()
+
 if __name__ == "__main__":
 
     sim_singapore()

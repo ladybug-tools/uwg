@@ -127,7 +127,7 @@ class UCMDef(object):
         s = "UCMDef: " +\
             "ver2Hor={b}, ".format(b=self.verToHor) +\
             "bldDens={c}, ".format(c=self.bldDensity) +\
-            "canyon H/W={a}/{d}={e}\n".format(a=int(self.bldHeight),\
+            "canyon H/W={a}/{d}={e}".format(a=int(self.bldHeight),\
                 d=int(self.canWidth),e=round(self.canAspect,1))
         return s
 

@@ -114,9 +114,11 @@ class Building(object):
         return s
 
 
-    """
-        function obj = BEMCalc(obj,UCM,BEM,forc,parameter,simTime)
 
+    def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
+        pass
+
+        """
             % Building Energy Model (some of these can be moved up)
             obj.ElecTotal = 0;
             obj.nFloor = max(UCM.bldHeight/obj.floorHeight,1);  % At least one floor

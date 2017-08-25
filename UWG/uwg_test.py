@@ -1,5 +1,5 @@
 class UWG_Test(object):
-    def __init__(self,test_name,run_test):
+    def __init__(self,test_name,run_test=True):
         self.fail = 0
         self.success = 0
         self.total = self._get_total()

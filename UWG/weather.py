@@ -28,10 +28,10 @@ class Weather(object):
         #H1 and HF define the row we want
         self.climate_data = read_csv(self.DIR_EPW_NAME + climate_file)
         self.location = self.climate_data[0][1]
-        self.staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
-        self.staTemp = map(lambda s: s+273.15, self.staTemp)
-        self.staRhum = str2fl(map(lambda r: r[8], self.climate_data[HI:HF+1]))
-        self.staPres = str2fl(map(lambda r: r[9], self.climate_data[HI:HF+1]))
+        staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
+        self.staTemp = map(lambda s: s+273.15, staTemp)                             # air temperature (K)
+        self.staRhum = str2fl(map(lambda r: r[8], self.climate_data[HI:HF+1]))      # air relative humidity (%)
+        self.staPres = str2fl(map(lambda r: r[9], self.climate_data[HI:HF+1]))      # air pressure (Pa)
         self.staInfra = str2fl(map(lambda r: r[12], self.climate_data[HI:HF+1]))    # horizontal Infrared Radiation Intensity (W m-2)
         self.staHor = str2fl(map(lambda r: r[13], self.climate_data[HI:HF+1]))      # horizontal radiation [W m-2]
         self.staDir = str2fl(map(lambda r: r[14], self.climate_data[HI:HF+1]))      # normal solar direct radiation (W m-2)
