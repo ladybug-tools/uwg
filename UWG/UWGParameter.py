@@ -10,19 +10,29 @@ from BEMDef import BEMDef
 from schdef import SchDef
 from simparam import SimParam
 from weather import Weather
+from param import Param
 
 def sim_singapore():
     test_uwg_param = UWG_Test("singapore_test", True)
 
+    # -------------------------------------------------------------------------
+    # Material
+    # -------------------------------------------------------------------------
     # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
     bldMat = Material(0.67,1.2e6)      # material (concrete? reference?)
     roadMat = Material(1.0,1.6e6)      # material (asphalt? reference?)
 
+    if test_uwg_param.run_test==True:
+        print "INIT MATERIALS"
+        print '\t', bldMat
+        print '\t', roadMat
 
-    # Define & build base elements
+    # -------------------------------------------------------------------------
+    # Elements
+    # -------------------------------------------------------------------------
     # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
-    #  materials, vegetation coverage, initial temperature (K),
-    #  inclination (horizontal - 1, vertical - 0) ]
+    # materials, vegetation coverage, initial temperature (K),
+    # inclination (horizontal - 1, vertical - 0) ]
     wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
         [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0)
     roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
@@ -33,6 +43,13 @@ def sim_singapore():
         [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
     mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0)
 
+    if test_uwg_param.run_test==True:
+        print "INIT ELEMENTS"
+        print '\t', 'wall', wall
+        print '\t', 'roof', roof
+        print '\t', 'road', road
+        print '\t', 'rural', rural
+        print '\t', 'mass', mass
     # -------------------------------------------------------------------------
     # Simulation Parameters
     # -------------------------------------------------------------------------
@@ -47,22 +64,33 @@ def sim_singapore():
     DAY = 30                 # Begin day of the month
     NUM_DAYS = 7             # Number of days of simulation
     autosize = 0             # Autosize HVAC
-    ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
 
+    ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
     #climate_file = "rural_weather_data_changi.epw
     climate_file = "SGP_Singapore.486980_IWEC.epw"
-
     # Create simulation class (SimParam.m)
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+
+    if test_uwg_param.run_test==True:
+        print "INIT SIMPARAM"
+        print '\t', simTime
 
     # Simulation Parameters tests
     test_uwg_param.test_equality_tol(simTime.timeSim,168,True)
     test_uwg_param.test_equality_tol(simTime.timeMax,604800,True)
     test_uwg_param.test_equality_tol(simTime.nt,2017,True)
 
+    # -------------------------------------------------------------------------
+    # Weather
+    # -------------------------------------------------------------------------
+
     # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
     weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
-    print weather_
+
+    if test_uwg_param.run_test==True:
+        print "INIT WEATHER"
+        print '\t', weather_
+
     # Weather Tests
     test_uwg_param.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
     test_uwg_param.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
@@ -78,6 +106,9 @@ def sim_singapore():
         test_uwg_param.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
         test_uwg_param.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
+    # -------------------------------------------------------------------------
+    # Building
+    # -------------------------------------------------------------------------
 
     # Building definitions
     # Residential building with AC
@@ -103,31 +134,26 @@ def sim_singapore():
 
     #Add this b/c doesn't appear in current building.py
     res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
-    print res_wAC
+    if test_uwg_param.run_test==True:
+        print "INIT BUILDING"
+        print '\t', res_wAC
 
     # -------------------------------------------------------------------------
-    # Urban Area Definitions (re-do this?)
+    # Urban MicroClimate Parameters
     # -------------------------------------------------------------------------
-
-    # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
-    #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param),
-
-    T_init = weather_.staTemp[0]     # start dry bulb
-    Hum_init = weather_.staHum[0]    # start relative humidity
-    Wind_init = weather_.staUmod[0]  # wind speed
 
     # Urban microclimate parameters from initialize.uwg
     h_ubl1 = 1000.          # ubl height - day (m)
     h_ubl2 = 80.            # ubl height - night (m)
-    h_ref = 150.            # inversion height
-    h_temp = 2.             # temperature height
-    h_wind = 10.            # wind height
+    h_ref = 150.            # inversion height (m)
+    h_temp = 2.             # temperature height (m)
+    h_wind = 10.            # wind height (m)
     c_circ = 1.2            # circulation coefficient
     c_exch = 1.0            # exchange coefficient
-    maxDay = 150.           # max day threshhold
-    maxNight = 20.          # max night threshhold
+    maxDay = 150.           # max day threshhold heat flux (W/m^2)
+    maxNight = 20.          # max night threshhold (W/m^2)
     windMin = 1.0           # min wind speed (m/s)
-    h_obs = 0.1             # rural average obstacle height
+    h_obs = 0.1             # rural average obstacle height (m)
 
      # Vegetatin parameters
     vegCover = 0.2          # urban area veg coverage ratio
@@ -142,14 +168,31 @@ def sim_singapore():
     nightStart = 18         # begin hour for night thermal set point schedule
     nightEnd = 8            # end hour for night thermal set point schedule
 
-    #geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
-    #    latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
-    #    g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
+    geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
+        latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
+        g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
+
+    if test_uwg_param.run_test==True:
+        print "INIT PARAM"
+        #print res_wAC
+    # -------------------------------------------------------------------------
+    # RSM/UCM/UBL
+    # -------------------------------------------------------------------------
+
+    # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
+    #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param)
+
+    T_init = weather_.staTemp[0]     # start dry bulb
+    Hum_init = weather_.staHum[0]    # start relative humidity
+    Wind_init = weather_.staUmod[0]  # wind speed
 
     #UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
     #    T_init,Hum_init,Wind_init,geo_param,r_glaze,SHGC,alb_wall,road,rural),
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
+    # -------------------------------------------------------------------------
+    # Method Testing
+    # -------------------------------------------------------------------------
     """
     #res_wAC.BEMCalc(UCM,res_wAC,forc,parameter,simTime)
 

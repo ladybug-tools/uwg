@@ -1,4 +1,3 @@
-"""Element class"""
 
 class Element(object):
     """
@@ -25,27 +24,28 @@ class Element(object):
         flux;            % external surface heat flux
     """
 
-    THICKNESS_EQ_MATERIAL_MSG = \
+    THICKNESSLST_EQ_MATERIALLST_MSG = \
     "-----------------------------------------\n"   +\
     "ERROR: the number of layer thickness must\n"   +\
     "match the number of layer materials\n"         +\
     "-----------------------------------------"
-    def __init__(self, alb, emis, Thickness, Material, vegCoverage, T_init, horizontal):
-        if len(Thickness) != len(Material):
-            raise Exception(self.THICKNESS_EQ_MATERIAL_MSG)
+    def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init, horizontal):
+        if len(thicknessLst) != len(materialLst):
+            raise Exception(self.THICKNESSLST_EQ_MATERIALLST_MSG)
         else:
             self.albedo = alb
             self.emissivity = emis
-            self.layerThickness = Thickness
+            self.layerThickness = thicknessLst
+            self.layerThermalCond = map(lambda z: 0, materialLst)
+            self.layerVolHeat = map(lambda z: 0, materialLst)
+
             """
-            self.layerThermalCond = zeros(numel(Material),1)
-            self.layerVolHeat = zeros(numel(Material),1)
-            for i = 1:numel(Material)
-              self.layerThermalCond(i) = Material(i).thermalCond
-              self.layerVolHeat(i) = Material(i).volHeat
+            for i = 1:numel(materialLst)
+              self.layerThermalCond(i) = materialLst(i).thermalCond
+              self.layerVolHeat(i) = materialLst(i).volHeat
             end
             self.vegCoverage = vegCoverage
-            self.layerTemp = T_init*ones(numel(Thickness),1)
+            self.layerTemp = T_init*ones(numel(ThicknessLst),1)
             self.waterStorage = 0.
             self.infra = 0
             self.horizontal = horizontal
@@ -53,8 +53,8 @@ class Element(object):
             """
     def __repr__(self):
         #returns some representative wall properties
-        return "Element: depth={z}, e={a}, k={b}, Cp*dens={c}".format(\
-            z=self.layerThickness, a=self.emissivity,b=str(self.ThermalConductivity),c=str(self.volHeat))
+        return "Element: depth={z}, e={a}, k={b}, Cp*dens={c}".format(z=sum(self.layerThickness),\
+         a=self.emissivity,b=str(sum(self.layerThermalCond)),c=str(sum(self.layerVolHeat)))
 
         """
 
