@@ -1,6 +1,3 @@
-# -------------------------------------------------------------------------
-# Element/Material Definitions
-# -------------------------------------------------------------------------
 
 from uwg_test import UWG_Test
 from building import Building
@@ -11,6 +8,28 @@ from schdef import SchDef
 from simparam import SimParam
 from weather import Weather
 from param import Param
+from UCMDef import UCMDef
+
+from math import pow, pi
+
+
+# Physical constants (moved here from UWG.m)
+g = 9.81                # gravity
+cp = 1004.              # heat capacity for air (J/kg.K)
+vk = 0.40               # von karman constant
+r = 287.                # gas constant for air
+rv = 461.5              # gas constant for vapour
+lv = 2.26e6             # latent heat of evaporation
+sigma = 5.67e-08        # Stefan Boltzmann constant
+waterDens = 1000.       # water density (kg/m^3)
+lvtt = 2.5008e6         #
+tt = 273.16             #
+estt = 611.14           #
+cl = 4.218e3            #
+cpv = 1846.1            #
+b = 9.4                 # Coefficients derived by Louis (1979)
+cm = 7.4                #
+colburn = pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
 def sim_singapore():
     test_uwg_param = UWG_Test("singapore_test", True)
@@ -39,8 +58,8 @@ def sim_singapore():
         [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1)
     road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
         [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1)
-    rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
-        [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
+    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
+    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
     mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0)
 
     if test_uwg_param.run_test==True:
@@ -48,7 +67,7 @@ def sim_singapore():
         print '\t', 'wall', wall
         print '\t', 'roof', roof
         print '\t', 'road', road
-        print '\t', 'rural', rural
+        #print '\t', 'rural', rural
         print '\t', 'mass', mass
     # -------------------------------------------------------------------------
     # Simulation Parameters
@@ -168,13 +187,18 @@ def sim_singapore():
     nightStart = 18         # begin hour for night thermal set point schedule
     nightEnd = 8            # end hour for night thermal set point schedule
 
+    # Site-specific parameters
+    wgmax = 0.005           # maximum film water depth on horizontal surfaces (m)
+    maxdx = 250             # Max Dx (m)
+
     geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
         latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
-        g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
+        g, cp, vk, r, rv, lv, pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
 
     if test_uwg_param.run_test==True:
         print "INIT PARAM"
-        #print res_wAC
+        print '\t', geoParam
+
     # -------------------------------------------------------------------------
     # RSM/UCM/UBL
     # -------------------------------------------------------------------------
@@ -186,8 +210,31 @@ def sim_singapore():
     Hum_init = weather_.staHum[0]    # start relative humidity
     Wind_init = weather_.staUmod[0]  # wind speed
 
-    #UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
-    #    T_init,Hum_init,Wind_init,geo_param,r_glaze,SHGC,alb_wall,road,rural),
+    # Urban characteristics
+    bldHeight = 10          # average building height (m)
+    h_mix = 1               # fraction of waste heat to canyon
+    bldDensity = 0.5        # urban area building plan density (0-1)
+    verToHor = 0.8          # urban area vertical to horizontal ratio
+    h_floor = 3.05          # average floor height
+    charLength = 1000       # urban area characteristic length (m)
+    alb_road = 0.2          # road albedo (0 - 1)
+    d_road = 0.5            # road pavement thickness (m)
+    sensAnth = 20           # non-building sens heat (W/m^2)
+    latAnth = 2             # non-building latent heat (W/m^2) (currently not used)
+
+    # In UWG.py this is done as average of all refDOE types
+    r_glaze = 0.3     # glazing ratio from Building
+    SHGC = 0.75       # from Building
+    alb_wall = 0.2    # from wall Element
+
+    UCM_ = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
+        T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
+
+    if test_uwg_param.run_test==True:
+        print "INIT UCM"
+        print '\t', UCM_
+
+
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
     # -------------------------------------------------------------------------

@@ -44,7 +44,9 @@ class Element(object):
               self.layerThermalCond(i) = materialLst(i).thermalCond
               self.layerVolHeat(i) = materialLst(i).volHeat
             end
+            """
             self.vegCoverage = vegCoverage
+            """
             self.layerTemp = T_init*ones(numel(ThicknessLst),1)
             self.waterStorage = 0.
             self.infra = 0

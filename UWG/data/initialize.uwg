@@ -1,23 +1,20 @@
-% UWGv4.1 Simulation initialization parameters
-% Joseph Yang, 2016, MIT
-%
-% Note: This parameter file is in Matlab format. Ensure that the variable
-% names and number formats ( with ';' terminator at the end of the line)
-% are maintained.
+# UWG_Python Simulation initialization parameters
+# translated from: UWGv4.1 by by Joseph Yang, 2016, MIT
+
 
 % Main simulation parameters
 Month = 1;              % starting month (1-12)
 Day = 1;                % starting day (1-31)
 nDay = 31;              % number of days
 dtSim = 300;            % simulation time step (s)
-dtWeather = 3600;       % weather time step (s) 
+dtWeather = 3600;       % weather time step (s)
 autosize = 0;           % autosize HVAC (1 or 0)
 sensOcc = 100;          % Sensible heat from occupant (W)
 LatFOcc = 0.3;          % Latent heat fraction from occupant (normally 0.3)
 RadFOcc = 0.2;          % Radiant heat fraction from occupant (normally 0.2)
 RadFEquip = 0.5;        % Radiant heat fraction from equipment (normally 0.5)
 RadFLight = 0.7;        % Radiant heat fraction from light (normally 0.7)
-writeMAT = 'No';        % Save data to .mat file 
+writeMAT = 'No';        % Save data to .mat file
 writeEPW = 'No';       % Generate EPW format
 writeXLS = 'Yes';        % Generate XLSX output (Excel needed)
 EPW = 'C:\Sim\UWG4.1\data\MA_BOSTON-LOGAN-IAP_725090_15.epw';   % Rural weather data
