@@ -3,7 +3,7 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
-from uwg_test import UWG_Test
+from test import Test
 from building import Building
 from material import Material
 from element import Element
@@ -51,8 +51,8 @@ def readDOE():
 
 
     #For Testing only
-    test_readDOE = UWG_Test("test_readDOE", False) #Make a test object for reading csv files
-    test_treeDOE = UWG_Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
+    test_readDOE = Test("test_readDOE", False) #Make a test object for reading csv files
+    test_treeDOE = Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
 
     #Define constants
     DIR_DOE_NAME = "data\\DOERefBuildings"

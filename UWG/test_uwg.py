@@ -1,5 +1,5 @@
 
-from uwg_test import UWG_Test
+from test import Test
 from building import Building
 from material import Material
 from element import Element
@@ -32,8 +32,8 @@ b = 9.4                 # Coefficients derived by Louis (1979)
 cm = 7.4                #
 colburn = pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
-def sim_singapore():
-    test_uwg_param = UWG_Test("singapore_test", True)
+def test_singapore():
+    test_uwg = Test("test_singapore", True)
 
     # -------------------------------------------------------------------------
     # Material
@@ -42,7 +42,7 @@ def sim_singapore():
     bldMat = Material(0.67,1.2e6)      # material (concrete? reference?)
     roadMat = Material(1.0,1.6e6)      # material (asphalt? reference?)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT MATERIALS"
         print '\t', bldMat
         print '\t', roadMat
@@ -63,7 +63,7 @@ def sim_singapore():
     #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
     mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT ELEMENTS"
         print '\t', 'wall', wall
         print '\t', 'roof', roof
@@ -91,14 +91,14 @@ def sim_singapore():
     # Create simulation class (SimParam.m)
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT SIMPARAM"
         print '\t', simTime
 
     # Simulation Parameters tests
-    test_uwg_param.test_equality_tol(simTime.timeSim,168,False)
-    test_uwg_param.test_equality_tol(simTime.timeMax,604800,False)
-    test_uwg_param.test_equality_tol(simTime.nt,2017,False)
+    test_uwg.test_equality_tol(simTime.timeSim,168,False)
+    test_uwg.test_equality_tol(simTime.timeMax,604800,False)
+    test_uwg.test_equality_tol(simTime.nt,2017,False)
 
     # -------------------------------------------------------------------------
     # Weather
@@ -107,24 +107,24 @@ def sim_singapore():
     # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
     weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT WEATHER"
         print '\t', weather_
 
     # Weather Tests
-    test_uwg_param.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
-    test_uwg_param.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
-    test_uwg_param.test_equality_tol(len(weather_.staTemp),simTime.timeFinal - simTime.timeInitial + 1,False)
+    test_uwg.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
+    test_uwg.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
+    test_uwg.test_equality_tol(len(weather_.staTemp),simTime.timeFinal - simTime.timeInitial + 1,False)
     if climate_file == "SGP_Singapore.486980_IWEC.epw":
-        test_uwg_param.test_equality_tol(weather_.staTemp[3],24.+273.15,False)
-        test_uwg_param.test_equality_tol(weather_.staTemp[-1],27.+273.15,False)
-        test_uwg_param.test_equality_tol(weather_.staPres[10],100600.,False)
-        test_uwg_param.test_equality_tol(weather_.staInfra[13],428.,False)
-        test_uwg_param.test_equality_tol(weather_.staDif[6],0.,False)
-        test_uwg_param.test_equality_tol(weather_.staDif[8],95.,False)
-        test_uwg_param.test_equality_tol(weather_.staUdir[2],270,False)  # 270 deg
-        test_uwg_param.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
-        test_uwg_param.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
+        test_uwg.test_equality_tol(weather_.staTemp[3],24.+273.15,False)
+        test_uwg.test_equality_tol(weather_.staTemp[-1],27.+273.15,False)
+        test_uwg.test_equality_tol(weather_.staPres[10],100600.,False)
+        test_uwg.test_equality_tol(weather_.staInfra[13],428.,False)
+        test_uwg.test_equality_tol(weather_.staDif[6],0.,False)
+        test_uwg.test_equality_tol(weather_.staDif[8],95.,False)
+        test_uwg.test_equality_tol(weather_.staUdir[2],270,False)  # 270 deg
+        test_uwg.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
+        test_uwg.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
     # -------------------------------------------------------------------------
     # Building
@@ -154,7 +154,7 @@ def sim_singapore():
 
     #Add this b/c doesn't appear in current building.py
     res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT BUILDING"
         print '\t', res_wAC
 
@@ -196,7 +196,7 @@ def sim_singapore():
         latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
         g, cp, vk, r, rv, lv, pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT PARAM"
         print '\t', geoParam
 
@@ -232,7 +232,7 @@ def sim_singapore():
     UCM_ = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
         T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT UCM"
         print '\t', UCM_
 
@@ -243,7 +243,7 @@ def sim_singapore():
     # -------------------------------------------------------------------------
     forc = Forcing(weather_.staTemp, weather_)
 
-    if test_uwg_param.run_test==True:
+    if test_uwg.run_test==True:
         print "INIT FORCING"
         print '\t', forc
 
@@ -252,8 +252,10 @@ def sim_singapore():
     # -------------------------------------------------------------------------
     res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
 
-    #print test_uwg_param.test_results()
+    print '--'
+    print weather_.staHum
+    #print test_uwg.test_results()
 
 if __name__ == "__main__":
 
-    sim_singapore()
+    test_singapore()

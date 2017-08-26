@@ -1,4 +1,4 @@
-class UWG_Test(object):
+class Test(object):
     def __init__(self,test_name,run_test=True):
         self.fail = 0
         self.success = 0
@@ -26,10 +26,9 @@ class UWG_Test(object):
             self.fail += 1
         if toggle:
             self.test_history += s
-    def test_equality_tol(self,a,b,toggle=True):
+    def test_equality_tol(self,a,b,toggle=True,tol=1e-4):
         if not self.run_test: return None
-        tol = 0.001
-        if abs(a-b) < 0.001:
+        if abs(a-b) < tol:
             s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
             self.success += 1
         else:
