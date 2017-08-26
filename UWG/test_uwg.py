@@ -252,9 +252,8 @@ def test_singapore():
     # -------------------------------------------------------------------------
     res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
 
-    print '--'
-    print weather_.staHum
-    #print test_uwg.test_results()
+    print '\n'
+    print test_uwg
 
 if __name__ == "__main__":
 

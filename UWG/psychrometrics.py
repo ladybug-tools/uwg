@@ -64,6 +64,79 @@ def saturation_pressure(Tdb_):
     Pws = Pws/1000.                                                               # in kPa
     return Pws
 
+"""
+function psat = psat(temp,parameter)
+    gamw  = (parameter.cl - parameter.cpv) / parameter.rv;
+    betaw = (parameter.lvtt/parameter.rv) + (gamw * parameter.tt);
+    alpw = log(parameter.estt) + (betaw /parameter.tt) + (gamw *log(parameter.tt));
+    psat = zeros(size(temp));
+    for jj=1:size(temp)
+        psat = exp(alpw - betaw/temp - gamw*log(temp));
+    end
+end
+
+% Not used for this release but saved for possible future use
+function Twb = wet_bulb(Tdb,Tdp,pres)
+
+    % Copyright (c) 2015, Rolf Henry Goodwin
+    % All rights reserved.
+    %
+    % Redistribution and use in source and binary forms, with or without
+    % modification, are permitted provided that the following conditions are
+    % met:
+    %
+    %     * Redistributions of source code must retain the above copyright
+    %       notice, this list of conditions and the following disclaimer.
+    %     * Redistributions in binary form must reproduce the above copyright
+    %       notice, this list of conditions and the following disclaimer in
+    %       the documentation and/or other materials provided with the distribution
+    %
+    % THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    % AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    % IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    % ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+    % LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    % CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    % SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+    % INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+    % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    % POSSIBILITY OF SUCH DAMAGE.
+
+    % Code modified to merge into a single file - Joseph Yang, 2016
+
+
+    % Tdb, Tdp, Twb in K
+    % p in Pa (obtained function uses hPa, so /100 needed)
+    global T;
+    global T_d;
+    global p;
+    T = Tdb;
+    T_d = Tdp;
+    p = pres/100;
+
+    Twb = root_finder(@Delta_q,T_d,T);
+end
+
+function dQTw = Delta_q(T_w)
+    %Delta_q finds the value of function dq(Tw)
+    %INPUT wet bulb temperature T_w
+    %OUTPUT dq(Tw)
+    global T;
+    global T_d;
+    global p;
+
+    Cp = 1005; % Heat capacity of water vapor in J/(kg*K)
+    L = 2.501e6; % Latent heat of water vapor at 0 degC in J/kg
+    w1 = mixing_ratio(T_d,p); % Mixing ratio corresponding to T_d and p
+    w2 = mixing_ratio(T_w,p); % Mixing ratio corresponding to T_w and p
+
+    dQTw = (L*(w2-w1))/(1+w2)-Cp*(T-T_w)*(1+0.8*w2); % Finds deltaq(Tw)
+
+end
+"""
+
+
 if __name__ == "__main__":
 
     psychro_test = Test("test_psychrometrics",run_test=False)
