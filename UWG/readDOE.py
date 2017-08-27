@@ -242,11 +242,11 @@ def readDOE():
                 # Referece from E+ for conductivity, thickness (reference below)
 
                 # Material: (thermalCond, volHeat = specific heat * density)
-                Concrete = Material (1.311, 836.8 * 2240)
-                Insulation = Material (0.049, 836.8 * 265.0)
-                Gypsum = Material (0.16, 830.0 * 784.9)
-                Wood = Material (0.11, 1210.0 * 544.62)
-                Stucco = Material(0.6918,  837.0 * 1859.0)
+                Concrete = Material (1.311, 836.8 * 2240,"Concrete")
+                Insulation = Material (0.049, 836.8 * 265.0, "Insulation")
+                Gypsum = Material (0.16, 830.0 * 784.9, "Gypsum")
+                Wood = Material (0.11, 1210.0 * 544.62, "Wood")
+                Stucco = Material(0.6918,  837.0 * 1859.0, "Stucco")
 
                 # Wall (1 in stucco, concrete, insulation, gypsum)
                 # Check TypWall by era, by climate
@@ -264,7 +264,7 @@ def readDOE():
                         thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,0.0127]
                         layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Gypsum]
 
-                    wall = Element(0.08,0.92,thickness,layers,0.,293.,0.)
+                    wall = Element(0.08,0.92,thickness,layers,0.,293.,0.,"MassWall")
 
                     # If mass wall, assume mass floor (4" concrete)
                     # Mass (assume 4" concrete);
@@ -272,7 +272,7 @@ def readDOE():
                     emis = 0.9
                     thickness = [0.054,0.054]
                     concrete = Material (1.31, 2240.0*836.8)
-                    mass = Element(alb,emis,thickness,[concrete,concrete],0,293,1)
+                    mass = Element(alb,emis,thickness,[concrete,concrete],0,293,1,"MassFloor")
 
                 elif TypeWall[j][k] == "WoodFrame":
                     # 0.01m wood siding, tbd insulation, 1/2" gypsum
@@ -287,14 +287,14 @@ def readDOE():
                         thickness = [0.01,0.0127]
                         layers = [Wood,Gypsum]
 
-                    wall = Element(0.22,0.92,thickness,layers,0.,293.,0.)
+                    wall = Element(0.22,0.92,thickness,layers,0.,293.,0.,"WoodFrameWall")
 
                     # If wood frame wall, assume wooden floor
                     alb = 0.2
                     emis = 0.9
                     thickness = [0.05,0.05]
                     wood = Material(1.31, 2240.0*836.8)
-                    mass = Element(alb,emis,thickness,[wood,wood],0.,293.,1.)
+                    mass = Element(alb,emis,thickness,[wood,wood],0.,293.,1.,"WoodFloor")
 
                 elif TypeWall[j][k] == "SteelFrame":
                     # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
@@ -307,14 +307,14 @@ def readDOE():
                     else:    # If insulation is too thin, assume no insulation
                         thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,0.0127]
                         layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Gypsum]
-                    wall = Element(0.15,0.92,thickness,layers,0.,293.,0.)
+                    wall = Element(0.15,0.92,thickness,layers,0.,293.,0.,"SteelFrame")
 
                     # If mass wall, assume mass foor
                     # Mass (assume 4" concrete),
                     alb = 0.2
                     emis = 0.93
                     thickness = [0.05,0.05]
-                    mass = Element(alb,emis,thickness,[Concrete,Concrete],0.,293.,1.)
+                    mass = Element(alb,emis,thickness,[Concrete,Concrete],0.,293.,1.,"MassFloor")
 
                 elif TypeWall[j][k] == "MetalWall":
                     # metal siding, insulation, 1/2" gypsum
@@ -323,14 +323,14 @@ def readDOE():
                     D_ins = max((RvalWall[j][k] * Insulation.thermalCond)/2, 0.01) #use derived insul thickness or 0.01 based on max
                     thickness = [D_ins,D_ins,0.0127]
                     materials = [Insulation,Insulation,Gypsum]
-                    wall = Element(alb,emis,thickness,materials,0,293,0)
+                    wall = Element(alb,emis,thickness,materials,0,293,0,"MetalWall")
 
                     # Mass (assume 4" concrete);
                     alb = 0.2
                     emis = 0.9
                     thickness = [0.05, 0.05]
                     concrete = Material(1.31, 2240.0*836.8)
-                    mass = Element(alb,emis,thickness,[concrete,concrete],0.,293.,1.)
+                    mass = Element(alb,emis,thickness,[concrete,concrete],0.,293.,1.,"MassFloor")
 
                 # Roof
                 if TypeRoof[j][k] == "IEAD": #Insulation Entirely Above Deck
@@ -338,26 +338,26 @@ def readDOE():
                      alb = 0.2
                      emis = 0.93
                      D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01);
-                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"IEAD")
 
                 elif TypeRoof[j][k] == "Attic":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
                     D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
-                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"Attic")
 
                 elif TypeRoof[j][k] == "MetalRoof":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
                     D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
-                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.)
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"MetalRoof")
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k]
-
+                
                 if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
 
                 Elec = SchEquip;   # 3x24 matrix of schedule for electricity (WD,Sat,Sun)

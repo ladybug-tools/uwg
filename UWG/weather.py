@@ -45,8 +45,11 @@ class Weather(object):
             self.staHum[i] = staHum
 
     def __repr__(self):
-        return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(a=self.location,\
-                                        b=self.staTemp[0]-273.15, c=self.staTemp[-1]-273.15)
+        return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(
+            a=self.location,
+            b=self.staTemp[0]-273.15,
+            c=self.staTemp[-1]-273.15
+            )
 
     def HumFromRHumTemp(self,RH,T,P):
         # Derive Specific HUmidity [kgh20/kgn202] from RH, T and Pa

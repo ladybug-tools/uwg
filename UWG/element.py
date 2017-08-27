@@ -29,10 +29,11 @@ class Element(object):
     "ERROR: the number of layer thickness must\n"   +\
     "match the number of layer materials\n"         +\
     "-----------------------------------------"
-    def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init, horizontal):
+    def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init, horizontal,name=None):
         if len(thicknessLst) != len(materialLst):
             raise Exception(self.THICKNESSLST_EQ_MATERIALLST_MSG)
         else:
+            self._name = name # purely for internal process
             self.albedo = alb
             self.emissivity = emis
             self.layerThickness = thicknessLst
@@ -55,8 +56,13 @@ class Element(object):
             """
     def __repr__(self):
         #returns some representative wall properties
-        return "Element: depth={z}, e={a}, k={b}, Cp*dens={c}".format(z=sum(self.layerThickness),\
-         a=self.emissivity,b=str(sum(self.layerThermalCond)),c=str(sum(self.layerVolHeat)))
+        return "Element: {n}, depth={z}, e={a}, k={b}, Cp*dens={c}".format(
+            n=self._name,
+            z=sum(self.layerThickness),
+            a=self.emissivity,
+            b=str(sum(self.layerThermalCond)),
+            c=str(sum(self.layerVolHeat))
+            )
 
         """
 

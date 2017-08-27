@@ -57,5 +57,9 @@ class SimParam(object):
             self.hourDay = floor(self.secDay/3600)       # 0 - 23hr
 
     def __repr__(self):
-        return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(a=self.month,\
-            b=self.day, c=self.timeSim, d=self.days)
+        return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(
+            a=self.month,
+            b=self.day,
+            c=self.timeSim,
+            d=self.days
+            )

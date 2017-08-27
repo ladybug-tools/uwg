@@ -41,3 +41,11 @@ class BEMDef(object):
         self.wall = wall
         self.roof = roof
         self.frac = frac
+
+    def __repr__(self):
+        return "BEMDef: {a}, {b}, {c}, wall={d}".format(
+            a=self.building.Type,
+            b=self.building.Zone,
+            c=self.building.Era,
+            d=self.wall
+            )

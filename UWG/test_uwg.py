@@ -36,47 +36,21 @@ def test_singapore():
     test_uwg = Test("test_singapore", True)
 
     # -------------------------------------------------------------------------
-    # Material
-    # -------------------------------------------------------------------------
-    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
-    bldMat = Material(0.67,1.2e6)      # material (concrete? reference?)
-    roadMat = Material(1.0,1.6e6)      # material (asphalt? reference?)
-
-    if test_uwg.run_test==True:
-        print "INIT MATERIALS"
-        print '\t', bldMat
-        print '\t', roadMat
-
-    # -------------------------------------------------------------------------
-    # Elements
-    # -------------------------------------------------------------------------
-    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
-    # materials, vegetation coverage, initial temperature (K),
-    # inclination (horizontal - 1, vertical - 0) ]
-    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0)
-    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1)
-    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
-        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1)
-    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
-    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
-    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0)
-
-    if test_uwg.run_test==True:
-        print "INIT ELEMENTS"
-        print '\t', 'wall', wall
-        print '\t', 'roof', roof
-        print '\t', 'road', road
-        #print '\t', 'rural', rural
-        print '\t', 'mass', mass
-    # -------------------------------------------------------------------------
-    # Simulation Parameters
+    # General Information
     # -------------------------------------------------------------------------
     cityName = 'Singapore'   # For plot/printing
     LAT = 1.37
     LON = 103.98
     ELEV = 0.1
+
+    if test_uwg.run_test==True:
+        print "GENERAL"
+        print '\t', cityName
+        print '\t', "LAT: {a}, LON: {b}, ELEV: {c}".format(a=LAT,b=LON,c=ELEV)
+
+    # -------------------------------------------------------------------------
+    # Simulation Parameters
+    # -------------------------------------------------------------------------
     dtSim = 300              # Sim time step
     dtWeather = 3600         # Weather data time-step
     monthName = 'July'       # For plot/printing
@@ -154,9 +128,61 @@ def test_singapore():
 
     #Add this b/c doesn't appear in current building.py
     res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
+    res_wAC.FanMax = 10.22
+
+    res_wAC.Type = 'MidRiseApartment'
+    res_wAC.zoneType = "1A (Miami)"
+    res_wAC.builtEra = "Pst80"
+
     if test_uwg.run_test==True:
         print "INIT BUILDING"
         print '\t', res_wAC
+
+    # -------------------------------------------------------------------------
+    # Material
+    # -------------------------------------------------------------------------
+    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
+    bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
+    roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
+
+    if test_uwg.run_test==True:
+        print "INIT MATERIALS"
+        print '\t', bldMat
+        print '\t', roadMat
+
+    # -------------------------------------------------------------------------
+    # Elements
+    # -------------------------------------------------------------------------
+    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
+    # materials, vegetation coverage, initial temperature (K),
+    # inclination (horizontal - 1, vertical - 0) ]
+    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0,"MassWall")
+    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1,"MassRoof")
+    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
+        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1,"MassRoad")
+    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
+    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
+    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0,"MassFloor")
+
+    if test_uwg.run_test==True:
+        print "INIT ELEMENTS"
+        print '\t', wall
+        print '\t', roof
+        print '\t', road
+        #print '\t', 'rural', rural
+        print '\t', mass
+
+    # -------------------------------------------------------------------------
+    # BEMDef
+    # -------------------------------------------------------------------------
+    res_wAC_BEM = BEMDef(res_wAC, mass, wall, roof, 0.0)
+    if test_uwg.run_test==True:
+        print "INIT BEMDef"
+        print '\t', res_wAC_BEM
+
+
 
     # -------------------------------------------------------------------------
     # Urban MicroClimate Parameters
@@ -250,7 +276,10 @@ def test_singapore():
     # -------------------------------------------------------------------------
     # BEMCALC()
     # -------------------------------------------------------------------------
-    res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
+    #BEM
+    #BEM.building = res_wAC (?)
+    #BEM.building.BEMCalc(UCM,BEM,forc,geoParam,simTime)
+    #res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
 
     print '\n'
     print test_uwg

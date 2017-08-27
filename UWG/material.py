@@ -9,9 +9,13 @@ class Material(object):
         name: Name of the material.
     """
     def __init__(self, thermalCond, volHeat, name=None):
-        self.name = name
+        self._name = name # purely for internal purpose
         self.thermalCond = thermalCond
         self.volHeat = volHeat
 
     def __repr__(self):
-        return "Material: Name: {a}, k={b}, spec vol={c}".format(a=self.name,b=self.thermalCond,c=self.volHeat)
+        return "Material: {a}, k={b}, spec vol={c}".format(
+            a=self._name,
+            b=self.thermalCond,
+            c=self.volHeat
+            )

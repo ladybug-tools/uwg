@@ -124,12 +124,13 @@ class UCMDef(object):
         self.sensHeat = 0.0                                         # urban sensible heat [W m-2]
 
     def __repr__(self):
-        s = "UCMDef: " +\
-            "ver2Hor={b}, ".format(b=self.verToHor) +\
-            "bldDens={c}, ".format(c=self.bldDensity) +\
-            "canyon H/W={a}/{d}={e}".format(a=int(self.bldHeight),\
-                d=int(self.canWidth),e=round(self.canAspect,1))
-        return s
+        return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(  
+            b=self.verToHor,
+            c=self.bldDensity,
+            a=int(self.bldHeight),
+            d=int(self.canWidth),
+            e=round(self.canAspect,1)
+            )
 
     """
         function obj = UCModel(obj,BEM,T_ubl,forc,parameter)

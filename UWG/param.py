@@ -45,4 +45,7 @@ class Param(object):
         self.colburn = colburn                   # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     def __repr__(self):
-        return "Param w/ dayBLht {a}, treeFlat {b} ".format(a=self.dayBLHeight,b=self.treeFLat)
+        return "Param w/ dayBLht {a}, treeFlat {b} ".format(
+            a=self.dayBLHeight,
+            b=self.treeFLat
+            )

@@ -22,4 +22,7 @@ class Forcing (object):
         self.wind = [weather.staUmod]       # wind speed (m s-1)
 
     def __repr__(self):
-        return "Forcing: deepT={a}, waterT={b}".format(a=int(self.deepTemp), b=int(self.waterTemp))
+        return "Forcing: deepT={a}, waterT={b}".format(
+            a=int(self.deepTemp),
+            b=int(self.waterTemp)
+            )
