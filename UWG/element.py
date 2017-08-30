@@ -33,39 +33,36 @@ class Element(object):
         if len(thicknessLst) != len(materialLst):
             raise Exception(self.THICKNESSLST_EQ_MATERIALLST_MSG)
         else:
-            self._name = name # purely for internal process
-            self.albedo = alb
-            self.emissivity = emis
-            self.layerThickness = thicknessLst
-            self.layerThermalCond = map(lambda z: 0, materialLst)
-            self.layerVolHeat = map(lambda z: 0, materialLst)
+            self._name = name                                       # purely for internal process -sv
+            self.albedo = alb                                       # outer surface albedo
+            self.emissivity = emis                                  # outer surface emissivity
+            self.layerThickness = thicknessLst                      # vector of layer thicnesses (m)
+            self.layerThermalCond = map(lambda z: 0, materialLst)   # vector of layer thermal conductivity (W m-1 K-1)
+            self.layerVolHeat = map(lambda z: 0, materialLst)       # vector of layer volumetric heat (J m-3 K-1)
 
-            """
-            for i = 1:numel(materialLst)
-              self.layerThermalCond(i) = materialLst(i).thermalCond
-              self.layerVolHeat(i) = materialLst(i).volHeat
-            end
-            """
-            self.vegCoverage = vegCoverage
-            """
-            self.layerTemp = T_init*ones(numel(ThicknessLst),1)
-            self.waterStorage = 0.
-            self.infra = 0
-            self.horizontal = horizontal
-            self.sens = 0.
-            """
+            #create list of layer k and Cp*density from materialLst properties
+            for i in xrange(len(materialLst)):
+              self.layerThermalCond[i] = materialLst[i].thermalCond
+              self.layerVolHeat[i] = materialLst[i].volHeat
+
+            self.vegCoverage = vegCoverage                          # surface vegetation coverage
+            self.layerTemp = [T_init] * len(ThicknessLst)           # vector of layer temperatures (K)
+            self.waterStorage = 0.                                  # thickness of water film (m) for horizontal surfaces only
+            self.infra = 0.                                         # net longwave radiation (W m-2)
+            self.horizontal = horizontal                            # 1-horizontal, 0-vertical
+            self.sens = 0.                                          # surface sensible heat flux (W m-2)
+
     def __repr__(self):
         #returns some representative wall properties
         return "Element: {n}, depth={z}, e={a}, k={b}, Cp*dens={c}".format(
             n=self._name,
             z=sum(self.layerThickness),
             a=self.emissivity,
-            b=str(sum(self.layerThermalCond)),
-            c=str(sum(self.layerVolHeat))
+            b=round(sum(self.layerThermalCond),2),
+            c=round(sum(self.layerVolHeat),2)
             )
 
         """
-
         function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
 
             % Calculated per unit area (m^2)

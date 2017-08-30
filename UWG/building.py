@@ -119,29 +119,30 @@ class Building(object):
 
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
         # Building Energy Model
-        self.ElecTotal = 0.0
+        self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
         self.nFloor = max(UCM.bldHeight/float(self.floorHeight),1)   # At least one floor
-        self.Qheat = 0.0
-        self.sensCoolDemand = 0.0
-        self.sensHeatDemand = 0.0
-        self.coolConsump  = 0.0
-        self.heatConsump  = 0.0
-        self.sensWaste = 0.0
-        self.dehumDemand  = 0.0
-        self.Qhvac = 0
+        self.Qheat = 0.0                                # total sensible heat added
+        self.sensCoolDemand = 0.0                       # building sensible cooling demand (W m-2)
+        self.sensHeatDemand = 0.0                       # building sensible heating demand (W m-2)
+        self.coolConsump  = 0.0                         # cooling energy consumption (W m-2)
+        self.heatConsump  = 0.0                         # heating energy consumption (W m-2)
+        self.sensWaste = 0.0                            # Sensible waste heat (W m-2)
+        self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
+        self.Qhvac = 0                                  # Total heat removed (sensible + latent)
 
         Qdehum = 0
-        dens = forc.pres/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum))
+        dens = map(lambda fP: fP/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum)), forc.pres)
         evapEff = 1.                                    # evaporation efficiency in the condenser
-        volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2(bld)]
-        volInfil = self.infil*UCM.bldHeight/3600.       # Change of units AC/H -> [m3 s-1 m-2(bld)]
-        volSWH = BEM.SWH * self.nFloor/3600.            #
-        T_wall = BEM.wall.layerTemp(end)            # Inner layer
-        T_ceil = BEM.roof.layerTemp(end)            # Inner layer
-        T_mass = BEM.mass.layerTemp(1)              # Outer layer
-        T_indoor = self.indoorTemp                   # Indoor temp (initial)
-        T_can = UCM.canTemp                         # Canyon temperature
-
+        volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
+        volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1 m-2 (bld/facade#)]
+        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s per m-2 (bld/area)]
+        """
+        T_wall = BEM.wall.layerTemp(end)                # Inner layer
+        T_ceil = BEM.roof.layerTemp(end)                # Inner layer
+        T_mass = BEM.mass.layerTemp(1)                  # Outer layer
+        T_indoor = self.indoorTemp                      # Indoor temp (initial)
+        T_can = UCM.canTemp                             # Canyon temperature
+        """
         """
         % Normalize areas to building foot print [m^2/m^2(bld)]
         facArea = UCM.verToHor/UCM.bldDensity       % [m2/m2(bld)]
