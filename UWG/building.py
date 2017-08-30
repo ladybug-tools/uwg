@@ -136,13 +136,12 @@ class Building(object):
         volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1 m-2 (bld/facade#)]
         volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s per m-2 (bld/area)]
-        """
-        T_wall = BEM.wall.layerTemp(end)                # Inner layer
-        T_ceil = BEM.roof.layerTemp(end)                # Inner layer
-        T_mass = BEM.mass.layerTemp(1)                  # Outer layer
+        T_wall = BEM.wall.layerTemp[-1]                 # Inner layer
+        T_ceil = BEM.roof.layerTemp[-1]                 # Inner layer
+        T_mass = BEM.mass.layerTemp[0]                  # Outer layer
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
         T_can = UCM.canTemp                             # Canyon temperature
-        """
+
         """
         % Normalize areas to building foot print [m^2/m^2(bld)]
         facArea = UCM.verToHor/UCM.bldDensity       % [m2/m2(bld)]
