@@ -36,11 +36,11 @@ class BEMDef(object):
 
 
     def __init__(self,building,mass,wall,roof,frac):
-        self.building = building
-        self.mass = mass
-        self.wall = wall
-        self.roof = roof
-        self.frac = frac
+        self.building = building    # building class type
+        self.mass = mass            # mass element class
+        self.wall = wall            # wall element class
+        self.roof = roof            # roof element class
+        self.frac = frac            # fraction of the urban floor space of this typology (~ bld_footprint/urba_footprint ?)
 
     def __repr__(self):
         return "BEMDef: {a}, {b}, {c}, wall={d}".format(

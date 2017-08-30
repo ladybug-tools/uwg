@@ -48,6 +48,8 @@ def test_singapore():
         print '\t', cityName
         print '\t', "LAT: {a}, LON: {b}, ELEV: {c}".format(a=LAT,b=LON,c=ELEV)
 
+
+
     # -------------------------------------------------------------------------
     # Simulation Parameters
     # -------------------------------------------------------------------------
@@ -101,6 +103,15 @@ def test_singapore():
         test_uwg.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
     # -------------------------------------------------------------------------
+    # FORCING
+    # -------------------------------------------------------------------------
+    forc = Forcing(weather_.staTemp, weather_)
+
+    if test_uwg.run_test==True:
+        print "INIT FORCING"
+        print '\t', forc
+
+    # -------------------------------------------------------------------------
     # Building
     # -------------------------------------------------------------------------
 
@@ -131,8 +142,8 @@ def test_singapore():
     res_wAC.FanMax = 10.22
 
     res_wAC.Type = 'MidRiseApartment'
-    res_wAC.zoneType = "1A (Miami)"
-    res_wAC.builtEra = "Pst80"
+    res_wAC.Zone = "1A (Miami)"
+    res_wAC.Era = "Pst80"
 
     if test_uwg.run_test==True:
         print "INIT BUILDING"
@@ -178,10 +189,22 @@ def test_singapore():
     # BEMDef
     # -------------------------------------------------------------------------
     res_wAC_BEM = BEMDef(res_wAC, mass, wall, roof, 0.0)
+
+    res_wAC_BEM.Elec = 0.        # Actual electricity consumption(W/m^2)
+    res_wAC_BEM.Light = 0.       # Actual light (W/m^2)
+    res_wAC_BEM.Nocc = 0.        # Actual gas consumption(W/m^2)
+    res_wAC_BEM.Qocc = 0.        # Actual heat load from occupant (W/m^2)
+    res_wAC_BEM.SWH = 0.         # Actual hot water usage
+    res_wAC_BEM.Gas = 0.         # Actual gas consumption(W/m^2)
+
+    res_wAC_BEM.T_wallex = res_wAC_BEM.wall.layerTemp[0]    # Wall surface temp (ext)
+    res_wAC_BEM.T_wallin = res_wAC_BEM.wall.layerTemp[-1]   # Wall surface temp (int)
+    res_wAC_BEM.T_roofex = res_wAC_BEM.roof.layerTemp[0]    # Roof surface temp (ext)
+    res_wAC_BEM.T_roofin = res_wAC_BEM.roof.layerTemp[-1]   # Roof surface temp (int)
+
     if test_uwg.run_test==True:
         print "INIT BEMDef"
         print '\t', res_wAC_BEM
-
 
 
     # -------------------------------------------------------------------------
@@ -255,31 +278,20 @@ def test_singapore():
     alb_wall = 0.2    # from wall Element
 
     #UCM needs to be tested
-    UCM_ = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
+    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
         T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
 
     if test_uwg.run_test==True:
         print "INIT UCM"
-        print '\t', UCM_
+        print '\t', UCM
 
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
 
     # -------------------------------------------------------------------------
-    # FORCING
-    # -------------------------------------------------------------------------
-    forc = Forcing(weather_.staTemp, weather_)
-
-    if test_uwg.run_test==True:
-        print "INIT FORCING"
-        print '\t', forc
-
-    # -------------------------------------------------------------------------
     # BEMCALC()
     # -------------------------------------------------------------------------
-    #BEM
-    #BEM.building = res_wAC (?)
-    #BEM.building.BEMCalc(UCM,BEM,forc,geoParam,simTime)
-    #res_wAC.BEMCalc(UCM_,res_wAC,forc,geoParam,simTime)
+
+    res_wAC_BEM.building.BEMCalc(UCM,res_wAC_BEM,forc,geoParam,simTime)
 
     print '\n'
     print test_uwg

@@ -46,7 +46,7 @@ class Element(object):
               self.layerVolHeat[i] = materialLst[i].volHeat
 
             self.vegCoverage = vegCoverage                          # surface vegetation coverage
-            self.layerTemp = [T_init] * len(ThicknessLst)           # vector of layer temperatures (K)
+            self.layerTemp = [T_init] * len(thicknessLst)           # vector of layer temperatures (K)
             self.waterStorage = 0.                                  # thickness of water film (m) for horizontal surfaces only
             self.infra = 0.                                         # net longwave radiation (W m-2)
             self.horizontal = horizontal                            # 1-horizontal, 0-vertical
