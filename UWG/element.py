@@ -25,9 +25,9 @@ class Element(object):
     """
 
     THICKNESSLST_EQ_MATERIALLST_MSG = \
-    "-----------------------------------------\n"   +\
-    "ERROR: the number of layer thickness must\n"   +\
-    "match the number of layer materials\n"         +\
+    "-----------------------------------------\n" +\
+    "ERROR: the number of layer thickness must\n" +\
+    "match the number of layer materials\n"
     "-----------------------------------------"
     def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init, horizontal,name=None):
         if len(thicknessLst) != len(materialLst):
@@ -51,6 +51,15 @@ class Element(object):
             self.infra = 0.                                         # net longwave radiation (W m-2)
             self.horizontal = horizontal                            # 1-horizontal, 0-vertical
             self.sens = 0.                                          # surface sensible heat flux (W m-2)
+
+            # undefined for now
+            self.solRec = []                                        # solar radiation received (W m-2)
+            self.lat = []                                           # surface latent heat flux (W m-2)
+            self.solAbs = []                                        # solar radiation absorbed (W m-2)
+            self.aeroCond = []                                      # convective heat transfer
+            self.T_ext = []                                         # external surface temperature
+            self.T_int = []                                         # internal surface temperature
+            self.flux = []                                          # external surface heat flux
 
     def __repr__(self):
         #returns some representative wall properties
