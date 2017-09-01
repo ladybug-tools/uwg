@@ -40,7 +40,7 @@ class Element(object):
             self.layerThermalCond = map(lambda z: 0, materialLst)   # vector of layer thermal conductivity (W m-1 K-1)
             self.layerVolHeat = map(lambda z: 0, materialLst)       # vector of layer volumetric heat (J m-3 K-1)
 
-            #create list of layer k and Cp*density from materialLst properties
+            #create list of layer k and (Cp*density) from materialLst properties
             for i in xrange(len(materialLst)):
               self.layerThermalCond[i] = materialLst[i].thermalCond
               self.layerVolHeat[i] = materialLst[i].volHeat
