@@ -64,6 +64,14 @@ def saturation_pressure(Tdb_):
     Pws = Pws/1000.                                                               # in kPa
     return Pws
 
+def moist_air_density(P,Tdb,H):
+    # Moist air density [kgv/ m-3] given dry bulb temperature, humidity ratio, and pressure.
+    # ASHRAE Fundamentals (2005) ch. 6 eqn. 28
+    # ASHRAE Fundamentals (2009) ch. 1 eqn. 28
+    # from: https://github.com/psychrometrics/Libraries/blob/master/Psychrometrics_SI.cpp
+    moist_air_density = P/(1000*0.287042*Tdb*(1.+1.607858*H))
+    return moist_air_density
+
 """
 function psat = psat(temp,parameter)
     gamw  = (parameter.cl - parameter.cpv) / parameter.rv;
