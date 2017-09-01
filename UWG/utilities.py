@@ -39,3 +39,18 @@ def str2fl(x):
     else:
         print 'Fail to convert to list of floats; type error {a} is {b}'.format(a=x[0], b=type(x[0]))
         return False
+
+def vector_times_scalar(vector,scalar):
+    new_vector = []
+    for i in xrange(len(vector)):
+        coordinate = vector[i]
+        new_vector.append(coordinate * scalar)
+    return new_vector
+
+def vector_add_scalar(vector,scalar):
+    # based on matrix + scalar op in matlab
+    new_vector = []
+    for i in xrange(len(vector)):
+        coordinate = vector[i]
+        new_vector.append(coordinate + scalar)
+    return new_vector
