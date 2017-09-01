@@ -3,7 +3,7 @@ class Element(object):
     """
     UWG Element
 
-    # Note: In matlab not all instance variables are instantiated. They are assumed to be empty double
+    # Note: In matlab not all instance variables are instantiated. They are assumed to be a 0-by-0 empty matrix
     # https://www.mathworks.com/help/matlab/matlab_oop/specifying-properties.html
 
     Attributes:
@@ -55,14 +55,14 @@ class Element(object):
             self.horizontal = horizontal                            # 1-horizontal, 0-vertical
             self.sens = 0.                                          # surface sensible heat flux (W m-2)
 
-            # B/c we have to explicity define this in python. Set as empty float
-            self.solRec = 0.0                                       # solar radiation received (W m-2)
-            self.lat = 0.0                                          # surface latent heat flux (W m-2)
-            self.solAbs = 0.0                                       # solar radiation absorbed (W m-2)
-            self.aeroCond = 0.0                                     # convective heat transfer
-            self.T_ext = 0.0                                        # external surface temperature
-            self.T_int = 0.0                                        # internal surface temperature
-            self.flux = 0.0                                         # external surface heat flux
+            # B/c we have to explicity define this in python. Set as None
+            self.solRec = None                                       # solar radiation received (W m-2)
+            self.lat = None                                          # surface latent heat flux (W m-2)
+            self.solAbs = None                                       # solar radiation absorbed (W m-2)
+            self.aeroCond = None                                     # convective heat transfer
+            self.T_ext = None                                        # external surface temperature
+            self.T_int = None                                        # internal surface temperature
+            self.flux = None                                         # external surface heat flux
 
     def __repr__(self):
         #returns some representative wall properties

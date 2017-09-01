@@ -1,4 +1,6 @@
 
+import utilities as ut
+
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Chris Mackey (chris@mackeyarchitecture.com) and Saeran Vasanthakumar (saeranv@gmail.com) - August 2017
@@ -131,12 +133,12 @@ class Building(object):
         self.Qhvac = 0                                  # Total heat removed (sensible + latent)
 
         Qdehum = 0
-        dens = map(lambda fP: fP/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum)), forc.pres) # vector of air density for sim period(?)
+        dens = ut.vector_times_scalar(forc.pres,1/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum))) # vector of air density for sim period(?)
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1 m-2 (bld/facade#)]
-        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s per m-2 (bld/area)]
         T_wall = BEM.wall.layerTemp[-1]                 # Inner layer
+        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s per m-2 (bld/area)]
         T_ceil = BEM.roof.layerTemp[-1]                 # Inner layer
         T_mass = BEM.mass.layerTemp[0]                  # Outer layer
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
@@ -178,30 +180,34 @@ class Building(object):
         # Heat fluxes (per m^2 of bld footprint)
         # -------------------------------------------------------------
         # Solar Heat Gain: solar radiation received (W m-2) * area * SHGC
-        winTrans = BEM.wall.solRec * self.shgc * winArea
+        # Check if BEM.wall.solRec has been instantiated
+        winTrans = (BEM.wall.solRec * self.shgc * winArea) if BEM.wall.solRec!=None else None
+
 
         # Latent heat infiltration & ventilation (W/m^2 of bld footprint) from
         # volInfil/volVent: [m3 s-1 m-2 (bld/facade#)]
         # parameter.lv: latent heat of evaporation [J kgv-1]
         # dens: kga m-3
         # UCM.canHum: canyon specific humidity (kgv kga-1)
-        # self.indoorHum: indoor kv kga-1
-        QLinfil = volInfil * dens * parameter.lv * (UCM.canHum - self.indoorHum)
-        QLvent = volVent * dens * parameter.lv * (UCM.canHum - self.indoorHum)
-        # Qlatent load = timestep internal gain - internal gain latent fraction
-        QLintload = self.intHeat * self.intHeatFLat
+        # indoorHum: indoor kv kga-1
+        QLinfil = ut.vector_times_scalar(dens, volInfil * parameter.lv * (UCM.canHum - self.indoorHum))
+        QLvent = ut.vector_times_scalar(dens, volVent * parameter.lv * (UCM.canHum - self.indoorHum))
+        QLintload = self.intHeat * self.intHeatFLat #Qlatent Internal load = timestep internal gain * internal gain latent fraction
 
+        """
         # Heat/Cooling load (W/m^2 of bld footprint), if any
         self.sensCoolDemand = max(
             wallArea*zac_in_wall*(T_wall - T_cool) +            # wall flux based on cooling setpoint
-            massArea*zac_in_mass*(T_mass-T_cool) +              # mass flux based on cooling setpoint
-            winArea*self.uValue*(T_can-T_cool) +                # window flux based on cooling setpoint
-            zac_in_ceil *(T_ceil-T_cool) +                      # ceiling flux based on cooling setpoint
-            self.intHeat +                                      # sensible internal gain flux
-            volInfil * dens * parameter.cp * (T_can-T_cool) +   # Infiltration sensible energy from canyon
-            volVent * dens * parameter.cp * (T_can-T_cool) +    # Ventilation sensible energy from canyon
+            massArea*zac_in_mass*(T_mass-T_cool) +              # + mass flux based on cooling setpoint
+            winArea*self.uValue*(T_can-T_cool) +                # + window flux based on cooling setpoint
+            zac_in_ceil *(T_ceil-T_cool) +                      # + ceiling flux based on cooling setpoint
+            self.intHeat +                                      # + sensible internal gain flux
+            ut.vector_times_scalar(dens, volInfil * parameter.cp * (T_can-T_cool)) +   # Infiltration sensible energy from canyon
+            ut.vector_times_scalar(dens, volVent * parameter.cp * (T_can-T_cool)) +    # Ventilation sensible energy from canyon
             winTrans,                                           # solar heat gain through window
             0.)
+
+        """
         """
         self.sensHeatDemand = max(-(wallArea*zac_in_wall*(T_wall-T_heat)+...
             massArea*zac_in_mass*(T_mass-T_heat)+...

@@ -46,3 +46,11 @@ def vector_times_scalar(vector,scalar):
         coordinate = vector[i]
         new_vector.append(coordinate * scalar)
     return new_vector
+
+def vector_add_scalar(vector,scalar):
+    # based on matrix + scalar op in matlab
+    new_vector = []
+    for i in xrange(len(vector)):
+        coordinate = vector[i]
+        new_vector.append(coordinate + scalar)
+    return new_vector
