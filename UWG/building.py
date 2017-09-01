@@ -129,9 +129,8 @@ class Building(object):
         self.sensWaste = 0.0                            # Sensible waste heat (W m-2)
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
         self.Qhvac = 0                                  # Total heat removed (sensible + latent)
-
         Qdehum = 0
-        dens = map(lambda fP: fP/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum)), forc.pres)
+        dens = map(lambda fP: fP/(1000*0.287042*self.indoorTemp*(1.+1.607858*self.indoorHum)), forc.pres) # [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1 m-2 (bld/facade#)]
