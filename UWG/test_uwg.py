@@ -54,11 +54,11 @@ def test_singapore():
     # Simulation Parameters
     # -------------------------------------------------------------------------
     dtSim = 300              # Sim time step
-    dtWeather = 3600         # Weather data time-step
+    dtWeather = 3600*4         # Weather data time-step
     monthName = 'July'       # For plot/printing
     MONTH = 7                # Begin month
     DAY = 30                 # Begin day of the month
-    NUM_DAYS = 7             # Number of days of simulation
+    NUM_DAYS = 1             # Number of days of simulation
     autosize = 0             # Autosize HVAC
 
     ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
@@ -294,7 +294,7 @@ def test_singapore():
 
     print '\n'
     print test_uwg
-    
+
 if __name__ == "__main__":
 
     test_singapore()
