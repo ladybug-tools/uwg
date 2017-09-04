@@ -11,8 +11,19 @@ from param import Param
 from UCMDef import UCMDef
 from forcing import Forcing
 
-from math import pow, pi
+import math
 
+"""Tests for UWG_Python
+
+example: https://github.com/ladybug-tools/honeybee/blob/master/tests/radiance_view_test.py
+
+"""
+
+
+#TODO: set default values for all nargin > conditions in classes
+#TODO: add module names back to imports i.e. math.pow, math.pi
+#TODO: break this up into indidvidual test classes in ../tests
+#TODO: use UWG main to test code
 
 # Physical constants (moved here from UWG.m)
 g = 9.81                # gravity
@@ -30,7 +41,7 @@ cl = 4.218e3            #
 cpv = 1846.1            #
 b = 9.4                 # Coefficients derived by Louis (1979)
 cm = 7.4                #
-colburn = pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
+colburn = math.pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
 def test_singapore():
     test_uwg = Test("test_singapore", True)
@@ -47,8 +58,6 @@ def test_singapore():
         print "GENERAL"
         print '\t', cityName
         print '\t', "LAT: {a}, LON: {b}, ELEV: {c}".format(a=LAT,b=LON,c=ELEV)
-
-
 
     # -------------------------------------------------------------------------
     # Simulation Parameters
@@ -88,7 +97,6 @@ def test_singapore():
         print '\t', weather_
 
     # Weather Tests
-
     test_uwg.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
     test_uwg.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
     test_uwg.test_equality_tol(len(weather_.staTemp),simTime.timeFinal - simTime.timeInitial + 1,False)
@@ -105,9 +113,148 @@ def test_singapore():
         test_uwg.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
 
     # -------------------------------------------------------------------------
+    # Urban MicroClimate Parameters
+    # -------------------------------------------------------------------------
+
+    # Urban microclimate parameters from initialize.uwg
+    h_ubl1 = 1000.          # ubl height - day (m)
+    h_ubl2 = 80.            # ubl height - night (m)
+    h_ref = 150.            # inversion height (m)
+    h_temp = 2.             # temperature height (m)
+    h_wind = 10.            # wind height (m)
+    c_circ = 1.2            # circulation coefficient
+    c_exch = 1.0            # exchange coefficient
+    maxDay = 150.           # max day threshhold heat flux (W/m^2)
+    maxNight = 20.          # max night threshhold (W/m^2)
+    windMin = 1.0           # min wind speed (m/s)
+    h_obs = 0.1             # rural average obstacle height (m)
+
+     # Vegetation parameters
+    vegCover = 0.2          # urban area veg coverage ratio
+    treeCoverage = 0.1      # urban area tree coverage ratio
+    vegStart = 4.           # vegetation start month
+    vegEnd = 10.            # vegetation end month
+    albVeg = 0.25           # Vegetation albedo
+    latGrss = 0.5           # latent fraction of grass
+    latTree = 0.5           # latent fraction of tree
+    rurVegCover = 0.9       # rural vegetation cover
+
+    nightStart = 18         # begin hour for night thermal set point schedule
+    nightEnd = 8            # end hour for night thermal set point schedule
+
+    # Site-specific parameters
+    wgmax = 0.005           # maximum film water depth on horizontal surfaces (m)
+    maxdx = 250             # Max Dx (m)
+
+    geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
+        latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
+        g, cp, vk, r, rv, lv, math.pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
+
+    if test_uwg.run_test==True:
+        print "INIT PARAM"
+        print '\t', geoParam
+
+    # -------------------------------------------------------------------------
+    # Material
+    # -------------------------------------------------------------------------
+    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
+    bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
+    roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
+
+    if test_uwg.run_test==True:
+        print "INIT MATERIALS"
+        print '\t', bldMat
+        print '\t', roadMat
+
+    # -------------------------------------------------------------------------
+    # Elements
+    # -------------------------------------------------------------------------
+    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
+    # materials, vegetation coverage, initial temperature (K),
+    # inclination (horizontal - 1, vertical - 0) ]
+    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0,"MassWall")
+    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1,"MassRoof")
+    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
+        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1,"MassRoad")
+    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
+    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
+    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0,"MassFloor")
+
+    if test_uwg.run_test==True:
+        print "INIT ELEMENTS"
+        print '\t', wall
+        print '\t', roof
+        print '\t', road
+        #print '\t', 'rural', rural
+        print '\t', mass
+
+
+    # -------------------------------------------------------------------------
+    # UCM/UBL
+    # -------------------------------------------------------------------------
+
+    T_init = weather_.staTemp[0]     # start dry bulb
+    Hum_init = weather_.staHum[0]    # start relative humidity
+    Wind_init = weather_.staUmod[0]  # wind speed
+
+    # Urban characteristics
+    bldHeight = 10          # average building height (m)
+    h_mix = 1               # fraction of waste heat to canyon
+    bldDensity = 0.5        # urban area building plan density (0-1)
+    verToHor = 0.8          # urban area vertical to horizontal ratio
+    h_floor = 3.05          # average floor height
+    charLength = 1000       # urban area characteristic length (m)
+    alb_road = 0.2          # road albedo (0 - 1)
+    d_road = 0.5            # road pavement thickness (m)
+    sensAnth = 20           # non-building sens heat (W/m^2)
+    latAnth = 2             # non-building latent heat (W/m^2) (currently not used)
+
+    # In UWG.py this is done as average of all refDOE types
+    r_glaze = 0.3     # glazing ratio from Building
+    SHGC = 0.75       # from Building
+    alb_wall = 0.2    # from wall Element
+
+    #UCM needs to be tested
+    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
+        T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
+
+    if test_uwg.run_test==True:
+        print "INIT UCM"
+        print '\t', UCM
+
+    #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
+
+    # -------------------------------------------------------------------------
     # FORCING
     # -------------------------------------------------------------------------
-    forc = Forcing(weather_.staTemp, weather_)
+    forcIP = Forcing(weather_.staTemp, weather_)
+    forc = Forcing()
+
+    ph = simTime.dt/3600.0      # per hour
+    it = range(simTime.nt)[0]   # simTime incrment
+
+    print 'ph', ph
+    print 'it', it
+
+    #TODO: unittests to understand ph it
+    sim_dt_index = int(math.ceil(it*ph))
+    print 'simdtindex', sim_dt_index
+
+    # Update the weather per UWG
+
+    forc.infra = forcIP.infra[sim_dt_index]
+    forc.wind = max(forcIP.wind[sim_dt_index], geoParam.windMin)
+    forc.uDir = forcIP.uDir[sim_dt_index]
+    forc.hum = forcIP.hum[sim_dt_index]
+    forc.pres = forcIP.pres[sim_dt_index]
+    forc.temp = forcIP.temp[sim_dt_index]
+    forc.rHum = forcIP.rHum[sim_dt_index]
+    forc.prec = forcIP.prec[sim_dt_index]
+    forc.dir = forcIP.dir[sim_dt_index]
+    forc.dif = forcIP.dif[sim_dt_index]
+    UCM.canHum = forc.hum      # Canyon humidity (absolute) same as rural
 
     if test_uwg.run_test==True:
         print "INIT FORCING"
@@ -151,41 +298,6 @@ def test_singapore():
         print "INIT BUILDING"
         print '\t', res_wAC
 
-    # -------------------------------------------------------------------------
-    # Material
-    # -------------------------------------------------------------------------
-    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
-    bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
-    roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
-
-    if test_uwg.run_test==True:
-        print "INIT MATERIALS"
-        print '\t', bldMat
-        print '\t', roadMat
-
-    # -------------------------------------------------------------------------
-    # Elements
-    # -------------------------------------------------------------------------
-    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
-    # materials, vegetation coverage, initial temperature (K),
-    # inclination (horizontal - 1, vertical - 0) ]
-    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0,"MassWall")
-    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1,"MassRoof")
-    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
-        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1,"MassRoad")
-    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
-    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
-    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0,"MassFloor")
-
-    if test_uwg.run_test==True:
-        print "INIT ELEMENTS"
-        print '\t', wall
-        print '\t', roof
-        print '\t', road
-        #print '\t', 'rural', rural
-        print '\t', mass
 
     # -------------------------------------------------------------------------
     # BEMDef
@@ -210,84 +322,16 @@ def test_singapore():
 
 
     # -------------------------------------------------------------------------
-    # Urban MicroClimate Parameters
+    # RSM
     # -------------------------------------------------------------------------
-
-    # Urban microclimate parameters from initialize.uwg
-    h_ubl1 = 1000.          # ubl height - day (m)
-    h_ubl2 = 80.            # ubl height - night (m)
-    h_ref = 150.            # inversion height (m)
-    h_temp = 2.             # temperature height (m)
-    h_wind = 10.            # wind height (m)
-    c_circ = 1.2            # circulation coefficient
-    c_exch = 1.0            # exchange coefficient
-    maxDay = 150.           # max day threshhold heat flux (W/m^2)
-    maxNight = 20.          # max night threshhold (W/m^2)
-    windMin = 1.0           # min wind speed (m/s)
-    h_obs = 0.1             # rural average obstacle height (m)
-
-     # Vegetatin parameters
-    vegCover = 0.2          # urban area veg coverage ratio
-    treeCoverage = 0.1      # urban area tree coverage ratio
-    vegStart = 4.           # vegetation start month
-    vegEnd = 10.            # vegetation end month
-    albVeg = 0.25           # Vegetation albedo
-    latGrss = 0.5           # latent fraction of grass
-    latTree = 0.5           # latent fraction of tree
-    rurVegCover = 0.9       # rural vegetation cover
-
-    nightStart = 18         # begin hour for night thermal set point schedule
-    nightEnd = 8            # end hour for night thermal set point schedule
-
-    # Site-specific parameters
-    wgmax = 0.005           # maximum film water depth on horizontal surfaces (m)
-    maxdx = 250             # Max Dx (m)
-
-    geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
-        latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
-        g, cp, vk, r, rv, lv, pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
-
-    if test_uwg.run_test==True:
-        print "INIT PARAM"
-        print '\t', geoParam
-
-    # -------------------------------------------------------------------------
-    # RSM/UCM/UBL
-    # -------------------------------------------------------------------------
-
     # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
-    #RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param)
+    # RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param)
 
-    T_init = weather_.staTemp[0]     # start dry bulb
-    Hum_init = weather_.staHum[0]    # start relative humidity
-    Wind_init = weather_.staUmod[0]  # wind speed
-
-    # Urban characteristics
-    bldHeight = 10          # average building height (m)
-    h_mix = 1               # fraction of waste heat to canyon
-    bldDensity = 0.5        # urban area building plan density (0-1)
-    verToHor = 0.8          # urban area vertical to horizontal ratio
-    h_floor = 3.05          # average floor height
-    charLength = 1000       # urban area characteristic length (m)
-    alb_road = 0.2          # road albedo (0 - 1)
-    d_road = 0.5            # road pavement thickness (m)
-    sensAnth = 20           # non-building sens heat (W/m^2)
-    latAnth = 2             # non-building latent heat (W/m^2) (currently not used)
-
-    # In UWG.py this is done as average of all refDOE types
-    r_glaze = 0.3     # glazing ratio from Building
-    SHGC = 0.75       # from Building
-    alb_wall = 0.2    # from wall Element
-
-    #UCM needs to be tested
-    UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
-        T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
-
-    if test_uwg.run_test==True:
-        print "INIT UCM"
-        print '\t', UCM
-
-    #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
+    # -------------------------------------------------------------------------
+    # SolarCalcs
+    # -------------------------------------------------------------------------
+    # Update solar flux
+    # rural,UCM,BEM = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural)
 
     # -------------------------------------------------------------------------
     # BEMCALC()

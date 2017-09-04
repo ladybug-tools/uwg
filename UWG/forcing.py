@@ -18,9 +18,9 @@ class Forcing (object):
             self.pres = None                    # Pressure (Pa)
             self.temp = None                    # air temperature (C)
             self.rHum = None                    # Relative humidity (%)
-            self.dir = None                     #  normal solar direct radiation (W m-2)
+            self.dir = None                     # normal solar direct radiation (W m-2)
             self.dif = None                     # horizontal solar diffuse radiation (W m-2)
-            self.prec = None                    #  Precipitation (mm h-1)
+            self.prec = None                    # Precipitation (mm h-1)
             self.wind = None                    # wind speed (m s-1)
         else:
             self.deepTemp = sum(staTemp)/float(len(staTemp))
@@ -38,6 +38,6 @@ class Forcing (object):
 
     def __repr__(self):
         return "Forcing: deepT={a}, waterT={b}".format(
-            a=int(self.deepTemp),
-            b=int(self.waterTemp)
+            a=int(self.deepTemp) if self.deepTemp else None,
+            b=int(self.waterTemp) if self.waterTemp else None
             )

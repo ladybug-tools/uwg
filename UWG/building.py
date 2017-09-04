@@ -1,5 +1,4 @@
 
-import utilities as ut
 import psychrometrics
 
 """
@@ -133,7 +132,6 @@ class Building(object):
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
         self.Qhvac = 0                                  # Total heat removed (sensible + latent)
         Qdehum = 0
-        forc.pres = 10.0 #TEMP
         dens =  psychrometrics.moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
@@ -168,7 +166,7 @@ class Building(object):
         zac_in_mass = 3.076                             # mass heat convection coefficeint
         #Note: may have to change to try/catch loop
         if T_ceil > T_indoor:                           # set higher ceiling heat convection coefficient
-            zac_in_ceil  = 0.948                        #   based on heat is higher on ceiling
+            zac_in_ceil  = 0.948                        #  -  based on heat is higher on ceiling
         elif T_ceil <= T_indoor:
             zac_in_ceil  = 4.040
         else:
@@ -176,13 +174,12 @@ class Building(object):
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
             return
 
-
+        """
         # -------------------------------------------------------------
         # Heat fluxes (per m^2 of bld footprint)
         # -------------------------------------------------------------
         # Solar Heat Gain: solar radiation received (W m-2) * area * SHGC
-        # Check if BEM.wall.solRec has been instantiated
-        winTrans = (BEM.wall.solRec * self.shgc * winArea) if BEM.wall.solRec!=None else None
+        winTrans = (BEM.wall.solRec * self.shgc * winArea)
 
 
         # Latent heat infiltration & ventilation (W/m^2 of bld footprint) from
@@ -192,11 +189,10 @@ class Building(object):
         # UCM.canHum: canyon specific humidity (kgv kga-1)
         # indoorHum: indoor kv kga-1
 
-        #QLinfil = ut.vector_times_scalar(dens, volInfil * parameter.lv * (UCM.canHum - self.indoorHum))
-        #QLvent = ut.vector_times_scalar(dens, volVent * parameter.lv * (UCM.canHum - self.indoorHum))
-        #QLintload = self.intHeat * self.intHeatFLat #Qlatent Internal load = timestep internal gain * internal gain latent fraction
+        QLinfil = volInfil * dens * parameter.lv * (UCM.canHum - self.indoorHum)
+        QLvent = volVent * dens * parameter.lv * (UCM.canHum - self.indoorHum)
+        QLintload = self.intHeat * self.intHeatFLat #Qlatent Internal load = timestep internal gain * internal gain latent fraction
 
-        """
         # Heat/Cooling load (W/m^2 of bld footprint), if any
         self.sensCoolDemand = max(
             wallArea*zac_in_wall*(T_wall - T_cool) +            # wall flux based on cooling setpoint
@@ -204,13 +200,12 @@ class Building(object):
             winArea*self.uValue*(T_can-T_cool) +                # + window flux based on cooling setpoint
             zac_in_ceil *(T_ceil-T_cool) +                      # + ceiling flux based on cooling setpoint
             self.intHeat +                                      # + sensible internal gain flux
-            ut.vector_times_scalar(dens, volInfil * parameter.cp * (T_can-T_cool)) +   # Infiltration sensible energy from canyon
-            ut.vector_times_scalar(dens, volVent * parameter.cp * (T_can-T_cool)) +    # Ventilation sensible energy from canyon
+            volInfil * dens * parameter.cp * (T_can-T_cool) +   # Infiltration sensible energy from canyon
+            volVent * dens * parameter.cp * (T_can-T_cool) +    # Ventilation sensible energy from canyon
             winTrans,                                           # solar heat gain through window
             0.)
 
-        """
-        """
+
         self.sensHeatDemand = max(-(wallArea*zac_in_wall*(T_wall-T_heat)+...
             massArea*zac_in_mass*(T_mass-T_heat)+...
             winArea*self.uValue*(T_can-T_heat)+...
