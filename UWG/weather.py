@@ -21,12 +21,11 @@ class Weather(object):
         staHum    % specific humidty (kg kg-1)
     """
 
-    DIR_EPW_NAME = "data\\epw\\"
     def __init__(self,climate_file,HI,HF):
         #HI: Julian start date
         #HF: Julian final date
         #H1 and HF define the row we want
-        self.climate_data = read_csv(self.DIR_EPW_NAME + climate_file)
+        self.climate_data = read_csv(climate_file)
         self.location = self.climate_data[0][1]
         staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
         self.staTemp = map(lambda s: s+273.15, staTemp)                             # air temperature (K)
