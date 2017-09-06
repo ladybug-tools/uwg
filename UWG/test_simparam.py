@@ -1,5 +1,5 @@
 from simparam import SimParam
-
+import pytest
 
 
 def test_simparam():
@@ -15,9 +15,9 @@ def test_simparam():
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
     # Simulation Parameters tests
-    assert abs(simTime.timeSim-168) < TOL
-    assert abs(simTime.timeMax-604800) < TOL
-    assert abs(simTime.nt-2017) < TOL
+    assert pytest.approx(simTime.timeSim - 168)
+    assert pytest.approx(simTime.timeMax - 604800)
+    assert pytest.approx(simTime.timeMax - 2017)
 
 if __name__ == '__main__':
     test_simparam()
