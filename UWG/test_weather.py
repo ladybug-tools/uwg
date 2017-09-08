@@ -3,7 +3,7 @@ from simparam import SimParam
 from weather import Weather
 
 
-DIR_EPW_NAME = "data\\epw\\"
+DIR_EPW_NAME = "UWG\\data\\epw\\"
 
 def setup_simparam():
     """setup by getting simparam instance"""
@@ -35,7 +35,7 @@ def test_weather():
     pytest.approx(weather_.staInfra[13],428., abs=1e-1)
     pytest.approx(weather_.staDif[6],0., abs=1e-3)
     pytest.approx(weather_.staDif[8],95., abs=1e-6)
-    pytest.approx(weather_.staRobs[8],0.0, abs=1e-3)  # 0. mm/hr
+    pytest.approx(weather_.staRobs[8],0.0, abs=1e-3)  # 0. mm/hre
 
 if __name__ == '__main__':
     test_weather()
