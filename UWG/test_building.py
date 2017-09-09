@@ -1,5 +1,4 @@
-
-from test import Test
+import pytest
 from building import Building
 from material import Material
 from element import Element
@@ -13,110 +12,67 @@ from forcing import Forcing
 
 import math
 
-"""Tests for UWG_Python
-
-example: https://github.com/ladybug-tools/honeybee/blob/master/tests/radiance_view_test.py
-
-"""
 
 
-#TODO: set default values for all nargin > conditions in classes
-#TODO: add module names back to imports i.e. math.pow, math.pi
-#TODO: break this up into indidvidual test classes in ../tests
-#TODO: use UWG main to test code
 
-# Physical constants (moved here from UWG.m)
-g = 9.81                # gravity
-cp = 1004.              # heat capacity for air (J/kg.K)
-vk = 0.40               # von karman constant
-r = 287.                # gas constant for air
-rv = 461.5              # gas constant for vapour
-lv = 2.26e6             # latent heat of evaporation
-sigma = 5.67e-08        # Stefan Boltzmann constant
-waterDens = 1000.       # water density (kg/m^3)
-lvtt = 2.5008e6         #
-tt = 273.16             #
-estt = 611.14           #
-cl = 4.218e3            #
-cpv = 1846.1            #
-b = 9.4                 # Coefficients derived by Louis (1979)
-cm = 7.4                #
-colburn = math.pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
-def test_singapore():
-    test_uwg = Test("test_singapore", True)
+DIR_EPW_NAME = "UWG\\data\\epw\\"
 
-    # -------------------------------------------------------------------------
-    # General Information
-    # -------------------------------------------------------------------------
-    cityName = 'Singapore'   # For plot/printing
-    LAT = 1.37
-    LON = 103.98
-    ELEV = 0.1
 
-    if test_uwg.run_test==True:
-        print "GENERAL"
-        print '\t', cityName
-        print '\t', "LAT: {a}, LON: {b}, ELEV: {c}".format(a=LAT,b=LON,c=ELEV)
 
-    # -------------------------------------------------------------------------
-    # Simulation Parameters
-    # -------------------------------------------------------------------------
-    dtSim = 300              # Sim time step
-    dtWeather = 3600*4#3600      # Weather data time-step
-    monthName = 'July'       # For plot/printing
-    MONTH = 7                # Begin month
-    DAY = 30                 # Begin day of the month
-    NUM_DAYS = 1#7             # Number of days of simulation
-    autosize = 0             # Autosize HVAC
 
-    ##CityBlock (8,3) = Block(NUM_DAYS * 24,wall,roof,mass,road)
-    # Create simulation class (SimParam.m)
-    simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+DIR_EPW_NAME = "UWG\\data\\epw\\"
+
+def setup_simparam():
+    """setup simparam instance"""
+
+    dtSim = 300             # Sim time step
+    dtWeather = 3600        # Weather data time-step
+    MONTH = 7               # Begin month
+    DAY = 30                # Begin day of the month
+    NUM_DAYS = 7            # Number of days of simulation
+
+    simparam = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
     if test_uwg.run_test==True:
         print "INIT SIMPARAM"
         print '\t', simTime
 
-    # Simulation Parameters tests
-    if dtWeather == 3600*4 and NUM_DAYS == 7:
-        test_uwg.test_equality_tol(simTime.timeSim,168,False)
-        test_uwg.test_equality_tol(simTime.timeMax,604800,False)
-        test_uwg.test_equality_tol(simTime.nt,2017,False)
+    return simparam
 
-    # -------------------------------------------------------------------------
-    # Weather
-    # -------------------------------------------------------------------------
-    #climate_file = "rural_weather_data_changi.epw
-    climate_file = "SGP_Singapore.486980_IWEC.epw"
-    # Read Rural weather data (EPW file - http://apps1.eere.energy.gov/)
-    weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
+def setup_weather():
+    """setup weather instance"""
+    climate_file = DIR_EPW_NAME + "SGP_Singapore.486980_IWEC.epw"
+
+    weather = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
 
     if test_uwg.run_test==True:
         print "INIT WEATHER"
-        print '\t', weather_
+        print '\t', weather
 
-    # Weather Tests
-    test_uwg.test_equality_tol(len(weather_.staDif),simTime.timeFinal - simTime.timeInitial + 1,False)
-    test_uwg.test_equality_tol(len(weather_.staHum),simTime.timeFinal - simTime.timeInitial + 1,False)
-    test_uwg.test_equality_tol(len(weather_.staTemp),simTime.timeFinal - simTime.timeInitial + 1,False)
-    if dtWeather == 3600*4 and NUM_DAYS == 7 and climate_file == "SGP_Singapore.486980_IWEC.epw":
-        test_uwg.test_equality_tol(weather_.staTemp[3],24.+273.15,False)
-        test_uwg.test_equality_tol(weather_.staTemp[-1],27.+273.15,False)
-        test_uwg.test_equality_tol(weather_.staUdir[2],270,False)  # 270 deg
-        test_uwg.test_equality_tol(weather_.staUmod[4],.5,False)   # 0.5 m/s
-        # for num days = 7 and dTweather = 3600
-        test_uwg.test_equality_tol(weather_.staPres[10],100600.,False)
-        test_uwg.test_equality_tol(weather_.staInfra[13],428.,False)
-        test_uwg.test_equality_tol(weather_.staDif[6],0.,False)
-        test_uwg.test_equality_tol(weather_.staDif[8],95.,False)
-        test_uwg.test_equality_tol(weather_.staRobs[8],0.0,False)  # 0. mm/hr
+    return weather
 
-    # -------------------------------------------------------------------------
-    # Urban MicroClimate Parameters
-    # -------------------------------------------------------------------------
+def setup_param():
+    """ setup geoparam parameters from initialize.uwg """
+    # Physical constants (moved here from UWG.m)
+    g = 9.81                # gravity
+    cp = 1004.              # heat capacity for air (J/kg.K)
+    vk = 0.40               # von karman constant
+    r = 287.                # gas constant for air
+    rv = 461.5              # gas constant for vapour
+    lv = 2.26e6             # latent heat of evaporation
+    sigma = 5.67e-08        # Stefan Boltzmann constant
+    waterDens = 1000.       # water density (kg/m^3)
+    lvtt = 2.5008e6         #
+    tt = 273.16             #
+    estt = 611.14           #
+    cl = 4.218e3            #
+    cpv = 1846.1            #
+    b = 9.4                 # Coefficients derived by Louis (1979)
+    cm = 7.4                #
+    colburn = math.pow((0.713/0.621),(2./3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
-    # Urban microclimate parameters from initialize.uwg
+    # variables
     h_ubl1 = 1000.          # ubl height - day (m)
     h_ubl2 = 80.            # ubl height - night (m)
     h_ref = 150.            # inversion height (m)
@@ -146,17 +102,18 @@ def test_singapore():
     wgmax = 0.005           # maximum film water depth on horizontal surfaces (m)
     maxdx = 250             # Max Dx (m)
 
-    geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
+    geo_param_ = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
         latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
         g, cp, vk, r, rv, lv, math.pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
 
     if test_uwg.run_test==True:
         print "INIT PARAM"
-        print '\t', geoParam
+        print '\t', geo_param
 
-    # -------------------------------------------------------------------------
-    # Material
-    # -------------------------------------------------------------------------
+    return geo_param
+
+def setup_material():
+    """ setup material.py """
     # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
     bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
     roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
@@ -166,9 +123,10 @@ def test_singapore():
         print '\t', bldMat
         print '\t', roadMat
 
-    # -------------------------------------------------------------------------
-    # Elements
-    # -------------------------------------------------------------------------
+    return bldMat, roadMat
+
+def setup_element():
+    """ setup element.py """
     # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
     # materials, vegetation coverage, initial temperature (K),
     # inclination (horizontal - 1, vertical - 0) ]
@@ -190,11 +148,10 @@ def test_singapore():
         #print '\t', 'rural', rural
         print '\t', mass
 
+    return wall, roof, road, mass
 
-    # -------------------------------------------------------------------------
-    # UCM/UBL
-    # -------------------------------------------------------------------------
-
+def setup_UCM():
+    """ setup UCM.py """
     T_init = weather_.staTemp[0]     # start dry bulb
     Hum_init = weather_.staHum[0]    # start relative humidity
     Wind_init = weather_.staUmod[0]  # wind speed
@@ -225,10 +182,10 @@ def test_singapore():
         print '\t', UCM
 
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
+    return UCM
 
-    # -------------------------------------------------------------------------
-    # FORCING
-    # -------------------------------------------------------------------------
+def setup_forcing():
+    """ setup forcing.py"""
     forcIP = Forcing(weather_.staTemp, weather_)
     forc = Forcing()
 
@@ -260,10 +217,47 @@ def test_singapore():
         print "INIT FORCING"
         print '\t', forc
 
-    # -------------------------------------------------------------------------
-    # Building
-    # -------------------------------------------------------------------------
+    return forc
 
+def test_building():
+    """ test building.py """
+    # Building definitions
+    # Residential building with AC
+    res_wAC = Building(3.0,     # floorHeight
+        4.0,                    # nighttime internal heat gains (W m-2 floor)
+        4.0,                    # daytime internal heat gains (W m-2 floor)
+        0.2,                    # radiant fraction of internal gains
+        0.2,                    # latent fraction of internal gains
+        0.5,                    # Infiltration (ACH)
+        0.0,                    # Ventilation (ACH)
+        0.3,                    # glazing ratio
+        2.715,                  # window U-value (W m-2 K)
+        0.75,                   # SHGC window solar heat gain coefficient
+        'AIR',                  # cooling condensation system type {'AIR','WATER'}
+        2.5,                    # COP of the cooling system
+        297.,                   # 24 C daytime indoor cooling set-point (K)
+        297.,                   # 24 C nighttime indoor cooling set-point (K)
+        293.,                   # 20 C daytime indoor heating set-point (K)
+        293.,                   # 20 C nighttime indoor heating set-point (K)
+        225.,                   # rated cooling system capacity (W m-2 bld)
+        0.9,                    # heating system efficiency (-)
+        300.)                   # 26.85 C intial indoor temp (K)
+
+    #Add this b/c doesn't appear in current building.py
+    res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
+    res_wAC.FanMax = 10.22
+
+    res_wAC.Type = 'MidRiseApartment'
+    res_wAC.Zone = "1A (Miami)"
+    res_wAC.Era = "Pst80"
+
+    if test_uwg.run_test==True:
+        print "INIT BUILDING"
+        print '\t', res_wAC
+    return building
+
+def test_BEMDef():
+    """ test BEMDef.py """
     # Building definitions
     # Residential building with AC
     res_wAC = Building(3.0,     # floorHeight
@@ -298,50 +292,33 @@ def test_singapore():
         print "INIT BUILDING"
         print '\t', res_wAC
 
+    return res_wAC
 
-    # -------------------------------------------------------------------------
-    # BEMDef
-    # -------------------------------------------------------------------------
-    res_wAC_BEM = BEMDef(res_wAC, mass, wall, roof, 0.0)
-
-    res_wAC_BEM.Elec = 0.        # Actual electricity consumption(W/m^2)
-    res_wAC_BEM.Light = 0.       # Actual light (W/m^2)
-    res_wAC_BEM.Nocc = 0.        # Actual gas consumption(W/m^2)
-    res_wAC_BEM.Qocc = 0.        # Actual heat load from occupant (W/m^2)
-    res_wAC_BEM.SWH = 0.         # Actual hot water usage
-    res_wAC_BEM.Gas = 0.         # Actual gas consumption(W/m^2)
-
-    res_wAC_BEM.T_wallex = res_wAC_BEM.wall.layerTemp[0]    # Wall surface temp (ext)
-    res_wAC_BEM.T_wallin = res_wAC_BEM.wall.layerTemp[-1]   # Wall surface temp (int)
-    res_wAC_BEM.T_roofex = res_wAC_BEM.roof.layerTemp[0]    # Roof surface temp (ext)
-    res_wAC_BEM.T_roofin = res_wAC_BEM.roof.layerTemp[-1]   # Roof surface temp (int)
-
-    if test_uwg.run_test==True:
-        print "INIT BEMDef"
-        print '\t', res_wAC_BEM
-
-
-    # -------------------------------------------------------------------------
-    # RSM
-    # -------------------------------------------------------------------------
-    # Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
-    # RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param)
-
-    # -------------------------------------------------------------------------
-    # SolarCalcs
-    # -------------------------------------------------------------------------
-    # Update solar flux
-    # rural,UCM,BEM = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural)
-
-    # -------------------------------------------------------------------------
-    # BEMCALC()
-    # -------------------------------------------------------------------------
+def test_building_BEMCalc():
+    """test for Building Class"""
+    # Need to model interdependcy
+    #setup_simparam()
+    #setup_weather()
+    #setup_UCM()
+    #setup_material()
     print '\n-- TESTING BEMCALC --\n'
     res_wAC_BEM.building.BEMCalc(UCM,res_wAC_BEM,forc,geoParam,simTime)
 
     print '\n------------------------------------------------------------------'
-    print test_uwg#.test_results()
+
 
 if __name__ == "__main__":
+    test_building()
 
-    test_singapore()
+
+# -------------------------------------------------------------------------
+# RSM
+# -------------------------------------------------------------------------
+# Define Reference (RSMDef(lat,lon,height,initialTemp,initialPres,Param))
+# RSM = RSMDef(LAT,LON,ELEV,weather.staTemp(1),weather.staPres(1),Param)
+
+# -------------------------------------------------------------------------
+# SolarCalcs
+# -------------------------------------------------------------------------
+# Update solar flux
+# rural,UCM,BEM = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural)

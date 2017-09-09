@@ -1,7 +1,7 @@
 import pytest
 from simparam import SimParam
 
-
+import math
 
 def test_simparam():
     """Test for simparam.py"""
@@ -15,9 +15,10 @@ def test_simparam():
     simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
     # Simulation Parameters tests
-    assert pytest.approx(simTime.timeSim - 168, abs=1e-6)
-    assert pytest.approx(simTime.timeMax - 604800,abs=1e-6)
-    assert pytest.approx(simTime.timeMax - 2017,abs=1e-6)
+    assert simTime.timeSim == pytest.approx(168, abs=1e-6)
+    assert simTime.timeMax == pytest.approx(604800,abs=1e-6)
+    assert simTime.nt == pytest.approx(2017,abs=1e-6)
+
 
 if __name__ == '__main__':
     test_simparam()
