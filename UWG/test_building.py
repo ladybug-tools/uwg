@@ -12,7 +12,7 @@ from forcing import Forcing
 
 import math
 
-DIR_EPW_NAME = "UWG\\data\\epw\\"
+DIR_EPW_NAME = "data\\epw\\"
 debug_log = True
 
 def setup_simparam():

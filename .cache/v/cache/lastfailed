@@ -1,1 +1,4 @@
-{}
+{
+  "UWG/test_building.py::test_building": true, 
+  "UWG/test_weather.py::test_weather": true
+}

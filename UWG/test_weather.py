@@ -3,7 +3,7 @@ from simparam import SimParam
 from weather import Weather
 
 
-DIR_EPW_NAME = "UWG\\data\\epw\\"
+DIR_EPW_NAME = "data\\epw\\"
 
 def setup_simparam():
     """setup simparam instance"""
