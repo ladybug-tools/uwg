@@ -35,7 +35,7 @@ class BEMDef(object):
     """
 
 
-    def __init__(self,building,mass,wall,roof,frac):
+    def __init__(self,building=None,mass=None,wall=None,roof=None,frac=None):
         self.building = building    # building class type
         self.mass = mass            # mass element class
         self.wall = wall            # wall element class
