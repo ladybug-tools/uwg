@@ -12,6 +12,8 @@ from forcing import Forcing
 
 import math
 
+DIR_EPW_NAME = "UWG\\data\\epw\\"
+debug_log = True
 
 def setup_simparam():
     """setup simparam instance"""
@@ -289,16 +291,14 @@ def test_building():
     building = setup_building()
     bemdef = setup_BEMDef(building, mass, wall, roof)
 
+    # TODO: Hold off on this until finished test_UWG.py
     # tests
-    print '\n-- TESTING BEMCALC --\n'
-    bemdef.building.BEMCalc(ucm,bemdef,forc,geo_param,simparam)
-    print '\n---------------------'
+    #print '\n-- TESTING BEMCALC --\n'
+    #bemdef.building.BEMCalc(ucm,bemdef,forc,geo_param,simparam)
+    #print '\n---------------------'
 
 
 if __name__ == "__main__":
-
-    DIR_EPW_NAME = "UWG\\data\\epw\\"
-    debug_log = True
 
     test_building()
 
