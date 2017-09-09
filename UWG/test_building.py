@@ -13,16 +13,6 @@ from forcing import Forcing
 import math
 
 
-
-
-
-DIR_EPW_NAME = "UWG\\data\\epw\\"
-
-
-
-
-DIR_EPW_NAME = "UWG\\data\\epw\\"
-
 def setup_simparam():
     """setup simparam instance"""
 
@@ -34,27 +24,65 @@ def setup_simparam():
 
     simparam = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT SIMPARAM"
-        print '\t', simTime
+        print '\t', simparam
 
     return simparam
 
-def setup_weather():
+def setup_weather(simTime,climate_file):
     """setup weather instance"""
-    climate_file = DIR_EPW_NAME + "SGP_Singapore.486980_IWEC.epw"
-
     weather = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT WEATHER"
         print '\t', weather
 
     return weather
 
+def setup_material():
+    """ setup material.py """
+    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
+    bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
+    roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
+
+    if debug_log==True:
+        print "INIT MATERIALS"
+        print '\t', bldMat
+        print '\t', roadMat
+
+    return bldMat, roadMat
+
+def setup_element(bldMat, roadMat):
+    """ setup element.py """
+    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
+    # materials, vegetation coverage, initial temperature (K),
+    # inclination (horizontal - 1, vertical - 0) ]
+    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0,"MassWall")
+    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
+        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1,"MassRoof")
+    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
+        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1,"MassRoad")
+    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
+    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
+    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0,"MassFloor")
+
+    if debug_log==True:
+        print "INIT ELEMENTS"
+        print '\t', wall
+        print '\t', roof
+        print '\t', road
+        #print '\t', 'rural', rural
+        print '\t', mass
+
+    return wall, roof, road, mass
+
+
 def setup_param():
     """ setup geoparam parameters from initialize.uwg """
     # Physical constants (moved here from UWG.m)
+    # TODO: Inquire about moving this to param class
     g = 9.81                # gravity
     cp = 1004.              # heat capacity for air (J/kg.K)
     vk = 0.40               # von karman constant
@@ -87,7 +115,6 @@ def setup_param():
 
      # Vegetation parameters
     vegCover = 0.2          # urban area veg coverage ratio
-    treeCoverage = 0.1      # urban area tree coverage ratio
     vegStart = 4.           # vegetation start month
     vegEnd = 10.            # vegetation end month
     albVeg = 0.25           # Vegetation albedo
@@ -102,55 +129,17 @@ def setup_param():
     wgmax = 0.005           # maximum film water depth on horizontal surfaces (m)
     maxdx = 250             # Max Dx (m)
 
-    geo_param_ = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
+    geo_param = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,
         latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,
         g, cp, vk, r, rv, lv, math.pi, sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn)
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT PARAM"
         print '\t', geo_param
 
     return geo_param
 
-def setup_material():
-    """ setup material.py """
-    # Material: [conductivity (W m-1 K-1), Vol heat capacity (J m-3 K-1)]
-    bldMat = Material(0.67,1.2e6,"Concrete")      # material (concrete? reference?)
-    roadMat = Material(1.0,1.6e6, "Ashphalt")     # material (asphalt? reference?)
-
-    if test_uwg.run_test==True:
-        print "INIT MATERIALS"
-        print '\t', bldMat
-        print '\t', roadMat
-
-    return bldMat, roadMat
-
-def setup_element():
-    """ setup element.py """
-    # Element: [albedo, emissivity, thicknesses (m)(outer layer first),
-    # materials, vegetation coverage, initial temperature (K),
-    # inclination (horizontal - 1, vertical - 0) ]
-    wall = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,0,"MassWall")
-    roof = Element(0.2,0.9,[0.01,0.05,0.1,0.05,0.01],\
-        [bldMat,bldMat,bldMat,bldMat,bldMat],0.,300.,1,"MassRoof")
-    road = Element(0.5,0.95,[0.05,0.1,0.1,0.5,0.5],\
-        [roadMat,roadMat,roadMat,roadMat,roadMat],0.2,300.,1,"MassRoad")
-    #rural = Element(0.1,0.95,[0.05,0.1,0.1,0.5,0.5],\
-    #    [roadMat,roadMat,roadMat,roadMat,roadMat],0.73,300.,1)
-    mass = Element(0.7,0.9,[0.05,0.05],[bldMat,bldMat],0.,300.,0,"MassFloor")
-
-    if test_uwg.run_test==True:
-        print "INIT ELEMENTS"
-        print '\t', wall
-        print '\t', roof
-        print '\t', road
-        #print '\t', 'rural', rural
-        print '\t', mass
-
-    return wall, roof, road, mass
-
-def setup_UCM():
+def setup_UCM(weather_,geoParam,road):
     """ setup UCM.py """
     T_init = weather_.staTemp[0]     # start dry bulb
     Hum_init = weather_.staHum[0]    # start relative humidity
@@ -173,18 +162,21 @@ def setup_UCM():
     SHGC = 0.75       # from Building
     alb_wall = 0.2    # from wall Element
 
+    # Vegetation parameters
+    treeCoverage = 0.1      # urban area tree coverage ratio
+
     #UCM needs to be tested
     UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,
         T_init,Hum_init,Wind_init,geoParam,r_glaze,SHGC,alb_wall,road)#,rural)
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT UCM"
         print '\t', UCM
 
     #UBL = UBLDef('C',1000.,weather.staTemp(1),Param.maxdx),
     return UCM
-
-def setup_forcing():
+    weather, param,
+def setup_forcing(weather_, simTime, geoParam, UCM):
     """ setup forcing.py"""
     forcIP = Forcing(weather_.staTemp, weather_)
     forc = Forcing()
@@ -192,12 +184,12 @@ def setup_forcing():
     ph = simTime.dt/3600.0      # per hour
     it = range(simTime.nt)[0]   # simTime incrment
 
-    print 'ph', ph
-    print 'it', it
+    #print 'ph', ph
+    #print 'it', it
 
     #TODO: unittests to understand ph it
     sim_dt_index = int(math.ceil(it*ph))
-    print 'simdtindex', sim_dt_index
+    #print 'simdtindex', sim_dt_index
 
     # Update the weather per UWG
 
@@ -213,14 +205,14 @@ def setup_forcing():
     forc.dif = forcIP.dif[sim_dt_index]
     UCM.canHum = forc.hum      # Canyon humidity (absolute) same as rural
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT FORCING"
         print '\t', forc
 
     return forc
 
-def test_building():
-    """ test building.py """
+def setup_building():
+    """ setup building.py """
     # Building definitions
     # Residential building with AC
     res_wAC = Building(3.0,     # floorHeight
@@ -251,63 +243,63 @@ def test_building():
     res_wAC.Zone = "1A (Miami)"
     res_wAC.Era = "Pst80"
 
-    if test_uwg.run_test==True:
+    if debug_log==True:
         print "INIT BUILDING"
         print '\t', res_wAC
-    return building
-
-def test_BEMDef():
-    """ test BEMDef.py """
-    # Building definitions
-    # Residential building with AC
-    res_wAC = Building(3.0,     # floorHeight
-        4.0,                    # nighttime internal heat gains (W m-2 floor)
-        4.0,                    # daytime internal heat gains (W m-2 floor)
-        0.2,                    # radiant fraction of internal gains
-        0.2,                    # latent fraction of internal gains
-        0.5,                    # Infiltration (ACH)
-        0.0,                    # Ventilation (ACH)
-        0.3,                    # glazing ratio
-        2.715,                  # window U-value (W m-2 K)
-        0.75,                   # SHGC window solar heat gain coefficient
-        'AIR',                  # cooling condensation system type {'AIR','WATER'}
-        2.5,                    # COP of the cooling system
-        297.,                   # 24 C daytime indoor cooling set-point (K)
-        297.,                   # 24 C nighttime indoor cooling set-point (K)
-        293.,                   # 20 C daytime indoor heating set-point (K)
-        293.,                   # 20 C nighttime indoor heating set-point (K)
-        225.,                   # rated cooling system capacity (W m-2 bld)
-        0.9,                    # heating system efficiency (-)
-        300.)                   # 26.85 C intial indoor temp (K)
-
-    #Add this b/c doesn't appear in current building.py
-    res_wAC.canyon_fraction = 1.0     # fraction of waste heat released into the canyon
-    res_wAC.FanMax = 10.22
-
-    res_wAC.Type = 'MidRiseApartment'
-    res_wAC.Zone = "1A (Miami)"
-    res_wAC.Era = "Pst80"
-
-    if test_uwg.run_test==True:
-        print "INIT BUILDING"
-        print '\t', res_wAC
-
     return res_wAC
 
-def test_building_BEMCalc():
-    """test for Building Class"""
-    # Need to model interdependcy
-    #setup_simparam()
-    #setup_weather()
-    #setup_UCM()
-    #setup_material()
-    print '\n-- TESTING BEMCALC --\n'
-    res_wAC_BEM.building.BEMCalc(UCM,res_wAC_BEM,forc,geoParam,simTime)
+def setup_BEMDef(building, mass, wall, roof):
+    """ setup BEMDef.py """
 
-    print '\n------------------------------------------------------------------'
+    res_wAC_BEM = BEMDef(building, mass, wall, roof, 0.0)
+
+    res_wAC_BEM.Elec = 0.        # Actual electricity consumption(W/m^2)
+    res_wAC_BEM.Light = 0.       # Actual light (W/m^2)
+    res_wAC_BEM.Nocc = 0.        # Actual gas consumption(W/m^2)
+    res_wAC_BEM.Qocc = 0.        # Actual heat load from occupant (W/m^2)
+    res_wAC_BEM.SWH = 0.         # Actual hot water usage
+    res_wAC_BEM.Gas = 0.         # Actual gas consumption(W/m^2)
+
+    res_wAC_BEM.T_wallex = res_wAC_BEM.wall.layerTemp[0]    # Wall surface temp (ext)
+    res_wAC_BEM.T_wallin = res_wAC_BEM.wall.layerTemp[-1]   # Wall surface temp (int)
+    res_wAC_BEM.T_roofex = res_wAC_BEM.roof.layerTemp[0]    # Roof surface temp (ext)
+    res_wAC_BEM.T_roofin = res_wAC_BEM.roof.layerTemp[-1]   # Roof surface temp (int)
+
+    if debug_log==True:
+        print "INIT BEMDef"
+        print '\t', res_wAC_BEM
+    return res_wAC_BEM
+
+def test_building():
+    """test for Building Class"""
+
+    simparam = setup_simparam()
+    cf = DIR_EPW_NAME + "SGP_Singapore.486980_IWEC.epw"
+    weather = setup_weather(simparam,cf)
+
+    geo_param = setup_param()
+
+    bldMat, roadMat = setup_material()
+    wall, roof, road, mass = setup_element(bldMat, roadMat)
+    ucm = setup_UCM(weather, geo_param, road)
+
+    forc = setup_forcing(weather, simparam, geo_param, ucm)
+
+    # bldg defs
+    building = setup_building()
+    bemdef = setup_BEMDef(building, mass, wall, roof)
+
+    # tests
+    print '\n-- TESTING BEMCALC --\n'
+    bemdef.building.BEMCalc(ucm,bemdef,forc,geo_param,simparam)
+    print '\n---------------------'
 
 
 if __name__ == "__main__":
+
+    DIR_EPW_NAME = "UWG\\data\\epw\\"
+    debug_log = True
+
     test_building()
 
 
