@@ -73,6 +73,7 @@ def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None,
     # =========================================================================
     # Section 2 - Read EPW file
     # =========================================================================
+    """
     if not epwFileName.lower().endswith('.epw'):
         epwFileName = epwFileName + '.epw'
     if not epwDir.lower().endswith('\\'):
@@ -119,7 +120,7 @@ def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None,
         destinationFile = epwFileName.lower().strip('.epw') + '_UWG.epw'
     newPathName = destinationDir + destinationFile
 
-
+    """
     """
     % =========================================================================
     % Section 3 - Read Input File (xlsm, XML, .m, file)
@@ -745,9 +746,10 @@ def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None,
     """
     return None
 
-# Run the function.
-epwDir = 'C:\ladybug'
-epwFileName = 'USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw'
-uwgParamDir = None
-uwgParamFileName = None
-UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
+if __name__ == "__main__":
+    # Run the function.
+    epwDir = None#'C:\ladybug'
+    epwFileName = None#'USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw'
+    uwgParamDir = None
+    uwgParamFileName = None
+    UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
