@@ -1,10 +1,11 @@
 import pytest
 import os
+
 from simparam import SimParam
 from weather import Weather
 
 
-REL_EPW_PATH = "data/epw/SGP_Singapore.486980_IWEC.epw"
+DIR_EPW_PATH = os.path.join(os.path.dirname(__file__),"data/epw/")
 
 def setup_simparam():
     """setup simparam instance"""
@@ -21,8 +22,8 @@ def test_weather():
     """Test for weather.py"""
 
     simTime = setup_simparam()
-    dir_path = os.path.dirname(__file__)
-    climate_file = os.path.join(dir_path,REL_EPW_PATH)
+    epw_name = "SGP_Singapore.486980_IWEC.epw"
+    climate_file = os.path.join(DIR_EPW_PATH, epw_name)
 
 
     weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)

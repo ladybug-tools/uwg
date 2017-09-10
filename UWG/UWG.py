@@ -22,7 +22,13 @@ import math
 from utilities import zeros
 from material import Material
 
-def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
+
+
+class MyDecimal(Decimal):
+    def is_near_zero(self, eps=1E-10):
+        return abs(float(self)) < eps
+
+class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
 
     args:
@@ -68,59 +74,69 @@ def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None,
     colburn = math.pow((0.713/0.621), (2/3)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     # Site-specific parameters
-    wgmax = 0.005;          # maximum film water depth on horizontal surfaces (m)
+    wgmax = 0.005          # maximum film water depth on horizontal surfaces (m)
 
-    # =========================================================================
-    # Section 2 - Read EPW file
-    # =========================================================================
-    """
-    if not epwFileName.lower().endswith('.epw'):
-        epwFileName = epwFileName + '.epw'
-    if not epwDir.lower().endswith('\\'):
-        epwDir = epwDir + '\\'
+    def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
+        self.epwDir = epwDir
+        self.epwFileName = epwFileName
+        self.uwgParamDir = uwgParamDir
+        self.uwgParamFileName = uwgParamFileName
+        self.destinationDir = destinationDir
+        self.destinationFile = destinationFile
 
-    climateDataPath = epwDir + epwFileName
-    try:
-        climateDataFile = open(climateDataPath, 'r')
-    except OSError:
-        print('Cannot find ' +  climateDataPath)
+    def __repr__(self):
+        return "UWG: {} ".format(self.epwFileName)
 
-    # Read header lines (1 to 8) from EPW and ensure TMY2 format.
-    header = [next(climateDataFile) for x in xrange(8)]
+    def read_epw(self):
+        """ Section 2 - Read EPW file """
 
-    # Read Lat, Long (line 1 of EPW)
-    line1 = header[0].split(',')
-    lat = float(line1[-4])
-    lon = float(line1[-3])
-    GMT = float(line1[-2])
+        if not self.epwFileName.lower().endswith('.epw'):
+            self.epwFileName = self.epwFileName + '.epw'
 
-    # Read in soil temperature data (assumes this is always there)
-    soilData = header[3].split(',')
-    nSoil = int(soilData[1])
-    Tsoil = zeros(nSoil,12)
-    depth = zeros(nSoil,1)
+        climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
-    # Read monthly data for each layer of soil from EPW file
-    for i in range(nSoil):
-        depth[i] = soilData[2 + (i*16)]
-        # Monthly data
-        for j in range(12):
-            Tsoil[i][j] = float(soilData[6+(i*16)+j])+273.15
+        try:
+            self.climateDataFile = open(climateDataPath, 'r')
+        except OSError:
+            print "Can not find " + climateDataPath
 
-    # Read weather data from EPW for each time step in weather file.
-    epwinput = []
-    for line in climateDataFile:
-        epwinput.append(line.split(','))
-    climateDataFile.close()
+        """
+        # Read header lines (1 to 8) from EPW and ensure TMY2 format.
+        header = [next(climateDataFile) for x in xrange(8)]
 
-    # Save location for the new EPW file.
-    if destinationDir == None:
-        destinationDir = epwDir
-    if destinationFile == None:
-        destinationFile = epwFileName.lower().strip('.epw') + '_UWG.epw'
-    newPathName = destinationDir + destinationFile
+        # Read Lat, Long (line 1 of EPW)
+        line1 = header[0].split(',')
+        lat = float(line1[-4])
+        lon = float(line1[-3])
+        GMT = float(line1[-2])
 
-    """
+        # Read in soil temperature data (assumes this is always there)
+        soilData = header[3].split(',')
+        nSoil = int(soilData[1])
+        Tsoil = zeros(nSoil,12)
+        depth = zeros(nSoil,1)
+
+        # Read monthly data for each layer of soil from EPW file
+        for i in range(nSoil):
+            depth[i] = soilData[2 + (i*16)]
+            # Monthly data
+            for j in range(12):
+                Tsoil[i][j] = float(soilData[6+(i*16)+j])+273.15
+
+        # Read weather data from EPW for each time step in weather file.
+        epwinput = []
+        for line in climateDataFile:
+            epwinput.append(line.split(','))
+        climateDataFile.close()
+
+        # Save location for the new EPW file.
+        if destinationDir == None:
+            destinationDir = epwDir
+        if destinationFile == None:
+            destinationFile = epwFileName.lower().strip('.epw') + '_UWG.epw'
+        newPathName = destinationDir + destinationFile
+
+        """
     """
     % =========================================================================
     % Section 3 - Read Input File (xlsm, XML, .m, file)
@@ -743,9 +759,9 @@ def UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None,
         end
         disp(['New climate file generated: ',new_climate_file]);
     end
-    """
-    return None
 
+    return None
+    """
 if __name__ == "__main__":
     # Run the function.
     epwDir = None#'C:\ladybug'

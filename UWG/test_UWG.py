@@ -1,23 +1,23 @@
+import os
 import pytest
 from UWG import UWG
-import os
 
 
-REL_EPW_PATH = "data\\epw\\SGP_Singapore.486980_IWEC.epw"
+DIR_EPW_PATH = os.path.join(os.path.dirname(__file__),"data/epw/")
+
+def test_read_epw(uwg_):
+    uwg_.read_epw()
 
 def test_UWG():
     """Test for UWG.py"""
-
-    epw_dir = None
-    epw_file_name = None
+    epw_dir = DIR_EPW_PATH
+    epw_file_name = "SGP_Singapore.486980_IWEC.epdw"
     uwg_param_dir = None
     uwg_param_file_name = None
 
-    UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
+    uwg = UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
+    test_read_epw(uwg)
 
-    #print os.listdir()
-    #for f in os.listdir(src_dir):
-    #file_name = os.path.join(src_dir, f)
 
 if __name__ == '__main__':
     test_UWG()
