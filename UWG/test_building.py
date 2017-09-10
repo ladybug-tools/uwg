@@ -12,7 +12,7 @@ from forcing import Forcing
 
 import math
 
-DIR_EPW_NAME = "data\\epw\\"
+REL_EPW_PATH = "data/epw/SGP_Singapore.486980_IWEC.epw"
 debug_log = True
 
 def setup_simparam():
@@ -276,7 +276,8 @@ def test_building():
     """test for Building Class"""
 
     simparam = setup_simparam()
-    cf = DIR_EPW_NAME + "SGP_Singapore.486980_IWEC.epw"
+    dir_path = os.path.dirname(__file__)
+    cf = os.path.join(dir_path,REL_EPW_PATH)
     weather = setup_weather(simparam,cf)
 
     geo_param = setup_param()
