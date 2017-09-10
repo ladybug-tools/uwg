@@ -4,7 +4,7 @@ from simparam import SimParam
 from weather import Weather
 
 
-DIR_EPW_NAME = "data\\epw\\SGP_Singapore.486980_IWEC.epw"
+REL_EPW_PATH = "data/epw/SGP_Singapore.486980_IWEC.epw"
 
 def setup_simparam():
     """setup simparam instance"""
@@ -22,7 +22,7 @@ def test_weather():
 
     simTime = setup_simparam()
     dir_path = os.path.dirname(__file__)
-    climate_file = os.path.join(dir_path,DIR_EPW_NAME)
+    climate_file = os.path.join(dir_path,REL_EPW_PATH)
 
 
     weather_ = Weather(climate_file,simTime.timeInitial,simTime.timeFinal)

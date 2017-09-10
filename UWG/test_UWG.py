@@ -1,8 +1,9 @@
 import pytest
 from UWG import UWG
 import os
-DIR_EPW_NAME = "data\\epw\\"
 
+
+REL_EPW_PATH = "data\\epw\\SGP_Singapore.486980_IWEC.epw"
 
 def test_UWG():
     """Test for UWG.py"""
