@@ -1,3 +1,4 @@
 {
-  "test_weather.py::test_weather": true
+  "test_UWG.py::TestClass::()::test_read_epw": true, 
+  "test_class.py::TestClass::()::test_two": true
 }
