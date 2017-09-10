@@ -19,14 +19,8 @@ doi: 10.1080/19401493.2012.718797
 import os
 import math
 
-from utilities import zeros
+import utilities
 from material import Material
-
-
-
-class MyDecimal(Decimal):
-    def is_near_zero(self, eps=1E-10):
-        return abs(float(self)) < eps
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -87,6 +81,9 @@ class UWG(object):
     def __repr__(self):
         return "UWG: {} ".format(self.epwFileName)
 
+    def is_near_zero(self,num,eps=1e-10):
+        return abs(float(num)) < eps
+
     def read_epw(self):
         """ Section 2 - Read EPW file """
 
@@ -96,7 +93,7 @@ class UWG(object):
         climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
         try:
-            self.climateDataFile = open(climateDataPath, 'r')
+            self.climateDataFile = utilities.read_csv(climateDataPath)
         except OSError:
             print "Can not find " + climateDataPath
 

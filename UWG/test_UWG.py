@@ -7,11 +7,13 @@ DIR_EPW_PATH = os.path.join(os.path.dirname(__file__),"data/epw/")
 
 def test_read_epw(uwg_):
     uwg_.read_epw()
+    assert uwg_.climateDataFile[0][0] == "LOCATION"
+    assert uwg_.climateDataFile[0][1] == "SINGAPORE"
 
 def test_UWG():
     """Test for UWG.py"""
     epw_dir = DIR_EPW_PATH
-    epw_file_name = "SGP_Singapore.486980_IWEC.epdw"
+    epw_file_name = "SGP_Singapore.486980_IWEC.epw"
     uwg_param_dir = None
     uwg_param_file_name = None
 

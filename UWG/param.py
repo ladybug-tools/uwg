@@ -48,4 +48,5 @@ class Param(object):
         b=self.treeFLat
         return "Param w/ dayBLht {a}, treeFlat {b} ".format(
             a=self.dayBLHeight,
+            b=self.treeFLat
             )
