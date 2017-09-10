@@ -1,4 +1,6 @@
 import pytest
+import os
+
 from building import Building
 from material import Material
 from element import Element
