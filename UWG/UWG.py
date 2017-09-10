@@ -42,7 +42,7 @@ class UWG(object):
     # =========================================================================
     # Section 1 - Definitions for constants / other parameters
     # =========================================================================
-
+    #TODO: capitalize for constant covnention
     minThickness = 0.01    # Minimum layer thickness (to prevent crashing) (m)
     maxThickness = 0.05    # Maximum layer thickness (m)
     soilTcond = 1          # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
@@ -95,6 +95,7 @@ class UWG(object):
         try:
             self.climateDataFile = utilities.read_csv(climateDataPath)
         except OSError:
+            # TODO: Figure out why this isn't called when OSError is raised..
             print "Can not find " + climateDataPath
 
         """
