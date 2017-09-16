@@ -1,4 +1,5 @@
 {
+  "test_UWG.py::TestUWG::()::test_read_epw": true, 
   "test_simparam.py": true, 
   "test_weather.py": true
 }

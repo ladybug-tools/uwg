@@ -1,7 +1,16 @@
 """Urban Weather Generator Library."""
 
-import sys
-import os
+from UWG import UWG #from UWG.py import class UWG
+from simparam import SimParam
+from weather import  Weather
+from building import Building
+from material import Material
+from element import Element
+from BEMDef import BEMDef
+from schdef import SchDef
+from param import Param
+from UCMDef import UCMDef
+from forcing import Forcing
 
 __all__ = [
     "UWG",
@@ -19,8 +28,3 @@ __all__ = [
     "urbflux",
     "weather",
     ]
-
-if __name__ == '__main__':
-    # path to the real library
-    path_to_up_dir = os.path.join(os.path.dirname(__file__),'..')
-    sys.path.insert(0, path_to_up_dir)

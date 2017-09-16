@@ -1,0 +1,8 @@
+# Compiled files
+*.pyc
+
+# GH files
+*.gh
+
+# Jupyter Notebook
+.ipynb_checkpoints
