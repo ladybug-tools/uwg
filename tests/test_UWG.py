@@ -8,7 +8,7 @@ class TestUWG(object):
     for test autodetection by pytest
     """
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"UWG\\data\\epw\\")
+    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"UWG\\data\\epw")
 
     def setup(self):
         epw_dir = self.DIR_EPW_PATH

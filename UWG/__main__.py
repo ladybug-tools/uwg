@@ -16,7 +16,7 @@ if len(sys.argv) > 5:
     uwg_param_file_name = sys.arg[4]
 else:
     du = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    epw_dir = os.path.join(du,"UWG\\data\\epw\\")
+    epw_dir = os.path.join(du,"UWG\\data\\epw")
     epw_file_name = "SGP_Singapore.486980_IWEC.epw"
     uwg_param_dir = None
     uwg_param_file_name = None
