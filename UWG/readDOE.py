@@ -3,6 +3,11 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 """
 
+import sys
+import os
+
+#import UWG #this should replace everything below
+
 from test import Test
 from building import Building
 from material import Material
@@ -12,6 +17,12 @@ from schdef import SchDef
 from utilities import read_csv, str2fl
 
 
+#TODO: Need to swap tests
+#TODO: externalize tests in tests/ module
+#TODO: Change import statements using UWG
+
+DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources/DOERefBuildings")
 
 def readDOE():
     """
@@ -55,8 +66,6 @@ def readDOE():
     test_treeDOE = Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
 
     #Define constants
-    DIR_DOE_NAME = "data\\DOERefBuildings"
-
     # DOE Building Types
     bldType = [
         'FullServiceRestaurant',
@@ -110,7 +119,7 @@ def readDOE():
 
     for i in xrange(16):#16
         # Read building summary (Sheet 1)
-        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe1 = read_csv(file_doe_name_bld)
         #listof(listof 3 era values)
         nFloor      = str2fl(list_doe1[3][3:6])      # Number of Floors, this will be list of floats and str if "basement"
@@ -127,7 +136,7 @@ def readDOE():
 
 
         # Read zone summary (Sheet 2)
-        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe2 = read_csv(file_doe_name_zone)
         #listof(listof 3 eras)
         AreaFloor   = str2fl([list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
@@ -149,7 +158,7 @@ def readDOE():
 
 
         # Read location summary (Sheet 3)
-        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_NAME,y=i+1)
+        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe3 = read_csv(file_doe_name_location)
         #(listof (listof 3 eras (listof 16 climate types)))
         TypeWall    = [list_doe3[3][4:20],list_doe3[14][4:20],list_doe3[25][4:20]]            # Construction type
@@ -179,7 +188,7 @@ def readDOE():
 
 
         # Read Schedules (Sheet 4)
-        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=DIR_DOE_NAME,y=i+1)
+        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe4 = read_csv(file_doe_name_schedules)
 
         #listof(listof weekday, sat, sun (list of 24 fractions)))
@@ -357,7 +366,7 @@ def readDOE():
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k]
-                
+
                 if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
 
                 Elec = SchEquip;   # 3x24 matrix of schedule for electricity (WD,Sat,Sun)

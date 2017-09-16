@@ -7,8 +7,5 @@ __pycache__/
 # Unit test / coverage reports
 .cache
 
-# GH files
-*.gh
-
 # Jupyter Notebook
 .ipynb_checkpoints

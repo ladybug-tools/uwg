@@ -7,7 +7,7 @@ import UWG
 class TestWeather(object):
 
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"UWG/data/epw")
+    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
 
     def setup(self):
         """setup simparam instance"""
