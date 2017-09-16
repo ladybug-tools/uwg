@@ -1,13 +1,13 @@
 import pytest
 import os
 
-from simparam import SimParam
-from weather import Weather
+import UWG
 
 
 class TestWeather(object):
 
-    DIR_EPW_PATH = os.path.join(os.path.dirname(__file__),"data/epw/")
+    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
 
     def setup(self):
         """setup simparam instance"""
@@ -18,7 +18,7 @@ class TestWeather(object):
         DAY = 30                # Begin day of the month
         NUM_DAYS = 7            # Number of days of simulation
 
-        self.simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+        self.simTime = UWG.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
     def test_weather(self):
         """Test for weather.py"""
@@ -27,7 +27,7 @@ class TestWeather(object):
         climate_file = os.path.join(self.DIR_EPW_PATH, epw_name)
 
 
-        self.weather = Weather(climate_file,self.simTime.timeInitial,self.simTime.timeFinal)
+        self.weather = UWG.Weather(climate_file,self.simTime.timeInitial,self.simTime.timeFinal)
 
         # Weather Tests
         assert len(self.weather.staDif) == pytest.approx(self.simTime.timeFinal - self.simTime.timeInitial + 1, abs=1e-6)

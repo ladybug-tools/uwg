@@ -1,10 +1,24 @@
-#So we can run UWG more easily from command line
-# use test_uwg as temp
+"""Urban Weather Generator Library.
+This module is only if you want to run UWG from cli
+"""
 
-import test_uwg
+import sys
+import os
+import UWG
 
-def main():
-    test_uwg.test_singapore()
 
-if __name__ == "__main__":
-    main()
+#TODO: revise with better args to UWG in default
+#TODO: probably better way to get sys.arg
+if len(sys.argv) > 5:
+    epw_dir = sys.argv[1]
+    epw_file_name = sys.argv[2]
+    uwg_param_dir = sys.arg[3]
+    uwg_param_file_name = sys.arg[4]
+else:
+    du = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    epw_dir = os.path.join(du,"resources/epw")
+    epw_file_name = "SGP_Singapore.486980_IWEC.epw"
+    uwg_param_dir = None
+    uwg_param_file_name = None
+
+UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)

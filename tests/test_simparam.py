@@ -1,5 +1,5 @@
 import pytest
-from simparam import SimParam
+import UWG
 
 
 def test_simparam():
@@ -11,7 +11,7 @@ def test_simparam():
     DAY = 30                # Begin day of the month
     NUM_DAYS = 7            # Number of days of simulation
 
-    simTime = SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+    simTime = UWG.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
     # Simulation Parameters tests
     assert simTime.timeSim == pytest.approx(168, abs=1e-6)
