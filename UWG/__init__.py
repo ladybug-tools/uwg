@@ -11,6 +11,7 @@ from schdef import SchDef
 from param import Param
 from UCMDef import UCMDef
 from forcing import Forcing
+import readDOE
 
 __all__ = [
     "UWG",

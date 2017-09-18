@@ -15,7 +15,7 @@ from element import Element
 from BEMDef import BEMDef
 from schdef import SchDef
 from utilities import read_csv, str2fl
-
+import utilities
 
 #TODO: Need to swap tests
 #TODO: externalize tests in tests/ module
@@ -62,8 +62,8 @@ def readDOE():
 
 
     #For Testing only
-    test_readDOE = Test("test_readDOE", False) #Make a test object for reading csv files
-    test_treeDOE = Test("test_treeDOE", False) #Make a test object making matrix of Building, Schedule, refBEM objs
+    test_readDOE = Test("test_readDOE", True) #Make a test object for reading csv files
+    test_treeDOE = Test("test_treeDOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
 
     #Define constants
     # DOE Building Types
@@ -150,6 +150,7 @@ def readDOE():
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
+
 
         #Tests sheet 2
         test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
@@ -388,9 +389,8 @@ def readDOE():
 
     #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
-    #print test_readDOE.test_results()
-    #print test_treeDOE.test_results()
-
+    print test_treeDOE.test_results()
+    
 
 if __name__ == "__main__":
     readDOE()
