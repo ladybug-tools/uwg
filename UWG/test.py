@@ -27,6 +27,7 @@ class Test(object):
         if toggle:
             self.test_history += s
     def test_equality_tol(self,a,b,toggle=True,tol=1e-4):
+        toggle = True
         if not self.run_test: return None
         if abs(a-b) < tol:
             s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)

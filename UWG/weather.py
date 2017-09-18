@@ -5,7 +5,7 @@ class Weather(object):
     """
     Weather
     Read epw file
-
+    http://bigladdersoftware.com/epx/docs/8-2/auxiliary-programs/epw-csv-format-inout.html
     properties
         location  # location name
         staTemp   % air temperature (C)

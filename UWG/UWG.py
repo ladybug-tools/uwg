@@ -18,9 +18,9 @@ doi: 10.1080/19401493.2012.718797
 
 import os
 import math
-
-import utilities
 from material import Material
+import utilities
+
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -85,440 +85,287 @@ class UWG(object):
         return abs(float(num)) < eps
 
     def read_epw(self):
-        """ Section 2 - Read EPW file """
+        """Section 2 - Read EPW file
+        properties
+            self.newPathName
+            self.header     # header data
+            self.epwinput   # timestep data for weather
+            self.lat        # latitude
+            self.lon        # longitude
+            self.GMT        # GMT
+            self.nSoil      # Number of soil depths
+            self.Tsoil      # nSoil x 12 matrix for soil temperture (K)
+            self.depth      # nSoil x 1 matrix for soil depth (m)
+        """
 
+        # Revise epw file name if not end with epw
         if not self.epwFileName.lower().endswith('.epw'):
             self.epwFileName = self.epwFileName + '.epw'
 
+        # Make dir path to epw file
         climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
+        # Open epw file and feed csv data to climateDataFile
         try:
-            self.climateDataFile = utilities.read_csv(climateDataPath)
+            climateDataFile = utilities.read_csv(climateDataPath)
         except OSError:
             # TODO: Figure out why this isn't called when OSError is raised..
             print "Can not find " + climateDataPath
 
-        """
         # Read header lines (1 to 8) from EPW and ensure TMY2 format.
-        header = [next(climateDataFile) for x in xrange(8)]
+        self.header = climateDataFile[0:8]
+
+        # Read weather data from EPW for each time step in weather file. (lines 8 - end)
+        self.epwinput = climateDataFile[8:]
 
         # Read Lat, Long (line 1 of EPW)
-        line1 = header[0].split(',')
-        lat = float(line1[-4])
-        lon = float(line1[-3])
-        GMT = float(line1[-2])
+        self.lat = float(self.header[0][6])
+        self.lon = float(self.header[0][7])
+        self.GMT = float(self.header[0][8])
 
         # Read in soil temperature data (assumes this is always there)
-        soilData = header[3].split(',')
-        nSoil = int(soilData[1])
-        Tsoil = zeros(nSoil,12)
-        depth = zeros(nSoil,1)
+        # ref: http://bigladdersoftware.com/epx/docs/8-2/auxiliary-programs/epw-csv-format-inout.html
+        soilData = self.header[3]
+        self.nSoil = int(soilData[1])           # Number of ground temperature depths
+        self.Tsoil = utilities.zeros(self.nSoil,12)  # nSoil x 12 matrix for soil temperture (K)
+        self.depth = utilities.zeros(self.nSoil,1)   # nSoil x 1 matrix for soil depth (m)
 
         # Read monthly data for each layer of soil from EPW file
-        for i in range(nSoil):
-            depth[i] = soilData[2 + (i*16)]
+        for i in xrange(self.nSoil):
+            self.depth[i][0] = float(soilData[2 + (i*16)])
             # Monthly data
-            for j in range(12):
-                Tsoil[i][j] = float(soilData[6+(i*16)+j])+273.15
+            for j in xrange(12):
+                self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15
 
-        # Read weather data from EPW for each time step in weather file.
-        epwinput = []
-        for line in climateDataFile:
-            epwinput.append(line.split(','))
-        climateDataFile.close()
+        # Set new directory path for the moprhed EPW file.
+        if self.destinationDir is None:
+            destinationDir = self.epwDir
+        if self.destinationFile is None:
+            destinationFile = self.epwFileName.lower().strip('.epw') + '_UWG.epw'
+        self.newPathName = destinationDir + destinationFile
 
-        # Save location for the new EPW file.
-        if destinationDir == None:
-            destinationDir = epwDir
-        if destinationFile == None:
-            destinationFile = epwFileName.lower().strip('.epw') + '_UWG.epw'
-        newPathName = destinationDir + destinationFile
-
+    def read_input(self):
+        """Section 3 - Read Input File (xlsm, XML, .m, file)
         """
+        pass
+        """
+        try
+            xml_location = strcat(CL_XML_PATH,'\',CL_XML);
+        catch
+            [FileName,PathName] = uigetfile('*.xml;*.m;*.xlsm','Select Urban Parameter Input file');
+            xml_location = strcat(PathName,FileName);
+        end
+
+        % Input files for UWG - note that soil layer buffering and
+        % layer thickness control are only performed for XML. (should update)
+        [~,~,ext] = fileparts(xml_location);
+        if strcmp(ext,'.xlsm')      % Excel input
+
+            % Create simulation & weather class
+            [num, ~, ~] = xlsread(xml_location,1,'N24:N34');
+            Month = num(1);         % starting month (1-12)
+            Day = num(2);           % starting day (1-31)
+            nDay = num(3);          % number of days
+            dtSim = num(4);         % simulation time step (s)
+
+            dtWeather = num(5);     % seconds (s)
+            autosize = num(6);      % autosize HVAC (1 or 0)
+            sensOcc = num(7);       % Sensible heat from occupant
+            LatFOcc = num(8);       % Latent heat fraction from occupant (normally 0.3)
+            RadFOcc = num(9);       % Radiant heat fraction from occupant (normally 0.2)
+            RadFEquip = num(10);    % Radiant heat fraction from equipment (normally 0.5)
+            RadFLight = num(11);    % Radiant heat fraction from light (normally 0.7)
+
+            simTime = SimParam(dtSim,dtWeather,Month,Day,nDay);
+            weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
+            forcIP = Forcing(weather.staTemp,weather);
+            forc = Forcing;
+
+            [~,txt,~] = xlsread(xml_location,1,'R32:R34');
+            writeMAT = txt(1);
+            writeEPW = txt(2);
+            writeXLS = txt(3);
+
+            % Urban microclimate parameters
+            [num, ~, ~] = xlsread(xml_location,1,'D4:D32');
+            h_ubl1 = num(1);        % ubl height - day (m)
+            h_ubl2 = num(2);        % ubl height - night (m)
+            h_ref = num(3);         % inversion height
+            h_temp = num(4);        % temperature height
+            h_wind = num(5);        % wind height
+            c_circ = num(6);        % circulation coefficient
+            c_exch = num(7);        % exchange coefficient
+            maxDay = num(8);        % max day threshhold
+            maxNight = num(9);      % max night threshhold
+            windMin = num(10);      % min wind speed (m/s)
+            h_obs = num(11);        % rural average obstacle height
+
+            % Urban characteristics
+            bldHeight = num(12);    % average building height (m)
+            h_mix = num(13);        % mixing height (m)
+            bldDensity = num(14);   % building density (0-1)
+            verToHor = num(15);     % building aspect ratio
+            charLength = num(16);   % characteristic length (m)
+            maxdx = num(17);        % Max Dx (m)
+            alb_road = num(18);     % road albedo
+            d_road = num(19);       % road pavement thickness
+            sensAnth = num(20);     % non-building sens heat (W/m^2)
+            latAnth = num(21);      % non-building lat heat (W/m^2)
+
+            % Vegetatin parameters
+            vegCover = num(22);     % urban area veg coverage ratio
+            treeCoverage = num(23); % urban area tree coverage ratio
+            vegStart = num(24);     % vegetation start month
+            vegEnd = num(25);       % vegetation end month
+            albVeg = num(26);       % Vegetation albedo
+            latGrss = num(27);      % latent fraction of grass
+            latTree = num(28);      % latent fraction of tree
+            rurVegCover = num(28);  % rural vegetation cover
+
+            nightStart = 18;        % arbitrary values (not used for XLSM)
+            nightEnd = 8;
+            geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
+                latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
+                g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
+            UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
+
+            % Traffic schedule
+            [SchTraffic, ~, ~] = xlsread(xml_location,1,'H4:K27');
+            SchTraffic = transpose(SchTraffic);
+
+            % Define BEM for each DOE type (read the fraction)
+            load ('RefDOE.mat');
+
+            [zone, ~, ~] = xlsread(xml_location,1,'AA3');
+            [num, ~, ~] = xlsread(xml_location,1,'S4:U19');
+            [area, ~, ~ ] = xlsread(xml_location,1,'P4:R19');
+
+            % Road (Assume 0.5m of asphalt)
+            emis = 0.93;
+            d_road = 0.5;
+            asphalt = Material (1.0,1.6e6);
+            thickness = 0.05 * ones (ceil(d_road/0.05),1);
+            road = Element(alb_road,emis,thickness,[asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;],0,293,1);
+            road.vegCoverage = min(vegCover/(1-bldDensity),1);
+
+            % Define building energy models
+            k = 0;
+            r_glaze = 0;
+            SHGC = 0;
+            alb_wall = 0;
+            for i = 1:16
+                for j = 1:3
+                    if num(i,j) > 0
+                        k = k + 1;
+                        BEM(k) = refBEM(i,j,zone);
+                        BEM(k).frac = num(i,j);
+                        BEM(k).fl_area = area(i,j);
+                        r_glaze = r_glaze + BEM(k).frac * BEM(k).building.glazingRatio;
+                        SHGC = SHGC + BEM(k).frac * BEM(k).building.shgc;
+                        alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
+                        BEM(k).Qocc = BEM(k).Qocc;
+                        Sch(k) = Schedule(i,j,zone);
+                    end
+                end
+            end
+
+            % Reference site class (also include VDM)
+            RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
+            USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
+
+            % Create UCM class (use road characteristics from BEM)
+            rural = road;
+            rural.vegCoverage = rurVegCover;
+            T_init = weather.staTemp(1);
+            H_init = weather.staHum(1);
+            UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
+                sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
+            UCM.h_mix = h_mix;
+
+            % Misc. stuff
+            soilindex1 = 1;
+            soilindex2 = 1;
+
+        elseif strcmp(ext,'.m')
+            % Run matlab script to generate UCM, UBL, etc.
+            run(xml_location);
+            nightStart = 18;        % arbitrary values (not used for XLSM)
+            nightEnd = 8;
+
+            simTime = SimParam(dtSim,dtWeather,Month,Day,nDay);
+            weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
+            forcIP = Forcing(weather.staTemp,weather);
+            forc = Forcing;
+
+            % Road (Assume 0.5m of asphalt)
+            emis = 0.93;
+            asphalt = Material (1.0,1.6e6);
+            thickness = 0.05 * ones (ceil(d_road/0.05),1);
+            road = Element(alb_road,emis,thickness,[asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;],0,293,1);
+            road.vegCoverage = min(vegCover/(1-bldDensity),1);
+
+            rural = road;
+            rural.vegCoverage = rurVegCover;
+            T_init = weather.staTemp(1);
+            H_init = weather.staHum(1);
+
+            geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
+                latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
+                g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
+            UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
+
+            % Define BEM for each DOE type (read the fraction)
+            load ('RefDOE.mat');
+
+            % Define building energy models
+            k = 0;
+            r_glaze = 0;
+            SHGC = 0;
+            alb_wall = 0;
+            area = bld*charLength^2*bldDensity*bldHeight/h_floor;  % building floor area
+            for i = 1:16
+                for j = 1:3
+                    if bld(i,j) > 0
+                        k = k + 1;
+                        BEM(k) = refBEM(i,j,zone);
+                        BEM(k).frac = bld(i,j);
+                        BEM(k).fl_area = area(i,j);
+                        r_glaze = r_glaze + BEM(k).frac * BEM(k).building.glazingRatio;
+                        SHGC = SHGC + BEM(k).frac * BEM(k).building.shgc;
+                        alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
+                        BEM(k).Qocc = BEM(k).Qocc;
+                        Sch(k) = Schedule(i,j,zone);
+                    end
+                end
+            end
+
+            UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
+                sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
+            UCM.h_mix = h_mix;
+
+            % Reference site class (also include VDM)
+            RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
+            USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
+
+            % For .m file, assume the soil depth is close to one of the ground
+            % soil depth specified in EPW (0.5, 1.0, 2.0)
+            for i = 1:n_soil
+                if sum(road.layerThickness) <= depth(i)
+                    soilindex1 = i;
+                    break;
+                end
+            end
+
+            % Same for rural road
+            for i = 1:n_soil
+                if sum(rural.layerThickness) <= depth(i)
+                    soilindex2 = i;
+                    break;
+                end
+            end
+        """
+
     """
-    % =========================================================================
-    % Section 3 - Read Input File (xlsm, XML, .m, file)
-    % =========================================================================
-
-    try
-        xml_location = strcat(CL_XML_PATH,'\',CL_XML);
-    catch
-        [FileName,PathName] = uigetfile('*.xml;*.m;*.xlsm','Select Urban Parameter Input file');
-        xml_location = strcat(PathName,FileName);
-    end
-
-    % Input files for UWG - note that soil layer buffering and
-    % layer thickness control are only performed for XML. (should update)
-    [~,~,ext] = fileparts(xml_location);
-    if strcmp(ext,'.xlsm')      % Excel input
-
-        % Create simulation & weather class
-        [num, ~, ~] = xlsread(xml_location,1,'N24:N34');
-        Month = num(1);         % starting month (1-12)
-        Day = num(2);           % starting day (1-31)
-        nDay = num(3);          % number of days
-        dtSim = num(4);         % simulation time step (s)
-
-        dtWeather = num(5);     % seconds (s)
-        autosize = num(6);      % autosize HVAC (1 or 0)
-        sensOcc = num(7);       % Sensible heat from occupant
-        LatFOcc = num(8);       % Latent heat fraction from occupant (normally 0.3)
-        RadFOcc = num(9);       % Radiant heat fraction from occupant (normally 0.2)
-        RadFEquip = num(10);    % Radiant heat fraction from equipment (normally 0.5)
-        RadFLight = num(11);    % Radiant heat fraction from light (normally 0.7)
-
-        simTime = SimParam(dtSim,dtWeather,Month,Day,nDay);
-        weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
-        forcIP = Forcing(weather.staTemp,weather);
-        forc = Forcing;
-
-        [~,txt,~] = xlsread(xml_location,1,'R32:R34');
-        writeMAT = txt(1);
-        writeEPW = txt(2);
-        writeXLS = txt(3);
-
-        % Urban microclimate parameters
-        [num, ~, ~] = xlsread(xml_location,1,'D4:D32');
-        h_ubl1 = num(1);        % ubl height - day (m)
-        h_ubl2 = num(2);        % ubl height - night (m)
-        h_ref = num(3);         % inversion height
-        h_temp = num(4);        % temperature height
-        h_wind = num(5);        % wind height
-        c_circ = num(6);        % circulation coefficient
-        c_exch = num(7);        % exchange coefficient
-        maxDay = num(8);        % max day threshhold
-        maxNight = num(9);      % max night threshhold
-        windMin = num(10);      % min wind speed (m/s)
-        h_obs = num(11);        % rural average obstacle height
-
-        % Urban characteristics
-        bldHeight = num(12);    % average building height (m)
-        h_mix = num(13);        % mixing height (m)
-        bldDensity = num(14);   % building density (0-1)
-        verToHor = num(15);     % building aspect ratio
-        charLength = num(16);   % characteristic length (m)
-        maxdx = num(17);        % Max Dx (m)
-        alb_road = num(18);     % road albedo
-        d_road = num(19);       % road pavement thickness
-        sensAnth = num(20);     % non-building sens heat (W/m^2)
-        latAnth = num(21);      % non-building lat heat (W/m^2)
-
-        % Vegetatin parameters
-        vegCover = num(22);     % urban area veg coverage ratio
-        treeCoverage = num(23); % urban area tree coverage ratio
-        vegStart = num(24);     % vegetation start month
-        vegEnd = num(25);       % vegetation end month
-        albVeg = num(26);       % Vegetation albedo
-        latGrss = num(27);      % latent fraction of grass
-        latTree = num(28);      % latent fraction of tree
-        rurVegCover = num(28);  % rural vegetation cover
-
-        nightStart = 18;        % arbitrary values (not used for XLSM)
-        nightEnd = 8;
-        geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
-            latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
-            g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
-        UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
-
-        % Traffic schedule
-        [SchTraffic, ~, ~] = xlsread(xml_location,1,'H4:K27');
-        SchTraffic = transpose(SchTraffic);
-
-        % Define BEM for each DOE type (read the fraction)
-        load ('RefDOE.mat');
-
-        [zone, ~, ~] = xlsread(xml_location,1,'AA3');
-        [num, ~, ~] = xlsread(xml_location,1,'S4:U19');
-        [area, ~, ~ ] = xlsread(xml_location,1,'P4:R19');
-
-        % Road (Assume 0.5m of asphalt)
-        emis = 0.93;
-        d_road = 0.5;
-        asphalt = Material (1.0,1.6e6);
-        thickness = 0.05 * ones (ceil(d_road/0.05),1);
-        road = Element(alb_road,emis,thickness,[asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;],0,293,1);
-        road.vegCoverage = min(vegCover/(1-bldDensity),1);
-
-        % Define building energy models
-        k = 0;
-        r_glaze = 0;
-        SHGC = 0;
-        alb_wall = 0;
-        for i = 1:16
-            for j = 1:3
-                if num(i,j) > 0
-                    k = k + 1;
-                    BEM(k) = refBEM(i,j,zone);
-                    BEM(k).frac = num(i,j);
-                    BEM(k).fl_area = area(i,j);
-                    r_glaze = r_glaze + BEM(k).frac * BEM(k).building.glazingRatio;
-                    SHGC = SHGC + BEM(k).frac * BEM(k).building.shgc;
-                    alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
-                    BEM(k).Qocc = BEM(k).Qocc;
-                    Sch(k) = Schedule(i,j,zone);
-                end
-            end
-        end
-
-        % Reference site class (also include VDM)
-        RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
-        USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
-
-        % Create UCM class (use road characteristics from BEM)
-        rural = road;
-        rural.vegCoverage = rurVegCover;
-        T_init = weather.staTemp(1);
-        H_init = weather.staHum(1);
-        UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
-            sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
-        UCM.h_mix = h_mix;
-
-        % Misc. stuff
-        soilindex1 = 1;
-        soilindex2 = 1;
-
-    elseif strcmp(ext,'.m')
-        % Run matlab script to generate UCM, UBL, etc.
-        run(xml_location);
-        nightStart = 18;        % arbitrary values (not used for XLSM)
-        nightEnd = 8;
-
-        simTime = SimParam(dtSim,dtWeather,Month,Day,nDay);
-        weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
-        forcIP = Forcing(weather.staTemp,weather);
-        forc = Forcing;
-
-        % Road (Assume 0.5m of asphalt)
-        emis = 0.93;
-        asphalt = Material (1.0,1.6e6);
-        thickness = 0.05 * ones (ceil(d_road/0.05),1);
-        road = Element(alb_road,emis,thickness,[asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;],0,293,1);
-        road.vegCoverage = min(vegCover/(1-bldDensity),1);
-
-        rural = road;
-        rural.vegCoverage = rurVegCover;
-        T_init = weather.staTemp(1);
-        H_init = weather.staHum(1);
-
-        geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
-            latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
-            g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
-        UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
-
-        % Define BEM for each DOE type (read the fraction)
-        load ('RefDOE.mat');
-
-        % Define building energy models
-        k = 0;
-        r_glaze = 0;
-        SHGC = 0;
-        alb_wall = 0;
-        area = bld*charLength^2*bldDensity*bldHeight/h_floor;  % building floor area
-        for i = 1:16
-            for j = 1:3
-                if bld(i,j) > 0
-                    k = k + 1;
-                    BEM(k) = refBEM(i,j,zone);
-                    BEM(k).frac = bld(i,j);
-                    BEM(k).fl_area = area(i,j);
-                    r_glaze = r_glaze + BEM(k).frac * BEM(k).building.glazingRatio;
-                    SHGC = SHGC + BEM(k).frac * BEM(k).building.shgc;
-                    alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
-                    BEM(k).Qocc = BEM(k).Qocc;
-                    Sch(k) = Schedule(i,j,zone);
-                end
-            end
-        end
-
-        UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
-            sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
-        UCM.h_mix = h_mix;
-
-        % Reference site class (also include VDM)
-        RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
-        USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
-
-        % For .m file, assume the soil depth is close to one of the ground
-        % soil depth specified in EPW (0.5, 1.0, 2.0)
-        for i = 1:n_soil
-            if sum(road.layerThickness) <= depth(i)
-                soilindex1 = i;
-                break;
-            end
-        end
-
-        % Same for rural road
-        for i = 1:n_soil
-            if sum(rural.layerThickness) <= depth(i)
-                soilindex2 = i;
-                break;
-            end
-        end
-
-    elseif strcmp(ext,'.xml')
-        % Some numbers not specified in XML
-        maxdx = 500;            % maximum discretization length for the UBL model (m)
-        circCoeff = 1.2;        %
-        dayThreshold = 200;     %
-        nightThreshold = 50;    %
-        windMin = 1;            % minimum wind speed (m s-1)
-        c_exch = 1;
-        autosize = 1;
-
-        % Process XML file to generate class elements
-        xml_input = xml_read(xml_location);
-        sim_dt = 300;           % Simulation time step (s)
-        weather_dt = 3600;      % Weather data time step (EPW) (s)
-
-        disp(['Urban Parameter file selected: ',xml_location]);
-
-        % Re-naming for file readability
-        xmlTyp(1) = xml_input.typology1;
-        xmlTyp(2) = xml_input.typology2;
-        xmlTyp(3) = xml_input.typology3;
-        xmlTyp(4) = xml_input.typology4;
-        building(1) = xmlTyp(1).building;
-        building(2) = xmlTyp(2).building;
-        building(3) = xmlTyp(3).building;
-        building(4) = xmlTyp(4).building;
-        xmlParam = xml_input.parameter;
-        xmlUCM = xml_input.urbanArea;
-        xmlRSite = xml_input.referenceSite;
-
-        % Simulation paramters
-        simTime = SimParam(sim_dt,weather_dt,xmlParam.simuStartMonth,...
-            xmlParam.simuStartDay, xmlParam.simuDuration);
-        weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
-
-        forcIP = Forcing(weather.staTemp,weather);
-        forc = Forcing;
-
-        nightStart = mean([building.nightSetStart]);
-        nightEnd = mean([building.nightSetEnd]);
-        geoParam = Param(xmlUCM.daytimeBLHeight,xmlUCM.nighttimeBLHeight,...
-            xmlUCM.refHeight,xmlParam.tempHeight,xmlParam.windHeight,...
-            circCoeff,dayThreshold,nightThreshold,...
-            xmlUCM.treeLatent,xmlUCM.grassLatent,xmlUCM.vegAlbedo,xmlUCM.vegStart,xmlUCM.vegEnd,...
-            nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
-            g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
-
-        % Define Road Element & buffer to match ground temperature depth
-        urbanRoad = xmlUCM.urbanRoad;
-        [roadMat, newthickness] = procMat(urbanRoad.materials,maxThickness,minThickness);
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; maxThickness];
-                    roadMat = [roadMat soil];
-                end
-                soilindex1 = i;
-                break;
-            end
-        end
-        road = Element(urbanRoad.albedo,urbanRoad.emissivity,newthickness,roadMat,...
-            urbanRoad.vegetationCoverage,urbanRoad.initialTemperature + 273.15,urbanRoad.inclination);
-
-        % Define Rural Element
-        ruralRoad = xmlRSite.ruralRoad;
-        [ruralMat, newthickness] = procMat(ruralRoad.materials,maxThickness,minThickness);
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; maxThickness];
-                    ruralMat = [ruralMat soil];
-                end
-                soilindex2 = i;
-                break;
-            end
-        end
-        rural = Element(ruralRoad.albedo,ruralRoad.emissivity,newthickness,...
-            ruralMat,ruralRoad.vegetationCoverage,ruralRoad.initialTemperature + 273.15,ruralRoad.inclination);
-
-        frac_total = 0;
-        for i = 1:4
-            % Define Wall element
-            [wallMat, newthickness] = procMat(xmlTyp(i).construction.wall.materials,maxThickness,minThickness);
-            xwall = xmlTyp(i).construction.wall;
-            wall = Element(xwall.albedo,xwall.emissivity,newthickness,wallMat,...
-                xwall.vegetationCoverage,xwall.initialTemperature + 273.15,xwall.inclination);
-
-            % Define Roof element
-            [roofMat, newthickness] = procMat(xmlTyp(i).construction.roof.materials,maxThickness,minThickness);
-            xroof = xmlTyp(i).construction.roof;
-            roof = Element(xroof.albedo,xroof.emissivity,newthickness,roofMat,...
-                xroof.vegetationCoverage,xroof.initialTemperature + 273.15,xroof.inclination);
-
-            % Define Mass element
-            [massMat, newthickness] = procMat(xmlTyp(i).construction.mass.materials,maxThickness,minThickness);
-            xmass = xmlTyp(i).construction.mass;
-            mass = Element(xmass.albedo,xmass.emissivity,newthickness,massMat,...
-                xmass.vegetationCoverage,xmass.initialTemperature + 273.15,xmass.inclination);
-
-            % Define building typology
-            typology = Building(building(i).floorHeight,...
-                building(i).nightInternalGains,...
-                building(i).dayInternalGains,...
-                building(i).radiantFraction,...
-                building(i).latentFraction,...
-                building(i).infiltration,...
-                building(i).ventilation,...
-                xmlTyp(i).construction.glazing.glazingRatio,...
-                xmlTyp(i).construction.glazing.windowUvalue,...
-                xmlTyp(i).construction.glazing.windowSHGC,...
-                building(i).coolingSystemType,...
-                building(i).coolingCOP,...
-                building(i).daytimeCoolingSetPoint + 273.15,...
-                building(i).nighttimeCoolingSetPoint + 273.15,...
-                building(i).daytimeHeatingSetPoint + 273.15,...
-                building(i).nighttimeHeatingSetPoint + 273.15,...
-                building(i).coolingCapacity,...
-                building(i).heatingEfficiency,...
-                building(i).initialT + 273.15);
-
-            % Define Urban Configuration [building,mass,wall,roof]
-            BEM(i) = BEMDef(typology,mass,wall,roof,xmlTyp(i).dist/100);
-
-            % If only one typology is defined, break
-            frac_total = frac_total + xmlTyp(i).dist/100;
-            if frac_total >= 1
-                break;
-            end
-        end
-
-        % Reference site class (also include VDM)
-        RSM = RSMDef(lat,lon,GMT,xmlRSite.averageObstacleHeight,...
-            weather.staTemp(1),weather.staPres(1),geoParam);
-
-
-        % Define average typology for UCM (weighted by floor space %)
-        SHGC = 0;
-        alb_wall = 0;
-        r_glaze = 0;
-        for i = 1:numel(BEM)
-            SHGC = SHGC + BEM(i).frac*BEM(i).building.shgc;
-            alb_wall = alb_wall + BEM(i).frac*BEM(i).wall.albedo;
-            r_glaze = r_glaze + BEM(i).frac*BEM(i).building.glazingRatio;
-        end
-
-        T_init = weather.staTemp(1);
-        H_init = weather.staHum(1);
-
-        % Define UCM class
-        h_bld = xmlUCM.averageBuildingHeight;
-        dens = xmlUCM.siteCoverageRatio;
-        Qtraffic = xmlUCM.nonBldgLatentAnthropogenicHeat;
-        Ltraffic = xmlUCM.nonBldgSensibleHeat;
-        VtoH = xmlUCM.facadeToSiteRatio;
-        UCM = UCMDef(h_bld,dens,VtoH,xmlUCM.treeCoverage,Ltraffic,Qtraffic,...
-            T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
-        UCM.h_mix = 1;
-        UBL = UBLDef('C',xmlUCM.charLength,weather.staTemp(1),geoParam.maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
-        USM = RSMDef(lat,lon,GMT,h_bld/10,weather.staTemp(1),weather.staPres(1),geoParam);
-
-    else
-        return;
-    end
-
     % =========================================================================
     % Section 6 - HVAC Autosizing (unlimited cooling & heating)
     % =========================================================================
@@ -760,6 +607,7 @@ class UWG(object):
 
     return None
     """
+"""
 if __name__ == "__main__":
     # Run the function.
     epwDir = None#'C:\ladybug'
@@ -767,3 +615,4 @@ if __name__ == "__main__":
     uwgParamDir = None
     uwgParamFileName = None
     UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
+"""
