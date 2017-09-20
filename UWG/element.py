@@ -36,7 +36,7 @@ class Element(object):
         if len(thicknessLst) != len(materialLst):
             raise Exception(self.THICKNESSLST_EQ_MATERIALLST_MSG)
         else:
-            self._name = name                                       # purely for internal process -sv
+            self._name = name                                       # purely for internal process
             self.albedo = alb                                       # outer surface albedo
             self.emissivity = emis                                  # outer surface emissivity
             self.layerThickness = thicknessLst                      # vector of layer thicnesses (m)

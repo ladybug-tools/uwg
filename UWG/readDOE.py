@@ -103,9 +103,11 @@ def readDOE():
         '7 (Duluth)',
         '8 (Fairbanks)']
 
-    builtEra = ['Pre80',
+    builtEra = [
+        'Pre80',
         'Pst80',
-    'New']
+        'New'
+        ]
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
@@ -171,7 +173,7 @@ def readDOE():
         HVAC        = str2fl([list_doe3[9][4:20],list_doe3[20][4:20],list_doe3[31][4:20]])     # [kW] Air Conditioning
         HEAT        = str2fl([list_doe3[10][4:20],list_doe3[21][4:20],list_doe3[32][4:20]])    # [kW] Heating
         COP         = str2fl([list_doe3[11][4:20],list_doe3[22][4:20],list_doe3[33][4:20]])    # [-] Air Conditioning COP
-        EffHeat     = str2fl([list_doe3[12][4:20],list_doe3[23][4:20],list_doe3[34][4:20]])    # [%] eating Efficiency
+        EffHeat     = str2fl([list_doe3[12][4:20],list_doe3[23][4:20],list_doe3[34][4:20]])    # [%] Heating Efficiency
         FanFlow     = str2fl([list_doe3[13][4:20],list_doe3[24][4:20],list_doe3[35][4:20]])    # [m3/s] Fan Max Flow Rate
 
         #Test sheet 3
@@ -390,7 +392,7 @@ def readDOE():
     #save ('RefDOE.mat','refDOE','refBEM','Schedule');
 
     print test_treeDOE.test_results()
-    
+
 
 if __name__ == "__main__":
     readDOE()
