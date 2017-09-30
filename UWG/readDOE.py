@@ -5,8 +5,7 @@ Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 
 import sys
 import os
-
-#import UWG #this should replace everything below
+import cPickle
 
 from test import Test
 from building import Building
@@ -19,7 +18,9 @@ import utilities
 
 #TODO: Need to swap tests
 #TODO: externalize tests in tests/ module
-#TODO: Change import statements using UWG
+#TODO: Change import statements using UWG?
+#TODO: create separate function for pickle serialization
+#TODO: creat DOE class with two functions
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources/DOERefBuildings")
@@ -389,10 +390,24 @@ def readDOE():
                 Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
                 Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
-    #save ('RefDOE.mat','refDOE','refBEM','Schedule');
+    # Serialize refDOE,refBEM,Schedule and store in resources
 
-    print test_treeDOE.test_results()
+    # Create a binary file for serialized obj
+    pickle_refDOE = open(os.path.join(DIR_UP_PATH,'resources','refDOE.pkl'), 'wb')
+    pickle_refBEM = open(os.path.join(DIR_UP_PATH,'resources','refBEM.pkl'), 'wb')
+    pickle_Schedule = open(os.path.join(DIR_UP_PATH,'resources','Schedule.pkl'), 'wb')
 
+    # resources
+    # Pickle objects, protocol 1 b/c binary file
+    cPickle.dump(refDOE, pickle_refDOE,1)
+    cPickle.dump(refBEM, pickle_refBEM,1)
+    cPickle.dump(Schedule, pickle_Schedule,1)
+
+    pickle_refDOE.close()
+    pickle_refBEM.close()
+    pickle_Schedule.close()
+
+    #print test_treeDOE.test_results()
 
 if __name__ == "__main__":
     readDOE()

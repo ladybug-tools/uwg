@@ -218,6 +218,11 @@ class UWG(object):
         RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
         USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
 
+        # Note:
+        # Looks to me like road layer is fixed at 0.5 (init) or user-specified depth and
+        # we subtract ground height until that reacehs 0.5 lenght or user-specified length.
+        # I.e not sure if soil depth at whcih deep T is taken is dependant on road depth.
+
         % For .m file, assume the soil depth is close to one of the ground
         % soil depth specified in EPW (0.5, 1.0, 2.0)
         for i = 1:n_soil
