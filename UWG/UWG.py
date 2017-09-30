@@ -154,6 +154,9 @@ class UWG(object):
         properties:
 
         """
+        # try to just read
+        print self.uwgParamDir
+        print self.uwgParamFileName
 
         #TODO: Need to load data from initialize.uwg
         #TODO: Possible take uwg ext, change to py and unpickle/pickle?
@@ -483,12 +486,13 @@ class UWG(object):
 
     return None
     """
-"""
+
 if __name__ == "__main__":
     # Run the function.
     epwDir = None#'C:\ladybug'
     epwFileName = None#'USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw'
     uwgParamDir = None
     uwgParamFileName = None
-    UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
-"""
+    uwg = UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
+    #uwg.read_epw()
+    uwg.read_input()
