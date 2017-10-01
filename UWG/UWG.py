@@ -165,9 +165,11 @@ class UWG(object):
         f = uwg_param_file.readlines()
         uwg_param_file.close()
 
-        print f[10]
-        fg = eval(f[10])
-        print fg
+
+        #TODO: transalte .uwg inputs into json file, then evaluate 
+        #print f[10]
+        #fg = eval(f[10])
+        #print fg
         # Revise epw file name if not end with epw
         #if not self.epwFileName.lower().endswith('.epw'):
         #    self.epwFileName = self.epwFileName + '.epw'
