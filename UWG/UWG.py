@@ -112,9 +112,8 @@ class UWG(object):
         # Open epw file and feed csv data to climateDataFile
         try:
             climateDataFile = utilities.read_csv(climateDataPath)
-        except OSError:
-            # TODO: Figure out why this isn't called when OSError is raised..
-            print "Can not find " + climateDataPath
+        except Exception as e:
+            raise Exception("Failed to read epw file! {}".format(e.message))
 
         # Read header lines (1 to 8) from EPW and ensure TMY2 format.
         self.header = climateDataFile[0:8]
@@ -157,6 +156,10 @@ class UWG(object):
         # try to just read
         print self.uwgParamDir
         print self.uwgParamFileName
+
+        # Revise epw file name if not end with epw
+        #if not self.epwFileName.lower().endswith('.epw'):
+        #    self.epwFileName = self.epwFileName + '.epw'
 
         #TODO: Need to load data from initialize.uwg
         #TODO: Possible take uwg ext, change to py and unpickle/pickle?
@@ -488,11 +491,12 @@ class UWG(object):
     """
 
 if __name__ == "__main__":
-    # Run the function.
-    epwDir = None#'C:\ladybug'
-    epwFileName = None#'USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw'
-    uwgParamDir = None
-    uwgParamFileName = None
+
+    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    epwDir = os.path.join(DIR_UP_PATH,"resources","epw")
+    epwFileName = "SGP_Singapore.486980_IWEC.epw"
+    uwgParamDir = os.path.join(DIR_UP_PATH,"resources")
+    uwgParamFileName = "initialize.uwg"
     uwg = UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
-    #uwg.read_epw()
+    uwg.read_epw()
     uwg.read_input()
