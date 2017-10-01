@@ -17,7 +17,7 @@ doi: 10.1080/19401493.2012.718797
 """
 
 import os
-
+import re
 import math
 
 import utilities
@@ -162,20 +162,27 @@ class UWG(object):
             raise Exception("Param file: '{}' does not exist.".format(uwg_param_file))
 
         uwg_param_file = open(uwg_param_file_path,"r")
-        f = uwg_param_file.readlines()
+        #filter(lambda f_: f_ != "", f)
+
+        input_line = uwg_param_file.readline()
+        uwg_params = []
+        while input_line:
+            input_line = re.sub(r'#.*$', "", input_line)        # remove python comments from end of line
+            input_line = re.sub('[\n,' ']', "", input_line)     # rempove white space
+            if input_line == "" or input_line.isspace(): 
+                input_line = uwg_param_file.readline()
+                continue
+            input_line = input_line.split("=")
+            uwg_params.append(input_line)
+            input_line = uwg_param_file.readline()
         uwg_param_file.close()
 
+        #for i in uwg_params:
+        #    print i
 
-        #TODO: transalte .uwg inputs into json file, then evaluate 
-        #print f[10]
-        #fg = eval(f[10])
-        #print fg
-        # Revise epw file name if not end with epw
-        #if not self.epwFileName.lower().endswith('.epw'):
-        #    self.epwFileName = self.epwFileName + '.epw'
-
+        print str(uwg_params[-1][0])
+        print float(uwg_params[-1][1])
         #TODO: Need to load data from initialize.uwg
-        #TODO: Possible take uwg ext, change to py and unpickle/pickle?
 
         # Run script to generate UCM, UBL, etc.
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint

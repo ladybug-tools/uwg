@@ -52,7 +52,7 @@ bld = [0 0 0,       # Full-service restaurant
     0 0 0,          # Stand-aloneRetail
     0 0 0,          # StripMall
     0 0 0,          # SuperMarket
-    0 0 0],         # Warehouse
+    0 0 0]         # Warehouse
 
 
 
@@ -83,15 +83,15 @@ RadFOcc = 0.2          # Radiant heat fraction from occupant (normally 0.2)
 RadFEquip = 0.5        # Radiant heat fraction from equipment (normally 0.5)
 RadFLight = 0.7        # Radiant heat fraction from light (normally 0.7)
 
-% Urban climate parameters
-h_ubl1 = 1000;          # ubl height - day (m)
-h_ubl2 = 80;            # ubl height - night (m)
-h_ref = 150;            # inversion height (m)
-h_temp = 2;             # temperature height (m)
-h_wind = 10;            # wind height (m)
-c_circ = 1.2;           # circulation coefficient (default = 1.2 per Bruno (2012))
-c_exch = 1.0;           # exchange coefficient (default = 1; ref Bruno (2014))
-maxDay = 150;           # max day threshold (W/m^2)
-maxNight = 20;          # max night threshold (W/m^2)
-windMin = 1.0;          # min wind speed (m/s)
-h_obs = 0.1;            # rural average obstacle height (m)
+# Urban climate parameters
+h_ubl1 = 1000          # ubl height - day (m)
+h_ubl2 = 80            # ubl height - night (m)
+h_ref = 150            # inversion height (m)
+h_temp = 2             # temperature height (m)
+h_wind = 10            # wind height (m)
+c_circ = 1.2           # circulation coefficient (default = 1.2 per Bruno (2012))
+c_exch = 1.0           # exchange coefficient (default = 1; ref Bruno (2014))
+maxDay = 150           # max day threshold (W/m^2)
+maxNight = 20          # max night threshold (W/m^2)
+windMin = 1.0          # min wind speed (m/s)
+h_obs = 0.1            # rural average obstacle height (m)
