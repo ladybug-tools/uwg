@@ -23,7 +23,7 @@ import utilities
 #TODO: creat DOE class with two functions
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources/DOERefBuildings")
+DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
 
 def readDOE():
     """
