@@ -157,6 +157,17 @@ class UWG(object):
         print self.uwgParamDir
         print self.uwgParamFileName
 
+        uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
+        if not os.path.exists(uwg_param_file_path):
+            raise Exception("Param file: '{}' does not exist.".format(uwg_param_file))
+
+        uwg_param_file = open(uwg_param_file_path,"r")
+        f = uwg_param_file.readlines()
+        uwg_param_file.close()
+
+        print f[10]
+        fg = eval(f[10])
+        print fg
         # Revise epw file name if not end with epw
         #if not self.epwFileName.lower().endswith('.epw'):
         #    self.epwFileName = self.epwFileName + '.epw'
