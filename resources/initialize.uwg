@@ -30,9 +30,10 @@ latTree,0.6,      # Fraction of the heat absorbed by trees that is latent (goes 
 rurVegCover,0.9,  # Fraction of the rural ground covered by vegetation
 
 # Traffic schedule [1 to 24 hour],
-SchTraffic,0.2,0.2,0.2,0.2,0.2,0.4,0.7,0.9,0.9,0.6,0.6,0.6,0.6,0.6,0.7,0.8,0.9,0.9,0.8,0.8,0.7,0.3,0.2,0.2, # Weekday
-0.2,0.2,0.2,0.2,0.2,0.3,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.7,0.7,0.7,0.7,0.5,0.4,0.3,0.2,0.2,            # Saturday
-0.2,0.2,0.2,0.2,0.2,0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.3,0.3,0.2,0.2,            # Sunday
+SchTraffic,
+0.2,0.2,0.2,0.2,0.2,0.4,0.7,0.9,0.9,0.6,0.6,0.6,0.6,0.6,0.7,0.8,0.9,0.9,0.8,0.8,0.7,0.3,0.2,0.2, # Weekday
+0.2,0.2,0.2,0.2,0.2,0.3,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.7,0.7,0.7,0.7,0.5,0.4,0.3,0.2,0.2, # Saturday
+0.2,0.2,0.2,0.2,0.2,0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.3,0.3,0.2,0.2, # Sunday
 
 # Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
 # Note that sum(bld) must be equal to 1
@@ -69,7 +70,7 @@ hvac,0,       # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natur
 # Simulation parameters,
 Month,1,        # starting month (1-12)
 Day,1,          # starting day (1-31)
-nDa,31,         # number of days to run simultion
+nDay,31,         # number of days to run simultion
 dtSim,300,      # simulation time step (s)
 dtWeather,3600, # weather time step (s)
 autosize,0,     # autosize HVAC (1 for yes; 0 for no)

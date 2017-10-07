@@ -23,7 +23,7 @@ import math
 import utilities
 from material import Material
 from simparam import SimParam
-
+from weather import Weather
 
 
 class UWG(object):
@@ -81,6 +81,7 @@ class UWG(object):
         self.uwgParamFileName = uwgParamFileName
         self.destinationDir = destinationDir
         self.destinationFile = destinationFile
+        self.init_param_dict = None
 
     def __repr__(self):
         return "UWG: {} ".format(self.epwFileName)
@@ -109,17 +110,17 @@ class UWG(object):
         # Make dir path to epw file
         climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
-        # Open epw file and feed csv data to climateDataFile
+        # Open epw file and feed csv data to climate_data
         try:
-            climateDataFile = utilities.read_csv(climateDataPath)
+            climate_data = utilities.read_csv(climateDataPath)
         except Exception as e:
             raise Exception("Failed to read epw file! {}".format(e.message))
 
         # Read header lines (1 to 8) from EPW and ensure TMY2 format.
-        self.header = climateDataFile[0:8]
+        self.header = climate_data[0:8]
 
         # Read weather data from EPW for each time step in weather file. (lines 8 - end)
-        self.epwinput = climateDataFile[8:]
+        self.epwinput = climate_data[8:]
 
         # Read Lat, Long (line 1 of EPW)
         self.lat = float(self.header[0][6])
@@ -151,49 +152,59 @@ class UWG(object):
         """Section 3 - Read Input File (.m, file)
         Note: UWG_Matlab input files are xlsm, XML, .m, file.
         properties:
-
+            self.updict # dictionary of simulation initialization parameters
         """
-        # try to just read
-        print self.uwgParamDir
-        print self.uwgParamFileName
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
+
+
         if not os.path.exists(uwg_param_file_path):
             raise Exception("Param file: '{}' does not exist.".format(uwg_param_file))
 
-        uwg_param_file = open(uwg_param_file_path,"r")
-        #filter(lambda f_: f_ != "", f)
+        # Open .uwg file and feed csv data to initializeDataFile
+        try:
+            uwg_param_data = utilities.read_csv(uwg_param_file_path)
+        except Exception as e:
+            raise Exception("Failed to read .uwg file! {}".format(e.message))
 
-        input_line = uwg_param_file.readline()
-        uwg_params = []
-        while input_line:
-            input_line = re.sub(r'#.*$', "", input_line)        # remove python comments from end of line
-            input_line = re.sub('[\n,' ']', "", input_line)     # rempove white space
-            if input_line == "" or input_line.isspace(): 
-                input_line = uwg_param_file.readline()
+
+        self.init_param_dict = {}
+        count = 0
+        while  count < len(uwg_param_data):
+            row = uwg_param_data[count]
+            if row == [] or "#" in row[0]:
+                count += 1
                 continue
-            input_line = input_line.split("=")
-            uwg_params.append(input_line)
-            input_line = uwg_param_file.readline()
-        uwg_param_file.close()
+            elif row[0] == "SchTraffic":
+                # SchTraffic: 3 x 24 matrix
+                trafficrows = uwg_param_data[count+1:count+4]
+                self.init_param_dict[row[0]] = map(lambda r: utilities.str2fl(r[:24]),trafficrows)
+                count += 4
+            elif row[0] == "bld":
+                #bld: 17 x 3 matrix
+                bldrows = uwg_param_data[count+1:count+18]
+                self.init_param_dict[row[0]] = map(lambda r: utilities.str2fl(r[:3]),bldrows)
+                count += 18
+            else:
+                count += 1
+                self.init_param_dict[row[0]] = float(row[1])
 
-        #for i in uwg_params:
-        #    print i
-
-        print str(uwg_params[-1][0])
-        print float(uwg_params[-1][1])
-        #TODO: Need to load data from initialize.uwg
+        IPD = self.init_param_dict
 
         # Run script to generate UCM, UBL, etc.
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
 
-        """
-        simTime = SimParam(dtSim,dtWeather,Month,Day,nDay);
-        weather = Weather(climate_data,simTime.timeInitial,simTime.timeFinal);
-        forcIP = Forcing(weather.staTemp,weather);
-        forc = Forcing;
+        #rename initial parameters
+        dtSim,dtWeather,Month,Day,nDay = IPD['dtSim'],IPD['dtWeather'],IPD['Month'],IPD['Day'],IPD['nDay']
+        climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
+        #simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)
+        #weather = Weather(climateDataPath,simTime.timeInitial,simTime.timeFinal)
+        #forcIP = Forcing(weather.staTemp,weather)
+        #forc = Forcing()
+
+        """
         % Road (Assume 0.5m of asphalt)
         emis = 0.93;
         asphalt = Material (1.0,1.6e6);

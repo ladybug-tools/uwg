@@ -15,15 +15,15 @@ class TestUWG(object):
     def setup_init_uwg(self):
         epw_dir = self.DIR_EPW_PATH
         epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = None
-        uwg_param_file_name = None
+        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
+        uwg_param_file_name = "initialize.uwg"
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
 
     def test_read_epw(self):
         self.setup_init_uwg()
-
         self.uwg.read_epw()
+
         # test header
         assert self.uwg.header[0][0] == "LOCATION"
         assert self.uwg.header[0][1] == "SINGAPORE"
@@ -43,6 +43,35 @@ class TestUWG(object):
         # test time step in weather file
         assert self.uwg.epwinput[0][0] == "1989"
         assert float(self.uwg.epwinput[3][6]) == pytest.approx(24.1,abs=1e-3)
+
+    def test_read_input(self):
+        self.setup_init_uwg()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        #test uwg param dictionary first and last
+        assert self.uwg.init_param_dict.has_key('bldHeight') == True
+        assert self.uwg.init_param_dict.has_key('h_obs') == True
+        #test values
+        assert self.uwg.init_param_dict['bldHeight'] == pytest.approx(10., abs=1e6)
+        assert self.uwg.init_param_dict['vegEnd'] == pytest.approx(0.2, abs=1e6)
+        assert self.uwg.init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e6)
+        assert self.uwg.init_param_dict['h_ubl1'] == pytest.approx(80., abs=1e6)
+        assert self.uwg.init_param_dict['h_ref'] == pytest.approx(150., abs=1e6)
+
+        # test SchTraffic schedule
+        assert self.uwg.init_param_dict['SchTraffic'][0][0] == pytest.approx(0.2, abs=1e6) # first
+        assert self.uwg.init_param_dict['SchTraffic'][2][23] == pytest.approx(0.2, abs=1e6) # last
+        assert self.uwg.init_param_dict['SchTraffic'][0][19] == pytest.approx(0.8, abs=1e6)
+        assert self.uwg.init_param_dict['SchTraffic'][1][21] == pytest.approx(0.3, abs=1e6)
+        assert self.uwg.init_param_dict['SchTraffic'][2][6] == pytest.approx(0.3, abs=1e6)
+
+        # test bld fraction list
+        assert self.uwg.init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e6)
+        assert self.uwg.init_param_dict['bld'][4][1] == pytest.approx(0.4, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][6][1] == pytest.approx(0.6, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][16][2] == pytest.approx(0.2, abs=1e6)
+
 
 if __name__ == "__main__":
     test = TestUWG()
