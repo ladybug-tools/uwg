@@ -73,6 +73,7 @@ Day,1,          # starting day (1-31)
 nDay,31,         # number of days to run simultion
 dtSim,300,      # simulation time step (s)
 dtWeather,3600, # weather time step (s)
+
 autosize,0,     # autosize HVAC (1 for yes; 0 for no)
 sensOcc,100,    # Sensible heat per occupant (W)
 LatFOcc,0.3,    # Latent heat fraction from occupant (normally 0.3)

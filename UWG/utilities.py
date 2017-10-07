@@ -11,6 +11,15 @@ def zeros(h, w):
     """
     return [[0 for x in range(w)] for y in range(h)]
 
+def ones(h, w):
+    """create a (h x w) matrix of ones.
+
+    Args:
+        h: Height of the matrix.
+        w: Width of the matrix.
+    """
+    return [[1 for x in range(w)] for y in range(h)]
+
 def read_csv(file_name_):
     # open csv file and read
     if os.path.exists(file_name_):

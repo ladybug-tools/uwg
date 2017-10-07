@@ -24,7 +24,8 @@ import utilities
 from material import Material
 from simparam import SimParam
 from weather import Weather
-
+from forcing import Forcing
+from element import Element
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -156,7 +157,7 @@ class UWG(object):
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
-
+        climate_file_path = os.path.join(self.epwDir, self.epwFileName)
 
         if not os.path.exists(uwg_param_file_path):
             raise Exception("Param file: '{}' does not exist.".format(uwg_param_file))
@@ -167,7 +168,8 @@ class UWG(object):
         except Exception as e:
             raise Exception("Failed to read .uwg file! {}".format(e.message))
 
-
+        # The initialize.uwg is read with a dictionary so that users changing
+        # line endings or line numbers doesn't make reading input incorrect
         self.init_param_dict = {}
         count = 0
         while  count < len(uwg_param_data):
@@ -189,42 +191,92 @@ class UWG(object):
                 count += 1
                 self.init_param_dict[row[0]] = float(row[1])
 
-        IPD = self.init_param_dict
+        #rename initial parameters for local scope
+        ipd = self.init_param_dict
+        # Define Simulation and Weather parameters
+        Month = ipd['Month']                # starting month (1-12)
+        Day = ipd['Day']                    # starting day (1-31)
+        nDay = ipd['nDay']                  # number of days
+        dtSim = ipd['dtSim']                # simulation time step (s)
 
-        # Run script to generate UCM, UBL, etc.
+        dtWeather = ipd['dtWeather']        # seconds (s)
+        autosize = ipd['autosize']          # autosize HVAC (1 or 0)
+        sensOcc = ipd['sensOcc']            # Sensible heat from occupant
+        LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
+        RadFOcc = ipd['RadFOcc']            # Radiant heat fraction from occupant (normally 0.2)
+        RadFEquip = ipd['RadFEquip']        # Radiant heat fraction from equipment (normally 0.5)
+        RadFLight = ipd['RadFLight']        # Radiant heat fraction from light (normally 0.7)
+
+        simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)  # simulation time parametrs
+        weather = Weather(climate_file_path,simTime.timeInitial,simTime.timeFinal) # weather file data for simulation time period
+        forcIP = Forcing(weather.staTemp,weather) # initialized Forcing class
+        forc = Forcing() # empty forcing class
+
+        # Define Urban microclimate parameters
+        h_ubl1 = ipd['h_ubl1']              # ubl height - day (m)
+        h_ubl2 = ipd['h_ubl2']              # ubl height - night (m)
+        h_ref = ipd['h_ref']                # inversion height
+        h_temp = ipd['h_temp']              # temperature height
+        h_wind = ipd['h_wind']              # wind height
+        c_circ = ipd['c_circ']              # circulation coefficient
+        c_exch = ipd['c_exch']              # exchange coefficient
+        maxDay = ipd['maxDay']              # max day threshhold
+        maxNight = ipd['maxNight']          # max night threshhold
+        windMin = ipd['windMin']            # min wind speed (m/s)
+        h_obs = ipd['h_obs']                # rural average obstacle height
+
+        # Urban characteristics
+        bldHeight = ipd['bldHeight']        # average building height (m)
+        h_mix = ipd['hMix']                # mixing height (m)
+        bldDensity = ipd['bldDensity']      # building density (0-1)
+        verToHor = ipd['verToHor']          # building aspect ratio
+        charLength = ipd['charLength']      # characteristic length (m)
+        alb_road = ipd['albRoad']          # road albedo
+        d_road = ipd['dRoad']              # road pavement thickness
+        sensAnth = ipd['sensAnth']          # non-building sens heat (W/m^2)
+
+        # Vegetation parameters
+        vegCover = ipd['vegCover']          # urban area veg coverage ratio
+        treeCoverage = ipd['treeCoverage']  # urban area tree coverage ratio
+        vegStart = ipd['vegStart']          # vegetation start month
+        vegEnd = ipd['vegEnd']              # vegetation end month
+        albVeg = ipd['albVeg']              # Vegetation albedo
+        latGrss = ipd['latGrss']            # latent fraction of grass
+        latTree = ipd['latTree']            # latent fraction of tree
+        rurVegCover = ipd['rurVegCover']    # rural vegetation cover
+
+        # Initialize geographic Param and Urban Boundary Layer Objects
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
 
-        #rename initial parameters
-        dtSim,dtWeather,Month,Day,nDay = IPD['dtSim'],IPD['dtWeather'],IPD['Month'],IPD['Day'],IPD['nDay']
-        climateDataPath = os.path.join(self.epwDir, self.epwFileName)
+        #TODO: geoParam, write UBLDef
+        #geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
+        #    latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
+        #    g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
+        #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
 
-        #simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)
-        #weather = Weather(climateDataPath,simTime.timeInitial,simTime.timeFinal)
-        #forcIP = Forcing(weather.staTemp,weather)
-        #forc = Forcing()
+        # Define Traffic schedule
+        SchTraffic = ipd['SchTraffic']
+
+        # Define Road (Assume 0.5m of asphalt)
+        emis = 0.93
+        asphalt = Material(1.0,1.6e6,'asphalt')
+        road_T_init = 293.
+        road_horizontal = 1
+        road_veg_coverage = min(vegCover/(1-bldDensity),1.) # fraction of surface vegetation coverage
+
+        # define road layers
+        road_layer_num = int(math.ceil(d_road/0.05))
+        thickness_vector = map(lambda r: 0.05, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
+        material_vector = map(lambda n: asphalt, range(road_layer_num))
+
+        road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal)
 
         """
-        % Road (Assume 0.5m of asphalt)
-        emis = 0.93;
-        asphalt = Material (1.0,1.6e6);
-        thickness = 0.05 * ones (ceil(d_road/0.05),1);
-        road = Element(alb_road,emis,thickness,[asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;asphalt;],0,293,1);
-        road.vegCoverage = min(vegCover/(1-bldDensity),1);
+        # Define BEM for each DOE type (read the fraction)
+        # load ('RefDOE.mat');
 
-        rural = road;
-        rural.vegCoverage = rurVegCover;
-        T_init = weather.staTemp(1);
-        H_init = weather.staHum(1);
-
-        geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
-            latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
-            g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
-        UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
-
-        % Define BEM for each DOE type (read the fraction)
-        load ('RefDOE.mat');
-
+        # may need to include optional building parameters here
         % Define building energy models
         k = 0;
         r_glaze = 0;
@@ -247,13 +299,19 @@ class UWG(object):
             end
         end
 
+        % Reference site class (also include VDM)
+        RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
+        USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
+
+        rural = road;
+        rural.vegCoverage = rurVegCover;
+        T_init = weather.staTemp(1);
+        H_init = weather.staHum(1);
+
         UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
             sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
         UCM.h_mix = h_mix;
 
-        % Reference site class (also include VDM)
-        RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
-        USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
 
         # Note:
         # Looks to me like road layer is fixed at 0.5 (init) or user-specified depth and

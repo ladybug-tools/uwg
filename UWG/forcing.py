@@ -1,13 +1,14 @@
 class Forcing (object):
     """
     FORCING
-    Force Restore method to estimate ground soil temperature?? -sv
+    Force method to estimate deep ground/water temperature
 
     """
 
     def __init__(self,staTemp=None,weather=None):
         # weather: Weather obj
         # staTemp: list of hourly air temperature for simulation period
+        
         # Define default values for instance variables, when the type can be mutable:
         if staTemp==None and weather==None:
             self.deepTemp = None                # deep soil temperature (K)
