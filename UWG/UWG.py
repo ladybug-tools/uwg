@@ -254,6 +254,7 @@ class UWG(object):
         geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
+
         #TODO:  write UBLDef
         #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
 
@@ -286,7 +287,7 @@ class UWG(object):
         hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
         """
-        % Define building energy models
+        # Define building energy models
         k = 0;
         r_glaze = 0;
         SHGC = 0;
