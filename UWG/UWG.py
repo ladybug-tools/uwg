@@ -249,8 +249,6 @@ class UWG(object):
         # Initialize geographic Param and Urban Boundary Layer Objects
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
-
-        #Confirm this
         maxdx = 250;            # max dx (m)
 
         geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
@@ -263,8 +261,11 @@ class UWG(object):
         SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
+        kRoad = ipd['kRoad'                 # road pavement conductivity (W/m K)
+        cRoad = ipd['cRoad']                # road volumetric heat capacity (J/m^3 K)
+
         emis = 0.93
-        asphalt = Material(1.0,1.6e6,'asphalt')
+        asphalt = Material(kRoad,cRoad,'asphalt')
         road_T_init = 293.
         road_horizontal = 1
         road_veg_coverage = min(vegCover/(1-bldDensity),1.) # fraction of surface vegetation coverage
@@ -276,11 +277,15 @@ class UWG(object):
 
         road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal)
 
-        """
         # Define BEM for each DOE type (read the fraction)
         # load ('RefDOE.mat');
 
-        # may need to include optional building parameters here
+        albRoof = ipd['albRoof']            # roof albedo (0 - 1)
+        vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
+        glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
+        hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+
+        """
         % Define building energy models
         k = 0;
         r_glaze = 0;
