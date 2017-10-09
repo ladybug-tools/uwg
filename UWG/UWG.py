@@ -284,7 +284,7 @@ class UWG(object):
         road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal)
 
         # Define BEM for each DOE type (read the fraction)
-        readDOE_file_path = os.path.join(DIR_UP_PATH,"resources","readDOE.pkl")
+        readDOE_file_path = os.path.join(self.DIR_UP_PATH,"resources","readDOE.pkl")
         if not os.path.exists(readDOE_file_path):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
@@ -295,6 +295,7 @@ class UWG(object):
         readDOE_file.close()
 
         # parameters from initialize.uwg
+        bld = ipd['bld']                    # fraction of building type/era
         albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
         r_glaze = ipd['glzR']               # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
@@ -302,10 +303,21 @@ class UWG(object):
 
         # Define building energy models
         k = 0
-        SHGC = 0        # SHGC addition
-        alb_wall = 0    # albedo wall addition
+        SHGC = 0                # SHGC addition
+        alb_wall = 0            # albedo wall addition
+        h_floor = 3.05          # average floor height
 
-        #area = bld*charLength^2*bldDensity*bldHeight/h_floor;  % building floor area
+        total_bld_area = math.pow(charLength,2)*bldDensity*bldHeight/h_floor  # total building floor area
+        area_matrix = utilities.ones(17,3)
+        
+        #pprint.pprint(area_matrix)
+        #print '-'
+        #pprint.pprint(bld)
+        #for i in xrange(len(bld)):
+        #    for j in range(3):
+        #        bld[i][j] = bld[i][j] * total_bld_area
+
+
 
         """
         for i = 1:16

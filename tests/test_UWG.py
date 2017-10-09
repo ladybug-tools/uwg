@@ -72,6 +72,8 @@ class TestUWG(object):
         assert self.uwg.init_param_dict['bld'][6][1] == pytest.approx(0.6, abs=1e6)
         assert self.uwg.init_param_dict['bld'][16][2] == pytest.approx(0.2, abs=1e6)
 
+        # test bld area multiplication
+        assert self.uwg.
 
 if __name__ == "__main__":
     test = TestUWG()

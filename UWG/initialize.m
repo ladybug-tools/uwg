@@ -9,13 +9,13 @@
 
 # Urban characteristics
 bldHeight = 10          # average building height (m)
-h_mix = 1               # fraction of waste heat to canyon
 bldDensity = 0.5        # urban area building plan density (0-1)
 verToHor = 0.8          # urban area vertical to horizontal ratio
 h_floor = 3.05          # average floor height
+h_mix = 1               # fraction of waste heat to canyon
 charLength = 1000       # urban area characteristic length (m)
-maxdx = 250             # Max Dx (m)
 alb_road = 0.2          # road albedo (0 - 1)
+maxdx = 250             # Max Dx (m)
 d_road = 0.5            # road pavement thickness (m)
 sensAnth = 20           # non-building sens heat (W/m^2)
 latAnth = 2             # non-building latent heat (W/m^2) (currently not used)
