@@ -26,6 +26,7 @@ from simparam import SimParam
 from weather import Weather
 from forcing import Forcing
 from element import Element
+from param import Param
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -249,10 +250,13 @@ class UWG(object):
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
 
-        #TODO: geoParam, write UBLDef
-        #geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,...
-        #    latTree,latGrss,albVeg,vegStart,vegEnd,nightStart,nightEnd,windMin,wgmax,c_exch,maxdx,...
-        #    g, cp, vk, r, rv, lv, pi(), sigma, waterDens, lvtt, tt, estt, cl, cpv, b, cm, colburn);
+        #Confirm this
+        maxdx = 250;            # max dx (m)
+
+        geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
+            nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
+            self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
+        #TODO:  write UBLDef
         #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
 
         # Define Traffic schedule
