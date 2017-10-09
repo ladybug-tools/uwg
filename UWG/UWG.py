@@ -17,8 +17,9 @@ doi: 10.1080/19401493.2012.718797
 """
 
 import os
-import re
 import math
+import cPickle
+import pprint
 
 import utilities
 from material import Material
@@ -75,6 +76,9 @@ class UWG(object):
 
     # Site-specific parameters
     wgmax = 0.005          # maximum film water depth on horizontal surfaces (m)
+
+    # File path parameter
+    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
         self.epwDir = epwDir
@@ -171,6 +175,7 @@ class UWG(object):
 
         # The initialize.uwg is read with a dictionary so that users changing
         # line endings or line numbers doesn't make reading input incorrect
+        # It may make sense to change .uwg into json or something for more control over i/o
         self.init_param_dict = {}
         count = 0
         while  count < len(uwg_param_data):
@@ -228,12 +233,12 @@ class UWG(object):
 
         # Urban characteristics
         bldHeight = ipd['bldHeight']        # average building height (m)
-        h_mix = ipd['hMix']                # mixing height (m)
+        h_mix = ipd['hMix']                 # mixing height (m)
         bldDensity = ipd['bldDensity']      # building density (0-1)
         verToHor = ipd['verToHor']          # building aspect ratio
-        charLength = ipd['charLength']      # characteristic length (m)
-        alb_road = ipd['albRoad']          # road albedo
-        d_road = ipd['dRoad']              # road pavement thickness
+        charLength = ipd['charLength']      # radius defining the urban area of study [aka. characteristic length] (m)
+        alb_road = ipd['albRoad']           # road albedo
+        d_road = ipd['dRoad']               # road pavement thickness
         sensAnth = ipd['sensAnth']          # non-building sens heat (W/m^2)
 
         # Vegetation parameters
@@ -262,8 +267,8 @@ class UWG(object):
         SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
-        kRoad = ipd['kRoad'                 # road pavement conductivity (W/m K)
-        cRoad = ipd['cRoad']                # road volumetric heat capacity (J/m^3 K)
+        kRoad = ipd['kRoad']                 # road pavement conductivity (W/m K)
+        cRoad = ipd['cRoad']                 # road volumetric heat capacity (J/m^3 K)
 
         emis = 0.93
         asphalt = Material(kRoad,cRoad,'asphalt')
@@ -279,20 +284,30 @@ class UWG(object):
         road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal)
 
         # Define BEM for each DOE type (read the fraction)
-        # load ('RefDOE.mat');
+        readDOE_file_path = os.path.join(DIR_UP_PATH,"resources","readDOE.pkl")
+        if not os.path.exists(readDOE_file_path):
+            raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
+        readDOE_file = open(readDOE_file_path, 'rb') # open pickle file in binary form
+        refDOE = cPickle.load(readDOE_file)
+        refBEM = cPickle.load(readDOE_file)
+        refSchedule = cPickle.load(readDOE_file)
+        readDOE_file.close()
+
+        # parameters from initialize.uwg
         albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
-        glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
+        r_glaze = ipd['glzR']               # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
         hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
-        """
         # Define building energy models
-        k = 0;
-        r_glaze = 0;
-        SHGC = 0;
-        alb_wall = 0;
-        area = bld*charLength^2*bldDensity*bldHeight/h_floor;  % building floor area
+        k = 0
+        SHGC = 0        # SHGC addition
+        alb_wall = 0    # albedo wall addition
+
+        #area = bld*charLength^2*bldDensity*bldHeight/h_floor;  % building floor area
+
+        """
         for i = 1:16
             for j = 1:3
                 if bld(i,j) > 0
@@ -308,7 +323,9 @@ class UWG(object):
                 end
             end
         end
+        """
 
+        """
         % Reference site class (also include VDM)
         RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
         USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);

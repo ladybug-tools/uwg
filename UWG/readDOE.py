@@ -393,19 +393,15 @@ def readDOE():
     # Serialize refDOE,refBEM,Schedule and store in resources
 
     # Create a binary file for serialized obj
-    pickle_refDOE = open(os.path.join(DIR_UP_PATH,'resources','refDOE.pkl'), 'wb')
-    pickle_refBEM = open(os.path.join(DIR_UP_PATH,'resources','refBEM.pkl'), 'wb')
-    pickle_Schedule = open(os.path.join(DIR_UP_PATH,'resources','Schedule.pkl'), 'wb')
+    pickle_readDOE = open(os.path.join(DIR_UP_PATH,'resources','readDOE.pkl'), 'wb')
 
     # resources
     # Pickle objects, protocol 1 b/c binary file
-    cPickle.dump(refDOE, pickle_refDOE,1)
-    cPickle.dump(refBEM, pickle_refBEM,1)
-    cPickle.dump(Schedule, pickle_Schedule,1)
+    cPickle.dump(refDOE, pickle_readDOE,1)
+    cPickle.dump(refBEM, pickle_readDOE,1)
+    cPickle.dump(Schedule, pickle_readDOE,1)
 
-    pickle_refDOE.close()
-    pickle_refBEM.close()
-    pickle_Schedule.close()
+    pickle_readDOE.close()
 
     #print test_treeDOE.test_results()
 
