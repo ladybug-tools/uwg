@@ -158,7 +158,8 @@ class UWG(object):
         """Section 3 - Read Input File (.m, file)
         Note: UWG_Matlab input files are xlsm, XML, .m, file.
         properties:
-            self.updict # dictionary of simulation initialization parameters
+            self.init_param_dict # dictionary of simulation initialization parameters
+            self.BEM # list of BEMDef objects used Building Energy Model
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
@@ -190,9 +191,9 @@ class UWG(object):
                 count += 4
             elif row[0] == "bld":
                 #bld: 17 x 3 matrix
-                bldrows = uwg_param_data[count+1:count+18]
+                bldrows = uwg_param_data[count+1:count+17]
                 self.init_param_dict[row[0]] = map(lambda r: utilities.str2fl(r[:3]),bldrows)
-                count += 18
+                count += 17
             else:
                 count += 1
                 self.init_param_dict[row[0]] = float(row[1])
@@ -240,6 +241,9 @@ class UWG(object):
         alb_road = ipd['albRoad']           # road albedo
         d_road = ipd['dRoad']               # road pavement thickness
         sensAnth = ipd['sensAnth']          # non-building sens heat (W/m^2)
+
+        # climate Zone
+        zone = int(ipd['zone'])-1
 
         # Vegetation parameters
         vegCover = ipd['vegCover']          # urban area veg coverage ratio
@@ -307,36 +311,23 @@ class UWG(object):
         alb_wall = 0            # albedo wall addition
         h_floor = 3.05          # average floor height
 
-        total_bld_area = math.pow(charLength,2)*bldDensity*bldHeight/h_floor  # total building floor area
-        area_matrix = utilities.ones(17,3)
-        
-        #pprint.pprint(area_matrix)
-        #print '-'
-        #pprint.pprint(bld)
-        #for i in xrange(len(bld)):
-        #    for j in range(3):
-        #        bld[i][j] = bld[i][j] * total_bld_area
+        total_urban_bld_area = math.pow(charLength,2)*bldDensity*bldHeight/h_floor  # total building floor area
+        area_matrix = utilities.zeros(16,3)
 
-
-
-        """
-        for i = 1:16
-            for j = 1:3
-                if bld(i,j) > 0
-                    k = k + 1;
-                    BEM(k) = refBEM(i,j,zone);
-                    BEM(k).frac = bld(i,j);
-                    BEM(k).fl_area = area(i,j);
-                    r_glaze = r_glaze + BEM(k).frac * BEM(k).building.glazingRatio;
-                    SHGC = SHGC + BEM(k).frac * BEM(k).building.shgc;
-                    alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
-                    BEM(k).Qocc = BEM(k).Qocc;
-                    Sch(k) = Schedule(i,j,zone);
-                end
-            end
-        end
-        """
-
+        self.BEM = []           # list of BEMDef objects
+        for i in xrange(16):    # 16 building types
+            for j in xrange(3): # 3 built eras
+                if bld[i][j] > 0.:
+                    self.BEM.append(refBEM[i][j][zone])
+                    #Test
+                    self.BEM[k].frac = bld[i][j]
+                    self.BEM[k].fl_area = bld[i][j] * total_urban_bld_area
+                    r_glaze = r_glaze + (self.BEM[k].frac * self.BEM[k].building.glazingRatio)
+                    SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
+                    #alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
+                    #BEM(k).Qocc = BEM(k).Qocc;
+                    #Sch(k) = Schedule(i,j,zone);
+                    k += 1
         """
         % Reference site class (also include VDM)
         RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);

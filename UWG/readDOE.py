@@ -120,7 +120,7 @@ def readDOE():
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
-    for i in xrange(16):#16
+    for i in xrange(16):
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe1 = read_csv(file_doe_name_bld)

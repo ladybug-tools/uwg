@@ -68,12 +68,18 @@ class TestUWG(object):
 
         # test bld fraction list
         assert self.uwg.init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e6)
-        assert self.uwg.init_param_dict['bld'][4][1] == pytest.approx(0.4, abs=1e6)
-        assert self.uwg.init_param_dict['bld'][6][1] == pytest.approx(0.6, abs=1e6)
-        assert self.uwg.init_param_dict['bld'][16][2] == pytest.approx(0.2, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][15][2] == pytest.approx(0.2, abs=1e6)
 
         # test bld area multiplication
-        assert self.uwg.
+        assert self.uwg.BEM[0].building.Type == "LargeOffice"
+        assert self.uwg.BEM[0].building.Zone == "1A (Miami)"
+        assert self.uwg.BEM[0].building.Era == "Pst80"
+
+        assert self.uwg.BEM[1].building.Type == "MidRiseApartment"
+        assert self.uwg.BEM[1].building.Zone == "1A (Miami)"
+        assert self.uwg.BEM[1].building.Era == "Pst80"
 
 if __name__ == "__main__":
     test = TestUWG()
