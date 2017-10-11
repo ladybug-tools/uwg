@@ -72,14 +72,25 @@ class TestUWG(object):
         assert self.uwg.init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e6)
         assert self.uwg.init_param_dict['bld'][15][2] == pytest.approx(0.2, abs=1e6)
 
-        # test bld area multiplication
+        # test BEMs
+        assert len(self.uwg.BEM) == pytest.approx(2.,abs=1e6)
+        # test BEM office
         assert self.uwg.BEM[0].building.Type == "LargeOffice"
         assert self.uwg.BEM[0].building.Zone == "1A (Miami)"
         assert self.uwg.BEM[0].building.Era == "Pst80"
+        assert self.uwg.BEM[0].frac = 0.4
 
+        # test BEM apartment
         assert self.uwg.BEM[1].building.Type == "MidRiseApartment"
         assert self.uwg.BEM[1].building.Zone == "1A (Miami)"
         assert self.uwg.BEM[1].building.Era == "Pst80"
+        assert self.uwg.BEM[1].frac = 0.6
+
+        # Check that schedules are called correctly
+        assert self.uwg.Sch[0].Light[0][10] == pytest.approx(0., abs=1e6)   #9am on Weekday for Office
+        assert self.uwg.Sch[0].Light[1][10] == pytest.approx(0., abs=1e6)   #9am on Weekend for Office
+        assert self.uwg.Sch[1].Occ[0][23] == pytest.approx(0., abs=1e6)     #11pm on Weekday for apt
+        assert self.uwg.Sch[1].Occ[1][13] == pytest.approx(0., abs=1e6)     #12 noon on Weekend for apt
 
 if __name__ == "__main__":
     test = TestUWG()

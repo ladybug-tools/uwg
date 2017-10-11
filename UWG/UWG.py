@@ -159,7 +159,8 @@ class UWG(object):
         Note: UWG_Matlab input files are xlsm, XML, .m, file.
         properties:
             self.init_param_dict # dictionary of simulation initialization parameters
-            self.BEM # list of BEMDef objects used Building Energy Model
+            self.BEM # list of BEMDef objects extracted from readDOE
+            self.Sch # list of Schedule objects extracted from readDOE
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
@@ -298,41 +299,48 @@ class UWG(object):
         refSchedule = cPickle.load(readDOE_file)
         readDOE_file.close()
 
-        # parameters from initialize.uwg
+        # optional parameters from initialize.uwg
         bld = ipd['bld']                    # fraction of building type/era
         albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
-        r_glaze = ipd['glzR']               # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
+        glzR = ipd['glzR']               # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
         hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
         # Define building energy models
         k = 0
-        SHGC = 0                # SHGC addition
-        alb_wall = 0            # albedo wall addition
+        r_glaze = 0             # Glazing ratio for total building stock
+        SHGC = 0                # SHGC addition for total building stock
+        alb_wall = 0            # albedo wall addition for total building stock
         h_floor = 3.05          # average floor height
 
         total_urban_bld_area = math.pow(charLength,2)*bldDensity*bldHeight/h_floor  # total building floor area
         area_matrix = utilities.zeros(16,3)
 
         self.BEM = []           # list of BEMDef objects
+        self.Sch = []           # list of Schedule objects
+
         for i in xrange(16):    # 16 building types
             for j in xrange(3): # 3 built eras
                 if bld[i][j] > 0.:
+                    # Add to BEM list
                     self.BEM.append(refBEM[i][j][zone])
-                    #Test
                     self.BEM[k].frac = bld[i][j]
                     self.BEM[k].fl_area = bld[i][j] * total_urban_bld_area
-                    r_glaze = r_glaze + (self.BEM[k].frac * self.BEM[k].building.glazingRatio)
-                    SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
-                    #alb_wall = alb_wall + BEM(k).frac * BEM(k).wall.albedo;
-                    #BEM(k).Qocc = BEM(k).Qocc;
-                    #Sch(k) = Schedule(i,j,zone);
-                    k += 1
-        """
-        % Reference site class (also include VDM)
-        RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
-        USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
 
+                    # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
+                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
+                    SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
+                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
+
+                    # Add to schedule list
+                    self.Sch.append(refSchedule[i][j][zone])
+                    k += 1
+
+        #TODO: Make RSM Class
+        # Reference site class (also include VDM)
+        #RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
+        #USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
+        """
         rural = road;
         rural.vegCoverage = rurVegCover;
         T_init = weather.staTemp(1);
