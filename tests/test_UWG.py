@@ -87,10 +87,10 @@ class TestUWG(object):
         assert self.uwg.BEM[1].frac = 0.6
 
         # Check that schedules are called correctly
-        assert self.uwg.Sch[0].Light[0][10] == pytest.approx(0., abs=1e6)   #9am on Weekday for Office
-        assert self.uwg.Sch[0].Light[1][10] == pytest.approx(0., abs=1e6)   #9am on Weekend for Office
-        assert self.uwg.Sch[1].Occ[0][23] == pytest.approx(0., abs=1e6)     #11pm on Weekday for apt
-        assert self.uwg.Sch[1].Occ[1][13] == pytest.approx(0., abs=1e6)     #12 noon on Weekend for apt
+        #assert self.uwg.Sch[0].Light[0][10] == pytest.approx(0., abs=1e6)   #9am on Weekday for Office
+        #assert self.uwg.Sch[0].Light[1][10] == pytest.approx(0., abs=1e6)   #9am on Weekend for Office
+        #assert self.uwg.Sch[1].Occ[0][23] == pytest.approx(0., abs=1e6)     #11pm on Weekday for apt
+        #assert self.uwg.Sch[1].Occ[1][13] == pytest.approx(0., abs=1e6)     #12 noon on Weekend for apt
 
 if __name__ == "__main__":
     test = TestUWG()
