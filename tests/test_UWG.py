@@ -78,13 +78,13 @@ class TestUWG(object):
         assert self.uwg.BEM[0].building.Type == "LargeOffice"
         assert self.uwg.BEM[0].building.Zone == "1A (Miami)"
         assert self.uwg.BEM[0].building.Era == "Pst80"
-        assert self.uwg.BEM[0].frac = 0.4
+        assert self.uwg.BEM[0].frac == 0.4
 
         # test BEM apartment
         assert self.uwg.BEM[1].building.Type == "MidRiseApartment"
         assert self.uwg.BEM[1].building.Zone == "1A (Miami)"
         assert self.uwg.BEM[1].building.Era == "Pst80"
-        assert self.uwg.BEM[1].frac = 0.6
+        assert self.uwg.BEM[1].frac == 0.6
 
         # Check that schedules are called correctly
         #assert self.uwg.Sch[0].Light[0][10] == pytest.approx(0., abs=1e6)   #9am on Weekday for Office
