@@ -53,27 +53,27 @@ class TestUWG(object):
         assert self.uwg.init_param_dict.has_key('bldHeight') == True
         assert self.uwg.init_param_dict.has_key('h_obs') == True
         #test values
-        assert self.uwg.init_param_dict['bldHeight'] == pytest.approx(10., abs=1e6)
-        assert self.uwg.init_param_dict['vegEnd'] == pytest.approx(0.2, abs=1e6)
-        assert self.uwg.init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e6)
-        assert self.uwg.init_param_dict['h_ubl1'] == pytest.approx(80., abs=1e6)
-        assert self.uwg.init_param_dict['h_ref'] == pytest.approx(150., abs=1e6)
+        assert self.uwg.init_param_dict['bldHeight'] == pytest.approx(10., abs=1e-6)
+        assert self.uwg.init_param_dict['vegEnd'] == pytest.approx(10, abs=1e-6)
+        assert self.uwg.init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e-6)
+        assert self.uwg.init_param_dict['h_ubl1'] == pytest.approx(1000., abs=1e-6)
+        assert self.uwg.init_param_dict['h_ref'] == pytest.approx(150., abs=1e-6)
 
         # test SchTraffic schedule
-        assert self.uwg.init_param_dict['SchTraffic'][0][0] == pytest.approx(0.2, abs=1e6) # first
-        assert self.uwg.init_param_dict['SchTraffic'][2][23] == pytest.approx(0.2, abs=1e6) # last
-        assert self.uwg.init_param_dict['SchTraffic'][0][19] == pytest.approx(0.8, abs=1e6)
-        assert self.uwg.init_param_dict['SchTraffic'][1][21] == pytest.approx(0.3, abs=1e6)
-        assert self.uwg.init_param_dict['SchTraffic'][2][6] == pytest.approx(0.3, abs=1e6)
+        assert self.uwg.init_param_dict['SchTraffic'][0][0] == pytest.approx(0.2, abs=1e-6) # first
+        assert self.uwg.init_param_dict['SchTraffic'][2][23] == pytest.approx(0.2, abs=1e-6) # last
+        assert self.uwg.init_param_dict['SchTraffic'][0][19] == pytest.approx(0.8, abs=1e-6)
+        assert self.uwg.init_param_dict['SchTraffic'][1][21] == pytest.approx(0.3, abs=1e-6)
+        assert self.uwg.init_param_dict['SchTraffic'][2][6] == pytest.approx(0.4, abs=1e-6)
 
         # test bld fraction list
-        assert self.uwg.init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e6)
-        assert self.uwg.init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e6)
-        assert self.uwg.init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e6)
-        assert self.uwg.init_param_dict['bld'][15][2] == pytest.approx(0.2, abs=1e6)
+        assert self.uwg.init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e-6)
+        assert self.uwg.init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e-6)
+        assert self.uwg.init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e-6)
+        assert self.uwg.init_param_dict['bld'][15][2] == pytest.approx(0.0, abs=1e-6)
 
         # test BEMs
-        assert len(self.uwg.BEM) == pytest.approx(2.,abs=1e6)
+        assert len(self.uwg.BEM) == pytest.approx(2.,abs=1e-6)
         # test BEM office
         assert self.uwg.BEM[0].building.Type == "LargeOffice"
         assert self.uwg.BEM[0].building.Zone == "1A (Miami)"
@@ -87,11 +87,11 @@ class TestUWG(object):
         assert self.uwg.BEM[1].frac == 0.6
 
         # Check that schedules are called correctly
-        #assert self.uwg.Sch[0].Light[0][10] == pytest.approx(0., abs=1e6)   #9am on Weekday for Office
-        #assert self.uwg.Sch[0].Light[1][10] == pytest.approx(0., abs=1e6)   #9am on Weekend for Office
-        #assert self.uwg.Sch[1].Occ[0][23] == pytest.approx(0., abs=1e6)     #11pm on Weekday for apt
-        #assert self.uwg.Sch[1].Occ[1][13] == pytest.approx(0., abs=1e6)     #12 noon on Weekend for apt
+        assert self.uwg.Sch[0].Light[0][8] == pytest.approx(0.9, abs=1e-6)   #9am on Weekday for Office
+        assert self.uwg.Sch[0].Light[0][7] == pytest.approx(0.3, abs=1e-6)   #9am on Weekday for Office
+        assert self.uwg.Sch[1].Occ[1][11] == pytest.approx(0.25, abs=1e-6)     #12 noon on Weekend for apt
 
 if __name__ == "__main__":
     test = TestUWG()
     test.test_read_epw()
+    test.test_read_input()

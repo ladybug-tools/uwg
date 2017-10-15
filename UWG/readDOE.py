@@ -69,22 +69,22 @@ def readDOE():
     #Define constants
     # DOE Building Types
     bldType = [
-        'FullServiceRestaurant',
-        'Hospital',
-        'LargeHotel',
-        'LargeOffice',
-        'MedOffice',
-        'MidRiseApartment',
-        'OutPatient',
-        'PrimarySchool',
-        'QuickServiceRestaurant',
-        'SecondarySchool',
-        'SmallHotel',
-        'SmallOffice',
-        'StandAloneRetail',
-        'StripMall',
-        'SuperMarket',
-        'WareHouse']
+        'FullServiceRestaurant',    # 1
+        'Hospital',                 # 2
+        'LargeHotel',               # 3
+        'LargeOffice',              # 4
+        'MedOffice',                # 5
+        'MidRiseApartment',         # 6
+        'OutPatient',               # 7
+        'PrimarySchool',            # 8
+        'QuickServiceRestaurant',   # 9
+        'SecondarySchool',          # 10
+        'SmallHotel',               # 11
+        'SmallOffice',              # 12
+        'StandAloneRetail',         # 13
+        'StripMall',                # 14
+        'SuperMarket',              # 15
+        'WareHouse']                # 16
 
     zoneType = [
         '1A (Miami)',

@@ -23,18 +23,17 @@ class UBLDef(object):
     def __init__(self,location,charLength,initialTemp,maxdx,dayBLHeight,nightBLHeight):
             pass
             """
-            if(nargin > 0)
-                obj.location = location;
-                obj.charLength = charLength;
-                obj.perimeter = 4*charLength;
-                obj.urbArea = charLength^2.;
-                obj.orthLength = charLength;
-                numdx = round(charLength/min(charLength,maxdx));
-                obj.paralLength = charLength/numdx;
-                obj.ublTemp = initialTemp;
-                obj.ublTempdx = initialTemp*ones(1,numdx);
-                obj.dayBLHeight = dayBLHeight;
-                obj.nightBLHeight = nightBLHeight;
+            obj.location = location;
+            obj.charLength = charLength;
+            obj.perimeter = 4*charLength;
+            obj.urbArea = charLength^2.;
+            obj.orthLength = charLength;
+            numdx = round(charLength/min(charLength,maxdx));
+            obj.paralLength = charLength/numdx;
+            obj.ublTemp = initialTemp;
+            obj.ublTempdx = initialTemp*ones(1,numdx);
+            obj.dayBLHeight = dayBLHeight;
+            obj.nightBLHeight = nightBLHeight;
             """
         """
         function obj = UBLModel(obj,UCM,RSM,rural,forc,parameter,simTime)

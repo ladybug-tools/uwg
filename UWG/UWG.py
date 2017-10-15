@@ -28,6 +28,7 @@ from weather import Weather
 from forcing import Forcing
 from element import Element
 from param import Param
+from RSMDef import RSMDef
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -319,6 +320,7 @@ class UWG(object):
         self.BEM = []           # list of BEMDef objects
         self.Sch = []           # list of Schedule objects
 
+        #TODO: Include optional parameters from intialize.uwg here after testing
         for i in xrange(16):    # 16 building types
             for j in xrange(3): # 3 built eras
                 if bld[i][j] > 0.:
@@ -338,8 +340,9 @@ class UWG(object):
 
         #TODO: Make RSM Class
         # Reference site class (also include VDM)
-        #RSM = RSMDef(lat,lon,GMT,h_obs,weather.staTemp(1),weather.staPres(1),geoParam);
-        #USM = RSMDef(lat,lon,GMT,bldHeight/10,weather.staTemp(1),weather.staPres(1),geoParam);
+        RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,weather.staTemp[1],weather.staPres[1],geoParam)
+        USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,weather.staTemp[1],weather.staPres[1],geoParam)
+
         """
         rural = road;
         rural.vegCoverage = rurVegCover;
