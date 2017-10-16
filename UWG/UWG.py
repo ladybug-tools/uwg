@@ -19,6 +19,7 @@ doi: 10.1080/19401493.2012.718797
 import os
 import math
 import cPickle
+import copy
 import pprint
 
 import utilities
@@ -29,6 +30,7 @@ from forcing import Forcing
 from element import Element
 from param import Param
 from RSMDef import RSMDef
+from UCMDef import UCMDef
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -107,7 +109,7 @@ class UWG(object):
             self.GMT        # GMT
             self.nSoil      # Number of soil depths
             self.Tsoil      # nSoil x 12 matrix for soil temperture (K)
-            self.depth      # nSoil x 1 matrix for soil depth (m)
+            self.depth_soil      # nSoil x 1 matrix for soil depth (m)
         """
 
         # Revise epw file name if not end with epw
@@ -139,14 +141,14 @@ class UWG(object):
         soilData = self.header[3]
         self.nSoil = int(soilData[1])           # Number of ground temperature depths
         self.Tsoil = utilities.zeros(self.nSoil,12)  # nSoil x 12 matrix for soil temperture (K)
-        self.depth = utilities.zeros(self.nSoil,1)   # nSoil x 1 matrix for soil depth (m)
+        self.depth_soil = utilities.zeros(self.nSoil,1)   # nSoil x 1 matrix for soil depth (m)
 
         # Read monthly data for each layer of soil from EPW file
         for i in xrange(self.nSoil):
-            self.depth[i][0] = float(soilData[2 + (i*16)])
+            self.depth_soil[i][0] = float(soilData[2 + (i*16)]) # get soil depth for each nSoil
             # Monthly data
             for j in xrange(12):
-                self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15
+                self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15 # 12 months of soil T for specific depth
 
         # Set new directory path for the moprhed EPW file.
         if self.destinationDir is None:
@@ -162,6 +164,8 @@ class UWG(object):
             self.init_param_dict # dictionary of simulation initialization parameters
             self.BEM # list of BEMDef objects extracted from readDOE
             self.Sch # list of Schedule objects extracted from readDOE
+            self.soilindex1 # soil index for urban road depth
+            self.soilindex2 # soil index for rural road depth
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
@@ -236,13 +240,14 @@ class UWG(object):
 
         # Urban characteristics
         bldHeight = ipd['bldHeight']        # average building height (m)
-        h_mix = ipd['hMix']                 # mixing height (m)
+        h_mix = ipd['h_mix']                 # mixing height (m)
         bldDensity = ipd['bldDensity']      # building density (0-1)
         verToHor = ipd['verToHor']          # building aspect ratio
         charLength = ipd['charLength']      # radius defining the urban area of study [aka. characteristic length] (m)
         alb_road = ipd['albRoad']           # road albedo
         d_road = ipd['dRoad']               # road pavement thickness
-        sensAnth = ipd['sensAnth']          # non-building sens heat (W/m^2)
+        sensAnth = ipd['sensAnth']          # non-building sensible heat (W/m^2)
+        latAnth = ipd['latAnth']            # non-building latent heat heat (W/m^2)
 
         # climate Zone
         zone = int(ipd['zone'])-1
@@ -287,7 +292,11 @@ class UWG(object):
         thickness_vector = map(lambda r: 0.05, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         material_vector = map(lambda n: asphalt, range(road_layer_num))
 
-        road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal)
+        road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal,name="road")
+
+        rural = copy.deepcopy(road)
+        rural.vegCoverage = rurVegCover
+
 
         # Define BEM for each DOE type (read the fraction)
         readDOE_file_path = os.path.join(self.DIR_UP_PATH,"resources","readDOE.pkl")
@@ -300,7 +309,7 @@ class UWG(object):
         refSchedule = cPickle.load(readDOE_file)
         readDOE_file.close()
 
-        # optional parameters from initialize.uwg
+        #TODO: Include optional parameters from intialize.uwg here after testing
         bld = ipd['bld']                    # fraction of building type/era
         albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
@@ -320,7 +329,6 @@ class UWG(object):
         self.BEM = []           # list of BEMDef objects
         self.Sch = []           # list of Schedule objects
 
-        #TODO: Include optional parameters from intialize.uwg here after testing
         for i in xrange(16):    # 16 building types
             for j in xrange(3): # 3 built eras
                 if bld[i][j] > 0.:
@@ -343,39 +351,24 @@ class UWG(object):
         RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,weather.staTemp[1],weather.staPres[1],geoParam)
         USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,weather.staTemp[1],weather.staPres[1],geoParam)
 
-        """
-        rural = road;
-        rural.vegCoverage = rurVegCover;
-        T_init = weather.staTemp(1);
-        H_init = weather.staHum(1);
+        T_init = weather.staTemp[1]
+        H_init = weather.staHum[1]
 
-        UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,...
-            sensAnth,latAnth,T_init,H_init,weather.staUmod(1),geoParam,r_glaze,SHGC,alb_wall,road);
-        UCM.h_mix = h_mix;
+        UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,T_init,H_init,\
+        weather.staUmod[1],geoParam,r_glaze,SHGC,alb_wall,road)
+        UCM.h_mix = h_mix
 
+        # Assume the soil depth is close to one of the ground soil depth specified in EPW (0.5, 1.0, 2.0)
+        for i in xrange(self.nSoil):
+            if sum(road.layerThickness) <= self.depth_soil[i][0]:
+                self.soilindex1 = i
+                break
 
-        # Note:
-        # Looks to me like road layer is fixed at 0.5 (init) or user-specified depth and
-        # we subtract ground height until that reacehs 0.5 lenght or user-specified length.
-        # I.e not sure if soil depth at whcih deep T is taken is dependant on road depth.
-
-        % For .m file, assume the soil depth is close to one of the ground
-        % soil depth specified in EPW (0.5, 1.0, 2.0)
-        for i = 1:n_soil
-            if sum(road.layerThickness) <= depth(i)
-                soilindex1 = i;
-                break;
-            end
-        end
-
-        % Same for rural road
-        for i = 1:n_soil
-            if sum(rural.layerThickness) <= depth(i)
-                soilindex2 = i;
-                break;
-            end
-        end
-        """
+        # Same for rural road
+        for i in xrange(self.nSoil):
+            if sum(rural.layerThickness) <= self.depth_soil[i][0]:
+                self.soilindex2 = i
+                break
 
     """
     % =========================================================================

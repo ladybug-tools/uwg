@@ -33,9 +33,9 @@ class TestUWG(object):
         # test soil data
         assert self.uwg.nSoil == pytest.approx(3, abs=1e-2)
         # test soil depths
-        assert self.uwg.depth[0][0] == pytest.approx(0.5, abs=1e-3)
-        assert self.uwg.depth[1][0] == pytest.approx(2., abs=1e-3)
-        assert self.uwg.depth[2][0] == pytest.approx(4., abs=1e-3)
+        assert self.uwg.depth_soil[0][0] == pytest.approx(0.5, abs=1e-3)
+        assert self.uwg.depth_soil[1][0] == pytest.approx(2., abs=1e-3)
+        assert self.uwg.depth_soil[2][0] == pytest.approx(4., abs=1e-3)
         # test soil temps over 12 months
         assert self.uwg.Tsoil[0][0] == pytest.approx(27.55+273.15, abs=1e-3)
         assert self.uwg.Tsoil[1][2] == pytest.approx(28.01+273.15, abs=1e-3)
@@ -90,6 +90,13 @@ class TestUWG(object):
         assert self.uwg.Sch[0].Light[0][8] == pytest.approx(0.9, abs=1e-6)   #9am on Weekday for Office
         assert self.uwg.Sch[0].Light[0][7] == pytest.approx(0.3, abs=1e-6)   #9am on Weekday for Office
         assert self.uwg.Sch[1].Occ[1][11] == pytest.approx(0.25, abs=1e-6)     #12 noon on Weekend for apt
+
+        # Check that soil ground depth is set correctly
+        assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
+        assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
+
+
+
 
 if __name__ == "__main__":
     test = TestUWG()

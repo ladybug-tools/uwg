@@ -11,13 +11,14 @@
 bldHeight,10,     # average building height (m)
 bldDensity,0.5,   # urban area building plan density (0-1)
 verToHor,0.8,     # urban area vertical to horizontal ratio
-hMix,1,           # fraction of building HVAC waste heat set to the street canyon [as opposed to the roof]
-charLength,1000,  # radius defining the urban area of study [aka. characteristic length] (m)
+h_mix,1,           # fraction of building HVAC waste heat set to the street canyon [as opposed to the roof]
+charLength,1000,  # dimension of a square that encompasses the whole neighborhood [aka. characteristic length] (m)
 albRoad,0.1,      # road albedo (0 - 1)
 dRoad,0.5,        # road pavement thickness (m)
 kRoad,1,          # road pavement conductivity (W/m K)
 cRoad,1600000,    # road volumetric heat capacity (J/m^3 K)
 sensAnth,20,      # non-building sensible heat at street level [aka. heat from cars, pedestrians, street cooking, etc. ] (W/m^2)
+latAnth,2,        # non-building latent heat (W/m^2) (currently not used)
 
 # Climate Zone (Eg. City)   Zone number
 # 1A(Miami)                     1
@@ -36,6 +37,7 @@ sensAnth,20,      # non-building sensible heat at street level [aka. heat from c
 # 6B(Helena)                    14
 # 7(Duluth)                     15
 # 8(Fairbanks)                  16
+
 zone,1,
 
 # Vegetation parameters

@@ -66,13 +66,19 @@ class Element(object):
 
     def __repr__(self):
         #returns some representative wall properties
-        return "Element: {n}, depth={z}, e={a}, k={b}, Cp*dens={c}".format(
-            n=self._name,
-            z=sum(self.layerThickness),
-            a=self.emissivity,
-            b=round(sum(self.layerThermalCond),2),
-            c=round(sum(self.layerVolHeat),2)
+        s1 = "Element: {a}\nlayerNum={b}, totaldepth={c}\n".format(
+            a=self._name,
+            b=len(self.layerThickness),
+            c=sum(self.layerThickness)
             )
+        s2 = "e={d}, a={e}\nk_avg={f}, Cp*dens_avg={g}\nlayerTemp: {h}".format(
+            d=self.emissivity,
+            e=self.albedo,
+            f=round(sum(self.layerThermalCond),2),
+            g=round(sum(self.layerVolHeat),2),
+            h=self.layerTemp
+            )
+        return s1 + s2
 
         """
         function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
