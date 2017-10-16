@@ -27,3 +27,9 @@ class SchDef(object):
         self.Cool = Cool
         self.Heat = Heat
         self.SWH = SWH
+
+    def __repr__(self):
+        return "Schedule:(weekday from 8:00 - 18:00) \n Heating: {a}\n Cooling: {b}".format(
+            a=self.Heat[0][7:17],
+            b=self.Cool[0][7:17]
+            )

@@ -5,8 +5,7 @@ Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
 
 import sys
 import os
-
-#import UWG #this should replace everything below
+import cPickle
 
 from test import Test
 from building import Building
@@ -19,10 +18,12 @@ import utilities
 
 #TODO: Need to swap tests
 #TODO: externalize tests in tests/ module
-#TODO: Change import statements using UWG
+#TODO: Change import statements using UWG?
+#TODO: create separate function for pickle serialization
+#TODO: creat DOE class with two functions
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources/DOERefBuildings")
+DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
 
 def readDOE():
     """
@@ -68,22 +69,22 @@ def readDOE():
     #Define constants
     # DOE Building Types
     bldType = [
-        'FullServiceRestaurant',
-        'Hospital',
-        'LargeHotel',
-        'LargeOffice',
-        'MedOffice',
-        'MidRiseApartment',
-        'OutPatient',
-        'PrimarySchool',
-        'QuickServiceRestaurant',
-        'SecondarySchool',
-        'SmallHotel',
-        'SmallOffice',
-        'StandAloneRetail',
-        'StripMall',
-        'SuperMarket',
-        'WareHouse']
+        'FullServiceRestaurant',    # 1
+        'Hospital',                 # 2
+        'LargeHotel',               # 3
+        'LargeOffice',              # 4
+        'MedOffice',                # 5
+        'MidRiseApartment',         # 6
+        'OutPatient',               # 7
+        'PrimarySchool',            # 8
+        'QuickServiceRestaurant',   # 9
+        'SecondarySchool',          # 10
+        'SmallHotel',               # 11
+        'SmallOffice',              # 12
+        'StandAloneRetail',         # 13
+        'StripMall',                # 14
+        'SuperMarket',              # 15
+        'WareHouse']                # 16
 
     zoneType = [
         '1A (Miami)',
@@ -119,7 +120,7 @@ def readDOE():
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
-    for i in xrange(16):#16
+    for i in xrange(16):
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe1 = read_csv(file_doe_name_bld)
@@ -389,10 +390,20 @@ def readDOE():
                 Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
                 Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
-    #save ('RefDOE.mat','refDOE','refBEM','Schedule');
+    # Serialize refDOE,refBEM,Schedule and store in resources
 
-    print test_treeDOE.test_results()
+    # Create a binary file for serialized obj
+    pickle_readDOE = open(os.path.join(DIR_UP_PATH,'resources','readDOE.pkl'), 'wb')
 
+    # resources
+    # Pickle objects, protocol 1 b/c binary file
+    cPickle.dump(refDOE, pickle_readDOE,1)
+    cPickle.dump(refBEM, pickle_readDOE,1)
+    cPickle.dump(Schedule, pickle_readDOE,1)
+
+    pickle_readDOE.close()
+
+    #print test_treeDOE.test_results()
 
 if __name__ == "__main__":
     readDOE()

@@ -1,5 +1,5 @@
 """Collection of useful methods."""
-
+import os
 from csv import reader as csv_reader
 
 def zeros(h, w):
@@ -12,11 +12,16 @@ def zeros(h, w):
     return [[0 for x in range(w)] for y in range(h)]
 
 def read_csv(file_name_):
-    file_ = open(file_name_,"r")
-    gen_ = csv_reader(file_, delimiter=",")
-    list_ = map(lambda r: r,gen_)
-    file_.close()
-    return list_
+    # open csv file and read
+    if os.path.exists(file_name_):
+        file_ = open(file_name_,"r")
+        gen_ = csv_reader(file_, delimiter=",")
+        L = map(lambda r: r,gen_)
+        file_.close()
+        return L
+    else:
+        raise Exception("File name: '{}' does not exist.".format(file_name_))
+
 
 def str2fl(x):
     """Recurses through lists and converts lists of string to float

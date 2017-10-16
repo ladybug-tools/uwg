@@ -8,7 +8,7 @@ class Material(object):
         volHeat: Volumetric heat capacity (J/m^3 K)
         name: Name of the material.
     """
-    def __init__(self, thermalCond, volHeat, name=None):
+    def __init__(self, thermalCond, volHeat, name='noname'):
         self._name = name # purely for internal purpose
         self.thermalCond = thermalCond
         self.volHeat = volHeat

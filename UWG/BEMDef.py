@@ -47,5 +47,5 @@ class BEMDef(object):
             a=self.building.Type,
             b=self.building.Zone,
             c=self.building.Era,
-            d=self.wall
+            d=self.wall._name
             )

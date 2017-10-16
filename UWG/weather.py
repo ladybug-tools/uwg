@@ -25,7 +25,13 @@ class Weather(object):
         #HI: Julian start date
         #HF: Julian final date
         #H1 and HF define the row we want
-        self.climate_data = read_csv(climate_file)
+
+        # Open .epw file and feed csv data to self.climate_data
+        try:
+            self.climate_data = read_csv(climate_file)
+        except Exception as e:
+            raise Exception("Failed to read .epw file! {}".format(e.message))
+
         self.location = self.climate_data[0][1]
         staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
         self.staTemp = map(lambda s: s+273.15, staTemp)                             # air temperature (K)
