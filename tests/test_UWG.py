@@ -25,8 +25,8 @@ class TestUWG(object):
         self.uwg.read_epw()
 
         # test header
-        assert self.uwg.header[0][0] == "LOCATION"
-        assert self.uwg.header[0][1] == "SINGAPORE"
+        assert self.uwg._header[0][0] == "LOCATION"
+        assert self.uwg._header[0][1] == "SINGAPORE"
         assert self.uwg.lat == pytest.approx(1.37, abs=1e-3)
         assert self.uwg.lon == pytest.approx(103.98, abs=1e-3)
         assert self.uwg.GMT == pytest.approx(8, abs=1e-3)
@@ -50,27 +50,27 @@ class TestUWG(object):
         self.uwg.read_input()
 
         #test uwg param dictionary first and last
-        assert self.uwg.init_param_dict.has_key('bldHeight') == True
-        assert self.uwg.init_param_dict.has_key('h_obs') == True
+        assert self.uwg._init_param_dict.has_key('bldHeight') == True
+        assert self.uwg._init_param_dict.has_key('h_obs') == True
         #test values
-        assert self.uwg.init_param_dict['bldHeight'] == pytest.approx(10., abs=1e-6)
-        assert self.uwg.init_param_dict['vegEnd'] == pytest.approx(10, abs=1e-6)
-        assert self.uwg.init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e-6)
-        assert self.uwg.init_param_dict['h_ubl1'] == pytest.approx(1000., abs=1e-6)
-        assert self.uwg.init_param_dict['h_ref'] == pytest.approx(150., abs=1e-6)
+        assert self.uwg._init_param_dict['bldHeight'] == pytest.approx(10., abs=1e-6)
+        assert self.uwg._init_param_dict['vegEnd'] == pytest.approx(10, abs=1e-6)
+        assert self.uwg._init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e-6)
+        assert self.uwg._init_param_dict['h_ubl1'] == pytest.approx(1000., abs=1e-6)
+        assert self.uwg._init_param_dict['h_ref'] == pytest.approx(150., abs=1e-6)
 
         # test SchTraffic schedule
-        assert self.uwg.init_param_dict['SchTraffic'][0][0] == pytest.approx(0.2, abs=1e-6) # first
-        assert self.uwg.init_param_dict['SchTraffic'][2][23] == pytest.approx(0.2, abs=1e-6) # last
-        assert self.uwg.init_param_dict['SchTraffic'][0][19] == pytest.approx(0.8, abs=1e-6)
-        assert self.uwg.init_param_dict['SchTraffic'][1][21] == pytest.approx(0.3, abs=1e-6)
-        assert self.uwg.init_param_dict['SchTraffic'][2][6] == pytest.approx(0.4, abs=1e-6)
+        assert self.uwg._init_param_dict['SchTraffic'][0][0] == pytest.approx(0.2, abs=1e-6) # first
+        assert self.uwg._init_param_dict['SchTraffic'][2][23] == pytest.approx(0.2, abs=1e-6) # last
+        assert self.uwg._init_param_dict['SchTraffic'][0][19] == pytest.approx(0.8, abs=1e-6)
+        assert self.uwg._init_param_dict['SchTraffic'][1][21] == pytest.approx(0.3, abs=1e-6)
+        assert self.uwg._init_param_dict['SchTraffic'][2][6] == pytest.approx(0.4, abs=1e-6)
 
         # test bld fraction list
-        assert self.uwg.init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e-6)
-        assert self.uwg.init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e-6)
-        assert self.uwg.init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e-6)
-        assert self.uwg.init_param_dict['bld'][15][2] == pytest.approx(0.0, abs=1e-6)
+        assert self.uwg._init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e-6)
+        assert self.uwg._init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e-6)
+        assert self.uwg._init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e-6)
+        assert self.uwg._init_param_dict['bld'][15][2] == pytest.approx(0.0, abs=1e-6)
 
         # test BEMs
         assert len(self.uwg.BEM) == pytest.approx(2.,abs=1e-6)
@@ -95,10 +95,39 @@ class TestUWG(object):
         assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
         assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
+    def test_hvac_autosize(self):
 
+        self.setup_init_uwg()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+        self.uwg.hvac_autosize()
 
+        assert self.uwg.BEM[0].building.coolCap == pytest.approx(9999., abs=1e-6)
+        assert self.uwg.BEM[0].building.heatCap == pytest.approx(9999., abs=1e-6)
+        assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
+        assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
+
+    def test_uwg_main(self):
+        self.setup_init_uwg()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
+
+        # Parameters from initialize.uwg
+        # Month = 1;              % starting month (1-12)
+        # Day = 1;                % starting day (1-31)
+        # nDay = 31;              % number of days
+        # dtSim = 300;            % simulation time step (s)
+        # dtWeather = 3600;       % weather time step (s)
+
+        assert self.uwg._N == pytest.approx(744., abs=1e-6)       # total hours in simulation
+        assert self.uwg._ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
+        
 
 if __name__ == "__main__":
     test = TestUWG()
     test.test_read_epw()
     test.test_read_input()
+    test.test_hvac_autosize()
+    test.test_uwg_main()
