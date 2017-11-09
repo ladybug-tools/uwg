@@ -427,14 +427,15 @@ class UWG(object):
             self._ph        # per hour
         """
 
+
         self._N = self.simTime.days * 24       # total number of hours in simulation
         n = 0
         self._ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
 
         # Data dump variables
         #time = transpose(1:1:simTime.days*24);
-        #WeatherData (N,1) = Forcing;
-        #UCMData (N,1) = UCMDef;
+        #WeatherData(N,1) = Forcing
+        UCMData(N,1) = UCMDef
         #UBLData (N,1) = UBLDef;
         #RSMData (N,1) = RSMDef;
         #USMData (N,1) = RSMDef;
