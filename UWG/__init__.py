@@ -13,6 +13,9 @@ from UCMDef import UCMDef
 from forcing import Forcing
 import readDOE
 
+
+from UWG import procMat
+
 __all__ = [
     "UWG",
     "utilities",

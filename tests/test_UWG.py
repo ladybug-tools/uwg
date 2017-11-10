@@ -2,7 +2,7 @@ import os
 import pytest
 import UWG
 
-
+from UWG import procMat
 
 class TestUWG(object):
     """Test for UWG.py
@@ -95,6 +95,14 @@ class TestUWG(object):
         assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
         assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
+    def test_procMat(self):
+
+        self.setup_init_uwg()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        roadMat, newthickness = procMat(self.uwg.road,self.uwg.minThickness,self.uwg.maxThickness)
+
     def test_hvac_autosize(self):
 
         self.setup_init_uwg()
@@ -106,6 +114,8 @@ class TestUWG(object):
         assert self.uwg.BEM[0].building.heatCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
+
+
 
     def test_uwg_main(self):
         self.setup_init_uwg()
@@ -123,7 +133,7 @@ class TestUWG(object):
 
         assert self.uwg._N == pytest.approx(744., abs=1e-6)       # total hours in simulation
         assert self.uwg._ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
-        
+
 
 if __name__ == "__main__":
     test = TestUWG()

@@ -172,6 +172,9 @@ class UWG(object):
             self.USM                # Urban site & vertical diffusion model obj
             self.UCM                # Urban canopy model obj
 
+            self.road               # urban road element
+            self.rural              # rural road element
+
             self.soilindex1         # soil index for urban rsoad depth
             self.soilindex2         # soil index for rural road depth
         """
@@ -300,10 +303,10 @@ class UWG(object):
         thickness_vector = map(lambda r: 0.05, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         material_vector = map(lambda n: asphalt, range(road_layer_num))
 
-        road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal,name="road")
+        self.road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal,name="road")
 
-        rural = copy.deepcopy(road)
-        rural.vegCoverage = rurVegCover
+        self.rural = copy.deepcopy(self.road)
+        self.rural.vegCoverage = rurVegCover
 
 
         # Define BEM for each DOE type (read the fraction)
@@ -354,7 +357,7 @@ class UWG(object):
                     self.Sch.append(refSchedule[i][j][zone])
                     k += 1
 
-        #TODO: Make RSM Class
+        #TODO: Finish RSM Class
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
         self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
@@ -363,14 +366,16 @@ class UWG(object):
         H_init = self.weather.staHum[1]
 
         self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,T_init,H_init,\
-        self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,road)
+        self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
         #TODO: Update road layer depth method with the one from .xml (below)
+
+        # Define Road Element & buffer to match ground temperature depth
+
+        roadMat, newthickness = procMat(self.road,self.minThickness,self.maxThickness)
+        print roadMat, newthickness
         """
-        % Define Road Element & buffer to match ground temperature depth
-        urbanRoad = xmlUCM.urbanRoad;
-        [roadMat, newthickness] = procMat(urbanRoad.materials,max_thickness,min_thickness);
         for i = 1:n_soil
             if sum(newthickness) <= depth(i)
                 while(sum(newthickness)<depth(i))
@@ -383,7 +388,8 @@ class UWG(object):
         end
         road = Element(urbanRoad.albedo,urbanRoad.emissivity,newthickness,roadMat,...
             urbanRoad.vegetationCoverage,urbanRoad.initialTemperature + 273.15,urbanRoad.inclination);
-
+        """
+        """
         % Define Rural Element
         ruralRoad = xmlRSite.ruralRoad;
         [ruralMat, newthickness] = procMat(ruralRoad.materials,max_thickness,min_thickness);
@@ -401,15 +407,16 @@ class UWG(object):
             ruralMat,ruralRoad.vegetationCoverage,ruralRoad.initialTemperature + 273.15,ruralRoad.inclination);
 
         """
+
         # Assume the soil depth is close to one of the ground soil depth specified in EPW (0.5, 1.0, 2.0)
         for i in xrange(self.nSoil):
-            if sum(road.layerThickness) <= self.depth_soil[i][0]:
+            if sum(self.road.layerThickness) <= self.depth_soil[i][0]:
                 self.soilindex1 = i
                 break
 
         # Same for rural road
         for i in xrange(self.nSoil):
-            if sum(rural.layerThickness) <= self.depth_soil[i][0]:
+            if sum(self.rural.layerThickness) <= self.depth_soil[i][0]:
                 self.soilindex2 = i
                 break
 
@@ -435,7 +442,7 @@ class UWG(object):
         # Data dump variables
         #time = transpose(1:1:simTime.days*24);
         #WeatherData(N,1) = Forcing
-        UCMData(N,1) = UCMDef
+        #UCMData(N,1) = UCMDef
         #UBLData (N,1) = UBLDef;
         #RSMData (N,1) = RSMDef;
         #USMData (N,1) = RSMDef;
@@ -657,6 +664,73 @@ class UWG(object):
 
     return None
     """
+
+def procMat(materials,max_thickness,min_thickness):
+    """ Processes material layer so that a material with single
+    layer thickness is divided into two and material layer that is too
+    thick is subdivided
+    """
+    newmat = []
+    newthickness = []
+
+    k = materials.layerThermalCond
+    Vhc = materials.layerVolHeat
+
+    if len(materials.layerThickness) > 1:
+        for j in xrange(len(materials.layerThickness)):
+            # Break up each layer that's more than max thickness (0.05m)
+            if materials.layerThickness[j] > max_thickness:
+                nlayers = math.ceil(materials.layerThickness[j]/max_thickness)
+                for i in xrange(int(nlayers)):
+                    pass#print i
+        print '---'
+
+    """
+    k = materials.thermalConductivity;
+    Vhc = materials.volumetricHeatCapacity;
+    if numel(materials.thickness)>1
+        for j = 1:numel(materials.thickness)
+            % Break up each layer that's more than 5cm thick
+            if materials.thickness(j) > max_thickness
+                nlayers = ceil(materials.thickness(j)/max_thickness);
+                for l = 1:nlayers
+                    newmat = [newmat Material(k{j},Vhc{j})];
+                    newthickness = [newthickness; materials.thickness(j)/nlayers];
+                end
+
+            % Material that's less then min_thickness is not added.
+            elseif materials.thickness(j) < min_thickness
+                 newmat = [newmat Material(k{j},Vhc{j})];
+                 newthickness = [newthickness; min_thickness];
+                disp('WARNING: Material layer found too thin (<1cm), ignored');
+            else
+                newmat = [newmat Material(k{j},Vhc{j})];
+                newthickness = [newthickness; materials.thickness(j)];
+            end
+        end
+    else
+        % Divide single layer into two (UWG assumes at least 2 layers)
+        if materials.thickness > max_thickness
+            nlayers = ceil(materials.thickness/max_thickness);
+            for l = 1:nlayers
+                newmat = [newmat Material(k,Vhc)];
+                newthickness = [newthickness; materials.thickness/nlayers];
+            end
+
+        % Material should be at least 1cm thick, so if we're here,
+        % should give warning and stop. Only warning given for now.
+        elseif materials.thickness < min_thickness*2
+            newthickness = [min_thickness/2; min_thickness/2];
+            newmat = [Material(k,Vhc) Material(k,Vhc)];
+            disp('WARNING: a thin (<2cm) single layer element found');
+            disp('May cause error');
+
+        else
+            newthickness = [materials.thickness/2; materials.thickness/2];
+            newmat = [Material(k,Vhc) Material(k,Vhc)];
+    """
+    return newmat, newthickness
+
 
 if __name__ == "__main__":
 
