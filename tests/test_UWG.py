@@ -1,8 +1,7 @@
 import os
 import pytest
 import UWG
-
-from UWG import procMat
+import math
 
 class TestUWG(object):
     """Test for UWG.py
@@ -95,13 +94,44 @@ class TestUWG(object):
         assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
         assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
+        def helper_mutate_road(road_, d_road_,d_layer_):
+            # Define new layer number based on depth, and slice depth
+            road_layer_num = int(math.ceil(d_road/d_layer))
+            # mutate road
+            road_.layerThickness = map(lambda r: d_layer, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
+            road_.layerThermalCond = map(lambda r: road_.layerThermalCond[0], range(road_layer_num))
+            road_.layerVolHeat = map(lambda r: road_.layerVolHeat[0], range(road_layer_num))
+            road_.layerTemp = [293.] * road_layer_num
+            return road_
+
+        d_road = 0.5  # m
+        d_layer = 0.05
+
+        #test_road = helper_mutate_road(self.uwg.road,d_road,d_layer)
+
+
     def test_procMat(self):
+        """
+        Test different max/min layer depths that generate different diffrent road layer
+        thicknesses (to account for too deep elements with inaccurate heat transfer).
+        """
 
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
 
-        roadMat, newthickness = procMat(self.uwg.road,self.uwg.minThickness,self.uwg.maxThickness)
+        #test a 0.5m road split into 10 slices of 0.05m
+
+        # base case; min=0.01, max=0.05
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.05, 0.01)
+        assert len(roadMat) == pytest.approx(0, abs=1e-6)
+        assert len(newthickness) == pytest.approx(0, abs=1e-6)
+
+        # min=0.01, max=0.04
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.04, 0.01)
+        assert len(roadMat) == pytest.approx(20, abs=1e-6)
+        assert len(newthickness) == pytest.approx(20, abs=1e-6)
+        assert newthickness[0] == pytest.approx(0.025, abs=1e-6)
 
     def test_hvac_autosize(self):
 
