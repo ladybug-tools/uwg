@@ -94,22 +94,6 @@ class TestUWG(object):
         assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
         assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
-        def helper_mutate_road(road_, d_road_,d_layer_):
-            # Define new layer number based on depth, and slice depth
-            road_layer_num = int(math.ceil(d_road/d_layer))
-            # mutate road
-            road_.layerThickness = map(lambda r: d_layer, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
-            road_.layerThermalCond = map(lambda r: road_.layerThermalCond[0], range(road_layer_num))
-            road_.layerVolHeat = map(lambda r: road_.layerVolHeat[0], range(road_layer_num))
-            road_.layerTemp = [293.] * road_layer_num
-            return road_
-
-        d_road = 0.5  # m
-        d_layer = 0.05
-
-        #test_road = helper_mutate_road(self.uwg.road,d_road,d_layer)
-
-
     def test_procMat(self):
         """
         Test different max/min layer depths that generate different diffrent road layer
@@ -121,17 +105,55 @@ class TestUWG(object):
         self.uwg.read_input()
 
         #test a 0.5m road split into 10 slices of 0.05m
-
-        # base case; min=0.01, max=0.05
+        # base case; min=0.01, max=0.05, stays the same
         roadMat, newthickness = UWG.procMat(self.uwg.road, 0.05, 0.01)
-        assert len(roadMat) == pytest.approx(0, abs=1e-6)
-        assert len(newthickness) == pytest.approx(0, abs=1e-6)
+        assert len(roadMat) == pytest.approx(10, abs=1e-6)
+        assert len(newthickness) == pytest.approx(10, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.05*10, abs=1e-6)
 
-        # min=0.01, max=0.04
+        # min=0.01, max=0.04, 0.05 cut into two = 0.025
         roadMat, newthickness = UWG.procMat(self.uwg.road, 0.04, 0.01)
         assert len(roadMat) == pytest.approx(20, abs=1e-6)
         assert len(newthickness) == pytest.approx(20, abs=1e-6)
-        assert newthickness[0] == pytest.approx(0.025, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.025*20, abs=1e-6)
+
+        # min=0.06, max=0.1, should make new material at 0.06 thickness
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.1, 0.06)
+        assert len(roadMat) == pytest.approx(10, abs=1e-6)
+        assert len(newthickness) == pytest.approx(10, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.06*10, abs=1e-6)
+
+        # min=0.0001, max=0.1, should stay the same
+        roadMat, newthickness = UWG.procMat(self.uwg.road,0.1,0.0001)
+        assert len(roadMat) == pytest.approx(10, abs=1e-6)
+        assert len(newthickness) == pytest.approx(10, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.5, abs=1e-6)
+
+        # modify to one layer for tests
+        self.uwg.road.layerThickness = [0.05]
+        self.uwg.road.layerThermalCond = self.uwg.road.layerThermalCond[:1]
+        self.uwg.road.layerVolHeat = self.uwg.road.layerVolHeat[:1]
+
+        #0.05 layer, will split in two
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.05, 0.01)
+        assert len(roadMat) == pytest.approx(2, abs=1e-6)
+        assert len(newthickness) == pytest.approx(2, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.025*2, abs=1e-6)
+
+        #0.015 layer, will split in min thickness in two
+        self.uwg.road.layerThickness = [0.015]
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.05, 0.01)
+        assert len(roadMat) == pytest.approx(2, abs=1e-6)
+        assert len(newthickness) == pytest.approx(2, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.005*2, abs=1e-6)
+
+        #0.12 layer, will split into 3 layers b/c > max_thickness
+        self.uwg.road.layerThickness = [0.12]
+        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.05, 0.01)
+        assert len(roadMat) == pytest.approx(3, abs=1e-6)
+        assert len(newthickness) == pytest.approx(3, abs=1e-6)
+        assert sum(newthickness) == pytest.approx(0.04*3, abs=1e-6)
+
 
     def test_hvac_autosize(self):
 
@@ -167,7 +189,8 @@ class TestUWG(object):
 
 if __name__ == "__main__":
     test = TestUWG()
-    test.test_read_epw()
-    test.test_read_input()
-    test.test_hvac_autosize()
-    test.test_uwg_main()
+    #test.test_read_epw()
+    #test.test_read_input()
+    test.test_procMat()
+    #test.test_hvac_autosize()
+    #test.test_uwg_main()
