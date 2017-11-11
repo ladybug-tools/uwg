@@ -124,7 +124,7 @@ class UCMDef(object):
         self.sensHeat = 0.0                                         # urban sensible heat [W m-2]
 
     def __repr__(self):
-        return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(  
+        return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(
             b=self.verToHor,
             c=self.bldDensity,
             a=int(self.bldHeight),
@@ -191,7 +191,7 @@ class UCMDef(object):
 
                 obj.wallTemp = obj.wallTemp + BEM(j).frac*T_wall;
                 obj.roofTemp = obj.roofTemp + BEM(j).frac*BEM(j).roof.layerTemp(1);
-                obj.Q_ubl = obj.Q_ubl + BEM(j).frac*(BEM(j).roof.sens*obj.bldDensity+building.sensWaste*(1-obj.h_mix));
+                obj.Q_ubl = obj.Q_ubl + BEM(j).frac*obj.bldDensity*(BEM(j).roof.sens + BEM(j).building.sensWaste*(1-obj.h_mix)); % Changed by Jiachen Mao in March 2017
 
             end
 

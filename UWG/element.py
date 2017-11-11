@@ -66,12 +66,12 @@ class Element(object):
 
     def __repr__(self):
         #returns some representative wall properties
-        s1 = "Element: {a}\nlayerNum={b}, totaldepth={c}\n".format(
+        s1 = "Element: {a}\n\tlayerNum={b}, totaldepth={c}\n\t".format(
             a=self._name,
             b=len(self.layerThickness),
             c=sum(self.layerThickness)
             )
-        s2 = "e={d}, a={e}\nk_avg={f}, Cp*dens_avg={g}\nlayerTemp: {h}".format(
+        s2 = "e={d}, a={e}\n\tk_avg={f}, Cp*dens_avg={g}\n\tlayerTemp: {h}".format(
             d=self.emissivity,
             e=self.albedo,
             f=round(sum(self.layerThermalCond),2),
