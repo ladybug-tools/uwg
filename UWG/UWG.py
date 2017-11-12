@@ -100,14 +100,14 @@ class UWG(object):
         """Section 2 - Read EPW file
         properties:
             self.newPathName
-            self._header     # header data
+            self._header    # header data
             self.epwinput   # timestep data for weather
             self.lat        # latitude
             self.lon        # longitude
             self.GMT        # GMT
             self.nSoil      # Number of soil depths
             self.Tsoil      # nSoil x 12 matrix for soil temperture (K)
-            self.depth_soil      # nSoil x 1 matrix for soil depth (m)
+            self.depth_soil # nSoil x 1 matrix for soil depth (m)
         """
 
         # Revise epw file name if not end with epw
@@ -303,10 +303,12 @@ class UWG(object):
         thickness_vector = map(lambda r: 0.05, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         material_vector = map(lambda n: asphalt, range(road_layer_num))
 
-        self.road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal,name="road")
+        self.road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,\
+            road_T_init,road_horizontal,name="urban_road")
 
         self.rural = copy.deepcopy(self.road)
         self.rural.vegCoverage = rurVegCover
+        self.rural._name = "rural_road"
 
 
         # Define BEM for each DOE type (read the fraction)
@@ -369,56 +371,44 @@ class UWG(object):
         self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
-        #TODO: Update road layer depth method with the one from .xml (below)
-
         # Define Road Element & buffer to match ground temperature depth
-
         roadMat, newthickness = procMat(self.road,self.maxThickness,self.minThickness)
 
-        """
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; max_thickness];
-                    roadMat = [roadMat soil];
-                end
-                soilindex1 = i;
-                break;
-            end
-        end
-        road = Element(urbanRoad.albedo,urbanRoad.emissivity,newthickness,roadMat,...
-            urbanRoad.vegetationCoverage,urbanRoad.initialTemperature + 273.15,urbanRoad.inclination);
-        """
-        """
-        % Define Rural Element
-        ruralRoad = xmlRSite.ruralRoad;
-        [ruralMat, newthickness] = procMat(ruralRoad.materials,max_thickness,min_thickness);
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; max_thickness];
-                    ruralMat = [ruralMat soil];
-                end
-                soilindex2 = i;
-                break;
-            end
-        end
-        rural = Element(ruralRoad.albedo,ruralRoad.emissivity,newthickness,...
-            ruralMat,ruralRoad.vegetationCoverage,ruralRoad.initialTemperature + 273.15,ruralRoad.inclination);
-
-        """
-
-        # Assume the soil depth is close to one of the ground soil depth specified in EPW (0.5, 1.0, 2.0)
         for i in xrange(self.nSoil):
-            if sum(self.road.layerThickness) <= self.depth_soil[i][0]:
+            # if soil depth is greater then the thickness of the road
+            # we add new slices of soil at max thickness until road is greater or equal
+            if self.depth_soil[i][0] >= sum(newthickness):
+                #to avoid floating point precision problems compare equality
+                is_greater = self.depth_soil[i][0] > sum(newthickness)
+                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
+                while(not is_equal and is_greater):
+                    newthickness.append(self.maxThickness)
+                    roadMat.append(self.soil)
                 self.soilindex1 = i
                 break
 
-        # Same for rural road
+        self.road = Element(self.road.albedo, self.road.emissivity, newthickness, roadMat,\
+            self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal, self.road._name)
+
+
+        # Define Rural Element
+        ruralMat, newthickness = procMat(self.rural,self.maxThickness,self.minThickness)
         for i in xrange(self.nSoil):
-            if sum(self.rural.layerThickness) <= self.depth_soil[i][0]:
+            # if soil depth is greater then the thickness of the road
+            # we add new slices of soil at max thickness until road is greater or equal
+            if self.depth_soil[i][0] >= sum(newthickness):
+                #to avoid floating point precision problems compare equality
+                is_greater = self.depth_soil[i][0] > sum(newthickness)
+                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
+                while(not is_equal and is_greater):
+                    newthickness.append(self.maxThickness)
+                    ruralMat.append(self.soil)
                 self.soilindex2 = i
                 break
+
+        self.rural = Element(self.rural.albedo, self.rural.emissivity, newthickness,\
+            ruralMat,self.rural.vegCoverage,self.rural.layerTemp[0],self.rural.horizontal, self.rural._name)
+
 
     def hvac_autosize(self):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
@@ -674,7 +664,7 @@ def procMat(materials,max_thickness,min_thickness):
     newthickness = []
     k = materials.layerThermalCond
     Vhc = materials.layerVolHeat
-    
+
     if len(materials.layerThickness) > 1:
 
         for j in xrange(len(materials.layerThickness)):

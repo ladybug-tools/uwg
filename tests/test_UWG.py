@@ -94,6 +94,15 @@ class TestUWG(object):
         assert self.uwg.depth_soil[self.uwg.soilindex1][0] == pytest.approx(0.5, abs=1e-6)
         assert self.uwg.depth_soil[self.uwg.soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
+        #self.road
+        # Check the road layer splitting
+        assert len(self.uwg.road.layerThickness) == pytest.approx(10., abs=1e-6)
+        assert self.uwg.road.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
+
+        # Check the road layer splitting for rural
+        assert len(self.uwg.rural.layerThickness) == pytest.approx(10., abs=1e-6)
+        assert self.uwg.rural.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
+
     def test_procMat(self):
         """
         Test different max/min layer depths that generate different diffrent road layer
@@ -189,8 +198,8 @@ class TestUWG(object):
 
 if __name__ == "__main__":
     test = TestUWG()
-    #test.test_read_epw()
-    #test.test_read_input()
-    test.test_procMat()
+    test.test_read_epw()
+    test.test_read_input()
+    #test.test_procMat()
     #test.test_hvac_autosize()
     #test.test_uwg_main()
