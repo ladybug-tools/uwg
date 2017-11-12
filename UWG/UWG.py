@@ -100,14 +100,14 @@ class UWG(object):
         """Section 2 - Read EPW file
         properties:
             self.newPathName
-            self._header     # header data
+            self._header    # header data
             self.epwinput   # timestep data for weather
             self.lat        # latitude
             self.lon        # longitude
             self.GMT        # GMT
             self.nSoil      # Number of soil depths
             self.Tsoil      # nSoil x 12 matrix for soil temperture (K)
-            self.depth_soil      # nSoil x 1 matrix for soil depth (m)
+            self.depth_soil # nSoil x 1 matrix for soil depth (m)
         """
 
         # Revise epw file name if not end with epw
@@ -303,10 +303,12 @@ class UWG(object):
         thickness_vector = map(lambda r: 0.05, range(road_layer_num)) # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         material_vector = map(lambda n: asphalt, range(road_layer_num))
 
-        self.road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,road_T_init,road_horizontal,name="road")
+        self.road = Element(alb_road,emis,thickness_vector,material_vector,road_veg_coverage,\
+            road_T_init,road_horizontal,name="urban_road")
 
         self.rural = copy.deepcopy(self.road)
         self.rural.vegCoverage = rurVegCover
+        self.rural._name = "rural_road"
 
 
         # Define BEM for each DOE type (read the fraction)
@@ -369,56 +371,44 @@ class UWG(object):
         self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
-        #TODO: Update road layer depth method with the one from .xml (below)
-
         # Define Road Element & buffer to match ground temperature depth
+        roadMat, newthickness = procMat(self.road,self.maxThickness,self.minThickness)
 
-        roadMat, newthickness = procMat(self.road,self.minThickness,self.maxThickness)
-        print roadMat, newthickness
-        """
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; max_thickness];
-                    roadMat = [roadMat soil];
-                end
-                soilindex1 = i;
-                break;
-            end
-        end
-        road = Element(urbanRoad.albedo,urbanRoad.emissivity,newthickness,roadMat,...
-            urbanRoad.vegetationCoverage,urbanRoad.initialTemperature + 273.15,urbanRoad.inclination);
-        """
-        """
-        % Define Rural Element
-        ruralRoad = xmlRSite.ruralRoad;
-        [ruralMat, newthickness] = procMat(ruralRoad.materials,max_thickness,min_thickness);
-        for i = 1:n_soil
-            if sum(newthickness) <= depth(i)
-                while(sum(newthickness)<depth(i))
-                    newthickness = [newthickness; max_thickness];
-                    ruralMat = [ruralMat soil];
-                end
-                soilindex2 = i;
-                break;
-            end
-        end
-        rural = Element(ruralRoad.albedo,ruralRoad.emissivity,newthickness,...
-            ruralMat,ruralRoad.vegetationCoverage,ruralRoad.initialTemperature + 273.15,ruralRoad.inclination);
-
-        """
-
-        # Assume the soil depth is close to one of the ground soil depth specified in EPW (0.5, 1.0, 2.0)
         for i in xrange(self.nSoil):
-            if sum(self.road.layerThickness) <= self.depth_soil[i][0]:
+            # if soil depth is greater then the thickness of the road
+            # we add new slices of soil at max thickness until road is greater or equal
+            if self.depth_soil[i][0] >= sum(newthickness):
+                #to avoid floating point precision problems compare equality
+                is_greater = self.depth_soil[i][0] > sum(newthickness)
+                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
+                while(not is_equal and is_greater):
+                    newthickness.append(self.maxThickness)
+                    roadMat.append(self.soil)
                 self.soilindex1 = i
                 break
 
-        # Same for rural road
+        self.road = Element(self.road.albedo, self.road.emissivity, newthickness, roadMat,\
+            self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal, self.road._name)
+
+
+        # Define Rural Element
+        ruralMat, newthickness = procMat(self.rural,self.maxThickness,self.minThickness)
         for i in xrange(self.nSoil):
-            if sum(self.rural.layerThickness) <= self.depth_soil[i][0]:
+            # if soil depth is greater then the thickness of the road
+            # we add new slices of soil at max thickness until road is greater or equal
+            if self.depth_soil[i][0] >= sum(newthickness):
+                #to avoid floating point precision problems compare equality
+                is_greater = self.depth_soil[i][0] > sum(newthickness)
+                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
+                while(not is_equal and is_greater):
+                    newthickness.append(self.maxThickness)
+                    ruralMat.append(self.soil)
                 self.soilindex2 = i
                 break
+
+        self.rural = Element(self.rural.albedo, self.rural.emissivity, newthickness,\
+            ruralMat,self.rural.vegCoverage,self.rural.layerTemp[0],self.rural.horizontal, self.rural._name)
+
 
     def hvac_autosize(self):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
@@ -672,63 +662,44 @@ def procMat(materials,max_thickness,min_thickness):
     """
     newmat = []
     newthickness = []
-
     k = materials.layerThermalCond
     Vhc = materials.layerVolHeat
 
     if len(materials.layerThickness) > 1:
+
         for j in xrange(len(materials.layerThickness)):
             # Break up each layer that's more than max thickness (0.05m)
             if materials.layerThickness[j] > max_thickness:
-                nlayers = math.ceil(materials.layerThickness[j]/max_thickness)
+                nlayers = math.ceil(materials.layerThickness[j]/float(max_thickness))
                 for i in xrange(int(nlayers)):
-                    pass#print i
-        print '---'
+                    newmat.append(Material(k[j],Vhc[j]))
+                    newthickness.append(materials.layerThickness[j]/float(nlayers))
+            # Material that's less then min_thickness is added at min_thickness.
+            elif materials.layerThickness[j] < min_thickness:
+                newmat.append(Material(k[j],Vhc[j]))
+                newthickness.append(min_thickness)
+                print 'WARNING: Material layer found too thin (<{:.2f}cm), added at new minimum thickness'.format(min_thickness*100)
+            else:
+                newmat.append(Material(k[j],Vhc[j]))
+                newthickness.append(materials.layerThickness[j])
 
-    """
-    k = materials.thermalConductivity;
-    Vhc = materials.volumetricHeatCapacity;
-    if numel(materials.thickness)>1
-        for j = 1:numel(materials.thickness)
-            % Break up each layer that's more than 5cm thick
-            if materials.thickness(j) > max_thickness
-                nlayers = ceil(materials.thickness(j)/max_thickness);
-                for l = 1:nlayers
-                    newmat = [newmat Material(k{j},Vhc{j})];
-                    newthickness = [newthickness; materials.thickness(j)/nlayers];
-                end
+    else:
 
-            % Material that's less then min_thickness is not added.
-            elseif materials.thickness(j) < min_thickness
-                 newmat = [newmat Material(k{j},Vhc{j})];
-                 newthickness = [newthickness; min_thickness];
-                disp('WARNING: Material layer found too thin (<1cm), ignored');
-            else
-                newmat = [newmat Material(k{j},Vhc{j})];
-                newthickness = [newthickness; materials.thickness(j)];
-            end
-        end
-    else
-        % Divide single layer into two (UWG assumes at least 2 layers)
-        if materials.thickness > max_thickness
-            nlayers = ceil(materials.thickness/max_thickness);
-            for l = 1:nlayers
-                newmat = [newmat Material(k,Vhc)];
-                newthickness = [newthickness; materials.thickness/nlayers];
-            end
-
-        % Material should be at least 1cm thick, so if we're here,
-        % should give warning and stop. Only warning given for now.
-        elseif materials.thickness < min_thickness*2
-            newthickness = [min_thickness/2; min_thickness/2];
-            newmat = [Material(k,Vhc) Material(k,Vhc)];
-            disp('WARNING: a thin (<2cm) single layer element found');
-            disp('May cause error');
-
-        else
-            newthickness = [materials.thickness/2; materials.thickness/2];
-            newmat = [Material(k,Vhc) Material(k,Vhc)];
-    """
+        # Divide single layer into two (UWG assumes at least 2 layers)
+        if materials.layerThickness[0] > max_thickness:
+            nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
+            for i in xrange(int(nlayers)):
+                newmat.append(Material(k[0],Vhc[0]))
+                newthickness.append(materials.layerThickness[0]/float(nlayers))
+        # Material should be at least 1cm thick, so if we're here,
+        # should give warning and stop. Only warning given for now.
+        elif materials.layerThickness[0] < min_thickness*2:
+            newthickness = [min_thickness/2., min_thickness/2.]
+            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
+            print 'WARNING: a thin (<2cm) single layer element found. May cause error'
+        else:
+            newthickness = [materials.layerThickness[0]/2., materials.layerThickness[0]/2.]
+            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
     return newmat, newthickness
 
 
