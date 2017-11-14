@@ -53,7 +53,6 @@ class SimParam(object):
             d=self.days
             )
 
-    #TODO: needs to be unit tested
     def UpdateDate(self):
         self.secDay = self.secDay + self.dt
         if self.secDay == 3600*24:
