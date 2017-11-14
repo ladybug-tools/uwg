@@ -1,3 +1,5 @@
+import math
+
 class SimParam(object):
     """
     SimParam
@@ -62,4 +64,4 @@ class SimParam(object):
                 if self.julian == self.inobis[j]:
                     self.month = self.month + 1
                     self.day = 1
-        self.hourDay = floor(self.secDay/3600)       # 0 - 23hr
+        self.hourDay = math.floor(self.secDay/3600.)       # 0 - 23hr

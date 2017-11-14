@@ -232,7 +232,8 @@ class UWG(object):
         RadFLight = ipd['RadFLight']        # Radiant heat fraction from light (normally 0.7)
 
         self.simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)  # simulation time parametrs
-        self.weather = Weather(climate_file_path,self.simTime.timeInitial,self.simTime.timeFinal) # weather file data for simulation time period
+        self.weather = Weather(climate_file_path,self.simTime.timeInitial,
+        self.simTime.timeFinal) # weather file data for simulation time period
         self.forcIP = Forcing(self.weather.staTemp,self.weather) # initialized Forcing class
         self.forc = Forcing() # empty forcing class
 
@@ -420,75 +421,90 @@ class UWG(object):
     def uwg_main(self):
         """ Section 7 - UWG main section
 
-            self._N         #
-            self._ph        # per hour
+            self.N         #
+            self.ph        # per hour
         """
 
 
-        self._N = self.simTime.days * 24       # total number of hours in simulation
+        self.N = int(self.simTime.days * 24)       # total number of hours in simulation
         n = 0
-        self._ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
+        self.ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
 
         # Data dump variables
-        #time = transpose(1:1:simTime.days*24);
-        #WeatherData(N,1) = Forcing
+        time = range(self.N)
+        #TODO: Figure out what this means
+        #WeatherData(self.N, 1) = Forcing() #Empty object
         #UCMData(N,1) = UCMDef
         #UBLData (N,1) = UBLDef;
         #RSMData (N,1) = RSMDef;
         #USMData (N,1) = RSMDef;
 
-        """
-        bTemp = zeros (N,numel(BEM));
-        bRHum = zeros (N,numel(BEM));
-        bPelec = zeros (N,numel(BEM));
-        bQgas = zeros (N,numel(BEM));
-        bPequip = zeros (N,numel(BEM));
-        bPlight = zeros (N,numel(BEM));
-        bQocc = zeros (N,numel(BEM));
-        bFluxMass = zeros (N,numel(BEM));
-        bFluxRoof = zeros(N,numel(BEM));
-        bFluxWall = zeros (N,numel(BEM));
-        bFluxSolar = zeros (N,numel(BEM));
-        bFluxWindow = zeros (N,numel(BEM));
-        bFluxInfil = zeros (N,numel(BEM));
-        bFluxVent = zeros (N,numel(BEM));
-        bCoolConsump = zeros (N,numel(BEM));
-        bHeatConsump = zeros (N,numel(BEM));
-        bCoolDemand = zeros (N,numel(BEM));
-        bHeatDemand = zeros (N,numel(BEM));
-        bTwallext = zeros (N,numel(BEM));
-        bTroofext = zeros (N,numel(BEM));
-        bTwallin = zeros (N,numel(BEM));
-        bTroofin = zeros (N,numel(BEM));
-        bTmassin = zeros (N,numel(BEM));
-        bCOP = zeros(N,numel(BEM));
-        bVent = zeros (N,numel(BEM));
 
-        for it=1:(simTime.nt-1)
+        bTemp = utilities.zeros(self.N,len(self.BEM))
+        bRHum = utilities.zeros(self.N,len(self.BEM))
+        bPelec = utilities.zeros(self.N,len(self.BEM))
+        bQgas = utilities.zeros(self.N,len(self.BEM))
+        bPequip = utilities.zeros(self.N,len(self.BEM))
+        bPlight = utilities.zeros(self.N,len(self.BEM))
+        bQocc = utilities.zeros(self.N,len(self.BEM))
+        bFluxMass = utilities.zeros(self.N,len(self.BEM))
+        bFluxRoof = utilities.zeros(self.N,len(self.BEM))
+        bFluxWall = utilities.zeros(self.N,len(self.BEM))
+        bFluxSolar = utilities.zeros(self.N,len(self.BEM))
+        bFluxWindow = utilities.zeros(self.N,len(self.BEM))
+        bFluxInfil = utilities.zeros(self.N,len(self.BEM))
+        bFluxVent = utilities.zeros(self.N,len(self.BEM))
+        bCoolConsump = utilities.zeros(self.N,len(self.BEM))
+        bHeatConsump = utilities.zeros(self.N,len(self.BEM))
+        bCoolDemand = utilities.zeros(self.N,len(self.BEM))
+        bHeatDemand = utilities.zeros(self.N,len(self.BEM))
+        bTwallext = utilities.zeros(self.N,len(self.BEM))
+        bTroofext = utilities.zeros(self.N,len(self.BEM))
+        bTwallin = utilities.zeros(self.N,len(self.BEM))
+        bTroofin = utilities.zeros(self.N,len(self.BEM))
+        bTmassin = utilities.zeros(self.N,len(self.BEM))
+        bCOP = utilities.zeros(self.N,len(self.BEM))
+        bVent = utilities.zeros(self.N,len(self.BEM))
 
-            % Update water temperature (estimated)
-            if n_soil == 0
-                forc.deepTemp = mean([forcIP.temp]);            % for BUBBLE/CAPITOUL/Singapore only
-                forc.waterTemp = mean([forcIP.temp]) - 10;      % for BUBBLE/CAPITOUL/Singapore only
-            else
-                forc.deepTemp = Tsoil(soilindex1,simTime.month);
-                forc.waterTemp = Tsoil(3,simTime.month);
-            end
+        print len(self.forcIP.temp)
+        print self.simTime.timeFinal - self.simTime.timeInitial + 1
+        print 'epw timestep', self.simTime.timePrint
+        print self.simTime.timeDay * 31
+        print self.simTime.nt - 1       #simulation defined by epw weather file (every 15 minutes?)
+        print '--'
+        print 31 * 24 * 3600/300. #simulation defined by uwg (every 5 minutes) for 31 days
+        print '--'
+        #pprint.pprint(self.Tsoil)
 
-            % There's probably a better way to update the weather...
-            simTime = UpdateDate(simTime);
-            forc.infra = forcIP.infra(ceil(it*ph));
-            forc.wind = max(forcIP.wind(ceil(it*ph)),geoParam.windMin);
-            forc.uDir = forcIP.uDir(ceil(it*ph));
-            forc.hum = forcIP.hum(ceil(it*ph));
-            forc.pres = forcIP.pres(ceil(it*ph));
-            forc.temp = forcIP.temp(ceil(it*ph));
-            forc.rHum = forcIP.rHum(ceil(it*ph));
-            forc.prec = forcIP.prec(ceil(it*ph));
-            forc.dir = forcIP.dir(ceil(it*ph));
-            forc.dif = forcIP.dif(ceil(it*ph));
-            UCM.canHum = forc.hum;      % Canyon humidity (absolute) same as rural
+        #TODO: keep at :15 slice for now
+        for it in range(self.simTime.nt-1)[:15]: #for every simulation time-step (i.e 5 min) defined by uwg
+            # Update water temperature (estimated)
+            if self.is_near_zero(self.nSoil):
+                self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))            # for BUBBLE/CAPITOUL/Singapore only
+                self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
+            else:
+                self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
+                self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
+            # There's probably a better way to update the weather...
+            self.simTime.UpdateDate() # TODO: test this
+            # Update forcing parameters, by simulation timestep * per hour
+            timestep = int(math.ceil(it*self.ph)) #TODO: better name
+            self.forc.infra = self.forcIP.infra[timestep]
+
+            """
+            self.forc.wind = max(self.forcIP.wind(ceil(it*ph)),geoParam.windMin);
+            self.forc.uDir = self.forcIP.uDir(ceil(it*ph));
+            self.forc.hum = self.forcIP.hum(ceil(it*ph));
+            self.forc.pres = self.forcIP.pres(ceil(it*ph));
+            self.forc.temp = self.forcIP.temp(ceil(it*ph));
+            self.forc.rHum = self.forcIP.rHum(ceil(it*ph));
+            self.forc.prec = self.forcIP.prec(ceil(it*ph));
+            self.forc.dir = self.forcIP.dir(ceil(it*ph));
+            self.forc.dif = self.forcIP.dif(ceil(it*ph));
+            self.UCM.canHum = self.forc.hum;      # Canyon humidity (absolute) same as rural
+            """
+            """
             % Update solar flux
             [rural,UCM,BEM] = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural);
 
@@ -538,25 +554,6 @@ class UWG(object):
                     BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
                     BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
                 end
-
-            elseif strcmp(ext,'.xml')
-
-                for i = 1:numel(BEM)
-
-                    % Schedules not used for .xml interface set to zero
-                    BEM(i).Elec = 0;
-                    BEM(i).Light = 0;
-                    BEM(i).Nocc = 0;
-                    BEM(i).Qocc = 0;
-                    BEM(i).SWH = 0;         % not used for .xml interface
-                    BEM(i).Gas = 0;         % not used for .xml interface
-
-                    BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
-                    BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
-                    BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
-                    BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
-                end
-
             end
 
             % Update rural heat fluxes & update vertical diffusion model (VDM)

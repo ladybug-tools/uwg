@@ -192,9 +192,10 @@ class TestUWG(object):
         # dtSim = 300;            % simulation time step (s)
         # dtWeather = 3600;       % weather time step (s)
 
-        assert self.uwg._N == pytest.approx(744., abs=1e-6)       # total hours in simulation
-        assert self.uwg._ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
+        assert self.uwg.N == pytest.approx(744., abs=1e-6)       # total hours in simulation
+        assert self.uwg.ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
 
+        #assert len(self.uwg.BEM) == pytest.approx(48, abs=1e-6)
 
 if __name__ == "__main__":
     test = TestUWG()
