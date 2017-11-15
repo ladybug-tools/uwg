@@ -470,13 +470,16 @@ class UWG(object):
         print self.simTime.timeFinal - self.simTime.timeInitial + 1
         print 'epw timestep', self.simTime.timePrint
         print self.simTime.timeDay * 31
-        print self.simTime.nt - 1       #simulation defined by epw weather file (every 15 minutes?)
+        print self.simTime.nt - 1       # simulation defined by epw weather file (every 5 minutes)
         print '--'
-        print 31 * 24 * 3600/300. #simulation defined by uwg (every 5 minutes) for 31 days
+        print 31 * 24 * 3600/300.       # simulation defined by uwg (every 5 minutes) for 31 days
         print '--'
         #pprint.pprint(self.Tsoil)
 
         #TODO: keep at :15 slice for now
+        print 8928, self.simTime.nt-1
+        print (self.simTime.nt-1)/12., len(self.forcIP.infra)
+
         for it in range(self.simTime.nt-1)[:15]: #for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -487,22 +490,23 @@ class UWG(object):
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
             # There's probably a better way to update the weather...
-            self.simTime.UpdateDate() # TODO: test this
+            self.simTime.UpdateDate()
             # Update forcing parameters, by simulation timestep * per hour
-            timestep = int(math.ceil(it*self.ph)) #TODO: better name
-            self.forc.infra = self.forcIP.infra[timestep]
+            time_increment_in_hours = it * self.ph
 
+            print it, int(math.ceil(time_increment_in_hours))
             """
-            self.forc.wind = max(self.forcIP.wind(ceil(it*ph)),geoParam.windMin);
-            self.forc.uDir = self.forcIP.uDir(ceil(it*ph));
-            self.forc.hum = self.forcIP.hum(ceil(it*ph));
-            self.forc.pres = self.forcIP.pres(ceil(it*ph));
-            self.forc.temp = self.forcIP.temp(ceil(it*ph));
-            self.forc.rHum = self.forcIP.rHum(ceil(it*ph));
-            self.forc.prec = self.forcIP.prec(ceil(it*ph));
-            self.forc.dir = self.forcIP.dir(ceil(it*ph));
-            self.forc.dif = self.forcIP.dif(ceil(it*ph));
-            self.UCM.canHum = self.forc.hum;      # Canyon humidity (absolute) same as rural
+            self.forc.infra = self.forcIP.infra[int(math.ceil(time_increment_in_hours))]        # horizontal Infrared Radiation Intensity (W m-2)
+            self.forc.wind = max(self.forcIP.wind[int(math.ceil(time_increment_in_hours))], self.geoParam.windMin) # wind speed (m s-1)
+            self.forc.uDir = self.forcIP.uDir[int(math.ceil(time_increment_in_hours))]          # wind direction
+            self.forc.hum = self.forcIP.hum[int(math.ceil(time_increment_in_hours))]            # specific humidty (kg kg-1)
+            self.forc.pres = self.forcIP.pres[int(math.ceil(time_increment_in_hours))]          # Pressure (Pa)
+            self.forc.temp = self.forcIP.temp[int(math.ceil(time_increment_in_hours))]          # air temperature (C)
+            self.forc.rHum = self.forcIP.rHum[int(math.ceil(time_increment_in_hours))]          # Relative humidity (%)
+            self.forc.prec = self.forcIP.prec[int(math.ceil(time_increment_in_hours))]          # Precipitation (mm h-1)
+            self.forc.dir = self.forcIP.dir[int(math.ceil(time_increment_in_hours))]            # normal solar direct radiation (W m-2)
+            self.forc.dif = self.forcIP.dif[int(math.ceil(time_increment_in_hours))]            # horizontal solar diffuse radiation (W m-2)
+            self.UCM.canHum = self.forc.hum      # Canyon humidity (absolute) same as rural
             """
             """
             % Update solar flux

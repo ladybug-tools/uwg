@@ -175,7 +175,7 @@ class TestUWG(object):
         assert self.uwg.BEM[0].building.heatCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
-
+        assert len(self.uwg.BEM) == pytest.approx(2, abs=1e-6)
 
 
     def test_uwg_main(self):
@@ -195,12 +195,18 @@ class TestUWG(object):
         assert self.uwg.N == pytest.approx(744., abs=1e-6)       # total hours in simulation
         assert self.uwg.ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
 
-        #assert len(self.uwg.BEM) == pytest.approx(48, abs=1e-6)
+        #test the weather data time series is equal to time step
+        assert len(self.uwg.forcIP.infra) == pytest.approx(744, abs=1e-3)
+        assert len(self.uwg.forcIP.infra) == pytest.approx((self.uwg.simTime.nt-1)/12., abs=1e-3)
+
+
+
+
 
 if __name__ == "__main__":
     test = TestUWG()
-    test.test_read_epw()
-    test.test_read_input()
+    #test.test_read_epw()
+    #test.test_read_input()
     #test.test_procMat()
     #test.test_hvac_autosize()
-    #test.test_uwg_main()
+    test.test_uwg_main()

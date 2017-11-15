@@ -34,7 +34,7 @@ class SimParam(object):
         self.timePrint = timefor                                            # weather data timestep
         self.timeDay = 24*3600/timefor                                      # how many times weather senses in a day
         self.timeSim = self.timeDay*days                                    # how many steps in weather data simulation
-        self.timeMax = 24.*3600.*days
+        self.timeMax = 24.*3600.*days                                       # total seconds in simulation days
         self.nt = int(round(self.timeMax/self.dt+1))                        # total number of timesteps for uwg simuation
         self.inobis = [0,31,59,90,120,151,181,212,243,273,304,334]
         self.julian = self.inobis[self.month - 1] + DAY - 1
