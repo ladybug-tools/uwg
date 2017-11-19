@@ -466,21 +466,14 @@ class UWG(object):
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
 
-        print len(self.forcIP.temp)
-        print self.simTime.timeFinal - self.simTime.timeInitial + 1
-        print 'epw timestep', self.simTime.timePrint
-        print self.simTime.timeDay * 31
-        print self.simTime.nt - 1       # simulation defined by epw weather file (every 5 minutes)
-        print '--'
-        print 31 * 24 * 3600/300.       # simulation defined by uwg (every 5 minutes) for 31 days
-        print '--'
-        #pprint.pprint(self.Tsoil)
 
         #TODO: keep at :15 slice for now
-        print 8928, self.simTime.nt-1
-        print (self.simTime.nt-1)/12., len(self.forcIP.infra)
+        print 31 * 24 * 3600/300., self.simTime.nt-1 # =8928, simulation time (every 5 minutes)
+        print 31 * 24, (self.simTime.nt-1)/12., len(self.forcIP.infra) #=744, epw weather file (every 60 minutes)
 
-        for it in range(self.simTime.nt-1)[:15]: #for every simulation time-step (i.e 5 min) defined by uwg
+        f = open(os.path.join(DIR_UP_PATH ,"check_simtime.txt"),'w')
+
+        for it in range(1,self.simTime.nt,1)[:]: #for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))            # for BUBBLE/CAPITOUL/Singapore only
@@ -494,8 +487,21 @@ class UWG(object):
             # Update forcing parameters, by simulation timestep * per hour
             time_increment_in_hours = it * self.ph
 
-            print it, int(math.ceil(time_increment_in_hours))
-            """
+            #print 'it', it
+            #print 'c-it*ph', int(math.ceil(time_increment_in_hours))
+            #print 'it*ph', time_increment_in_hours
+            #print '---'
+            fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
+                a=it,
+                b=int(math.ceil(time_increment_in_hours)),
+                c=time_increment_in_hours
+                )
+            f.write(fchk)
+
+        f.close()
+
+        """
+
             self.forc.infra = self.forcIP.infra[int(math.ceil(time_increment_in_hours))]        # horizontal Infrared Radiation Intensity (W m-2)
             self.forc.wind = max(self.forcIP.wind[int(math.ceil(time_increment_in_hours))], self.geoParam.windMin) # wind speed (m s-1)
             self.forc.uDir = self.forcIP.uDir[int(math.ceil(time_increment_in_hours))]          # wind direction
@@ -507,8 +513,10 @@ class UWG(object):
             self.forc.dir = self.forcIP.dir[int(math.ceil(time_increment_in_hours))]            # normal solar direct radiation (W m-2)
             self.forc.dif = self.forcIP.dif[int(math.ceil(time_increment_in_hours))]            # horizontal solar diffuse radiation (W m-2)
             self.UCM.canHum = self.forc.hum      # Canyon humidity (absolute) same as rural
-            """
-            """
+
+        """
+        """
+
             % Update solar flux
             [rural,UCM,BEM] = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural);
 
