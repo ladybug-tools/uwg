@@ -73,7 +73,7 @@ class UWG(object):
     cpv = 1846.1           #
     b = 9.4                # Coefficients derived by Louis (1979)
     cm = 7.4               #
-    colburn = math.pow((0.713/0.621), (2/3)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
+    colburn = math.pow((0.713/0.621), (2/3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     # Site-specific parameters
     wgmax = 0.005          # maximum film water depth on horizontal surfaces (m)
