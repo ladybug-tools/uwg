@@ -471,12 +471,12 @@ class UWG(object):
         print 31 * 24 * 3600/300., self.simTime.nt-1 # =8928, simulation time (every 5 minutes)
         print 31 * 24, (self.simTime.nt-1)/12., len(self.forcIP.infra) #=744, epw weather file (every 60 minutes)
 
-        f = open(os.path.join(DIR_UP_PATH ,"check_simtime.txt"),'w')
+        #f = open(os.path.join(DIR_UP_PATH ,"check_simtime.txt"),'w')
 
         for it in range(1,self.simTime.nt,1)[:]: #for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
-                self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))            # for BUBBLE/CAPITOUL/Singapore only
+                self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
             else:
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
@@ -485,36 +485,31 @@ class UWG(object):
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
             # Update forcing parameters, by simulation timestep * per hour
-            time_increment_in_hours = it * self.ph
+            ceil_time_step = int(math.ceil(it * self.ph)) - 1  # simulation time increment raised to weather time step
 
             #print 'it', it
             #print 'c-it*ph', int(math.ceil(time_increment_in_hours))
             #print 'it*ph', time_increment_in_hours
             #print '---'
-            fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
-                a=it,
-                b=int(math.ceil(time_increment_in_hours)),
-                c=time_increment_in_hours
-                )
-            f.write(fchk)
+            #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
+            #    a=it,
+            #    b= ceil_time_step,
+            #    c= it * self.ph
+            #    )
 
-        f.close()
+            self.forc.infra = self.forcIP.infra[ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
+            self.forc.wind = max(self.forcIP.wind[ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
+            self.forc.uDir = self.forcIP.uDir[ceil_time_step]          # wind direction
+            self.forc.hum = self.forcIP.hum[ceil_time_step]            # specific humidty (kg kg-1)
+            self.forc.pres = self.forcIP.pres[ceil_time_step]          # Pressure (Pa)
+            self.forc.temp = self.forcIP.temp[ceil_time_step]          # air temperature (C)
+            self.forc.rHum = self.forcIP.rHum[ceil_time_step]          # Relative humidity (%)
+            self.forc.prec = self.forcIP.prec[ceil_time_step]          # Precipitation (mm h-1)
+            self.forc.dir = self.forcIP.dir[ceil_time_step]            # normal solar direct radiation (W m-2)
+            self.forc.dif = self.forcIP.dif[ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
+            self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
 
-        """
-
-            self.forc.infra = self.forcIP.infra[int(math.ceil(time_increment_in_hours))]        # horizontal Infrared Radiation Intensity (W m-2)
-            self.forc.wind = max(self.forcIP.wind[int(math.ceil(time_increment_in_hours))], self.geoParam.windMin) # wind speed (m s-1)
-            self.forc.uDir = self.forcIP.uDir[int(math.ceil(time_increment_in_hours))]          # wind direction
-            self.forc.hum = self.forcIP.hum[int(math.ceil(time_increment_in_hours))]            # specific humidty (kg kg-1)
-            self.forc.pres = self.forcIP.pres[int(math.ceil(time_increment_in_hours))]          # Pressure (Pa)
-            self.forc.temp = self.forcIP.temp[int(math.ceil(time_increment_in_hours))]          # air temperature (C)
-            self.forc.rHum = self.forcIP.rHum[int(math.ceil(time_increment_in_hours))]          # Relative humidity (%)
-            self.forc.prec = self.forcIP.prec[int(math.ceil(time_increment_in_hours))]          # Precipitation (mm h-1)
-            self.forc.dir = self.forcIP.dir[int(math.ceil(time_increment_in_hours))]            # normal solar direct radiation (W m-2)
-            self.forc.dif = self.forcIP.dif[int(math.ceil(time_increment_in_hours))]            # horizontal solar diffuse radiation (W m-2)
-            self.UCM.canHum = self.forc.hum      # Canyon humidity (absolute) same as rural
-
-        """
+        #f.close()
         """
 
             % Update solar flux
