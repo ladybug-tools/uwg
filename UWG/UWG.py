@@ -31,6 +31,7 @@ from element import Element
 from param import Param
 from RSMDef import RSMDef
 from UCMDef import UCMDef
+from solarcalcs import solarcalcs
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -467,13 +468,10 @@ class UWG(object):
         bVent = utilities.zeros(self.N,len(self.BEM))
 
 
-        #TODO: keep at :15 slice for now
-        print 31 * 24 * 3600/300., self.simTime.nt-1 # =8928, simulation time (every 5 minutes)
-        print 31 * 24, (self.simTime.nt-1)/12., len(self.forcIP.infra) #=744, epw weather file (every 60 minutes)
-
-        #f = open(os.path.join(DIR_UP_PATH ,"check_simtime.txt"),'w')
-
-        for it in range(1,self.simTime.nt,1)[:]: #for every simulation time-step (i.e 5 min) defined by uwg
+        # For testing only create test file
+        #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
+        simtoggle = True
+        for it in range(1,self.simTime.nt,1)[:12*24*2]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -483,20 +481,20 @@ class UWG(object):
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
             # There's probably a better way to update the weather...
+            #TODO: tmmrw: this is meant to start from 0
             self.simTime.UpdateDate()
-            # Update forcing parameters, by simulation timestep * per hour
+
             ceil_time_step = int(math.ceil(it * self.ph)) - 1  # simulation time increment raised to weather time step
 
-            #print 'it', it
-            #print 'c-it*ph', int(math.ceil(time_increment_in_hours))
-            #print 'it*ph', time_increment_in_hours
-            #print '---'
-            #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
-            #    a=it,
-            #    b= ceil_time_step,
-            #    c= it * self.ph
-            #    )
+            print ceil_time_step, self.simTime.julian, self.simTime.secDay
+            if self.is_near_zero(it%12):#simtoggle:
+                print 'dy: ', round(it*300/3600/24.,2)
+                print 'hr: ', it*300/3600.
+                print 'simday, simjulian:', self.simTime.day, self.simTime.julian
+                print '---'
+                simtoggle = False
 
+            # Updating forcing instance
             self.forc.infra = self.forcIP.infra[ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
             self.forc.wind = max(self.forcIP.wind[ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
             self.forc.uDir = self.forcIP.uDir[ceil_time_step]          # wind direction
@@ -509,27 +507,24 @@ class UWG(object):
             self.forc.dif = self.forcIP.dif[ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
             self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
 
-        #f.close()
-        """
+            # Update solar flux
+            #TODO: write this function
+            rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
+            # Update building & traffic schedule
+            # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
+            if self.is_near_zero(self.simTime.julian % 7):              # Sunday
+                dayType = 3
+            elif self.is_near_zero(self.simTime.julian % 7 - 6.):  # Saturday
+                dayType = 2
+            else:
+                dayType = 1                                             # Weekday
+            #print 'dayType', dayType
 
-            % Update solar flux
-            [rural,UCM,BEM] = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural);
-
-            % Update buildling & traffic schedule
-            if strcmp(ext,'.xlsm') || strcmp(ext,'.m')
-
-                % Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
-                if mod (simTime.julian,7) == 0      % Sunday
-                    dayType = 3;
-                elseif mod (simTime.julian,7) == 6  % Saturday
-                    dayType = 2;
-                else                                % Weekday
-                    dayType = 1;
-                end
-
-                % Update anthropogenic heat load for each hour (building & UCM)
-                UCM.sensAnthrop = sensAnth*(SchTraffic(dayType,simTime.hourDay+1));
-
+            #% Update anthropogenic heat load for each hour (building & UCM)
+            #UCM.sensAnthrop = sensAnth*(SchTraffic(dayType,simTime.hourDay+1));
+            """
+            """
+            """
                 for i = 1:numel(BEM)
 
                     % Set temperature
@@ -624,6 +619,16 @@ class UWG(object):
         end
         progressbar(1); % Close progress bar
 
+        """
+
+            #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
+            #    a=it,
+            #    b= ceil_time_step,
+            #    c= it * self.ph
+            #    )
+        #f.close()
+
+        """
     # =========================================================================
     # Section 8 - Writing new EPW file
     # =========================================================================

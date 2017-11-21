@@ -196,8 +196,11 @@ class TestUWG(object):
         assert self.uwg.ph == pytest.approx(0.083333, abs=1e-6)  # dt (simulation time step) in hours
 
         #test the weather data time series is equal to time step
-        assert len(self.uwg.forcIP.infra) == pytest.approx(744, abs=1e-3)
         assert len(self.uwg.forcIP.infra) == pytest.approx((self.uwg.simTime.nt-1)/12., abs=1e-3)
+        # check that simulation time is happening every 5 minutes 8928
+        assert self.uwg.simTime.nt-1 == pytest.approx(31*24*3600/300., abs=1e-3)
+        # check that weather step time is happening every 1 hour = 744
+        assert len(self.uwg.forcIP.dif) ==  pytest.approx(31 * 24, abs=1e-3)
 
 
 
