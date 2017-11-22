@@ -80,35 +80,35 @@ class Building(object):
             condType,cop,coolSetpointDay,coolSetpointNight,\
             heatSetpointDay,heatSetpointNight,coolCap,heatEff,initialTemp):
 
-            self.floorHeight =float(floorHeight)    # floor height
-            self.intHeat = intHeatNight             # timetep internal gains (W m-2 bld) (sensible only)
-            self.intHeatNight = intHeatNight        # nighttime internal heat gains  (W m-2 floor)
-            self.intHeatDay = intHeatDay            # daytime internal heat gains  (W m-2 floor)
-            self.intHeatFRad = intHeatFRad          # internal gain radiant fraction
-            self.intHeatFLat = intHeatFLat          # internal gain latent fraction
-            self.infil = infil                      # Infiltration (ACH)
-            self.vent = vent                        # Ventilation (ACH)
-            self.glazingRatio = glazingRatio        # glazing ratio
-            self.uValue = uValue                    # window U-value ( w m-2 K-1) including film coeff
-            self.shgc = shgc                        # window SHGC
-            self.condType = condType                # cooling condensation system type: AIR, WATER
-            self.cop = cop                          # COP of cooling system (nominal)
-            self.coolSetpointDay = coolSetpointDay  # daytime indoor cooling setpoint [K]
-            self.coolSetpointNight = coolSetpointNight # nighttime indoor heating setpoint [K]
-            self.heatSetpointDay = heatSetpointDay     # daytimge indoor heating setpoint [K]
-            self.heatSetpointNight = heatSetpointNight # nighttime indoor heating setpoint [K]
-            self.coolCap = coolCap                     # rated cooling system capacity (W m-2)
-            self.heatEff = heatEff                     # heating system capacity (-)
+            self.floorHeight =float(floorHeight)        # floor height
+            self.intHeat = intHeatNight                 # timetep internal gains (W m-2 bld) (sensible only)
+            self.intHeatNight = intHeatNight            # nighttime internal heat gains  (W m-2 floor)
+            self.intHeatDay = intHeatDay                # daytime internal heat gains  (W m-2 floor)
+            self.intHeatFRad = intHeatFRad              # internal gain radiant fraction
+            self.intHeatFLat = intHeatFLat              # internal gain latent fraction
+            self.infil = infil                          # Infiltration (ACH)
+            self.vent = vent                            # Ventilation (ACH)
+            self.glazingRatio = glazingRatio            # glazing ratio
+            self.uValue = uValue                        # window U-value ( w m-2 K-1) including film coeff
+            self.shgc = shgc                            # window SHGC
+            self.condType = condType                    # cooling condensation system type: AIR, WATER
+            self.cop = cop                              # COP of cooling system (nominal)
+            self.coolSetpointDay = coolSetpointDay      # daytime indoor cooling setpoint [K]
+            self.coolSetpointNight = coolSetpointNight  # nighttime indoor heating setpoint [K]
+            self.heatSetpointDay = heatSetpointDay      # daytimge indoor heating setpoint [K]
+            self.heatSetpointNight = heatSetpointNight  # nighttime indoor heating setpoint [K]
+            self.coolCap = coolCap                      # rated cooling system capacity (W m-2)
+            self.heatEff = heatEff                      # heating system capacity (-)
             self.mSys = coolCap/1004./(min(coolSetpointDay,coolSetpointNight)-14-273.15) # HVAC supply mass flowrate (kg s-1 m-2)
-            self.indoorTemp = initialTemp           # Indoor Air Temperature [K]
-            self.indoorHum = 0.012                  # Indoor specific humidity [kgv/kga]
-            self.heatCap = 999                      # Default heat capacity value
-            self.copAdj = cop                       # adjusted COP per temperature
-            self.canyon_fraction = 1.0              # Default canyon fraction
+            self.indoorTemp = initialTemp               # Indoor Air Temperature [K]
+            self.indoorHum = 0.012                      # Indoor specific humidity [kgv/kga]
+            self.heatCap = 999                          # Default heat capacity value
+            self.copAdj = cop                           # adjusted COP per temperature
+            self.canyon_fraction = 1.0                  # Default canyon fraction
 
-            self.Type = "null"                      # DOE reference building type
-            self.Era = "null"                       # pre80, pst80, new
-            self.Zone = "null"                      # Climate zone number
+            self.Type = "null"                          # DOE reference building type
+            self.Era = "null"                           # pre80, pst80, new
+            self.Zone = "null"                          # Climate zone number
 
     def __repr__(self):
         return "Building: Type: {:s}, Era: {:s}, Zone: {:s}; @ Ti: {a}, WWR: {b}".format(

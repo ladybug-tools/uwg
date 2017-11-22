@@ -221,6 +221,7 @@ class UWG(object):
                 self._init_param_dict[row[0]] = float(row[1])
 
         #rename initial parameters for local scope
+        #TODO: should make all this a property of the class
         ipd = self._init_param_dict
         # Define Simulation and Weather parameters
         Month = ipd['Month']                # starting month (1-12)
@@ -230,11 +231,11 @@ class UWG(object):
 
         dtWeather = ipd['dtWeather']        # seconds (s)
         autosize = ipd['autosize']          # autosize HVAC (1 or 0)
-        sensOcc = ipd['sensOcc']            # Sensible heat from occupant
-        LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
-        RadFOcc = ipd['RadFOcc']            # Radiant heat fraction from occupant (normally 0.2)
-        RadFEquip = ipd['RadFEquip']        # Radiant heat fraction from equipment (normally 0.5)
-        RadFLight = ipd['RadFLight']        # Radiant heat fraction from light (normally 0.7)
+        self.sensOcc = ipd['sensOcc']       # Sensible heat from occupant
+        self.LatFOcc = ipd['LatFOcc']       # Latent heat fraction from occupant (normally 0.3)
+        self.RadFOcc = ipd['RadFOcc']       # Radiant heat fraction from occupant (normally 0.2)
+        self.RadFEquip = ipd['RadFEquip']   # Radiant heat fraction from equipment (normally 0.5)
+        self.RadFLight = ipd['RadFLight']   # Radiant heat fraction from light (normally 0.7)
 
         self.simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)  # simulation time parametrs
         self.weather = Weather(climate_file_path,self.simTime.timeInitial,
@@ -264,7 +265,7 @@ class UWG(object):
         alb_road = ipd['albRoad']           # road albedo
         d_road = ipd['dRoad']               # road pavement thickness
         self.sensAnth = ipd['sensAnth']     # non-building sensible heat (W/m^2)
-        latAnth = ipd['latAnth']            # non-building latent heat heat (W/m^2)
+        self.latAnth = ipd['latAnth']       # non-building latent heat heat (W/m^2)
 
         # climate Zone
         zone = int(ipd['zone'])-1
@@ -373,7 +374,7 @@ class UWG(object):
         T_init = self.weather.staTemp[1]
         H_init = self.weather.staHum[1]
 
-        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,latAnth,T_init,H_init,\
+        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,self.latAnth,T_init,H_init,\
         self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
@@ -481,7 +482,8 @@ class UWG(object):
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
-            else:#TODO: this is slightly offset by simTime.nt from rest of timestep
+            else:
+                #TODO: this is slightly offset by simTime.nt seconds from rest of timestep due to placement of UpdateDate()
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
@@ -526,39 +528,38 @@ class UWG(object):
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
-            
-            """
-                for i = 1:numel(BEM)
 
-                    % Set temperature
-                    BEM(i).building.coolSetpointDay = Sch(i).Cool(dayType,simTime.hourDay+1) + 273.15;
-                    BEM(i).building.coolSetpointNight = BEM(i).building.coolSetpointDay;
-                    BEM(i).building.heatSetpointDay = Sch(i).Heat(dayType,simTime.hourDay+1) + 273.15;
-                    BEM(i).building.heatSetpointNight = BEM(i).building.heatSetpointDay;
+            # Update the energy components for building types defined in initialize.uwg
+            for i in xrange(len(self.BEM)):
+                # Set temperature
+                self.BEM[i].building.coolSetpointDay = self.Sch[i].Cool[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for cooling
+                self.BEM[i].building.coolSetpointNight = self.BEM[i].building.coolSetpointDay
+                self.BEM[i].building.heatSetpointDay = self.Sch[i].Heat[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for heating
+                self.BEM[i].building.heatSetpointNight = self.BEM[i].building.heatSetpointDay
 
-                    % Internal Heat Load Schedule (W/m^2 of floor area for Q)
-                    BEM(i).Elec = Sch(i).Qelec*Sch(i).Elec(dayType,simTime.hourDay+1);
-                    BEM(i).Light = Sch(i).Qlight*Sch(i).Light(dayType,simTime.hourDay+1);
-                    BEM(i).Nocc = Sch(i).Nocc*Sch(i).Occ(dayType,simTime.hourDay+1);
-                    BEM(i).Qocc = sensOcc*(1-LatFOcc)*BEM(i).Nocc;
+                # Internal Heat Load Schedule (W/m^2 of floor area for Q)
+                #self.BEM[i].Elec = self.Sch[i].Qelec * self.Sch[i].Elec[self.dayType-1][self.simTime.hourDay]
+                #self.BEM[i].Light = self.Sch[i].Qlight * self.Sch[i].Light[self.dayType-1][self.simTime.hourDay]
+                #self.BEM[i].Nocc = self.Sch[i].Nocc * self.Sch[i].Occ[self.dayType-1][self.simTime.hourDay] # Occupant schedule * number of occupants
+                #self.BEM[i].Qocc = self.sensOcc * (1 - self.LatFOcc) * self.BEM[i].Nocc  # occupant (W/m^2) = Sensible Q occupant * fraction occupant sensible Q * number of occupants
 
-                    % SWH and ventilation schedule
-                    BEM(i).SWH = Sch(i).Vswh*Sch(i).SWH(dayType,simTime.hourDay+1);     % litres per hour / m^2 of floor space
-                    BEM(i).building.vent = Sch(i).Vent;                                 % m^3/s/m^2 of floor
-                    BEM(i).Gas = Sch(i).Qgas * Sch(i).Gas(dayType,simTime.hourDay+1);   % Gas Equip Schedule, per m^2 of floor
+                """
+                % SWH and ventilation schedule
+                BEM(i).SWH = Sch(i).Vswh*Sch(i).SWH(dayType,simTime.hourDay+1);     % litres per hour / m^2 of floor space
+                BEM(i).building.vent = Sch(i).Vent;                                 % m^3/s/m^2 of floor
+                BEM(i).Gas = Sch(i).Qgas * Sch(i).Gas(dayType,simTime.hourDay+1);   % Gas Equip Schedule, per m^2 of floor
 
-                    % This is quite messy, should update
-                    intHeat = BEM(i).Light+BEM(i).Elec+BEM(i).Qocc;
-                    BEM(i).building.intHeatDay = intHeat;
-                    BEM(i).building.intHeatNight = intHeat;
-                    BEM(i).building.intHeatFRad = (RadFLight *BEM(i).Light + RadFEquip*BEM(i).Elec)/intHeat;
-                    BEM(i).building.intHeatFLat = LatFOcc*sensOcc*BEM(i).Nocc/intHeat;
+                % This is quite messy, should update
+                intHeat = BEM(i).Light+BEM(i).Elec+BEM(i).Qocc;
+                BEM(i).building.intHeatDay = intHeat;
+                BEM(i).building.intHeatNight = intHeat;
+                BEM(i).building.intHeatFRad = (RadFLight *BEM(i).Light + RadFEquip*BEM(i).Elec)/intHeat;
+                BEM(i).building.intHeatFLat = LatFOcc*sensOcc*BEM(i).Nocc/intHeat;
 
-                    BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
-                    BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
-                    BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
-                    BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
-                end
+                BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
+                BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
+                BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
+                BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
             end
 
             % Update rural heat fluxes & update vertical diffusion model (VDM)
