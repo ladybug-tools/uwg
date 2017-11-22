@@ -160,7 +160,11 @@ class UWG(object):
         """Section 3 - Read Input File (.m, file)
         Note: UWG_Matlab input files are xlsm, XML, .m, file.
         properties:
-            self._init_param_dict    # dictionary of simulation initialization parameters
+            self._init_param_dict   # dictionary of simulation initialization parameters
+
+            self.sensAnth           # non-building sensible heat (W/m^2)
+            self.SchTraffic         # Traffice schedule
+
             self.BEM                # list of BEMDef objects extracted from readDOE
             self.Sch                # list of Schedule objects extracted from readDOE
 
@@ -259,7 +263,7 @@ class UWG(object):
         charLength = ipd['charLength']      # radius defining the urban area of study [aka. characteristic length] (m)
         alb_road = ipd['albRoad']           # road albedo
         d_road = ipd['dRoad']               # road pavement thickness
-        sensAnth = ipd['sensAnth']          # non-building sensible heat (W/m^2)
+        self.sensAnth = ipd['sensAnth']     # non-building sensible heat (W/m^2)
         latAnth = ipd['latAnth']            # non-building latent heat heat (W/m^2)
 
         # climate Zone
@@ -288,7 +292,7 @@ class UWG(object):
         #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
 
         # Define Traffic schedule
-        SchTraffic = ipd['SchTraffic']
+        self.SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
         kRoad = ipd['kRoad']                 # road pavement conductivity (W/m K)
@@ -369,7 +373,7 @@ class UWG(object):
         T_init = self.weather.staTemp[1]
         H_init = self.weather.staHum[1]
 
-        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,T_init,H_init,\
+        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,latAnth,T_init,H_init,\
         self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
@@ -422,8 +426,9 @@ class UWG(object):
     def uwg_main(self):
         """ Section 7 - UWG main section
 
-            self.N         #
-            self.ph        # per hour
+            self.N          #
+            self.ph         # per hour
+            self.dayType    # 3=Sun, 2=Sat, 1=Weekday
         """
 
 
@@ -476,16 +481,15 @@ class UWG(object):
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
-            else:
+            else:#TODO: this is slightly offset by simTime.nt from rest of timestep
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
             # There's probably a better way to update the weather...
-            #TODO: tmmrw: this is meant to start from 0
             self.simTime.UpdateDate()
-
             ceil_time_step = int(math.ceil(it * self.ph)) - 1  # simulation time increment raised to weather time step
 
+            """
             print ceil_time_step, self.simTime.julian, self.simTime.secDay
             if self.is_near_zero(it%12):#simtoggle:
                 print 'dy: ', round(it*300/3600/24.,2)
@@ -493,6 +497,7 @@ class UWG(object):
                 print 'simday, simjulian:', self.simTime.day, self.simTime.julian
                 print '---'
                 simtoggle = False
+            """
 
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
@@ -512,18 +517,16 @@ class UWG(object):
             rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
             # Update building & traffic schedule
             # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
-            if self.is_near_zero(self.simTime.julian % 7):              # Sunday
-                dayType = 3
-            elif self.is_near_zero(self.simTime.julian % 7 - 6.):  # Saturday
-                dayType = 2
+            if self.is_near_zero(self.simTime.julian % 7):
+                self.dayType = 3                                        # Sunday
+            elif self.is_near_zero(self.simTime.julian % 7 - 6.):
+                self.dayType = 2                                        # Saturday
             else:
-                dayType = 1                                             # Weekday
-            #print 'dayType', dayType
+                self.dayType = 1                                        # Weekday
 
-            #% Update anthropogenic heat load for each hour (building & UCM)
-            #UCM.sensAnthrop = sensAnth*(SchTraffic(dayType,simTime.hourDay+1));
-            """
-            """
+            # Update anthropogenic heat load for each hour (building & UCM)
+            self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
+            
             """
                 for i = 1:numel(BEM)
 

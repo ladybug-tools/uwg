@@ -202,8 +202,9 @@ class TestUWG(object):
         # check that weather step time is happening every 1 hour = 744
         assert len(self.uwg.forcIP.dif) ==  pytest.approx(31 * 24, abs=1e-3)
 
-
-
+        # check that final day of timestep is at correct dayType
+        assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
+        assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
 
 
 if __name__ == "__main__":

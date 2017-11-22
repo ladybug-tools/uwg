@@ -60,11 +60,11 @@ class SimParam(object):
     def UpdateDate(self):
         self.secDay = self.secDay + self.dt
         if self.is_near_zero(self.secDay - 3600*24):
-            self.day = self.day + 1
+            self.day += 1
             self.julian = self.julian + 1
             self.secDay = 0.
             for j in xrange(12):
                 if self.is_near_zero(self.julian - self.inobis[j]):
                     self.month = self.month + 1
                     self.day = 1
-        self.hourDay = math.floor(self.secDay/3600.)       # 0 - 23hr
+        self.hourDay = int(math.floor(self.secDay/3600.))       # 0 - 23hr
