@@ -439,7 +439,7 @@ class UWG(object):
 
         # Data dump variables
         time = range(self.N)
-        #TODO: Figure out what this means
+        #TODO: Similar to readDOE Schedule initialization - init list where empty object is every item
         #WeatherData(self.N, 1) = Forcing() #Empty object
         #UCMData(N,1) = UCMDef
         #UBLData (N,1) = UBLDef;
@@ -636,18 +636,21 @@ class UWG(object):
             #    )
         #f.close()
 
+    def write_epw(self):
+        """ Section 8 - Writing new EPW file
+
         """
-    # =========================================================================
-    # Section 8 - Writing new EPW file
-    # =========================================================================
-    if strcmp('Yes',writeEPW)
-        disp('Calculating new Temperature and humidity values')
-        for iJ = 1:numel(UCMData)
-            epwinput.values{iJ+simTime.timeInitial-8,7}{1,1} = num2str(UCMData(iJ).canTemp- 273.15,'%0.1f'); % dry bulb temperature  [C]
+        pass
+        """
+        print 'Calculating new Temperature and humidity values'
+
+
+        for iJ in xrange(len(UCMData)):
+            print self.epwinput.values#{iJ+simTime.timeInitial-8,7}{1,1} = num2str(UCMData(iJ).canTemp- 273.15,'%0.1f'); % dry bulb temperature  [C]
             epwinput.values{iJ+simTime.timeInitial-8,8}{1,1} = num2str(UCMData(iJ).Tdp,'%0.1f'); % dew point temperature [C]
             epwinput.values{iJ+simTime.timeInitial-8,9}{1,1} = num2str(UCMData(iJ).canRHum,'%0.0f'); % relative humidity     [%]
             epwinput.values{iJ+simTime.timeInitial-8,22}{1,1} = num2str(WeatherData(iJ).wind,'%0.1f'); % wind speed [m/s]
-        end
+
         disp('writing new EPW file');
 
         % Writing new EPW file
@@ -667,10 +670,9 @@ class UWG(object):
             fprintf(epwnewid,'%s\r\n',printme);
         end
         disp(['New climate file generated: ',new_climate_file]);
-    end
 
-    return None
-    """
+        return None
+        """
 
 def procMat(materials,max_thickness,min_thickness):
     """ Processes material layer so that a material with single
@@ -732,3 +734,4 @@ if __name__ == "__main__":
     uwg.read_input()
     uwg.hvac_autosize()
     uwg.uwg_main()
+    uwg.write_epw()
