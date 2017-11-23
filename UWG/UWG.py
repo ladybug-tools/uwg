@@ -477,7 +477,7 @@ class UWG(object):
         # For testing only create test file
         #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
         simtoggle = True
-        for it in range(1,self.simTime.nt,1)[:12*24*2]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+        for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -532,36 +532,37 @@ class UWG(object):
             # Update the energy components for building types defined in initialize.uwg
             for i in xrange(len(self.BEM)):
                 # Set temperature
-                self.BEM[i].building.coolSetpointDay = self.Sch[i].Cool[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for cooling
+                self.BEM[i].building.coolSetpointDay   = self.Sch[i].Cool[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for cooling
                 self.BEM[i].building.coolSetpointNight = self.BEM[i].building.coolSetpointDay
-                self.BEM[i].building.heatSetpointDay = self.Sch[i].Heat[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for heating
+                self.BEM[i].building.heatSetpointDay   = self.Sch[i].Heat[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for heating
                 self.BEM[i].building.heatSetpointNight = self.BEM[i].building.heatSetpointDay
 
                 # Internal Heat Load Schedule (W/m^2 of floor area for Q)
-                #self.BEM[i].Elec = self.Sch[i].Qelec * self.Sch[i].Elec[self.dayType-1][self.simTime.hourDay]
-                #self.BEM[i].Light = self.Sch[i].Qlight * self.Sch[i].Light[self.dayType-1][self.simTime.hourDay]
-                #self.BEM[i].Nocc = self.Sch[i].Nocc * self.Sch[i].Occ[self.dayType-1][self.simTime.hourDay] # Occupant schedule * number of occupants
-                #self.BEM[i].Qocc = self.sensOcc * (1 - self.LatFOcc) * self.BEM[i].Nocc  # occupant (W/m^2) = Sensible Q occupant * fraction occupant sensible Q * number of occupants
+                self.BEM[i].Elec  = self.Sch[i].Qelec * self.Sch[i].Elec[self.dayType-1][self.simTime.hourDay]      # Qelec x elec fraction for day
+                self.BEM[i].Light = self.Sch[i].Qlight * self.Sch[i].Light[self.dayType-1][self.simTime.hourDay]    # Qlight x light fraction for day
+                self.BEM[i].Nocc  = self.Sch[i].Nocc * self.Sch[i].Occ[self.dayType-1][self.simTime.hourDay]        # Number of occupants x occ fraction for day
+                self.BEM[i].Qocc  = self.sensOcc * (1 - self.LatFOcc) * self.BEM[i].Nocc                            # Sensible Q occupant * fraction occupant sensible Q * number of occupants
 
-                """
-                % SWH and ventilation schedule
-                BEM(i).SWH = Sch(i).Vswh*Sch(i).SWH(dayType,simTime.hourDay+1);     % litres per hour / m^2 of floor space
-                BEM(i).building.vent = Sch(i).Vent;                                 % m^3/s/m^2 of floor
-                BEM(i).Gas = Sch(i).Qgas * Sch(i).Gas(dayType,simTime.hourDay+1);   % Gas Equip Schedule, per m^2 of floor
+                # SWH and ventilation schedule
+                self.BEM[i].SWH = self.Sch[i].Vswh * self.Sch[i].SWH[self.dayType-1][self.simTime.hourDay]          # litres per hour x SWH fraction for day
+                self.BEM[i].building.vent = self.Sch[i].Vent                                                        # m^3/s/m^2 of floor
+                self.BEM[i].Gas = self.Sch[i].Qgas * self.Sch[i].Gas[self.dayType-1][self.simTime.hourDay]          # Gas Equip Schedule, per m^2 of floor
 
-                % This is quite messy, should update
-                intHeat = BEM(i).Light+BEM(i).Elec+BEM(i).Qocc;
-                BEM(i).building.intHeatDay = intHeat;
-                BEM(i).building.intHeatNight = intHeat;
-                BEM(i).building.intHeatFRad = (RadFLight *BEM(i).Light + RadFEquip*BEM(i).Elec)/intHeat;
-                BEM(i).building.intHeatFLat = LatFOcc*sensOcc*BEM(i).Nocc/intHeat;
+                # This is quite messy, should update
+                # Update internal heat and corresponding fractional loads
+                intHeat = self.BEM[i].Light + self.BEM[i].Elec + self.BEM[i].Qocc
+                self.BEM[i].building.intHeatDay = intHeat                                                           # W/m2 from light, electricity, occupants
+                self.BEM[i].building.intHeatNight = intHeat
+                self.BEM[i].building.intHeatFRad = (self.RadFLight * self.BEM[i].Light + self.RadFEquip * self.BEM[i].Elec) / intHeat # fraction of radiant heat from light and equipment of whole internal heat
+                self.BEM[i].building.intHeatFLat = self.LatFOcc * self.sensOcc * self.BEM[i].Nocc/intHeat           # fraction of latent heat (from occupants) of whole internal heat
 
-                BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
-                BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
-                BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
-                BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
-            end
+                # Update envelope temperature layers
+                self.BEM[i].T_wallex = self.BEM[i].wall.layerTemp[0]
+                self.BEM[i].T_wallin = self.BEM[i].wall.layerTemp[-1]
+                self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
+                self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
+            """
             % Update rural heat fluxes & update vertical diffusion model (VDM)
             rural.infra = forc.infra-rural.emissivity*sigma*rural.layerTemp(1)^4.;
             rural = SurfFlux(rural,forc,geoParam,simTime,forc.hum,forc.temp,forc.wind,2,0.);
