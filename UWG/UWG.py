@@ -562,12 +562,15 @@ class UWG(object):
                 self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
-            """
-            % Update rural heat fluxes & update vertical diffusion model (VDM)
-            rural.infra = forc.infra-rural.emissivity*sigma*rural.layerTemp(1)^4.;
-            rural = SurfFlux(rural,forc,geoParam,simTime,forc.hum,forc.temp,forc.wind,2,0.);
-            RSM = VDM(RSM,forc,rural,geoParam,simTime);
 
+            # Update rural heat fluxes & update vertical diffusion model (VDM)
+            self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+            #TODO: Code this (from element class)
+            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
+            #TODO: Code this (from RSM class)
+            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+
+            """
             % Calculate urban heat fluxes, update UCM & UBL
             [UCM,UBL,BEM] = UrbFlux(UCM,UBL,BEM,forc,geoParam,simTime,RSM);
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);

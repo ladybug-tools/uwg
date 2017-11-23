@@ -19,7 +19,7 @@ class SchDef(object):
     Vent        % litres/s/person for ventilation
     """
 
-    def __init__(self,Elec,Gas,Light,Occ,Cool,Heat,SWH):
+    def __init__(self,Elec=None,Gas=None,Light=None,Occ=None,Cool=None,Heat=None,SWH=None):
         self.Elec = Elec
         self.Gas = Gas
         self.Light = Light
@@ -30,6 +30,6 @@ class SchDef(object):
 
     def __repr__(self):
         return "Schedule:(weekday from 8:00 - 18:00) \n Heating: {a}\n Cooling: {b}".format(
-            a=self.Heat[0][7:17],
-            b=self.Cool[0][7:17]
+            a= "Null" if self.Heat is None else self.Heat[0][7:17],
+            b= "Null" if self.Cool is None else self.Cool[0][7:17]
             )
