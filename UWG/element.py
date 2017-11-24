@@ -131,36 +131,40 @@ class Element(object):
         obj.T_ext = obj.layerTemp(1);
         obj.T_int = obj.layerTemp(end);
     end
+    """
 
-    function t = Conduction(obj,dt,flx1,bc,temp2,flx2)
-        t = obj.layerTemp;
-        hc = obj.layerVolHeat;
-        tc = obj.layerThermalCond;
-        d = obj.layerThickness;
-        % flx1  : net heat flux on surface
-        % bc    : boundary condition parameter (1 or 2)
-        % temp2 : deep soil temperature (ave of air temperature)
-        % flx2  : surface flux (sum of absorbed, emitted, etc.)
+    def Conduction(self, dt, flx1, bc, temp2, flx2):
+        t = self.layerTemp          # vector of layer thicknesses (m)
+        hc = self.layerVolHeat      # vector of layer volumetric heat (J m-3 K-1)
+        tc = self.layerThermalCond  # vector of layer thermal conductivities (W m-1 K-1)
+        d = self.layerThickness     # vector of layer thicknesses (m)
 
-        fimp=0.5;           % implicit coefficient
-        fexp=0.5;           % explicit coefficient
-        num = size(t,1);    % number of layers
+        # flx1                      : net heat flux on surface
+        # bc                        : boundary condition parameter (1 or 2)
+        # temp2                     : deep soil temperature (ave of air temperature)
+        # flx2                      : surface flux (sum of absorbed, emitted, etc.)
 
-        % mean thermal conductivity over distance between 2 layers
-        tcp = zeros(num,1);
-        % thermal capacity times layer depth
-        hcp = zeros(num,1);
-        % lower, main, and upper diagonals
-        za = zeros(num,3);
-        % RHS
-        zy = zeros(num,1);
-        %--------------------------------------------------------------------------
-        hcp(1) = hc(1)* d(1);
-        for j=2:num;
-          tcp(j) = 2./(d(j-1)/tc(j-1)+d(j)/tc(j));
-          hcp(j) = hc(j)*d(j);
-        end
-        %--------------------------------------------------------------------------
+        fimp = 0.5                  # implicit coefficient
+        fexp = 0.5                  # explicit coefficient
+        num = len(t)                # number of layers
+
+        # Mean thermal conductivity over distance between 2 layers
+        tcp = map(lambda tcon: 0, range(num))
+        # Thermal capacity times layer depth
+        hcp = map(lambda tcap: 0, range(num))
+        # lower, main, and upper diagonals
+        za = map(lambda y_: map(lambda x_: 0, range(3)), range(num))
+        # RHS
+        zy = map(lambda rhs_: 0, range(num))
+
+        #--------------------------------------------------------------------------
+        hcp[0] = hc[0] * d[0]   #thermal capacity (J/m2K) = volumetric heat (J/m3K) * thickness (m)
+        #for j=2:num;
+        #  tcp(j) = 2./(d(j-1)/tc(j-1)+d(j)/tc(j));
+        #  hcp(j) = hc(j)*d(j);
+
+        #--------------------------------------------------------------------------
+        """
         za(1,1) = 0.;
         za(1,2) = hcp(1)/dt + fimp*tcp(2);
         za(1,3) = -fimp*tcp(2);
@@ -191,10 +195,8 @@ class Element(object):
         % zx=tridiag_ground(za,zb,zc,zy);
         zx = Invert(num,za,zy);
         t(:) = zx(:);
-
-    end
- end
-end
+        """
+"""
 
 function qsat = qsat(temp,pres,parameter)
 
