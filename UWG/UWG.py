@@ -32,6 +32,8 @@ from param import Param
 from RSMDef import RSMDef
 from UCMDef import UCMDef
 from solarcalcs import solarcalcs
+from urbflux import urbflux
+from UBLDef import UBLDef
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -176,6 +178,7 @@ class UWG(object):
             self.RSM                # Rural site & vertical diffusion model obj
             self.USM                # Urban site & vertical diffusion model obj
             self.UCM                # Urban canopy model obj
+            self.UBL                # Urban boundary layer model
 
             self.road               # urban road element
             self.rural              # rural road element
@@ -290,7 +293,7 @@ class UWG(object):
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
         #TODO:  write UBLDef
-        #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
+        self.UBL = UBLDef('C',charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
 
         # Define Traffic schedule
         self.SchTraffic = ipd['SchTraffic']
@@ -570,9 +573,10 @@ class UWG(object):
             #TODO: Code this (from RSM class)
             #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
+
+            # Calculate urban heat fluxes, update UCM & UBL
+            self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
             """
-            % Calculate urban heat fluxes, update UCM & UBL
-            [UCM,UBL,BEM] = UrbFlux(UCM,UBL,BEM,forc,geoParam,simTime,RSM);
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);
 

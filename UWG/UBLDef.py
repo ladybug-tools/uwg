@@ -35,69 +35,70 @@ class UBLDef(object):
             obj.dayBLHeight = dayBLHeight;
             obj.nightBLHeight = nightBLHeight;
             """
+
+    """
+    function obj = UBLModel(obj,UCM,RSM,rural,forc,parameter,simTime)
+
+        % Note that only one urban canyon area is considered
+        obj.sensHeat = UCM.sensHeat;
+        heatDif = max(obj.sensHeat - rural.sens,0);
+        Cp = parameter.cp;                  % Heat capacity of air (J/kg.K)
+        k_w = parameter.circCoeff;          % k_w per Bueno 'the UWG', eq 8
+        g = parameter.g;                    % Gravity
+        v_wind = max(forc.wind,parameter.windMin);   % wind velocity
+
+        % Air density
+        refDens = 0;
+        for iz=1:RSM.nzref
+            refDens = refDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
+                (RSM.z(RSM.nzref)+RSM.dz(RSM.nzref)/2);
+        end
+        forDens = 0;
+        for iz=1:RSM.nzfor
+            forDens = forDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
+                (RSM.z(RSM.nzfor)+RSM.dz(RSM.nzfor)/2);
+        end
+
+        % ---------------------------------------------------------------------
+        % Day
+        % ---------------------------------------------------------------------
+        time = simTime.secDay/3600;
+        noon = 12;
+        daylimit = parameter.dayThreshold;      % sunlight threshold for day (~150W/m^2)
+        nightlimit = parameter.dayThreshold;    % sunlight threshold for night (~50W/m^2)
+        sunlight = forc.dir+forc.dif;
+
+        % If dir & dif light is greater than threshold, use day
+        if sunlight > daylimit && time <= noon ||...
+                sunlight > nightlimit && time > noon || obj.sensHeat > 150
+
+            % Circulation velocity per Bueno 'the UWG', eq 8
+            h_UBL = obj.dayBLHeight;            % Day boundary layer height
+            eqTemp = RSM.tempProf(RSM.nzref);
+            eqWind = RSM.windProf(RSM.nzref);
+
+            Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp);
+            u_circ = k_w*(g*heatDif/Cp/refDens/eqTemp*h_UBL)^(1./3.);
+
+            if v_wind > u_circ    % Forced problem (usually this)
+                advCoef  = obj.orthLength*eqWind*simTime.dt/obj.urbArea*1.4;
+                obj.ublTemp = (Csurf+advCoef*eqTemp + obj.ublTemp)/(1 + advCoef);
+                obj.ublTempdx(:)= obj.ublTemp;
+
+            else                  % Convective problem
+                advCoef  = obj.perimeter*u_circ*simTime.dt/obj.urbArea*1.4;
+                obj.ublTemp = (Csurf+advCoef*eqTemp + obj.ublTemp)/(1 + advCoef);
+                obj.ublTempdx(:)= obj.ublTemp;
+            end
+        % ---------------------------------------------------------------------
+        % Night
+        % ---------------------------------------------------------------------
+        else
+            h_UBL = obj.nightBLHeight;      % Night boundary layer height
+            Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp);
+             [obj.ublTemp,obj.ublTempdx] = NightForc(obj.ublTempdx,simTime.dt,...
+                  h_UBL,obj.paralLength,obj.charLength,RSM,Csurf);
         """
-        function obj = UBLModel(obj,UCM,RSM,rural,forc,parameter,simTime)
-
-            % Note that only one urban canyon area is considered
-            obj.sensHeat = UCM.sensHeat;
-            heatDif = max(obj.sensHeat - rural.sens,0);
-            Cp = parameter.cp;                  % Heat capacity of air (J/kg.K)
-            k_w = parameter.circCoeff;          % k_w per Bueno 'the UWG', eq 8
-            g = parameter.g;                    % Gravity
-            v_wind = max(forc.wind,parameter.windMin);   % wind velocity
-
-            % Air density
-            refDens = 0;
-            for iz=1:RSM.nzref
-                refDens = refDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
-                    (RSM.z(RSM.nzref)+RSM.dz(RSM.nzref)/2);
-            end
-            forDens = 0;
-            for iz=1:RSM.nzfor
-                forDens = forDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
-                    (RSM.z(RSM.nzfor)+RSM.dz(RSM.nzfor)/2);
-            end
-
-            % ---------------------------------------------------------------------
-            % Day
-            % ---------------------------------------------------------------------
-            time = simTime.secDay/3600;
-            noon = 12;
-            daylimit = parameter.dayThreshold;      % sunlight threshold for day (~150W/m^2)
-            nightlimit = parameter.dayThreshold;    % sunlight threshold for night (~50W/m^2)
-            sunlight = forc.dir+forc.dif;
-
-            % If dir & dif light is greater than threshold, use day
-            if sunlight > daylimit && time <= noon ||...
-                    sunlight > nightlimit && time > noon || obj.sensHeat > 150
-
-                % Circulation velocity per Bueno 'the UWG', eq 8
-                h_UBL = obj.dayBLHeight;            % Day boundary layer height
-                eqTemp = RSM.tempProf(RSM.nzref);
-                eqWind = RSM.windProf(RSM.nzref);
-
-                Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp);
-                u_circ = k_w*(g*heatDif/Cp/refDens/eqTemp*h_UBL)^(1./3.);
-
-                if v_wind > u_circ    % Forced problem (usually this)
-                    advCoef  = obj.orthLength*eqWind*simTime.dt/obj.urbArea*1.4;
-                    obj.ublTemp = (Csurf+advCoef*eqTemp + obj.ublTemp)/(1 + advCoef);
-                    obj.ublTempdx(:)= obj.ublTemp;
-
-                else                  % Convective problem
-                    advCoef  = obj.perimeter*u_circ*simTime.dt/obj.urbArea*1.4;
-                    obj.ublTemp = (Csurf+advCoef*eqTemp + obj.ublTemp)/(1 + advCoef);
-                    obj.ublTempdx(:)= obj.ublTemp;
-                end
-            % ---------------------------------------------------------------------
-            % Night
-            % ---------------------------------------------------------------------
-            else
-                h_UBL = obj.nightBLHeight;      % Night boundary layer height
-                Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp);
-                 [obj.ublTemp,obj.ublTempdx] = NightForc(obj.ublTempdx,simTime.dt,...
-                      h_UBL,obj.paralLength,obj.charLength,RSM,Csurf);
-            """
     """
     def function [ublTemp,ublTempdx] = NightForc(ublTempdx,dt,h_UBL,paralLength,charLength,RSM,Csurf)
 

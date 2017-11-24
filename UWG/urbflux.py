@@ -3,7 +3,7 @@ Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/UrbFlux.m
 Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - August, 2017
 """
 
-def UrbFlux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
+def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     """
     Calculate the surface heat fluxes
     Output: [UCM,UBL,BEM]
@@ -15,11 +15,12 @@ def UrbFlux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     UCM.roofTemp = 0       # Average urban roof temperature
     UCM.wallTemp = 0       # Average urban wall temperature
 
-    """
-    for j = 1:numel(BEM)
 
-        % Building energy model
-        BEM(j).building = BEMCalc(BEM(j).building,UCM,BEM(j),forc,parameter,simTime);
+    for j in xrange(len(BEM[:1])):
+        # Building energy model
+        BEM[j].building.BEMCalc(UCM, BEM[j], forc, parameter, simTime)
+
+        """
         BEM(j).ElecTotal = BEM(j).building.ElecTotal * BEM(j).fl_area;
 
         % Update roof infra calc
@@ -40,8 +41,8 @@ def UrbFlux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
         % Note the average wall & roof temperature
         UCM.wallTemp = UCM.wallTemp + BEM(j).frac*BEM(j).wall.layerTemp(1);
         UCM.roofTemp = UCM.roofTemp + BEM(j).frac*BEM(j).roof.layerTemp(1);
-
-    end
+        """
+    """
 
     % Update road infra calc (assume walls have similar emissivity, so use the last one)
     [UCM.road.infra,~] = InfraCalcs(UCM,forc,UCM.road.emissivity,e_wall,UCM.roadTemp,UCM.wallTemp);
@@ -101,4 +102,4 @@ def UrbFlux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     end
     """
 
-    return [UCM,UBL,BEM]
+    return UCM,UBL,BEM
