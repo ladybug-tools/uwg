@@ -80,120 +80,123 @@ class Element(object):
             )
         return s1 + s2
 
+
+    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
+        pass
         """
-        function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
+        % Calculated per unit area (m^2)
+        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
+        obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
 
-            % Calculated per unit area (m^2)
-            dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
-            obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
+        if (obj.horizontal)     % For roof, mass, road
 
-            if (obj.horizontal)     % For roof, mass, road
-
-                % Evaporation (m s-1), Film water & soil latent heat
-                if obj.waterStorage > 0
-                    qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
-                    eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
-                    obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
-                    obj.waterStorage = max(obj.waterStorage,0);
-                else
-                    eg = 0;
-                end
-                soilLat = eg*parameter.waterDens*parameter.lv;
-
-                % Winter, no veg
-                if simTime.month < parameter.vegStart && simTime.month > parameter.vegEnd
-                    obj.solAbs = (1-obj.albedo)*obj.solRec;
-                    vegLat = 0;
-                    vegSens = 0;
-                else    % Summer, veg
-                    obj.solAbs = ((1-obj.vegCoverage)*(1-obj.albedo)+...
-                        obj.vegCoverage*(1-parameter.vegAlbedo))*obj.solRec;
-                    vegLat = obj.vegCoverage*parameter.grassFLat*(1-parameter.vegAlbedo)*obj.solRec;
-                    vegSens = obj.vegCoverage*(1.-parameter.grassFLat)*(1-parameter.vegAlbedo)*obj.solRec;
-                end
-                obj.lat = soilLat + vegLat;
-
-                % Sensible & net heat flux
-                obj.sens = vegSens + obj.aeroCond*(obj.layerTemp(1)-tempRef);
-                obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
-
-            else     % Vertical surface (wall)
-                obj.solAbs = (1-obj.albedo)*obj.solRec;
-                obj.lat = 0;
-
-                % Sensible & net heat flux
-                obj.sens = obj.aeroCond*(obj.layerTemp(1)-tempRef);
-                obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
-            end
-
-            obj.layerTemp = Conduction(obj,simTime.dt,obj.flux,boundCond,forc.deepTemp,intFlux);
-            obj.T_ext = obj.layerTemp(1);
-            obj.T_int = obj.layerTemp(end);
-        end
-
-        function t = Conduction(obj,dt,flx1,bc,temp2,flx2)
-            t = obj.layerTemp;
-            hc = obj.layerVolHeat;
-            tc = obj.layerThermalCond;
-            d = obj.layerThickness;
-            % flx1  : net heat flux on surface
-            % bc    : boundary condition parameter (1 or 2)
-            % temp2 : deep soil temperature (ave of air temperature)
-            % flx2  : surface flux (sum of absorbed, emitted, etc.)
-
-            fimp=0.5;           % implicit coefficient
-            fexp=0.5;           % explicit coefficient
-            num = size(t,1);    % number of layers
-
-            % mean thermal conductivity over distance between 2 layers
-            tcp = zeros(num,1);
-            % thermal capacity times layer depth
-            hcp = zeros(num,1);
-            % lower, main, and upper diagonals
-            za = zeros(num,3);
-            % RHS
-            zy = zeros(num,1);
-            %--------------------------------------------------------------------------
-            hcp(1) = hc(1)* d(1);
-            for j=2:num;
-              tcp(j) = 2./(d(j-1)/tc(j-1)+d(j)/tc(j));
-              hcp(j) = hc(j)*d(j);
-            end
-            %--------------------------------------------------------------------------
-            za(1,1) = 0.;
-            za(1,2) = hcp(1)/dt + fimp*tcp(2);
-            za(1,3) = -fimp*tcp(2);
-            zy(1) = hcp(1)/dt*t(1) - fexp*tcp(2)*(t(1)-t(2)) + flx1;
-            %--------------------------------------------------------------------------
-            for j=2:num-1;
-              za(j,1) = fimp*(-tcp(j));
-              za(j,2) = hcp(j)/dt+ fimp*(tcp(j)+tcp(j+1));
-              za(j,3) = fimp*(-tcp(j+1));
-              zy(j) = hcp(j)/dt*t(j)+fexp*(tcp(j)*t(j-1)-...
-                  tcp(j)*t(j)-tcp(j+1)*t(j)+ tcp(j+1)*t(j+1));
-            end
-            %--------------------------------------------------------------------------
-            if eq(bc,1) % het flux
-                za(num,1) = fimp*(- tcp(num) );
-                za(num,2) = hcp(num)/dt+ fimp* tcp(num);
-                za(num,3) = 0.;
-                zy(num) = hcp(num)/dt*t(num) + fexp*tcp(num)*(t(num-1)-t(num)) + flx2;
-            elseif eq(bc,2) % deep-temperature
-                za(num,1) = 0;
-                za(num,2) = 1;
-                za(num,3) = 0.;
-                zy(num) = temp2;
+            % Evaporation (m s-1), Film water & soil latent heat
+            if obj.waterStorage > 0
+                qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
+                eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
+                obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
+                obj.waterStorage = max(obj.waterStorage,0);
             else
-                disp('ERROR: check input parameters in the Conduction routine')
+                eg = 0;
             end
-            %--------------------------------------------------------------------------
-            % zx=tridiag_ground(za,zb,zc,zy);
-            zx = Invert(num,za,zy);
-            t(:) = zx(:);
+            soilLat = eg*parameter.waterDens*parameter.lv;
 
+            % Winter, no veg
+            if simTime.month < parameter.vegStart && simTime.month > parameter.vegEnd
+                obj.solAbs = (1-obj.albedo)*obj.solRec;
+                vegLat = 0;
+                vegSens = 0;
+            else    % Summer, veg
+                obj.solAbs = ((1-obj.vegCoverage)*(1-obj.albedo)+...
+                    obj.vegCoverage*(1-parameter.vegAlbedo))*obj.solRec;
+                vegLat = obj.vegCoverage*parameter.grassFLat*(1-parameter.vegAlbedo)*obj.solRec;
+                vegSens = obj.vegCoverage*(1.-parameter.grassFLat)*(1-parameter.vegAlbedo)*obj.solRec;
+            end
+            obj.lat = soilLat + vegLat;
+
+            % Sensible & net heat flux
+            obj.sens = vegSens + obj.aeroCond*(obj.layerTemp(1)-tempRef);
+            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
+
+        else     % Vertical surface (wall)
+            obj.solAbs = (1-obj.albedo)*obj.solRec;
+            obj.lat = 0;
+
+            % Sensible & net heat flux
+            obj.sens = obj.aeroCond*(obj.layerTemp(1)-tempRef);
+            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
         end
-     end
-end
+
+        obj.layerTemp = Conduction(obj,simTime.dt,obj.flux,boundCond,forc.deepTemp,intFlux);
+        obj.T_ext = obj.layerTemp(1);
+        obj.T_int = obj.layerTemp(end);
+    end
+    """
+
+    def Conduction(self, dt, flx1, bc, temp2, flx2):
+        t = self.layerTemp          # vector of layer thicknesses (m)
+        hc = self.layerVolHeat      # vector of layer volumetric heat (J m-3 K-1)
+        tc = self.layerThermalCond  # vector of layer thermal conductivities (W m-1 K-1)
+        d = self.layerThickness     # vector of layer thicknesses (m)
+
+        # flx1                      : net heat flux on surface
+        # bc                        : boundary condition parameter (1 or 2)
+        # temp2                     : deep soil temperature (ave of air temperature)
+        # flx2                      : surface flux (sum of absorbed, emitted, etc.)
+
+        fimp = 0.5                  # implicit coefficient
+        fexp = 0.5                  # explicit coefficient
+        num = len(t)                # number of layers
+
+        # Mean thermal conductivity over distance between 2 layers
+        tcp = map(lambda tcon: 0, range(num))
+        # Thermal capacity times layer depth
+        hcp = map(lambda tcap: 0, range(num))
+        # lower, main, and upper diagonals
+        za = map(lambda y_: map(lambda x_: 0, range(3)), range(num))
+        # RHS
+        zy = map(lambda rhs_: 0, range(num))
+
+        #--------------------------------------------------------------------------
+        hcp[0] = hc[0] * d[0]   #thermal capacity (J/m2K) = volumetric heat (J/m3K) * thickness (m)
+        #for j=2:num;
+        #  tcp(j) = 2./(d(j-1)/tc(j-1)+d(j)/tc(j));
+        #  hcp(j) = hc(j)*d(j);
+
+        #--------------------------------------------------------------------------
+        """
+        za(1,1) = 0.;
+        za(1,2) = hcp(1)/dt + fimp*tcp(2);
+        za(1,3) = -fimp*tcp(2);
+        zy(1) = hcp(1)/dt*t(1) - fexp*tcp(2)*(t(1)-t(2)) + flx1;
+        %--------------------------------------------------------------------------
+        for j=2:num-1;
+          za(j,1) = fimp*(-tcp(j));
+          za(j,2) = hcp(j)/dt+ fimp*(tcp(j)+tcp(j+1));
+          za(j,3) = fimp*(-tcp(j+1));
+          zy(j) = hcp(j)/dt*t(j)+fexp*(tcp(j)*t(j-1)-...
+              tcp(j)*t(j)-tcp(j+1)*t(j)+ tcp(j+1)*t(j+1));
+        end
+        %--------------------------------------------------------------------------
+        if eq(bc,1) % het flux
+            za(num,1) = fimp*(- tcp(num) );
+            za(num,2) = hcp(num)/dt+ fimp* tcp(num);
+            za(num,3) = 0.;
+            zy(num) = hcp(num)/dt*t(num) + fexp*tcp(num)*(t(num-1)-t(num)) + flx2;
+        elseif eq(bc,2) % deep-temperature
+            za(num,1) = 0;
+            za(num,2) = 1;
+            za(num,3) = 0.;
+            zy(num) = temp2;
+        else
+            disp('ERROR: check input parameters in the Conduction routine')
+        end
+        %--------------------------------------------------------------------------
+        % zx=tridiag_ground(za,zb,zc,zy);
+        zx = Invert(num,za,zy);
+        t(:) = zx(:);
+        """
+"""
 
 function qsat = qsat(temp,pres,parameter)
 

@@ -143,7 +143,7 @@ class Building(object):
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
         T_can = UCM.canTemp                             # Canyon temperature
 
-
+        
         # Normalize areas to building foot print [m^2/m^2(bld)]
         facArea = UCM.verToHor/UCM.bldDensity           # [m2(facade)/m2(bld)]
         wallArea = facArea*(1.-self.glazingRatio)       # [m2(wall)/m2(bld)]

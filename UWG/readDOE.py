@@ -147,7 +147,7 @@ def readDOE():
         AreaWall    = str2fl([list_doe2[2][8],list_doe2[3][8],list_doe2[4][8]])       # [m2]
         AreaWindow  = str2fl([list_doe2[2][9],list_doe2[3][9],list_doe2[4][9]])       # [m2]
         Occupant    = str2fl([list_doe2[2][11],list_doe2[3][11],list_doe2[4][11]])    # Number of People
-        Lights      = str2fl([list_doe2[2][12],list_doe2[3][12],list_doe2[4][12]])    # [W/m2]
+        Light       = str2fl([list_doe2[2][12],list_doe2[3][12],list_doe2[4][12]])    # [W/m2]
         Elec        = str2fl([list_doe2[2][13],list_doe2[3][13],list_doe2[4][13]])    # [W/m2] Electric Plug and Process
         Gas         = str2fl([list_doe2[2][14],list_doe2[3][14],list_doe2[4][14]])    # [W/m2] Gas Plug and Process
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
@@ -373,15 +373,15 @@ def readDOE():
 
                 if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
 
-                Elec = SchEquip;   # 3x24 matrix of schedule for electricity (WD,Sat,Sun)
-                Light = SchLight;  # 3x24 matrix of schedule for light (WD,Sat,Sun)
-                Gas = SchGas;      # 3x24 matrix of schedule for gas (WD,Sat,Sun)
-                Occ = SchOcc;      # 3x24 matrix of schedule for occupancy (WD,Sat,Sun)
-                Cool = SetCool;    # 3x24 matrix of schedule for cooling temp (WD,Sat,Sun)
-                Heat = SetHeat;    # 3x24 matrix of schedule for heating temp (WD,Sat,Sun)
-                SWH = SchSWH;      # 3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                Schedule[i][j][k] = SchDef()
 
-                Schedule[i][j][k] = SchDef(Elec,Gas,Light,Occ,Cool,Heat,SWH)
+                Schedule[i][j][k].Elec = SchEquip   # 3x24 matrix of schedule for fraction electricity (WD,Sat,Sun)
+                Schedule[i][j][k].Light = SchLight  # 3x24 matrix of schedule for fraction light (WD,Sat,Sun)
+                Schedule[i][j][k].Gas = SchGas      # 3x24 matrix of schedule for fraction gas (WD,Sat,Sun)
+                Schedule[i][j][k].Occ = SchOcc      # 3x24 matrix of schedule for fraction occupancy (WD,Sat,Sun)
+                Schedule[i][j][k].Cool = SetCool    # 3x24 matrix of schedule for fraction cooling temp (WD,Sat,Sun)
+                Schedule[i][j][k].Heat = SetHeat    # 3x24 matrix of schedule for fraction heating temp (WD,Sat,Sun)
+                Schedule[i][j][k].SWH = SchSWH      # 3x24 matrix of schedule for fraction SWH (WD,Sat,Sun
 
                 Schedule[i][j][k].Qelec = Elec[j]                   # W/m^2 (max) for electrical plug process
                 Schedule[i][j][k].Qlight = Light[j]                 # W/m^2 (max) for light

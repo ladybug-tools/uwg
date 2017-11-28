@@ -73,7 +73,7 @@ class TestUWG(object):
 
         # test BEMs
         assert len(self.uwg.BEM) == pytest.approx(2.,abs=1e-6)
-        # test BEM office
+        # test BEM office (BLD4 in DOE)
         assert self.uwg.BEM[0].building.Type == "LargeOffice"
         assert self.uwg.BEM[0].building.Zone == "1A (Miami)"
         assert self.uwg.BEM[0].building.Era == "Pst80"
