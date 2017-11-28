@@ -31,6 +31,7 @@ from element import Element
 from param import Param
 from RSMDef import RSMDef
 from UCMDef import UCMDef
+from UBLDef import UBLDef
 from solarcalcs import solarcalcs
 
 class UWG(object):
@@ -77,7 +78,7 @@ class UWG(object):
     colburn = math.pow((0.713/0.621), (2/3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     # Site-specific parameters
-    wgmax = 0.005          # maximum film water depth on horizontal surfaces (m)
+    wgmax = 0.005 # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -283,14 +284,14 @@ class UWG(object):
         # Initialize geographic Param and Urban Boundary Layer Objects
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
-        maxdx = 250;            # max dx (m)
+        maxdx = 250.;            # max dx (m)
 
         self.geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
         #TODO:  write UBLDef
-        #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
+        UBL = UBLDef('C',charLength,self.weather.staTemp[0],maxdx,self.geoParam.dayBLHeight,self.geoParam.nightBLHeight)
 
         # Define Traffic schedule
         self.SchTraffic = ipd['SchTraffic']
