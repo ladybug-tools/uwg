@@ -40,24 +40,21 @@ class UBLDef(object):
         # Note that only one urban canyon area is considered
         self.sensHeat = UCM.sensHeat
         heatDif = max(self.sensHeat - rural.sens,0)
-        Cp = parameter.cp                  # Heat capacity of air (J/kg.K)
-        k_w = parameter.circCoeff          # k_w per Bueno 'the UWG', eq 8
-        g = parameter.g                    # Gravity
+        Cp = parameter.cp                           # Heat capacity of air (J/kg.K)
+        k_w = parameter.circCoeff                   # k_w per Bueno 'the UWG', eq 8
+        g = parameter.g                             # Gravity
         v_wind = max(forc.wind,parameter.windMin)   # wind velocity
 
-        """
-        % Air density
-        refDens = 0;
-        for iz=1:RSM.nzref
-            refDens = refDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
-                (RSM.z(RSM.nzref)+RSM.dz(RSM.nzref)/2);
-        end
-        forDens = 0;
-        for iz=1:RSM.nzfor
-            forDens = forDens + RSM.densityProfC(iz)*RSM.dz(iz)/...
-                (RSM.z(RSM.nzfor)+RSM.dz(RSM.nzfor)/2);
-        end
+        # Air density
+        refDens = 0.
+        for iz in xrange(RSM.nzref):
+            refDens = refDens + RSM.densityProfC(iz) * RSM.dz(iz) / (RSM.z(RSM.nzref) + RSM.dz(RSM.nzref)/2.)
 
+        forDens = 0
+        for iz in xrange(RSM.nzfor):
+            forDens = forDens + RSM.densityProfC(iz) * RSM.dz(iz) / (RSM.z(RSM.nzfor) + RSM.dz(RSM.nzfor)/2.)
+
+        """
         % ---------------------------------------------------------------------
         % Day
         % ---------------------------------------------------------------------

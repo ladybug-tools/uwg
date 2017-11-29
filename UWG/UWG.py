@@ -294,11 +294,8 @@ class UWG(object):
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
         #TODO:  write UBLDef
-<<<<<<< HEAD
-        UBL = UBLDef('C',charLength,self.weather.staTemp[0],maxdx,self.geoParam.dayBLHeight,self.geoParam.nightBLHeight)
-=======
         self.UBL = UBLDef('C',charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
->>>>>>> 445be86255b765aa3c045f98cf331a9df614dee7
+
 
         # Define Traffic schedule
         self.SchTraffic = ipd['SchTraffic']
