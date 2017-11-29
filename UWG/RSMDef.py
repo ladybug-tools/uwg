@@ -99,54 +99,54 @@ class RSMDef(object):
         obj.windProf = ones(1,obj.nzref);
     """
     """
-        % Ref: The UWG (2012), Eq. (4)
-        function obj = VDM(obj,forc,rural,parameter,simTime)
+    % Ref: The UWG (2012), Eq. (4)
+    function obj = VDM(obj,forc,rural,parameter,simTime)
 
-            obj.tempProf(1) = forc.temp;    % Lower boundary condition
-            % compute pressure profile
-            for iz=obj.nzref:-1:2
-               obj.presProf(iz-1)=(obj.presProf(iz)^(parameter.r/parameter.cp)+...
-                   parameter.g/parameter.cp*(forc.pres^(parameter.r/parameter.cp))*...
-                   (1./obj.tempProf(iz)+1./obj.tempProf(iz-1))*...
-                   0.5*obj.dz(iz))^(1./(parameter.r/parameter.cp));
-            end
-            % compute the real temperature profile
-            for iz=1:obj.nzref
-               obj.tempRealProf(iz)=obj.tempProf(iz)*...
-                   (obj.presProf(iz)/forc.pres)^(parameter.r/parameter.cp);
-            end
-            % compute the density profile
-            for iz=1:obj.nzref
-               obj.densityProfC(iz)=obj.presProf(iz)/parameter.r/obj.tempRealProf(iz);
-            end
-            obj.densityProfS(1)=obj.densityProfC(1);
-            for iz=2:obj.nzref
-               obj.densityProfS(iz)=(obj.densityProfC(iz)*obj.dz(iz-1)+...
-                   obj.densityProfC(iz-1)*obj.dz(iz))/(obj.dz(iz-1)+obj.dz(iz));
-            end
-            obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
+        obj.tempProf(1) = forc.temp;    % Lower boundary condition
+        % compute pressure profile
+        for iz=obj.nzref:-1:2
+           obj.presProf(iz-1)=(obj.presProf(iz)^(parameter.r/parameter.cp)+...
+               parameter.g/parameter.cp*(forc.pres^(parameter.r/parameter.cp))*...
+               (1./obj.tempProf(iz)+1./obj.tempProf(iz-1))*...
+               0.5*obj.dz(iz))^(1./(parameter.r/parameter.cp));
+        end
+        % compute the real temperature profile
+        for iz=1:obj.nzref
+           obj.tempRealProf(iz)=obj.tempProf(iz)*...
+               (obj.presProf(iz)/forc.pres)^(parameter.r/parameter.cp);
+        end
+        % compute the density profile
+        for iz=1:obj.nzref
+           obj.densityProfC(iz)=obj.presProf(iz)/parameter.r/obj.tempRealProf(iz);
+        end
+        obj.densityProfS(1)=obj.densityProfC(1);
+        for iz=2:obj.nzref
+           obj.densityProfS(iz)=(obj.densityProfC(iz)*obj.dz(iz-1)+...
+               obj.densityProfC(iz-1)*obj.dz(iz))/(obj.dz(iz-1)+obj.dz(iz));
+        end
+        obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
 
-            % Ref: The UWG (2012), Eq. (5)
-            % compute diffusion coefficient
-            [cd,ustarRur] = DiffusionCoefficient(obj.densityProfC(1),...
-                obj.z,obj.dz,obj.z0r,obj.disp,...
-                obj.tempProf(1),rural.sens,obj.nzref,forc.wind,...
-                obj.tempProf,parameter);
-            % solve diffusion equation
-            obj.tempProf = DiffusionEquation(obj.nzref,simTime.dt,...
-                obj.tempProf,obj.densityProfC,obj.densityProfS,cd,obj.dz);
-            % compute wind profile
-            for iz=1:obj.nzref
-                obj.windProf(iz) = ustarRur/parameter.vk*...
-                    log((obj.z(iz)-obj.disp)/obj.z0r);
-            end
-            % Average pressure
-            obj.ublPres = 0;
-            for iz=1:obj.nzfor
-                obj.ublPres = obj.ublPres +...
-                    obj.presProf(iz)*obj.dz(iz)/...
-                    (obj.z(obj.nzref)+obj.dz(obj.nzref)/2);
-            end
+        % Ref: The UWG (2012), Eq. (5)
+        % compute diffusion coefficient
+        [cd,ustarRur] = DiffusionCoefficient(obj.densityProfC(1),...
+            obj.z,obj.dz,obj.z0r,obj.disp,...
+            obj.tempProf(1),rural.sens,obj.nzref,forc.wind,...
+            obj.tempProf,parameter);
+        % solve diffusion equation
+        obj.tempProf = DiffusionEquation(obj.nzref,simTime.dt,...
+            obj.tempProf,obj.densityProfC,obj.densityProfS,cd,obj.dz);
+        % compute wind profile
+        for iz=1:obj.nzref
+            obj.windProf(iz) = ustarRur/parameter.vk*...
+                log((obj.z(iz)-obj.disp)/obj.z0r);
+        end
+        % Average pressure
+        obj.ublPres = 0;
+        for iz=1:obj.nzfor
+            obj.ublPres = obj.ublPres +...
+                obj.presProf(iz)*obj.dz(iz)/...
+                (obj.z(obj.nzref)+obj.dz(obj.nzref)/2);
+        end
         end
     end
 end

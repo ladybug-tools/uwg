@@ -293,7 +293,6 @@ class UWG(object):
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
-        #TODO:  write UBLDef
         self.UBL = UBLDef('C',charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
 
 
@@ -373,14 +372,14 @@ class UWG(object):
 
         #TODO: Finish RSM Class
         # Reference site class (also include VDM)
-        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
-        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
+        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam)
+        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam)
 
-        T_init = self.weather.staTemp[1]
-        H_init = self.weather.staHum[1]
+        T_init = self.weather.staTemp[0]
+        H_init = self.weather.staHum[0]
 
         self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,self.latAnth,T_init,H_init,\
-        self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
+        self.weather.staUmod[0],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
         # Define Road Element & buffer to match ground temperature depth
