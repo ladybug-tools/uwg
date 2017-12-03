@@ -23,18 +23,23 @@ import copy
 import pprint
 
 import utilities
-from material import Material
+
 from simparam import SimParam
-from weather import Weather
-from forcing import Forcing
+from weather import  Weather
+from building import Building
+from material import Material
 from element import Element
+from BEMDef import BEMDef
+from schdef import SchDef
 from param import Param
-from RSMDef import RSMDef
 from UCMDef import UCMDef
+from forcing import Forcing
 from UBLDef import UBLDef
+from RSMDef import RSMDef
+
 from solarcalcs import solarcalcs
+from readDOE import readDOE
 from urbflux import urbflux
-from UBLDef import UBLDef
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.

@@ -1,6 +1,5 @@
 """Urban Weather Generator Library."""
 
-from UWG import UWG #from UWG.py import class UWG
 from simparam import SimParam
 from weather import  Weather
 from building import Building
@@ -11,9 +10,15 @@ from schdef import SchDef
 from param import Param
 from UCMDef import UCMDef
 from forcing import Forcing
-import readDOE
+from UBLDef import UBLDef
+from RSMDef import RSMDef
 
+from solarcalcs import solarcalcs
+from readDOE import readDOE
+from infracalcs import infracalcs
+from urbflux import urbflux
 
+from UWG import UWG #from UWG.py import class UWG
 from UWG import procMat
 
 __all__ = [
@@ -31,4 +36,5 @@ __all__ = [
     "UCMDef",
     "urbflux",
     "weather",
+    "RSMDef",
     ]

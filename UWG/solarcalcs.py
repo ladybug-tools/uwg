@@ -1,4 +1,3 @@
-
 def solarcalcs(UCM,BEM,simTime,RSM,forc,parameter,rural):
     """
     solarcalcs
