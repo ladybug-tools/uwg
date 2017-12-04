@@ -21,16 +21,24 @@ import math
 import cPickle
 import copy
 import pprint
-
 import utilities
-from material import Material
+
 from simparam import SimParam
-from weather import Weather
-from forcing import Forcing
+from weather import  Weather
+from building import Building
+from material import Material
 from element import Element
+from BEMDef import BEMDef
+from schdef import SchDef
 from param import Param
-from RSMDef import RSMDef
 from UCMDef import UCMDef
+from forcing import Forcing
+from UBLDef import UBLDef
+from RSMDef import RSMDef
+
+from solarcalcs import solarcalcs
+from readDOE import readDOE
+from urbflux import urbflux
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -73,13 +81,16 @@ class UWG(object):
     cpv = 1846.1           #
     b = 9.4                # Coefficients derived by Louis (1979)
     cm = 7.4               #
-    colburn = math.pow((0.713/0.621), (2/3)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
+    colburn = math.pow((0.713/0.621), (2/3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     # Site-specific parameters
-    wgmax = 0.005          # maximum film water depth on horizontal surfaces (m)
+    wgmax = 0.005 # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
+    #TODO: This should be a absolute path input not relatively derived here/swap this with RESOURCE PATH
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    #TODO: this should be an input
+    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
     def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
         self.epwDir = epwDir
@@ -159,7 +170,11 @@ class UWG(object):
         """Section 3 - Read Input File (.m, file)
         Note: UWG_Matlab input files are xlsm, XML, .m, file.
         properties:
-            self._init_param_dict    # dictionary of simulation initialization parameters
+            self._init_param_dict   # dictionary of simulation initialization parameters
+
+            self.sensAnth           # non-building sensible heat (W/m^2)
+            self.SchTraffic         # Traffice schedule
+
             self.BEM                # list of BEMDef objects extracted from readDOE
             self.Sch                # list of Schedule objects extracted from readDOE
 
@@ -171,6 +186,7 @@ class UWG(object):
             self.RSM                # Rural site & vertical diffusion model obj
             self.USM                # Urban site & vertical diffusion model obj
             self.UCM                # Urban canopy model obj
+            self.UBL                # Urban boundary layer model
 
             self.road               # urban road element
             self.rural              # rural road element
@@ -216,6 +232,7 @@ class UWG(object):
                 self._init_param_dict[row[0]] = float(row[1])
 
         #rename initial parameters for local scope
+        #TODO: should make all this a property of the class
         ipd = self._init_param_dict
         # Define Simulation and Weather parameters
         Month = ipd['Month']                # starting month (1-12)
@@ -225,14 +242,15 @@ class UWG(object):
 
         dtWeather = ipd['dtWeather']        # seconds (s)
         autosize = ipd['autosize']          # autosize HVAC (1 or 0)
-        sensOcc = ipd['sensOcc']            # Sensible heat from occupant
-        LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
-        RadFOcc = ipd['RadFOcc']            # Radiant heat fraction from occupant (normally 0.2)
-        RadFEquip = ipd['RadFEquip']        # Radiant heat fraction from equipment (normally 0.5)
-        RadFLight = ipd['RadFLight']        # Radiant heat fraction from light (normally 0.7)
+        self.sensOcc = ipd['sensOcc']       # Sensible heat from occupant
+        self.LatFOcc = ipd['LatFOcc']       # Latent heat fraction from occupant (normally 0.3)
+        self.RadFOcc = ipd['RadFOcc']       # Radiant heat fraction from occupant (normally 0.2)
+        self.RadFEquip = ipd['RadFEquip']   # Radiant heat fraction from equipment (normally 0.5)
+        self.RadFLight = ipd['RadFLight']   # Radiant heat fraction from light (normally 0.7)
 
         self.simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)  # simulation time parametrs
-        self.weather = Weather(climate_file_path,self.simTime.timeInitial,self.simTime.timeFinal) # weather file data for simulation time period
+        self.weather = Weather(climate_file_path,self.simTime.timeInitial,
+        self.simTime.timeFinal) # weather file data for simulation time period
         self.forcIP = Forcing(self.weather.staTemp,self.weather) # initialized Forcing class
         self.forc = Forcing() # empty forcing class
 
@@ -257,8 +275,8 @@ class UWG(object):
         charLength = ipd['charLength']      # radius defining the urban area of study [aka. characteristic length] (m)
         alb_road = ipd['albRoad']           # road albedo
         d_road = ipd['dRoad']               # road pavement thickness
-        sensAnth = ipd['sensAnth']          # non-building sensible heat (W/m^2)
-        latAnth = ipd['latAnth']            # non-building latent heat heat (W/m^2)
+        self.sensAnth = ipd['sensAnth']     # non-building sensible heat (W/m^2)
+        self.latAnth = ipd['latAnth']       # non-building latent heat heat (W/m^2)
 
         # climate Zone
         zone = int(ipd['zone'])-1
@@ -276,17 +294,17 @@ class UWG(object):
         # Initialize geographic Param and Urban Boundary Layer Objects
         nightStart = 18.        # arbitrary values for begin/end hour for night setpoint
         nightEnd = 8.
-        maxdx = 250;            # max dx (m)
+        maxdx = 250.;            # max dx (m)
 
         self.geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
-        #TODO:  write UBLDef
-        #UBL = UBLDef('C',charLength,weather.staTemp(1),maxdx,geoParam.dayBLHeight,geoParam.nightBLHeight);
+        self.UBL = UBLDef('C',charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
+
 
         # Define Traffic schedule
-        SchTraffic = ipd['SchTraffic']
+        self.SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
         kRoad = ipd['kRoad']                 # road pavement conductivity (W/m K)
@@ -361,14 +379,15 @@ class UWG(object):
 
         #TODO: Finish RSM Class
         # Reference site class (also include VDM)
-        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
-        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[1],self.weather.staPres[1],self.geoParam)
+        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
+        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
 
-        T_init = self.weather.staTemp[1]
-        H_init = self.weather.staHum[1]
+        T_init = self.weather.staTemp[0]
+        H_init = self.weather.staHum[0]
 
-        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,sensAnth,latAnth,T_init,H_init,\
-        self.weather.staUmod[1],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
+        #TODO: Finish UCM class
+        self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,self.latAnth,T_init,H_init,\
+        self.weather.staUmod[0],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
 
         # Define Road Element & buffer to match ground temperature depth
@@ -420,152 +439,153 @@ class UWG(object):
     def uwg_main(self):
         """ Section 7 - UWG main section
 
-            self._N         #
-            self._ph        # per hour
+            self.N          #
+            self.ph         # per hour
+            self.dayType    # 3=Sun, 2=Sat, 1=Weekday
         """
 
 
-        self._N = self.simTime.days * 24       # total number of hours in simulation
+        self.N = int(self.simTime.days * 24)       # total number of hours in simulation
         n = 0
-        self._ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
+        self.ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
 
         # Data dump variables
-        #time = transpose(1:1:simTime.days*24);
-        #WeatherData(N,1) = Forcing
+        time = range(self.N)
+        #TODO: Similar to readDOE Schedule initialization - init list where empty object is every item
+        #WeatherData(self.N, 1) = Forcing() #Empty object
         #UCMData(N,1) = UCMDef
         #UBLData (N,1) = UBLDef;
         #RSMData (N,1) = RSMDef;
         #USMData (N,1) = RSMDef;
 
-        """
-        bTemp = zeros (N,numel(BEM));
-        bRHum = zeros (N,numel(BEM));
-        bPelec = zeros (N,numel(BEM));
-        bQgas = zeros (N,numel(BEM));
-        bPequip = zeros (N,numel(BEM));
-        bPlight = zeros (N,numel(BEM));
-        bQocc = zeros (N,numel(BEM));
-        bFluxMass = zeros (N,numel(BEM));
-        bFluxRoof = zeros(N,numel(BEM));
-        bFluxWall = zeros (N,numel(BEM));
-        bFluxSolar = zeros (N,numel(BEM));
-        bFluxWindow = zeros (N,numel(BEM));
-        bFluxInfil = zeros (N,numel(BEM));
-        bFluxVent = zeros (N,numel(BEM));
-        bCoolConsump = zeros (N,numel(BEM));
-        bHeatConsump = zeros (N,numel(BEM));
-        bCoolDemand = zeros (N,numel(BEM));
-        bHeatDemand = zeros (N,numel(BEM));
-        bTwallext = zeros (N,numel(BEM));
-        bTroofext = zeros (N,numel(BEM));
-        bTwallin = zeros (N,numel(BEM));
-        bTroofin = zeros (N,numel(BEM));
-        bTmassin = zeros (N,numel(BEM));
-        bCOP = zeros(N,numel(BEM));
-        bVent = zeros (N,numel(BEM));
 
-        for it=1:(simTime.nt-1)
+        bTemp = utilities.zeros(self.N,len(self.BEM))
+        bRHum = utilities.zeros(self.N,len(self.BEM))
+        bPelec = utilities.zeros(self.N,len(self.BEM))
+        bQgas = utilities.zeros(self.N,len(self.BEM))
+        bPequip = utilities.zeros(self.N,len(self.BEM))
+        bPlight = utilities.zeros(self.N,len(self.BEM))
+        bQocc = utilities.zeros(self.N,len(self.BEM))
+        bFluxMass = utilities.zeros(self.N,len(self.BEM))
+        bFluxRoof = utilities.zeros(self.N,len(self.BEM))
+        bFluxWall = utilities.zeros(self.N,len(self.BEM))
+        bFluxSolar = utilities.zeros(self.N,len(self.BEM))
+        bFluxWindow = utilities.zeros(self.N,len(self.BEM))
+        bFluxInfil = utilities.zeros(self.N,len(self.BEM))
+        bFluxVent = utilities.zeros(self.N,len(self.BEM))
+        bCoolConsump = utilities.zeros(self.N,len(self.BEM))
+        bHeatConsump = utilities.zeros(self.N,len(self.BEM))
+        bCoolDemand = utilities.zeros(self.N,len(self.BEM))
+        bHeatDemand = utilities.zeros(self.N,len(self.BEM))
+        bTwallext = utilities.zeros(self.N,len(self.BEM))
+        bTroofext = utilities.zeros(self.N,len(self.BEM))
+        bTwallin = utilities.zeros(self.N,len(self.BEM))
+        bTroofin = utilities.zeros(self.N,len(self.BEM))
+        bTmassin = utilities.zeros(self.N,len(self.BEM))
+        bCOP = utilities.zeros(self.N,len(self.BEM))
+        bVent = utilities.zeros(self.N,len(self.BEM))
 
-            % Update water temperature (estimated)
-            if n_soil == 0
-                forc.deepTemp = mean([forcIP.temp]);            % for BUBBLE/CAPITOUL/Singapore only
-                forc.waterTemp = mean([forcIP.temp]) - 10;      % for BUBBLE/CAPITOUL/Singapore only
-            else
-                forc.deepTemp = Tsoil(soilindex1,simTime.month);
-                forc.waterTemp = Tsoil(3,simTime.month);
-            end
 
-            % There's probably a better way to update the weather...
-            simTime = UpdateDate(simTime);
-            forc.infra = forcIP.infra(ceil(it*ph));
-            forc.wind = max(forcIP.wind(ceil(it*ph)),geoParam.windMin);
-            forc.uDir = forcIP.uDir(ceil(it*ph));
-            forc.hum = forcIP.hum(ceil(it*ph));
-            forc.pres = forcIP.pres(ceil(it*ph));
-            forc.temp = forcIP.temp(ceil(it*ph));
-            forc.rHum = forcIP.rHum(ceil(it*ph));
-            forc.prec = forcIP.prec(ceil(it*ph));
-            forc.dir = forcIP.dir(ceil(it*ph));
-            forc.dif = forcIP.dif(ceil(it*ph));
-            UCM.canHum = forc.hum;      % Canyon humidity (absolute) same as rural
+        # For testing only create test file
+        #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
+        simtoggle = True
+        for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+            # Update water temperature (estimated)
+            if self.is_near_zero(self.nSoil):
+                self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
+                self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
+            else:
+                #TODO: this is slightly offset by simTime.nt seconds from rest of timestep due to placement of UpdateDate()
+                self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
+                self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
-            % Update solar flux
-            [rural,UCM,BEM] = SolarCalcs(UCM,BEM,simTime,RSM,forc,geoParam,rural);
+            # There's probably a better way to update the weather...
+            self.simTime.UpdateDate()
+            ceil_time_step = int(math.ceil(it * self.ph)) - 1  # simulation time increment raised to weather time step
 
-            % Update buildling & traffic schedule
-            if strcmp(ext,'.xlsm') || strcmp(ext,'.m')
+            """
+            print ceil_time_step, self.simTime.julian, self.simTime.secDay
+            if self.is_near_zero(it%12):#simtoggle:
+                print 'dy: ', round(it*300/3600/24.,2)
+                print 'hr: ', it*300/3600.
+                print 'simday, simjulian:', self.simTime.day, self.simTime.julian
+                print '---'
+                simtoggle = False
+            """
 
-                % Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
-                if mod (simTime.julian,7) == 0      % Sunday
-                    dayType = 3;
-                elseif mod (simTime.julian,7) == 6  % Saturday
-                    dayType = 2;
-                else                                % Weekday
-                    dayType = 1;
-                end
+            # Updating forcing instance
+            self.forc.infra = self.forcIP.infra[ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
+            self.forc.wind = max(self.forcIP.wind[ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
+            self.forc.uDir = self.forcIP.uDir[ceil_time_step]          # wind direction
+            self.forc.hum = self.forcIP.hum[ceil_time_step]            # specific humidty (kg kg-1)
+            self.forc.pres = self.forcIP.pres[ceil_time_step]          # Pressure (Pa)
+            self.forc.temp = self.forcIP.temp[ceil_time_step]          # air temperature (C)
+            self.forc.rHum = self.forcIP.rHum[ceil_time_step]          # Relative humidity (%)
+            self.forc.prec = self.forcIP.prec[ceil_time_step]          # Precipitation (mm h-1)
+            self.forc.dir = self.forcIP.dir[ceil_time_step]            # normal solar direct radiation (W m-2)
+            self.forc.dif = self.forcIP.dif[ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
+            self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
 
-                % Update anthropogenic heat load for each hour (building & UCM)
-                UCM.sensAnthrop = sensAnth*(SchTraffic(dayType,simTime.hourDay+1));
+            # Update solar flux
+            #TODO: write this function
+            rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
+            # Update building & traffic schedule
+            # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
+            if self.is_near_zero(self.simTime.julian % 7):
+                self.dayType = 3                                        # Sunday
+            elif self.is_near_zero(self.simTime.julian % 7 - 6.):
+                self.dayType = 2                                        # Saturday
+            else:
+                self.dayType = 1                                        # Weekday
 
-                for i = 1:numel(BEM)
+            # Update anthropogenic heat load for each hour (building & UCM)
+            self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
 
-                    % Set temperature
-                    BEM(i).building.coolSetpointDay = Sch(i).Cool(dayType,simTime.hourDay+1) + 273.15;
-                    BEM(i).building.coolSetpointNight = BEM(i).building.coolSetpointDay;
-                    BEM(i).building.heatSetpointDay = Sch(i).Heat(dayType,simTime.hourDay+1) + 273.15;
-                    BEM(i).building.heatSetpointNight = BEM(i).building.heatSetpointDay;
+            # Update the energy components for building types defined in initialize.uwg
+            for i in xrange(len(self.BEM)):
+                # Set temperature
+                self.BEM[i].building.coolSetpointDay   = self.Sch[i].Cool[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for cooling
+                self.BEM[i].building.coolSetpointNight = self.BEM[i].building.coolSetpointDay
+                self.BEM[i].building.heatSetpointDay   = self.Sch[i].Heat[self.dayType-1][self.simTime.hourDay] + 273.15 # add from temperature schedule for heating
+                self.BEM[i].building.heatSetpointNight = self.BEM[i].building.heatSetpointDay
 
-                    % Internal Heat Load Schedule (W/m^2 of floor area for Q)
-                    BEM(i).Elec = Sch(i).Qelec*Sch(i).Elec(dayType,simTime.hourDay+1);
-                    BEM(i).Light = Sch(i).Qlight*Sch(i).Light(dayType,simTime.hourDay+1);
-                    BEM(i).Nocc = Sch(i).Nocc*Sch(i).Occ(dayType,simTime.hourDay+1);
-                    BEM(i).Qocc = sensOcc*(1-LatFOcc)*BEM(i).Nocc;
+                # Internal Heat Load Schedule (W/m^2 of floor area for Q)
+                self.BEM[i].Elec  = self.Sch[i].Qelec * self.Sch[i].Elec[self.dayType-1][self.simTime.hourDay]      # Qelec x elec fraction for day
+                self.BEM[i].Light = self.Sch[i].Qlight * self.Sch[i].Light[self.dayType-1][self.simTime.hourDay]    # Qlight x light fraction for day
+                self.BEM[i].Nocc  = self.Sch[i].Nocc * self.Sch[i].Occ[self.dayType-1][self.simTime.hourDay]        # Number of occupants x occ fraction for day
+                self.BEM[i].Qocc  = self.sensOcc * (1 - self.LatFOcc) * self.BEM[i].Nocc                            # Sensible Q occupant * fraction occupant sensible Q * number of occupants
 
-                    % SWH and ventilation schedule
-                    BEM(i).SWH = Sch(i).Vswh*Sch(i).SWH(dayType,simTime.hourDay+1);     % litres per hour / m^2 of floor space
-                    BEM(i).building.vent = Sch(i).Vent;                                 % m^3/s/m^2 of floor
-                    BEM(i).Gas = Sch(i).Qgas * Sch(i).Gas(dayType,simTime.hourDay+1);   % Gas Equip Schedule, per m^2 of floor
+                # SWH and ventilation schedule
+                self.BEM[i].SWH = self.Sch[i].Vswh * self.Sch[i].SWH[self.dayType-1][self.simTime.hourDay]          # litres per hour x SWH fraction for day
+                self.BEM[i].building.vent = self.Sch[i].Vent                                                        # m^3/s/m^2 of floor
+                self.BEM[i].Gas = self.Sch[i].Qgas * self.Sch[i].Gas[self.dayType-1][self.simTime.hourDay]          # Gas Equip Schedule, per m^2 of floor
 
-                    % This is quite messy, should update
-                    intHeat = BEM(i).Light+BEM(i).Elec+BEM(i).Qocc;
-                    BEM(i).building.intHeatDay = intHeat;
-                    BEM(i).building.intHeatNight = intHeat;
-                    BEM(i).building.intHeatFRad = (RadFLight *BEM(i).Light + RadFEquip*BEM(i).Elec)/intHeat;
-                    BEM(i).building.intHeatFLat = LatFOcc*sensOcc*BEM(i).Nocc/intHeat;
+                # This is quite messy, should update
+                # Update internal heat and corresponding fractional loads
+                intHeat = self.BEM[i].Light + self.BEM[i].Elec + self.BEM[i].Qocc
+                self.BEM[i].building.intHeatDay = intHeat                                                           # W/m2 from light, electricity, occupants
+                self.BEM[i].building.intHeatNight = intHeat
+                self.BEM[i].building.intHeatFRad = (self.RadFLight * self.BEM[i].Light + self.RadFEquip * self.BEM[i].Elec) / intHeat # fraction of radiant heat from light and equipment of whole internal heat
+                self.BEM[i].building.intHeatFLat = self.LatFOcc * self.sensOcc * self.BEM[i].Nocc/intHeat           # fraction of latent heat (from occupants) of whole internal heat
 
-                    BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
-                    BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
-                    BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
-                    BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
-                end
+                # Update envelope temperature layers
+                self.BEM[i].T_wallex = self.BEM[i].wall.layerTemp[0]
+                self.BEM[i].T_wallin = self.BEM[i].wall.layerTemp[-1]
+                self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
+                self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
-            elseif strcmp(ext,'.xml')
 
-                for i = 1:numel(BEM)
+            # Update rural heat fluxes & update vertical diffusion model (VDM)
+            self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+            #TODO: Code this (from element class)
+            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
+            #TODO: Code this (from RSM class)
+            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
-                    % Schedules not used for .xml interface set to zero
-                    BEM(i).Elec = 0;
-                    BEM(i).Light = 0;
-                    BEM(i).Nocc = 0;
-                    BEM(i).Qocc = 0;
-                    BEM(i).SWH = 0;         % not used for .xml interface
-                    BEM(i).Gas = 0;         % not used for .xml interface
 
-                    BEM(i).T_wallex = BEM(i).wall.layerTemp(1);
-                    BEM(i).T_wallin = BEM(i).wall.layerTemp(end);
-                    BEM(i).T_roofex = BEM(i).roof.layerTemp(1);
-                    BEM(i).T_roofin = BEM(i).roof.layerTemp(end);
-                end
-
-            end
-
-            % Update rural heat fluxes & update vertical diffusion model (VDM)
-            rural.infra = forc.infra-rural.emissivity*sigma*rural.layerTemp(1)^4.;
-            rural = SurfFlux(rural,forc,geoParam,simTime,forc.hum,forc.temp,forc.wind,2,0.);
-            RSM = VDM(RSM,forc,rural,geoParam,simTime);
-
-            % Calculate urban heat fluxes, update UCM & UBL
-            [UCM,UBL,BEM] = UrbFlux(UCM,UBL,BEM,forc,geoParam,simTime,RSM);
+            # Calculate urban heat fluxes, update UCM & UBL
+            self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+            """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);
 
@@ -620,17 +640,30 @@ class UWG(object):
         end
         progressbar(1); % Close progress bar
 
-    # =========================================================================
-    # Section 8 - Writing new EPW file
-    # =========================================================================
-    if strcmp('Yes',writeEPW)
-        disp('Calculating new Temperature and humidity values')
-        for iJ = 1:numel(UCMData)
-            epwinput.values{iJ+simTime.timeInitial-8,7}{1,1} = num2str(UCMData(iJ).canTemp- 273.15,'%0.1f'); % dry bulb temperature  [C]
+        """
+
+            #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
+            #    a=it,
+            #    b= ceil_time_step,
+            #    c= it * self.ph
+            #    )
+        #f.close()
+
+    def write_epw(self):
+        """ Section 8 - Writing new EPW file
+
+        """
+        pass
+        """
+        print 'Calculating new Temperature and humidity values'
+
+
+        for iJ in xrange(len(UCMData)):
+            print self.epwinput.values#{iJ+simTime.timeInitial-8,7}{1,1} = num2str(UCMData(iJ).canTemp- 273.15,'%0.1f'); % dry bulb temperature  [C]
             epwinput.values{iJ+simTime.timeInitial-8,8}{1,1} = num2str(UCMData(iJ).Tdp,'%0.1f'); % dew point temperature [C]
             epwinput.values{iJ+simTime.timeInitial-8,9}{1,1} = num2str(UCMData(iJ).canRHum,'%0.0f'); % relative humidity     [%]
             epwinput.values{iJ+simTime.timeInitial-8,22}{1,1} = num2str(WeatherData(iJ).wind,'%0.1f'); % wind speed [m/s]
-        end
+
         disp('writing new EPW file');
 
         % Writing new EPW file
@@ -650,10 +683,9 @@ class UWG(object):
             fprintf(epwnewid,'%s\r\n',printme);
         end
         disp(['New climate file generated: ',new_climate_file]);
-    end
 
-    return None
-    """
+        return None
+        """
 
 def procMat(materials,max_thickness,min_thickness):
     """ Processes material layer so that a material with single
@@ -715,3 +747,4 @@ if __name__ == "__main__":
     uwg.read_input()
     uwg.hvac_autosize()
     uwg.uwg_main()
+    uwg.write_epw()

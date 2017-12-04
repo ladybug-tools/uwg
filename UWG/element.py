@@ -32,6 +32,8 @@ class Element(object):
     "ERROR: the number of layer thickness must\n" +\
     "match the number of layer materials\n"
     "-----------------------------------------"
+    CONDUCTION_INPUT_MSG = 'ERROR: check input parameters in the Conduction routine'
+
     def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init, horizontal,name=None):
         if len(thicknessLst) != len(materialLst):
             raise Exception(self.THICKNESSLST_EQ_MATERIALLST_MSG)
@@ -80,120 +82,148 @@ class Element(object):
             )
         return s1 + s2
 
+    def is_near_zero(self,num,eps=1e-10):
+        return abs(float(num)) < eps
+
+    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
+        pass
         """
-        function obj = SurfFlux(obj,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
+        % Calculated per unit area (m^2)
+        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
+        obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
 
-            % Calculated per unit area (m^2)
-            dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
-            obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
+        if (obj.horizontal)     % For roof, mass, road
 
-            if (obj.horizontal)     % For roof, mass, road
-
-                % Evaporation (m s-1), Film water & soil latent heat
-                if obj.waterStorage > 0
-                    qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
-                    eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
-                    obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
-                    obj.waterStorage = max(obj.waterStorage,0);
-                else
-                    eg = 0;
-                end
-                soilLat = eg*parameter.waterDens*parameter.lv;
-
-                % Winter, no veg
-                if simTime.month < parameter.vegStart && simTime.month > parameter.vegEnd
-                    obj.solAbs = (1-obj.albedo)*obj.solRec;
-                    vegLat = 0;
-                    vegSens = 0;
-                else    % Summer, veg
-                    obj.solAbs = ((1-obj.vegCoverage)*(1-obj.albedo)+...
-                        obj.vegCoverage*(1-parameter.vegAlbedo))*obj.solRec;
-                    vegLat = obj.vegCoverage*parameter.grassFLat*(1-parameter.vegAlbedo)*obj.solRec;
-                    vegSens = obj.vegCoverage*(1.-parameter.grassFLat)*(1-parameter.vegAlbedo)*obj.solRec;
-                end
-                obj.lat = soilLat + vegLat;
-
-                % Sensible & net heat flux
-                obj.sens = vegSens + obj.aeroCond*(obj.layerTemp(1)-tempRef);
-                obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
-
-            else     % Vertical surface (wall)
-                obj.solAbs = (1-obj.albedo)*obj.solRec;
-                obj.lat = 0;
-
-                % Sensible & net heat flux
-                obj.sens = obj.aeroCond*(obj.layerTemp(1)-tempRef);
-                obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
-            end
-
-            obj.layerTemp = Conduction(obj,simTime.dt,obj.flux,boundCond,forc.deepTemp,intFlux);
-            obj.T_ext = obj.layerTemp(1);
-            obj.T_int = obj.layerTemp(end);
-        end
-
-        function t = Conduction(obj,dt,flx1,bc,temp2,flx2)
-            t = obj.layerTemp;
-            hc = obj.layerVolHeat;
-            tc = obj.layerThermalCond;
-            d = obj.layerThickness;
-            % flx1  : net heat flux on surface
-            % bc    : boundary condition parameter (1 or 2)
-            % temp2 : deep soil temperature (ave of air temperature)
-            % flx2  : surface flux (sum of absorbed, emitted, etc.)
-
-            fimp=0.5;           % implicit coefficient
-            fexp=0.5;           % explicit coefficient
-            num = size(t,1);    % number of layers
-
-            % mean thermal conductivity over distance between 2 layers
-            tcp = zeros(num,1);
-            % thermal capacity times layer depth
-            hcp = zeros(num,1);
-            % lower, main, and upper diagonals
-            za = zeros(num,3);
-            % RHS
-            zy = zeros(num,1);
-            %--------------------------------------------------------------------------
-            hcp(1) = hc(1)* d(1);
-            for j=2:num;
-              tcp(j) = 2./(d(j-1)/tc(j-1)+d(j)/tc(j));
-              hcp(j) = hc(j)*d(j);
-            end
-            %--------------------------------------------------------------------------
-            za(1,1) = 0.;
-            za(1,2) = hcp(1)/dt + fimp*tcp(2);
-            za(1,3) = -fimp*tcp(2);
-            zy(1) = hcp(1)/dt*t(1) - fexp*tcp(2)*(t(1)-t(2)) + flx1;
-            %--------------------------------------------------------------------------
-            for j=2:num-1;
-              za(j,1) = fimp*(-tcp(j));
-              za(j,2) = hcp(j)/dt+ fimp*(tcp(j)+tcp(j+1));
-              za(j,3) = fimp*(-tcp(j+1));
-              zy(j) = hcp(j)/dt*t(j)+fexp*(tcp(j)*t(j-1)-...
-                  tcp(j)*t(j)-tcp(j+1)*t(j)+ tcp(j+1)*t(j+1));
-            end
-            %--------------------------------------------------------------------------
-            if eq(bc,1) % het flux
-                za(num,1) = fimp*(- tcp(num) );
-                za(num,2) = hcp(num)/dt+ fimp* tcp(num);
-                za(num,3) = 0.;
-                zy(num) = hcp(num)/dt*t(num) + fexp*tcp(num)*(t(num-1)-t(num)) + flx2;
-            elseif eq(bc,2) % deep-temperature
-                za(num,1) = 0;
-                za(num,2) = 1;
-                za(num,3) = 0.;
-                zy(num) = temp2;
+            % Evaporation (m s-1), Film water & soil latent heat
+            if obj.waterStorage > 0
+                qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
+                eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
+                obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
+                obj.waterStorage = max(obj.waterStorage,0);
             else
-                disp('ERROR: check input parameters in the Conduction routine')
+                eg = 0;
             end
-            %--------------------------------------------------------------------------
-            % zx=tridiag_ground(za,zb,zc,zy);
-            zx = Invert(num,za,zy);
-            t(:) = zx(:);
+            soilLat = eg*parameter.waterDens*parameter.lv;
 
+            % Winter, no veg
+            if simTime.month < parameter.vegStart && simTime.month > parameter.vegEnd
+                obj.solAbs = (1-obj.albedo)*obj.solRec;
+                vegLat = 0;
+                vegSens = 0;
+            else    % Summer, veg
+                obj.solAbs = ((1-obj.vegCoverage)*(1-obj.albedo)+...
+                    obj.vegCoverage*(1-parameter.vegAlbedo))*obj.solRec;
+                vegLat = obj.vegCoverage*parameter.grassFLat*(1-parameter.vegAlbedo)*obj.solRec;
+                vegSens = obj.vegCoverage*(1.-parameter.grassFLat)*(1-parameter.vegAlbedo)*obj.solRec;
+            end
+            obj.lat = soilLat + vegLat;
+
+            % Sensible & net heat flux
+            obj.sens = vegSens + obj.aeroCond*(obj.layerTemp(1)-tempRef);
+            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
+
+        else     % Vertical surface (wall)
+            obj.solAbs = (1-obj.albedo)*obj.solRec;
+            obj.lat = 0;
+
+            % Sensible & net heat flux
+            obj.sens = obj.aeroCond*(obj.layerTemp(1)-tempRef);
+            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
         end
-     end
-end
+
+        obj.layerTemp = Conduction(obj,simTime.dt,obj.flux,boundCond,forc.deepTemp,intFlux);
+        obj.T_ext = obj.layerTemp(1);
+        obj.T_int = obj.layerTemp(end);
+    end
+    """
+
+    def Conduction(self, dt, flx1, bc, temp2, flx2):
+        """
+        Solve the conductance of heat based on of the element layers.
+        arg:
+            flx1  : net heat flux on surface
+            bc    : boundary condition parameter (1 or 2)
+            temp2 : deep soil temperature (ave of air temperature)
+            flx2  : surface flux (sum of absorbed, emitted, etc.)
+
+        key prop:
+            za = [[ x00, x01, x02 ... x0w ]
+                  [ x10, x11, x12 ... x1w ]
+                            ...
+                  [ xh0, xh1, xh2 ... xhw ]]
+
+            where h = matrix row index    = element layer number
+                  w = matrix column index = 3
+
+        """
+        t = self.layerTemp          # vector of layer temperatures (K)
+        hc = self.layerVolHeat      # vector of layer volumetric heat (J m-3 K-1)
+        tc = self.layerThermalCond  # vector of layer thermal conductivities (W m-1 K-1)
+        d = self.layerThickness     # vector of layer thicknesses (m)
+
+        # flx1                      : net heat flux on surface
+        # bc                        : boundary condition parameter (1 or 2)
+        # temp2                     : deep soil temperature (ave of air temperature)
+        # flx2                      : surface flux (sum of absorbed, emitted, etc.)
+
+        fimp = 0.5                  # implicit coefficient
+        fexp = 0.5                  # explicit coefficient
+        num = len(t)                # number of layers
+
+        # Mean thermal conductivity over distance between 2 layers (W/mK)
+        tcp = map(lambda tcon: 0, range(num))
+        # Thermal capacity times layer depth (J/m2K)
+        hcp = map(lambda tcap: 0, range(num))
+        # lower, main, and upper diagonals
+        za = map(lambda y_: map(lambda x_: 0, range(3)), range(num))
+        # RHS
+        zy = map(lambda rhs_: 0, range(num))
+
+        #--------------------------------------------------------------------------
+        # Define the column vectors for heat capactiy and conductivity
+        hcp[0] = hc[0] * d[0]       # (J/m2K) = First row, define thermal capacity (J/m3K) * thickness (m)
+        for j in xrange(1,num):     # From second row, define thermal conductivity and thermal capacity
+            tcp[j] = 2. / (d[j-1] / tc[j-1] + d[j] / tc[j]) # (W/m2K) Mean of conductance (W/m2K) for layer j and j-1
+            hcp[j] = hc[j] * d[j]   # (J/m2K)
+
+        #--------------------------------------------------------------------------
+        # Define the first row of za matrix, and RHS column vector
+        za[0][0] = 0.
+        za[0][1] = hcp[0]/dt + fimp*tcp[1]  # (J/m2K)/t + W/m2K
+        za[0][2] = -fimp*tcp[1]             # W/m2K
+        zy[0] = hcp[0]/dt*t[0] - fexp*tcp[1]*(t[0]-t[1]) + flx1 # W/m2 = K*(J/m2K)/t - K*W/m2K
+
+        #--------------------------------------------------------------------------
+        # ??? Define other rows
+        for j in xrange(1,num-1):
+          za[j][0] = fimp*(-tcp[j]) # W/m2K
+          za[j][1] = hcp[j]/dt + fimp*(tcp[j]+tcp[j+1]) # J/m2K/t + W/m2K + W/m2K
+          za[j][2] = fimp*(-tcp[j+1])   # W/m2K
+          zy[j] = hcp[j]/dt * t[j] + fexp * \
+            (tcp[j]*t[j-1] - tcp[j]*t[j] - tcp[j+1]*t[j] + tcp[j+1]*t[j+1]) # W/m2 = K*J/m2K/t * K*W/m2K - K*W/m2K - K*W/m2K + K*W/m2K
+
+        #--------------------------------------------------------------------------
+        # ??? Boundary conditions
+        if self.is_near_zero(bc-1.): # heat flux
+            za[num-1][0] = fimp * (-tcp[num-1])
+            za[num-1][1] = hcp[num-1]/dt + fimp*tcp[num-1]
+            za[num-1][2] = 0.
+            zy[num-1] = hcp[num-1]/dt*t[num-1] + fexp*tcp[num-1]*(t[num-2]-t[num-1]) + flx2
+        elif self.is_near_zero(bc-2.): # deep-temperature
+            za[num-1][0] = 0.
+            za[num-1][1] = 1.
+            za[num-1][2] = 0.
+            zy[num-1] = temp2
+        else:
+            raise Exception(self.CONDUCTION_INPUT_MSG)
+
+        #--------------------------------------------------------------------------
+        # zx=tridiag_ground(za,zb,zc,zy);
+        zx = invert(num,za,zy)
+        #t[:] = zx[:]
+        #print '----fin----'
+
+"""
 
 function qsat = qsat(temp,pres,parameter)
 
@@ -213,9 +243,10 @@ function qsat = qsat(temp,pres,parameter)
     end
 
 end
+"""
 
-function x = Invert(nz,a,c)
-
+def invert(nz,a,c):
+    """
     %--------------------------------------------------------------------------
     % Inversion and resolution of a tridiagonal matrix
     %          A X = C
@@ -242,7 +273,5 @@ function x = Invert(nz,a,c)
     for in=1:nz
         x(in)=c(in)/a(in,2);
     end
-
-end
-
-"""
+    """
+    return None#x

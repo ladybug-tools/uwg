@@ -1,3 +1,5 @@
+import math
+
 class SimParam(object):
     """
     SimParam
@@ -24,37 +26,24 @@ class SimParam(object):
     """
 
     def __init__(self,dt,timefor,M,DAY,days):
-        self.dt = dt
-        self.timeForcing = timefor #weather data timestep
+        self.dt = dt                                                        # uwg time simulation time step
+        self.timeForcing = timefor                                          # weather data timestep
         self.month = int(M)
         self.day = DAY
         self.days = days
-        self.timePrint = timefor
-        self.timeDay = 24*3600/timefor #how many times weather senses in a day
-        self.timeSim = self.timeDay*days #how many steps in simulation
-        self.timeMax = 24.*3600.*days
-        self.nt = int(round(self.timeMax/self.dt+1)) #total number of timesteps
+        self.timePrint = timefor                                            # weather data timestep
+        self.timeDay = 24*3600/timefor                                      # how many times weather senses in a day
+        self.timeSim = self.timeDay*days                                    # how many steps in weather data simulation
+        self.timeMax = 24.*3600.*days                                       # total seconds in simulation days
+        self.nt = int(round(self.timeMax/self.dt+1))                        # total number of timesteps for uwg simuation
         self.inobis = [0,31,59,90,120,151,181,212,243,273,304,334]
         self.julian = self.inobis[self.month - 1] + DAY - 1
         #H1: (julian day * number of timesteps in a day) == sensor data index in epw
         H1 = int((self.inobis[self.month - 1] + DAY - 1) * self.timeDay)
-        self.timeInitial = H1 + 8
-        self.timeFinal = int(H1 + self.timeDay * self.days - 1 + 8)
+        self.timeInitial = H1 + 8                                           # sensor data in epw for intial time based on julian day & timesteps
+        self.timeFinal = int(H1 + self.timeDay * self.days - 1 + 8)         # sensor data in epw for final time based on julian day & timesteps
         self.secDay = 0
         self.hourDay = 0
-
-        #TODO: needs to be unit tested
-        def UpdateDate(self):
-            self.secDay = self.secDay + self.dt
-            if self.secDay == 3600*24:
-                self.day = self.day + 1
-                self.julian = self.julian + 1
-                self.secDay = 0
-                for j in xrange(12):
-                    if self.julian == self.inobis[j]:
-                        self.month = self.month + 1
-                        self.day = 1
-            self.hourDay = floor(self.secDay/3600)       # 0 - 23hr
 
     def __repr__(self):
         return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(
@@ -63,3 +52,18 @@ class SimParam(object):
             c=self.timeSim,
             d=self.days
             )
+
+    def is_near_zero(self,num,eps=1e-10):
+        return abs(float(num)) < eps
+
+    def UpdateDate(self):
+        self.secDay = self.secDay + self.dt
+        if self.is_near_zero(self.secDay - 3600*24):
+            self.day += 1
+            self.julian = self.julian + 1
+            self.secDay = 0.
+            for j in xrange(12):
+                if self.is_near_zero(self.julian - self.inobis[j]):
+                    self.month = self.month + 1
+                    self.day = 1
+        self.hourDay = int(math.floor(self.secDay/3600.))       # 0 - 23hr
