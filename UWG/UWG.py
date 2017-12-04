@@ -21,7 +21,6 @@ import math
 import cPickle
 import copy
 import pprint
-
 import utilities
 
 from simparam import SimParam
@@ -88,7 +87,10 @@ class UWG(object):
     wgmax = 0.005 # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
+    #TODO: This should be a absolute path input not relatively derived here/swap this with RESOURCE PATH
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    #TODO: this should be an input
+    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
     def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
         self.epwDir = epwDir
@@ -377,12 +379,13 @@ class UWG(object):
 
         #TODO: Finish RSM Class
         # Reference site class (also include VDM)
-        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam)
-        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam)
+        self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
+        self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
 
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
 
+        #TODO: Finish UCM class
         self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,self.latAnth,T_init,H_init,\
         self.weather.staUmod[0],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix

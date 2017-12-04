@@ -1,8 +1,3 @@
-"""
-Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/UrbFlux.m
-Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - August, 2017
-"""
-
 from infracalcs import infracalcs
 
 def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
@@ -38,7 +33,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
         BEM[j].building.fluxMass = 100.0 # (w/m2) TEMPORARY DELETE THIS
         # this function will mutate BEM[j].mass.layerTemp
         BEM[j].mass.Conduction(simTime.dt, BEM[j].building.fluxMass, 1, 0, BEM[j].building.fluxMass)
-        
+
         """
         BEM(j).roof = SurfFlux(BEM(j).roof,forc,parameter,simTime,UCM.canHum,T_can,max(forc.wind,UCM.canWind),1,BEM(j).building.fluxRoof);
         BEM(j).wall = SurfFlux(BEM(j).wall,forc,parameter,simTime,UCM.canHum,T_can,UCM.canWind,1,BEM(j).building.fluxWall);

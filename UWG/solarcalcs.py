@@ -14,8 +14,8 @@ def solarcalcs(UCM,BEM,simTime,RSM,forc,parameter,rural):
     """
 
 
-    dir = forc.dir     # Direct sunlight (perpendicular to the sun's ray)
-    dif = forc.dif     # Diffuse sunlight
+    dir_ = forc.dir     # Direct sunlight (perpendicular to the sun's ray)
+    dif_ = forc.dif     # Diffuse sunlight
 
     """
     if dir + dif > 0

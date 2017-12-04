@@ -1,3 +1,5 @@
+import os
+
 class RSMDef(object):
     """
     % Rural Site & Vertical Diffusion Model (VDM)
@@ -28,9 +30,13 @@ class RSMDef(object):
     end
     """
 
-    def __init__(self,lat,lon,GMT,height,T_init,P_init,parameter):
-        # class constructor
-        #load -ascii z_meso.txt;
+    Z_MESO_FILE_NAME = "z_meso.txt"
+
+    def __init__(self,lat,lon,GMT,height,T_init,P_init,parameter,z_meso_path):
+
+        # defines self.z_meso property
+        self.load_z_meso(z_meso_path)   # TODO:look up in thesis and define z_meso
+
         self.lat = lat                  # latitude (deg)
         self.lon = lon                  # longitude (deg)
         self.GMT = GMT                  # GMT hour correction
@@ -38,49 +44,79 @@ class RSMDef(object):
         self.z0r = 0.1 * height         # rural roughness length (m)
         self.disp = 0.5 * height        # rural displacement lenght (m)
 
+        # vertical grid at the rural site
+        self.z  = [0 for x in range(len(self.z_meso)-1)] # Midht btwn each distance interval
+        self.dz = [0 for x in range(len(self.z_meso)-1)] # Distance betweeen each interval
+
+        for zi in xrange(len(self.z_meso)-1):
+            self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])
+            self.dz[zi] = self.z_meso[zi+1] - self.z_meso[zi]
+
         """
-        % vertical grid at the rural site
-        self.z  = zeros(numel(z_meso)-1,1);
-        self.dz = zeros(numel(z_meso)-1,1);
-        for zi=1:numel(z_meso)-1
-            self.z(zi) = 0.5*(z_meso(zi)+z_meso(zi+1));
-            self.dz(zi) = z_meso(zi+1) - z_meso(zi);
-        end
-        ll = 1;
-        mm = 1;
-        nn = 1;
-        oo = 1;
-        pp = 1;
-        for iz=1:55
-           if (self.z(iz)>=parameter.tempHeight && ll==1)
-              self.nz0 = iz;
-              ll = 0;
-           end
-           if (self.z(iz)>=parameter.refHeight && mm==1)
-              self.nzref = iz;
-              mm = 0;
-           end
-           if (self.z(iz)>=parameter.nightBLHeight && nn==1)
-              self.nzfor = iz;
-              nn = 0;
-           end
-           if (self.z(iz)>=parameter.windHeight && oo==1)
-              self.nz10 = iz;
-              oo = 0;
-           end
-           if (self.z(iz)>=parameter.dayBLHeight && pp==1)
-              self.nzi = iz;
-              pp = 0;
-           end
-        end
-        % vertical profiles at the rural site
-        self.tempProf = ones(1,self.nzref)*T_init;
-        self.presProf = ones(1,self.nzref)*P_init;
-        for iz=2:self.nzref;
-           self.presProf(iz) = (self.presProf(iz-1)^(parameter.r/parameter.cp)-...
-               parameter.g/parameter.cp*(P_init^(parameter.r/parameter.cp))*(1./self.tempProf(iz)+...
-               1./self.tempProf(iz-1))*0.5*self.dz(iz))^(1./(parameter.r/parameter.cp));
-        end
+        f = open('testzmeso.txt','w')
+        for zi in xrange(len(self.z_meso)-1):
+            line = "i={b}\nzmeso={c}\nz={d}\ndz]{e}\n---------\n".format(
+                b= zi,
+                c= self.z_meso[zi],
+                d= self.z[zi],
+                e= self.dz[zi]
+                )
+            f.write(line)
+        f.close()
+        """
+
+
+        # Define initial booleans
+        ll = True
+        mm = True
+        nn = True
+        oo = True
+        pp = True
+
+        # Define self.nz0, self.nzref, self.nzfor, self.nz10, self.nzi
+        for iz in xrange(len(self.z_meso)-1):
+            # self.nz0: self.z index >= reference height for weather station
+            eq_th = self.is_near_zero(self.z[iz] - parameter.tempHeight)
+            if (eq_th == True or self.z[iz] > parameter.tempHeight) and ll==True:
+                self.nz0 = iz   # layer number at zmt (m)
+                ll = False
+
+            # self.nzref: self.z index >= reference inversion height
+            eq_rh = self.is_near_zero(self.z[iz] - parameter.refHeight)
+            if (eq_rh == True or self.z[iz] > parameter.refHeight) and mm==True:
+              self.nzref = iz   # layer number at zref (m)
+              mm = False
+
+            # self.nzfor: self.z index >= nighttime boundary layer height
+            eq_nh = self.is_near_zero(self.z[iz] - parameter.nightBLHeight)
+            if (eq_nh == True or self.z[iz] > parameter.nightBLHeight) and nn==True:
+              self.nzfor = iz   # layer number at zfor (m)
+              nn = False
+
+            # self.nz10: self.z index >= wind height
+            eq_wh = self.is_near_zero(self.z[iz] - parameter.windHeight)
+            if (eq_wh == True or self.z[iz] > parameter.windHeight) and oo==True:
+              self.nz10 = iz    # layer number at zmu (m)
+              oo = False
+
+            eq_dh = self.is_near_zero(self.z[iz] - parameter.dayBLHeight)
+            if (eq_dh == True or self.z[iz] > parameter.dayBLHeight) and pp==True:
+              self.nzi = iz     # layer number at zi_d (m)
+              pp = False
+
+
+        # initialize temperature and pressure vertical profiles at the rural site
+        self.tempProf = [T_init for x in range(self.nzref+1)]
+        self.presProf = [P_init for x in range(self.nzref+1)]
+
+        for iz in xrange(1,self.nzref+1):
+            self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
+               parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
+               1./self.tempProf[iz-1]) * 0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
+
+        self.testvar = 99080.2481868111
+
+        """
         self.tempRealProf = ones(1,self.nzref)*T_init;
         for iz=1:self.nzref;
            obj.tempRealProf(iz)=obj.tempProf(iz)*...
@@ -97,7 +133,31 @@ class RSMDef(object):
         end
         obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
         obj.windProf = ones(1,obj.nzref);
-    """
+
+        """
+    def __repr__(self):
+        return "RSM: obstacle ht={a}".format(
+            a=self.height
+            )
+    def is_near_zero(self,num,eps=1e-10):
+        return abs(float(num)) < eps
+
+    def load_z_meso(self,z_meso_path):
+        """ Open the z_meso.txt file and return heights as list """
+
+        self.z_meso = []
+        z_meso_file_path = os.path.join(z_meso_path, self.Z_MESO_FILE_NAME)
+
+        # Check if exists
+        if not os.path.exists(z_meso_file_path):
+            raise Exception("z_meso.txt file: '{}' does not exist.".format(uwg_param_file))
+
+        f = open(z_meso_file_path,'r')
+        for txtline in f:
+            z_ = float("".join(txtline.split())) # Strip all white spaces and change to float
+            self.z_meso.append(z_)
+        f.close()
+
     """
     % Ref: The UWG (2012), Eq. (4)
     function obj = VDM(obj,forc,rural,parameter,simTime)
