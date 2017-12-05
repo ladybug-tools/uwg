@@ -5,12 +5,12 @@ def test_64bit_precision():
     """
     Tests for max number of precision for 64bit python float
     64 bits = 53 bits (significand) + 8 bits (characteristic)
-    == max for python 64bit float (2^-53 = 1.11e-16)
+    Therefore max fraction size for 53 bits in base 2 is (2^-53 = 1.11e-16)
     So for numbers > 0. we have to subtract the 16 significant digits (significand)
     from the integer part when testing the numbers
     """
 
-    #"""
+    """
     # Unblock this for visual test
     print "0.12345678901234561111", "-- original input"
     print Decimal.from_float(0.12345678901234561111)
@@ -20,7 +20,7 @@ def test_64bit_precision():
     print Decimal.from_float(11111.12345678901234561111)
     print "      12345678901 -- will be accurate to 11th digit"
     print '----'
-    #"""
+    """
 
     # 16 digits number
     digit_19 = 0.1234567890123456444
