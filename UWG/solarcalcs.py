@@ -17,9 +17,10 @@ def solarcalcs(UCM,BEM,simTime,RSM,forc,parameter,rural):
     dir_ = forc.dir     # Direct sunlight (perpendicular to the sun's ray)
     dif_ = forc.dif     # Diffuse sunlight
 
-    """
-    if dir + dif > 0
 
+    if dir_ + dif_ > 0.:
+        pass
+        """
         % Solar angles
         [zenith, tanzen, critOrient] = SolarAngles(UCM.canAspect,simTime,RSM.lon,RSM.lat,RSM.GMT);
         horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
