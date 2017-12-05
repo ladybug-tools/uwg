@@ -377,7 +377,6 @@ class UWG(object):
                     self.Sch.append(refSchedule[i][j][zone])
                     k += 1
 
-        #TODO: Finish RSM Class
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
         self.USM = RSMDef(self.lat,self.lon,self.GMT,bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
@@ -385,7 +384,6 @@ class UWG(object):
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
 
-        #TODO: Finish UCM class
         self.UCM = UCMDef(bldHeight,bldDensity,verToHor,treeCoverage,self.sensAnth,self.latAnth,T_init,H_init,\
         self.weather.staUmod[0],self.geoParam,r_glaze,SHGC,alb_wall,self.road)
         self.UCM.h_mix = h_mix
@@ -408,7 +406,6 @@ class UWG(object):
 
         self.road = Element(self.road.albedo, self.road.emissivity, newthickness, roadMat,\
             self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal, self.road._name)
-
 
         # Define Rural Element
         ruralMat, newthickness = procMat(self.rural,self.maxThickness,self.minThickness)
@@ -489,7 +486,8 @@ class UWG(object):
         # For testing only create test file
         #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
         simtoggle = True
-        for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+        print self.simTime.nt
+        for it in range(1,self.simTime.nt,1):#[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -501,7 +499,7 @@ class UWG(object):
 
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
-            ceil_time_step = int(math.ceil(it * self.ph)) - 1  # simulation time increment raised to weather time step
+            ceil_time_step = int(math.ceil(it * self.ph))  # simulation time increment raised to weather time step
 
             """
             print ceil_time_step, self.simTime.julian, self.simTime.secDay
@@ -540,6 +538,16 @@ class UWG(object):
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
+
+            if it == 46:
+                print 'check precision'
+                print 'it', it
+                print 'ceil', math.ceil(it*self.ph)
+                print 'infra', self.forc.infra
+                print 'wind', self.forc.wind
+                print 'uDir', self.forc.uDir
+                print 'hum', self.forc.hum
+                print '---f----'
 
             # Update the energy components for building types defined in initialize.uwg
             for i in xrange(len(self.BEM)):
