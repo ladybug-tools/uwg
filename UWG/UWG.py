@@ -295,12 +295,6 @@ class UWG(object):
         nightEnd = 8.
         maxdx = 250.;            # max dx (m)
 
-        print "-----i-----"
-        print T_init
-        print H_init
-        print rurVegCover
-        print "-----f-----"
-
         self.geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
@@ -375,10 +369,15 @@ class UWG(object):
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
-
+                    # BEM(k).Qocc = BEM(k).Qocc; #TODO
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][zone])
                     k += 1
+
+        print '---i---'
+        print self.BEM[0].frac
+        print self.BEM[1].frac
+        print '---f---'
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
