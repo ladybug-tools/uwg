@@ -69,11 +69,11 @@ class UWG(object):
     g = 9.81               # gravity
     cp = 1004.             # heat capacity for air (J/kg.K)
     vk = 0.40              # von karman constant
-    r = 287                # gas constant
+    r = 287.               # gas constant
     rv = 461.5             #
     lv = 2.26e6            # latent heat of evaporation
     sigma = 5.67e-08       # Stefan Boltzmann constant
-    waterDens = 1000       # water density (kg/m^3)
+    waterDens = 1000.      # water density (kg/m^3)
     lvtt = 2.5008e6        #
     tt = 273.16            #
     estt = 611.14          #
@@ -249,8 +249,7 @@ class UWG(object):
         self.RadFLight = ipd['RadFLight']   # Radiant heat fraction from light (normally 0.7)
 
         self.simTime = SimParam(dtSim,dtWeather,Month,Day,nDay)  # simulation time parametrs
-        self.weather = Weather(climate_file_path,self.simTime.timeInitial,
-        self.simTime.timeFinal) # weather file data for simulation time period
+        self.weather = Weather(climate_file_path,self.simTime.timeInitial,self.simTime.timeFinal) # weather file data for simulation time period
         self.forcIP = Forcing(self.weather.staTemp,self.weather) # initialized Forcing class
         self.forc = Forcing() # empty forcing class
 
@@ -296,12 +295,17 @@ class UWG(object):
         nightEnd = 8.
         maxdx = 250.;            # max dx (m)
 
+        print "-----i-----"
+        print T_init
+        print H_init
+        print rurVegCover
+        print "-----f-----"
+
         self.geoParam = Param(h_ubl1,h_ubl2,h_ref,h_temp,h_wind,c_circ,maxDay,maxNight,latTree,latGrss,albVeg,vegStart,vegEnd,\
             nightStart,nightEnd,windMin,self.wgmax,c_exch,maxdx,self.g,self.cp,self.vk,self.r,self.rv,self.lv,math.pi,\
             self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,self.cpv,self.b, self.cm,self.colburn)
 
         self.UBL = UBLDef('C',charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
-
 
         # Define Traffic schedule
         self.SchTraffic = ipd['SchTraffic']
@@ -327,7 +331,6 @@ class UWG(object):
         self.rural = copy.deepcopy(self.road)
         self.rural.vegCoverage = rurVegCover
         self.rural._name = "rural_road"
-
 
         # Define BEM for each DOE type (read the fraction)
         readDOE_file_path = os.path.join(self.DIR_UP_PATH,"resources","readDOE.pkl")
@@ -486,8 +489,8 @@ class UWG(object):
         # For testing only create test file
         #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
         simtoggle = True
-        print self.simTime.nt
-        for it in range(1,self.simTime.nt,1):#[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+        #print self.simTime.nt
+        for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -538,7 +541,7 @@ class UWG(object):
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
-
+            """
             if it == 46:
                 print 'check precision'
                 print 'it', it
@@ -548,7 +551,7 @@ class UWG(object):
                 print 'uDir', self.forc.uDir
                 print 'hum', self.forc.hum
                 print '---f----'
-
+            """
             # Update the energy components for building types defined in initialize.uwg
             for i in xrange(len(self.BEM)):
                 # Set temperature
