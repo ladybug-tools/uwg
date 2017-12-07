@@ -1,10 +1,10 @@
-1,Building Summary Hospital,,,,
+1.0000000000000000,Building Summary Hospital,,,,
 UWG,,,Pre80,Post80,New
-areaFloor,,Total Floor Area (m2),"22422","22422","22422"
+areaFloor,,Total Floor Area (m2),22422.1768480000000000,22422.1768480000000000,22422.1768480000000000
 nFloor,,Number of Floors,5 plus basement,5 plus basement,5 plus basement
-glazing,,Total,0.146,0.146,0.146
-hCeiling,,Floor to Ceiling Height (m),4.3,4.3,4.3
-areaWall,,Gross Dimensions - Total Area (m2),"5184","5184","5184"
-ver2hor,,Wall to Skin Ratio,0.42,0.42,0.42
-areaRoof,,Gross Dimensions - Total Area (m2),"3739","3739","3739"
-areaWindow,,Total Area (m2),845.4,845.4,845.4
+glazing,,Total,0.1461000000000000,0.1461000000000000,0.1461000000000000
+hCeiling,,Floor to Ceiling Height (m),4.2700000000000000,4.2700000000000000,4.2700000000000000
+areaWall,,Gross Dimensions - Total Area (m2),5184.3200000000000000,5184.3200000000000000,5184.3200000000000000
+ver2hor,,Wall to Skin Ratio,0.4190231719690600,0.4190231719690600,0.4190231719690600
+areaRoof,,Gross Dimensions - Total Area (m2),3739.1340000000000000,3739.1340000000000000,3739.1340000000000000
+areaWindow,,Total Area (m2),845.4200000000000000,845.4200000000000000,845.4200000000000000

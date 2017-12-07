@@ -19,7 +19,7 @@ class Test(object):
     def test_equality(self,a,b,toggle=True):
         if not self.run_test: return None
         if a == b:
-            s = "test_equality: {y} == {z} success\n".format(y=a,z=b)
+            s = ""#"test_equality: {y} == {z} success\n".format(y=a,z=b)
             self.success += 1
         else:
             s = "test_equality: {y} != {z} fail\n".format(y=a,z=b)
@@ -30,7 +30,7 @@ class Test(object):
         toggle = True
         if not self.run_test: return None
         if abs(a-b) < tol:
-            s = "test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
+            s = ""#"test_equality_tol: {y} == {z} success\n".format(y=a,z=b)
             self.success += 1
         else:
             s = "test_equality_tol: {y} != {z} fail\n".format(y=a,z=b)
@@ -44,7 +44,7 @@ class Test(object):
             self.fail += 1
         else:
             if b in a:
-                s = "test_in_string:: {y} in {z} success\n".format(y=b,z=a)
+                s = ""#"test_in_string:: {y} in {z} success\n".format(y=b,z=a)
                 self.success += 1
             else:
                 s = "test_in_string: {y} in {z} fail\n".format(y=b,z=a)

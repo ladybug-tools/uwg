@@ -61,7 +61,6 @@ def readDOE():
 
     """
 
-
     #For Testing only
     test_readDOE = Test("test_readDOE", True) #Make a test object for reading csv files
     test_treeDOE = Test("test_treeDOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
@@ -121,6 +120,7 @@ def readDOE():
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
     for i in xrange(16):
+        #print i+1
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe1 = read_csv(file_doe_name_bld)
@@ -133,10 +133,9 @@ def readDOE():
 
         #Tests for sheet 1
         test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
-        test_readDOE.test_equality(len(nFloor),3,toggle=False)
-        test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=False)
+        test_readDOE.test_equality(len(nFloor),3,toggle=True)
+        test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=True)
         if i==0: test_readDOE.test_equality_tol(AreaRoof[0],570.0)
-
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
@@ -154,10 +153,15 @@ def readDOE():
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
 
+        #from decimal import Decimal
+        #for a in AreaFloor:
+        #    print type(a), a, Decimal.from_float(a)
+        #print '----------'
+
 
         #Tests sheet 2
         test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
-        test_readDOE.test_equality(len(Elec),3,toggle=False)
+        test_readDOE.test_equality(len(Elec),3,toggle=True)
         if i==0: test_readDOE.test_equality_tol(Vent[0],5.34)
 
 
@@ -179,16 +183,16 @@ def readDOE():
 
         #Test sheet 3
         test_readDOE.test_equality(list_doe3[0][2],"Location Summary")
-        test_readDOE.test_equality(16,len(TypeWall[0]),toggle=False)
-        test_readDOE.test_equality(16,len(TypeWall[1]),toggle=False)
-        test_readDOE.test_equality(16,len(TypeWall[2]),toggle=False)
-        test_readDOE.test_equality(16,len(RvalWall[0]),toggle=False)
+        test_readDOE.test_equality(16,len(TypeWall[0]),toggle=True)
+        test_readDOE.test_equality(16,len(TypeWall[1]),toggle=True)
+        test_readDOE.test_equality(16,len(TypeWall[2]),toggle=True)
+        test_readDOE.test_equality(16,len(RvalWall[0]),toggle=True)
         if i==0: test_readDOE.test_in_string('SteelFrame',TypeWall[0][0])
         if i==0: test_readDOE.test_equality_tol(RvalWall[0][0],0.77)
-        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=False)
+        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=True)
 
 
         # Read Schedules (Sheet 4)
@@ -215,7 +219,12 @@ def readDOE():
         #print "type: ", bldType[i]
         for j in xrange(3):
             #print '\tera: ', builtEra[j]
+            #print '-----j-------'
+            #print j+1
             for k in xrange(16):
+                #print '-----k------'
+                #print k+1
+
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight
@@ -233,7 +242,7 @@ def readDOE():
                     297,                                # coolSetpointNight
                     293,                                # heatSetpointDay = 20 C
                     293,                                # heatSetpointNight
-                    (HVAC[j][k]*1000.0)/AreaFloor[j],   # cooling Capacity converted to W/m2 by era, climate type
+                    (HVAC[j][k]*1000.0)/AreaFloor[j],   # coolCap converted to W/m2 by era, climate type
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
@@ -245,11 +254,19 @@ def readDOE():
                 refDOE[i][j][k] = B
                 #print '\t\t', B
 
+                #from decimal import Decimal
+
+                #print Decimal.from_float(HVAC[j][k])
+                #print Decimal.from_float(AreaFloor[j])
+
+                #print '------'
+
+
                 # Test for treeDOE
-                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96,toggle=False)
-                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244,toggle=False)
-                if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=False)
-                if i==1 and j==2 and k==15: test_treeDOE.test_equality_tol(refDOE[i][j][k].vent,1.8/1000.0,toggle=False)
+                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96,toggle=True)
+                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244,toggle=True)
+                if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=True)
+                if i==1 and j==2 and k==15: test_treeDOE.test_equality_tol(refDOE[i][j][k].vent,1.8/1000.0,toggle=True)
 
                 # Define wall, mass(floor), roof
                 # Referece from E+ for conductivity, thickness (reference below)
@@ -403,7 +420,8 @@ def readDOE():
 
     pickle_readDOE.close()
 
-    #print test_treeDOE.test_results()
+    print test_readDOE.test_results()
+    print test_treeDOE.test_results()
 
 if __name__ == "__main__":
     readDOE()

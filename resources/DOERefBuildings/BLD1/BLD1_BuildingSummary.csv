@@ -1,10 +1,10 @@
-1,Building Summary Full Service Restaurant,,,,
+1.0000000000000000,Building Summary Full Service Restaurant,,,,
 UWG,,,Value,Value,Value
-areaFloor,,Total Floor Area (m2),511,511,511
-nFloor,,Number of Floors,1,1,1
-glazing,,Total,0.1820,0.1820,0.1820
-hCeiling,,Floor to Ceiling Height (m),3.0,3.0,3.0
-areaWall,,Gross Dimensions - Total Area (m2),276,276,276
-ver2hor,,Wall to Skin Ratio,0.35,0.33,0.33
-areaRoof,,Gross Dimensions - Total Area (m2),570,570,570
-areaWindow,,Total Area (m2),50.2,50.2,50.2
+areaFloor,,Total Floor Area (m2),511.1500000000000000,511.1500000000000000,511.1500000000000000
+nFloor,,Number of Floors,1.0000000000000000,1.0000000000000000,1.0000000000000000
+glazing,,Total,0.1820000000000000,0.1820000000000000,0.1820000000000000
+hCeiling,,Floor to Ceiling Height (m),3.0480000000000000,3.0480000000000000,3.0480000000000000
+areaWall,,Gross Dimensions - Total Area (m2),275.7200000000000000,275.7200000000000000,275.7200000000000000
+ver2hor,,Wall to Skin Ratio,0.3500000000000000,0.3260000000000000,0.3260000000000000
+areaRoof,,Gross Dimensions - Total Area (m2),569.5200000000000000,569.5200000000000000,569.5200000000000000
+areaWindow,,Total Area (m2),50.1800000000000000,50.1800000000000000,50.1800000000000000

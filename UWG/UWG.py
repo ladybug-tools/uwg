@@ -369,15 +369,21 @@ class UWG(object):
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
-                    # BEM(k).Qocc = BEM(k).Qocc; #TODO
+                    # BEM(k).Qocc = BEM(k).Qocc; #TODO What is this?
                     # Add to schedule list
+                    print '---i---'
+                    print self.BEM[k].building.coolCap
+                    #print self.BEM[k].building.coolSetpointDay
+                    #print self.BEM[k].building.coolSetpointNight
+                    #print self.BEM[k].building.mSys
+                    print '---f---'
                     self.Sch.append(refSchedule[i][j][zone])
                     k += 1
 
-        print '---i---'
-        print self.BEM[0].frac
-        print self.BEM[1].frac
-        print '---f---'
+        #print '---i---'
+        #print self.BEM[0].frac
+        #print self.BEM[1].frac
+        #print '---f---'
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
