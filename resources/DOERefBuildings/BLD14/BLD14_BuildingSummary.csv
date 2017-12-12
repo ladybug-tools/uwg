@@ -1,10 +1,10 @@
-1,Building Summary Strip Mall pre-1980 construction,,,,
+1.0000000000000000,Building Summary Strip Mall pre-1980 construction,,,,
 UWG,,,Value,Value,Value
-areaFloor,,Total Floor Area (m2),"2,090","2,090","2,090"
-nFloor,,Number of Floors,1,1,1
-glazing,,Glazing (Total),0.11,0.11,0.11
-hCeiling,,Floor to Ceiling Height (m),5.182,5.182,5.182
-areaWall,,Gross Dimensions - Total Area (m2),"1,184","1,184","1,184"
-ver2hor,,Wall to Skin Ratio,0.36,0.36,0.36
-areaRoof,,Gross Dimensions - Total Area (m2),"2,090","2,090","2,090"
-areaWindow,,Total Window Area (m2),124,124,124
+areaFloor,,Total Floor Area (m2),2090.0000000000000000,2090.0000000000000000,2090.0000000000000000
+nFloor,,Number of Floors,1.0000000000000000,1.0000000000000000,1.0000000000000000
+glazing,,Glazing (Total),0.1050000000000000,0.1050000000000000,0.1050000000000000
+hCeiling,,Floor to Ceiling Height (m),5.1816000000000000,5.1816000000000000,5.1816000000000000
+areaWall,,Gross Dimensions - Total Area (m2),1184.1300000000000000,1184.1300000000000000,1184.1300000000000000
+ver2hor,,Wall to Skin Ratio,0.3600000000000000,0.3600000000000000,0.3600000000000000
+areaRoof,,Gross Dimensions - Total Area (m2),2090.0000000000000000,2090.0000000000000000,2090.0000000000000000
+areaWindow,,Total Window Area (m2),124.0000000000000000,124.0000000000000000,124.0000000000000000
