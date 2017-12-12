@@ -135,7 +135,7 @@ def readDOE():
         test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
         test_readDOE.test_equality(len(nFloor),3,toggle=True)
         test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=True)
-        if i==0: test_readDOE.test_equality_tol(AreaRoof[0],570.0)
+        if i==0: test_readDOE.test_equality_tol(AreaRoof[0],569.52)
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
@@ -162,7 +162,7 @@ def readDOE():
         #Tests sheet 2
         test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
         test_readDOE.test_equality(len(Elec),3,toggle=True)
-        if i==0: test_readDOE.test_equality_tol(Vent[0],5.34)
+        if i==0: test_readDOE.test_equality_tol(Vent[0],5.33624898002)
 
 
         # Read location summary (Sheet 3)
@@ -188,10 +188,10 @@ def readDOE():
         test_readDOE.test_equality(16,len(TypeWall[2]),toggle=True)
         test_readDOE.test_equality(16,len(RvalWall[0]),toggle=True)
         if i==0: test_readDOE.test_in_string('SteelFrame',TypeWall[0][0])
-        if i==0: test_readDOE.test_equality_tol(RvalWall[0][0],0.77)
-        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=True)
-        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=True)
-        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(RvalWall[0][0],0.765696784074)
+        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.835,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.407,toggle=True)
+        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.49709,toggle=True)
         if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=True)
 
 
@@ -263,8 +263,8 @@ def readDOE():
 
 
                 # Test for treeDOE
-                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96,toggle=True)
-                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244,toggle=True)
+                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.956,toggle=True)
+                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.784213988722,toggle=True)
                 if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=True)
                 if i==1 and j==2 and k==15: test_treeDOE.test_equality_tol(refDOE[i][j][k].vent,1.8/1000.0,toggle=True)
 
@@ -420,8 +420,8 @@ def readDOE():
 
     pickle_readDOE.close()
 
-    print test_readDOE.test_results()
-    print test_treeDOE.test_results()
+    #print test_readDOE.test_results()
+    #print test_treeDOE.test_results()
 
 if __name__ == "__main__":
     readDOE()
