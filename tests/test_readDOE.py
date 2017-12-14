@@ -32,6 +32,9 @@ class TestReadDOE(object):
             CLIMATE_ZONE_16]
     """
 
+    DIR_CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+    DIR_MATLAB_PATH = os.path.join(DIR_CURRENT_PATH,"matlab_ref","matlab_readDOE")
+
     def test_refDOE(self):
         """ Tests for refDOE (Building class)
 
@@ -65,20 +68,38 @@ class TestReadDOE(object):
         """
 
         refDOE, refBEM, Schedule = UWG.readDOE(serialize_output=False)
+        matlab_uval_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_uValue.txt")
 
-        matlab_vent_bld_0 = ((5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
-            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03),
-            (5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
-            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03),
-            (5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
-            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03))
+        # check U values
+        if not os.path.exists(matlab_uval_path):
+            raise Exception("Failed to open {}!".format(matlab_uval_path))
 
-        for bldEra in xrange(len(refDOE[0])):
-            for bldType in xrange(len(refDOE[0][bldEra])):
-                assert refDOE[0][bldEra][bldType].vent == pytest.approx(matlab_vent_bld_0[bldEra][bldType], abs=1e-8)
+        file_uval = open(matlab_uval_path,'r')
+
+        assert len(refDOE) == pytest.approx(16.0, abs=1e-3)
+        for bldType in xrange(16):         # bldType
+            assert len(refDOE[bldType]) == pytest.approx(3.0, abs=1e-3)
+            for bldEra in xrange(3):        # bltEra
+                assert len(refDOE[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
+                for bldType in xrange(16):  # ZoneType
+                    matlab_uval = float(file_uval.next())
+                    assert refDOE[bldType][bldEra][bldType].uValue == pytest.approx(matlab_uval, abs=1e-15)
+
+
+        #print f.next()
+        #for matlab_ref_val in f:
+        #    print float(matlab_ref_val)
+        f.close()
+
+
 
 
         """
+        matlab_vent_bld_0 = [[0.0053362489800193]*16]*3
+        for bldEra in xrange(len(refDOE[0])):
+            for bldType in xrange(len(refDOE[0][bldEra])):
+                assert refDOE[0][bldEra][bldType].vent == pytest.approx(matlab_vent_bld_0[bldEra][bldType], abs=1e-15)
+
         #Test sheet 3
         matlab_rvalue_bld_1 = ((1.757469244288225,2.375296912114014,2.793296089385475),
             (1.757469244288225,2.666666666666667,2.793296089385475))
