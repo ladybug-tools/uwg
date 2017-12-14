@@ -55,10 +55,6 @@ def readDOE(serialize_output=True):
 
     """
 
-    #For Testing only
-    test_readDOE = Test("test_readDOE", True) #Make a test object for reading csv files
-    test_treeDOE = Test("test_treeDOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
-
     #Define constants
     # DOE Building Types
     bldType = [

@@ -66,6 +66,16 @@ class TestReadDOE(object):
 
         refDOE, refBEM, Schedule = UWG.readDOE(serialize_output=False)
 
+        matlab_vent_bld_0 = ((5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
+            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03),
+            (5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
+            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03),
+            (5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,
+            5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03,5.336249e-03))
+
+        for bldEra in xrange(len(refDOE[0])):
+            for bldType in xrange(len(refDOE[0][bldEra])):
+                assert refDOE[0][bldEra][bldType].vent == pytest.approx(matlab_vent_bld_0[bldEra][bldType], abs=1e-8)
 
 
         """
@@ -74,7 +84,7 @@ class TestReadDOE(object):
             (1.757469244288225,2.666666666666667,2.793296089385475))
         #if i==1:
         #    pprint.pprint(RvalRoof)
-        
+
         assert refDOE[0][0][0].vent == pytest.approx(0.00533624898002, abs=1e-15)
         assert refDOE[0][1][15].uValue == pytest.approx(2.956, abs=1e-6)
         assert refDOE[0][2][2].heatEff == pytest.approx(0.784213988722061, abs=1e-15)
