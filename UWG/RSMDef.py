@@ -52,20 +52,6 @@ class RSMDef(object):
             self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])
             self.dz[zi] = self.z_meso[zi+1] - self.z_meso[zi]
 
-        """
-        f = open('testzmeso.txt','w')
-        for zi in xrange(len(self.z_meso)-1):
-            line = "i={b}\nzmeso={c}\nz={d}\ndz]{e}\n---------\n".format(
-                b= zi,
-                c= self.z_meso[zi],
-                d= self.z[zi],
-                e= self.dz[zi]
-                )
-            f.write(line)
-        f.close()
-        """
-
-
         # Define initial booleans
         ll = True
         mm = True
