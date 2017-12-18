@@ -1,4 +1,3 @@
-from test import Test
 from math import log, pow, exp
 
 def psychrometrics (Tdb_in, w_in, P):
@@ -146,7 +145,9 @@ end
 
 
 if __name__ == "__main__":
-
+    pass
+    #TODO: move this to separate file
+    """
     psychro_test = Test("test_psychrometrics",run_test=False)
     #Test 1
     Tdb_in = 20.0 + 273.15
@@ -175,3 +176,4 @@ if __name__ == "__main__":
     psychro_test.test_equality_tol(v,0.9,True,0.03) #spec. vol [m^3 kg-1]
 
     print psychro_test.test_results()
+    """
