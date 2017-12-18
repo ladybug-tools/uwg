@@ -3,7 +3,7 @@ import os
 import UWG
 from decimal import Decimal
 import copy
-dd = lambda x: Decimal.from_float(x)
+import pprint
 
 class TestReadDOE(object):
     """Test for readDOE.py
@@ -37,6 +37,7 @@ class TestReadDOE(object):
 
     DIR_CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
     DIR_MATLAB_PATH = os.path.join(DIR_CURRENT_PATH,"matlab_ref","matlab_readDOE")
+    DD = lambda x: Decimal.from_float(x)
 
     def test_refDOE(self):
         """ Tests for refDOE (Building class)"""
@@ -80,6 +81,7 @@ class TestReadDOE(object):
             matlab_file = open(matlab_path,'r')
 
             assert len(refDOE) == pytest.approx(16.0, abs=1e-3)
+
             for bldType in xrange(16):         # bldType
                 assert len(refDOE[bldType]) == pytest.approx(3.0, abs=1e-3)
 
@@ -215,8 +217,10 @@ class TestReadDOE(object):
         ]
 
         for bemi in xrange(len(bemlst)):
+
             for ei in xrange(len(elementlst)):
                 bemid = bemlst[bemi][0] + "_" + bemlst[bemi][1][ei]
+
                 matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_bemdef_{}.txt".format(bemid))
                 # check file exists
                 if not os.path.exists(matlab_path):
@@ -224,9 +228,13 @@ class TestReadDOE(object):
 
                 matlab_file = open(matlab_path,'r')
 
+                assert len(refBEM) == pytest.approx(16.0, abs=1e-3)
+
                 for bldType in xrange(16):         # bldType
+                    assert len(refBEM[bldType]) == pytest.approx(3.0, abs=1e-3)
 
                     for bldEra in xrange(3):        # bltEra
+                        assert len(refBEM[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
 
                         for climateZone in xrange(16):  # ZoneType
                             # next line
@@ -345,7 +353,7 @@ class TestReadDOE(object):
         for bldType in xrange(16):         # bldType
             for bldEra in xrange(3):        # bltEra
                 for climateZone in xrange(16):  # ZoneType
-                    #TODO
+                    #TODO move this to building check and then test
                     #assert refBEM[bldType][bldEra][climateZone].building.FanMax == pytest.approx(matlab_ref_value, abs=1e-15),\
                     #    'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
                     pass
@@ -357,16 +365,121 @@ class TestReadDOE(object):
 
         refDOE, refBEM, Schedule = UWG.readDOE(serialize_output=False)
 
-        elementlst=[
-        'albedo',
-        'emissivity',
-        'layerThickness',
-        'layerThermalCond',
-        'layerVolHeat',
-        'vegCoverage',
-        'layerTemp',
-        'horizontal'
+        schlst=[
+        'Elec',
+        'Light',
+        'Gas',
+        'Occ',
+        'Cool',
+        'Heat',
+        'SWH',
+        'Qelec',
+        'Qlight',
+        'Nocc',
+        'Qgas',
+        'Vent',
+        'Vswh'
         ]
+
+        for si in xrange(len(schlst)):
+            schid = schlst[si]
+
+            # Define file path
+            matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_sch_{}_.txt".format(schid))
+            # check file exists
+            if not os.path.exists(matlab_path):
+                raise Exception("Failed to open {}!".format(matlab_path))
+
+            matlab_file = open(matlab_path,'r')
+
+            assert len(Schedule) == pytest.approx(16.0, abs=1e-3)
+
+            for bldType in xrange(1): # bldType
+                assert len(Schedule[bldType]) == pytest.approx(3.0, abs=1e-3)
+
+                for bldEra in xrange(1): # bltEra
+                    assert len(Schedule[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
+
+                    for climateZone in xrange(1): # ZoneType
+
+
+
+                        if schid in schlst[:7]: #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            matlab_ref_str = matlab_file.next()
+                            # replace [,] -> "" && split at " "
+                            matlab_ref_str = matlab_ref_str.replace("[","").replace("]","").replace(";","_").replace(" ", "_")
+                            matlab_ref_str = "".join(matlab_ref_str.split())
+                            matlab_ref_str = matlab_ref_str.split("_")
+                            matlab_ref_value = [float(x) for x in matlab_ref_str]
+                            # can compare equality of flat lists [0.12, 4, 5,1.12, 5, 6] == pytest.approx([0.124, 4., 5, 1.125, 5, 6], abs=1e-2)
+                            assert len(matlab_ref_value) == pytest.approx(24.0*3.,abs=1e-3)
+                        else:
+                            matlab_ref_value = float(matlab_file.next())
+
+                        if schid == 'Elec': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Elec)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Light': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Light)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                                'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Gas': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Gas)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                                'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Occ': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Occ)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                                'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Cool': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Cool)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Heat': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Heat)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'SWH': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
+                            flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].SWH)
+                            assert flatten_sch == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        #elif schid == 'Qelec':
+                        #    assert Schedule[bldType][bldEra][climateZone].Qelec == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        #elif schid == 'Qlight':
+                        #    assert Schedule[bldType][bldEra][climateZone].Qlight == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Nocc':
+                        	assert Schedule[bldType][bldEra][climateZone].Nocc == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        #elif schid == 'Qgas':
+                        #	assert Schedule[bldType][bldEra][climateZone].Qgas == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Vent':
+                        	assert Schedule[bldType][bldEra][climateZone].Vent == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+                        elif schid == 'Vswh':
+                        	assert Schedule[bldType][bldEra][climateZone].Vswh == pytest.approx(matlab_ref_value, abs=1e-15),\
+                        		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+
+        matlab_file.close()
+
+
+
+
 
 if __name__ == "__main__":
     test_read_doe = TestReadDOE()

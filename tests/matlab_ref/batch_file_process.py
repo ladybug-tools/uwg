@@ -179,20 +179,18 @@ def building_properties_schedule():
     for bi in xrange(len(schlst)):
         sch = schlst[bi]
         fid = fid_.replace("XX", sch)
-        print fid
+        #print fid
 
     #make assert statement in Python
-    """
-    for bi in xrange(len(schlst)):
-        a = "elif bemid == '{}':\n".format(bemid)
-        if "layer" in bemid:
-            b = "\tassert refBEM[bldType][bldEra][climateZone].{}.{}[0] == pytest.approx(matlab_ref_value, abs=1e-15),\n".format(bemlst[bi],elemlst[ei])
-        else:
-            b = "\tassert refBEM[bldType][bldEra][climateZone].{}.{} == pytest.approx(matlab_ref_value, abs=1e-15),\n".format(bemlst[bi],elemlst[ei])
+    for si in xrange(len(schlst)):
+        a = "elif schid == '{}':\n".format(schlst[si])
+
+        b = "\tassert Schedule[bldType][bldEra][climateZone].{} == pytest.approx(matlab_ref_value, abs=1e-15),\n".format(schlst[si])
 
         c = "\t\t'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)\n"
-        #print a+b+c
-    """
+
+        print a+b+c
+
 
 
 if __name__ == "__main__":
