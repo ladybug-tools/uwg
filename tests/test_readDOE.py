@@ -44,7 +44,7 @@ class TestReadDOE(object):
 
         refDOE, refBEM, Schedule = UWG.readDOE(serialize_output=False)
 
-        bldprop = [
+        bldlst = [
             'floorHeight',
             'intHeat',
             'intHeatNight',
@@ -72,8 +72,8 @@ class TestReadDOE(object):
             'fanMax'
             ]
 
-        for bpi in xrange(len(bldprop)):
-            bldid = bldprop[bpi]
+        for bi in xrange(len(bldlst)):
+            bldid = bldlst[bi]
             matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_{}_.txt".format(bldid))
             # check file exists
             if not os.path.exists(matlab_path):
@@ -90,8 +90,19 @@ class TestReadDOE(object):
                     assert len(refDOE[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
 
                     for climateZone in xrange(16):  # ZoneType
+
                         # next line
-                        matlab_ref_value = float(matlab_file.next())
+                        #if bldid:
+                        #    matlab_ref_value == 'AIR':
+                        #else:
+
+                        matlab_ref_value = matlab_file.next()
+
+                        #if bldid == 'condType':
+                        #print matlab_ref_value, "check for air"
+
+                        matlab_ref_value = float(matlab_ref_value)
+
                         # run tests
                         if bldid == 'floorHeight':
                         	assert refDOE[bldType][bldEra][climateZone].floorHeight == pytest.approx(matlab_ref_value, abs=1e-15),\
@@ -117,9 +128,17 @@ class TestReadDOE(object):
                         	assert refDOE[bldType][bldEra][climateZone].intHeatFLat == pytest.approx(matlab_ref_value, abs=1e-15),\
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                        #TODO elif bldid == 'infil':
-                        #	assert refDOE[bldType][bldEra][climateZone].infil == pytest.approx(matlab_ref_value, abs=1e-15),\
-                        #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+                        # TODO
+                        # uwgpython == uwgmatlab
+                        # 2.0607894524638599165200503193773329257965087890625
+                        # 2.060789452463861692876889719627797603607177734375
+                        # 1.12345678901234567890
+                        # 2.06078945246386
+                        # 2.06078945246386
+                        elif bldid == 'infil':
+                            assert refDOE[bldType][bldEra][climateZone].infil == pytest.approx(matlab_ref_value, abs=1e-15),\
+                                (Decimal.from_float(refDOE[bldType][bldEra][climateZone].infil), Decimal.from_float(matlab_ref_value))
+                                #'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bldid == 'vent':
                         	assert refDOE[bldType][bldEra][climateZone].vent == pytest.approx(matlab_ref_value, abs=1e-15),\
@@ -136,8 +155,8 @@ class TestReadDOE(object):
                         elif bldid == 'shgc':
                         	assert refDOE[bldType][bldEra][climateZone].shgc == pytest.approx(matlab_ref_value, abs=1e-15),\
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
-
-                        #TODO elif bldid == 'condType':
+                        #TODO
+                        #elif bldid == 'condType':
                         #	assert refDOE[bldType][bldEra][climateZone].condType == pytest.approx(matlab_ref_value, abs=1e-15),\
                         #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
