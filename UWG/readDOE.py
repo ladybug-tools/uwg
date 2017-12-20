@@ -54,7 +54,7 @@ def readDOE(serialize_output=True):
             CLIMATE_ZONE_16]
 
     """
-
+    toggle = True
     #Define constants
     # DOE Building Types
     bldType = [
@@ -137,7 +137,15 @@ def readDOE(serialize_output=True):
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
-
+        if toggle:
+            import decimal
+            #https://stackoverflow.com/questions/31264275/can-i-convert-any-string-to-float-without-losing-precision-in-python
+            print list_doe2[2][20]
+            dec =  decimal.Decimal(list_doe2[2][20])
+            print dec, type(dec)
+            print decimal.Decimal.from_float(float(dec))
+            print decimal.Decimal.from_float(float(list_doe2[2][20]))
+            toggle = False
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
