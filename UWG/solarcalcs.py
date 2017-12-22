@@ -19,12 +19,11 @@ def solarcalcs(UCM,BEM,simTime,RSM,forc,parameter,rural):
 
 
     if dir_ + dif_ > 0.:
-        pass
-        """
-        % Solar angles
-        [zenith, tanzen, critOrient] = SolarAngles(UCM.canAspect,simTime,RSM.lon,RSM.lat,RSM.GMT);
-        horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
+        # Solar angles
+        zenith, tanzen, critOrient = SolarAngles(UCM.canAspect,simTime,RSM.lon,RSM.lat,RSM.GMT)
+        #horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
 
+        """
         % Fractional terms for wall & road
         Kw_term = min(abs(1/UCM.canAspect*(0.5-critOrient/pi)+1/pi*tanzen*(1-cos(critOrient))),1);
         Kr_term = min(abs(2*critOrient/pi-(2/pi*UCM.canAspect*tanzen)*(1-cos(critOrient))),1-2*UCM.canAspect*Kw_term);
@@ -86,15 +85,28 @@ def solarcalcs(UCM,BEM,simTime,RSM,forc,parameter,rural):
 
     end
 end
+"""
+def SolarAngles (canAspect,simTime,lon,lat,GMT):
+    """ Calculation based on NOAA
+    Input
+        canAspect   # aspect Ratio of canyon
+        simTime     # simulation parameters
+        lon         # longitude (deg)
+        lat         # latitude (deg)
+        GMT         # GMT hour correction
+    Output
+        zenith      # ?
+        tanzen      # ?
+        theta0      # ?
+    """
 
-function [zenith, tanzen, theta0] = SolarAngles (canAspect,simTime,lon,lat,GMT)
+    month = simTime.month
+    day = simTime.day
+    secDay = simTime.secDay
+    inobis = simTime.inobis
+    ut = 24.0 + (secDay/3600. % 24.0) % 24.0
 
-    % Calculation based on NOAA
-    month = simTime.month;
-    day = simTime.day;
-    secDay = simTime.secDay;
-    inobis = simTime.inobis;
-    ut = mod(24.0+mod(secDay/3600.,24.0),24.0);
+    """
 
     ibis = inobis;
     for JI=2:12
