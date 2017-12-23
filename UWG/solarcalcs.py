@@ -1,3 +1,5 @@
+import math
+
 
 class SolarCalcs(object):
     """
@@ -35,7 +37,7 @@ class SolarCalcs(object):
 
         if dir_ + dif_ > 0.:
             # Solar angles
-            zenith, tanzen, critOrient = SolarAngles(UCM.canAspect,simTime,RSM.lon,RSM.lat,RSM.GMT)
+            zenith, tanzen, critOrient = solarangles()
             #horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
 
             """
@@ -102,43 +104,46 @@ class SolarCalcs(object):
     end
     """
 
-    def solarangles (canAspect,simTime,lon,lat,GMT):
+    def solarangles (self):
         """ Calculation based on NOAA
         Input
-            canAspect   # aspect Ratio of canyon
+            UCM.canAspect   # aspect Ratio of canyon
             simTime     # simulation parameters
-            lon         # longitude (deg)
-            lat         # latitude (deg)
-            GMT         # GMT hour correction
+            RSM.lon         # longitude (deg)
+            RSM.lat         # latitude (deg)
+            RSM.GMT         # GMT hour correction
         Output
             zenith      # ?
             tanzen      # ?
             theta0      # ?
         """
 
-        month = simTime.month
-        day = simTime.day
-        secDay = simTime.secDay
-        inobis = simTime.inobis
-        ut = 24.0 + (secDay/3600. % 24.0) % 24.0
+        month = self.simTime.month
+        day = self.simTime.day
+        secDay = self.simTime.secDay    # Total elapsed seconds in simulation
+        inobis = self.simTime.inobis    # total days for first of month
+                                        #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
 
-        ibis = range(len(inobis))
+        self.ut = (24.0 + (secDay/3600. % 24.0)) % 24.0 # Get elapsed hours on current day
 
-        for JI in xrange(2,13):
-          ibis[JI] = inobis[JI]+1
+        self.ibis = range(len(inobis))
 
-        date = day + inobis[month] - 1                  # Julian day of the year
-        ad = 2.0 * pi/365. * (date-1 + (ut-12/24.))     # Fractional year (rad)
+        for JI in xrange(1,12):
+             self.ibis[JI] = inobis[JI]+1
 
-        #eqtime = 229.18 * (0.000075+0.001868*cos(ad)-0.032077*sin(ad) - ...
-        #    0.01461*cos(2*ad)-0.040849*sin(2*ad));
+        self.date = day + inobis[month-1]-1 # Julian day of the year
+        # divide circle by 365 days, multiply by elapsed days + hours
+        self.ad = 2.0 * math.pi/365. * (self.date-1 + (self.ut-12/24.))     # Fractional year (radians)
 
-        """
-        % Declination angle
-        decsol = 0.006918-0.399912*cos(ad)+0.070257*sin(ad)...
-                 -0.006758*cos(2.*ad)+0.000907*sin(2.*ad)...
-                 -0.002697*cos(3.*ad)+0.00148 *sin(3.*ad);
-        """
+        self.eqtime = 229.18 * (0.000075+0.001868*math.cos(self.ad)-0.032077*math.sin(self.ad) - \
+            0.01461*math.cos(2*self.ad)-0.040849*math.sin(2*self.ad))
+
+
+        # Declination angle
+        self.decsol = 0.006918-0.399912*math.cos(self.ad)+0.070257*math.sin(self.ad) \
+            -0.006758*math.cos(2.*self.ad)+0.000907*math.sin(2.*self.ad) \
+            -0.002697*math.cos(3.*self.ad)+0.00148 *math.sin(3.*self.ad)
+
         """
         time_offset = eqtime - 4*lon + 60*(GMT);
         tst = secDay + time_offset*60;
@@ -166,4 +171,4 @@ class SolarCalcs(object):
         theta0 = asin(min(abs( 1./tanzen)/canAspect, 1. ));
         end
         """
-        return rural, UCM, BEM
+        return self.rural, self.UCM, self.BEM

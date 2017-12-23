@@ -371,12 +371,12 @@ class UWG(object):
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
                     # BEM(k).Qocc = BEM(k).Qocc; #TODO What is this?
                     # Add to schedule list
-                    print '---i---'
-                    print self.BEM[k].building.coolCap
+                    #print '---i---'
+                    #print self.BEM[k].building.coolCap
                     #print self.BEM[k].building.coolSetpointDay
                     #print self.BEM[k].building.coolSetpointNight
                     #print self.BEM[k].building.mSys
-                    print '---f---'
+                    #print '---f---'
                     self.Sch.append(refSchedule[i][j][zone])
                     k += 1
 
@@ -495,6 +495,7 @@ class UWG(object):
         #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
         simtoggle = True
         #print self.simTime.nt
+        
         for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -534,7 +535,7 @@ class UWG(object):
 
             # Update solar flux
             #TODO: write this function
-            rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
+            #rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
             # Update building & traffic schedule
             # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
             if self.is_near_zero(self.simTime.julian % 7):

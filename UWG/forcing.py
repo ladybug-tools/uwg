@@ -40,10 +40,6 @@ class Forcing (object):
         else:
             self.deepTemp = sum(staTemp)/float(len(staTemp))
             self.waterTemp = sum(staTemp)/float(len(staTemp))
-            print 'forcing'
-            print self.deepTemp
-            print self.waterTemp
-            print '---'
             self.infra = weather.staInfra
             self.uDir = weather.staUdir
             self.hum  = weather.staHum
