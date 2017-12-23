@@ -23,7 +23,7 @@ class TestRSMDef(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
-        print '-----'
+        
         # Make RSM instance for rural site parameters
         lat = 1.37
         lon = 103.98
