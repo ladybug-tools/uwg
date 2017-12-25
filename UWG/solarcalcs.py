@@ -29,15 +29,25 @@ class SolarCalcs(object):
         self.parameter = parameter
         self.rural = rural
 
+    #TODO: Change to OOP
+    #TODO: docuent mutation/i/o in doc strings
     def solarcalcs(self):
-        """ solar calcs """
+        """ Solar Calculation
+
+        Properties
+            xxx
+        Output
+            self.rural
+            self.UCM
+            self.BEM
+        """
 
         dir_ = forc.dir     # Direct sunlight (perpendicular to the sun's ray)
         dif_ = forc.dif     # Diffuse sunlight
 
         if dir_ + dif_ > 0.:
             # Solar angles
-            zenith, tanzen, critOrient = solarangles()
+            zenith, tanzen, critOrient = solarangles(self.UCM.canAspect,self.simTime,self.RSM.lon,self.RSM.lat,self.RSM.GMT)
             #horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
 
             """
@@ -104,32 +114,35 @@ class SolarCalcs(object):
     end
     """
 
-    def solarangles (self):
+    def solarangles (self,canAspect,simTime,lon,lat,GMT):
         """ Calculation based on NOAA
         Input
-            UCM.canAspect   # aspect Ratio of canyon
+            canAspect   # aspect Ratio of canyon
             simTime     # simulation parameters
             RSM.lon         # longitude (deg)
             RSM.lat         # latitude (deg)
             RSM.GMT         # GMT hour correction
 
+        Properties
+            self.ut # elapsed hours on current day
+            self.ad # fractional year in radians
+            self.eqtime #
+            self.decsol # solar declination angle
+
+        Output
             zenith      # Angle between normal to earth's surface and sun position
             tanzen      # tangente of solar zenithal angle
             theta0      # critical canyon angle for which solar radiation reaches the road
         """
-        #TODO: add other self properties to doc strings
-        month = self.simTime.month
-        day = self.simTime.day
-        secDay = self.simTime.secDay    # Total elapsed seconds in simulation
-        inobis = self.simTime.inobis    # total days for first of month
-                                        #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
-        lon = self.RSM.lon
-        lat = self.RSM.lat
-        GMT = self.RSM.GMT
-        canAspect = self.UCM.canAspect
+        month = simTime.month
+        day = simTime.day
+        secDay = simTime.secDay    # Total elapsed seconds in simulation
+        inobis = simTime.inobis    # total days for first of month
+                                   #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
 
-        self.ut = (24.0 + (secDay/3600. % 24.0)) % 24.0 # Get elapsed hours on current day
-        # ut = mod(24.0+mod(secDay/3600.,24.0),24.0);
+
+        self.ut = (24.0 + (secDay/3600.%24.0)) % 24.0 # Get elapsed hours on current day
+
         ibis = range(len(inobis))
 
         for JI in xrange(1,12):

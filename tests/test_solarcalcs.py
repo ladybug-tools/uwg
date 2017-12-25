@@ -51,6 +51,8 @@ class TestSolarCalcs(object):
         for i in xrange(12*24*20 + 12*1 + 6): # Incremen time to 22 days, 13hrs, 30min = Jan 22 at 1330
             self.solarcalcs.simTime.UpdateDate()
 
+        # recalculate solar angles with new time simulation
+        zenith, tanzen, theta0 = self.solarcalcs.solarangles()
         # open matlab ref file
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_solarangles.txt")
         if not os.path.exists(matlab_path):
@@ -73,14 +75,10 @@ class TestSolarCalcs(object):
         theta0
         ]
 
-        #   print len(uwg_matlab_val), len(uwg_python_val)
         assert len(uwg_matlab_val) == len(uwg_python_val)
-
-        print self.solarcalcs.ut, 13.500000000000000
-        #for i in xrange(len(uwg_matlab_val)):
+        for i in xrange(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
-
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
 
 
 
