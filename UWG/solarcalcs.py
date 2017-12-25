@@ -112,63 +112,64 @@ class SolarCalcs(object):
             RSM.lon         # longitude (deg)
             RSM.lat         # latitude (deg)
             RSM.GMT         # GMT hour correction
-        Output
-            zenith      # ?
-            tanzen      # ?
-            theta0      # ?
-        """
 
+            zenith      # Angle between normal to earth's surface and sun position
+            tanzen      # tangente of solar zenithal angle
+            theta0      # critical canyon angle for which solar radiation reaches the road
+        """
+        #TODO: add other self properties to doc strings
         month = self.simTime.month
         day = self.simTime.day
         secDay = self.simTime.secDay    # Total elapsed seconds in simulation
         inobis = self.simTime.inobis    # total days for first of month
                                         #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
+        lon = self.RSM.lon
+        lat = self.RSM.lat
+        GMT = self.RSM.GMT
+        canAspect = self.UCM.canAspect
 
         self.ut = (24.0 + (secDay/3600. % 24.0)) % 24.0 # Get elapsed hours on current day
-
-        self.ibis = range(len(inobis))
+        # ut = mod(24.0+mod(secDay/3600.,24.0),24.0);
+        ibis = range(len(inobis))
 
         for JI in xrange(1,12):
-             self.ibis[JI] = inobis[JI]+1
+             ibis[JI] = inobis[JI]+1
 
-        self.date = day + inobis[month-1]-1 # Julian day of the year
+        date = day + inobis[month-1]-1 # Julian day of the year
         # divide circle by 365 days, multiply by elapsed days + hours
-        self.ad = 2.0 * math.pi/365. * (self.date-1 + (self.ut-12/24.))     # Fractional year (radians)
+        self.ad = 2.0 * math.pi/365. * (date-1 + (self.ut-12/24.))     # Fractional year (radians)
 
         self.eqtime = 229.18 * (0.000075+0.001868*math.cos(self.ad)-0.032077*math.sin(self.ad) - \
             0.01461*math.cos(2*self.ad)-0.040849*math.sin(2*self.ad))
 
-
-        # Declination angle
+        # Declination angle (angle of sun with equatorial plane)
         self.decsol = 0.006918-0.399912*math.cos(self.ad)+0.070257*math.sin(self.ad) \
             -0.006758*math.cos(2.*self.ad)+0.000907*math.sin(2.*self.ad) \
             -0.002697*math.cos(3.*self.ad)+0.00148 *math.sin(3.*self.ad)
 
-        """
-        time_offset = eqtime - 4*lon + 60*(GMT);
-        tst = secDay + time_offset*60;
-        ha = (tst/4/60-180)*pi/180;
-        zlat = lat*(pi/180.);   % change angle units
+        time_offset = self.eqtime - 4. * lon + 60 * GMT
+        tst = secDay + time_offset * 60
+        ha = (tst/4./60.-180.) * math.pi/180.
+        zlat = lat * (math.pi/180.)   # change angle units to radians
 
-        % Calculate zenith solar angle
-        zenith = acos(sin(zlat)*sin(decsol) + cos(zlat)*cos(decsol)*cos(ha));
+        # Calculate zenith solar angle
+        zenith = math.acos(math.sin(zlat)*math.sin(self.decsol) + math.cos(zlat)*math.cos(self.decsol)*math.cos(ha))
 
-        % tangente of solar zenithal angle
-        if (abs(0.5*pi-zenith) <  1.E-6)
-            if(0.5*pi-zenith > 0.)
-                tanzen = tan(0.5*pi-1.E-6);
-            end
-            if(0.5*pi-zenith <= 0.)
-                tanzen = tan(0.5*pi+1.E-6);
-            end
-        elseif (abs(zenith) <  1.E-6)
-            tanzen = sign(1.,zenith)*tan(1.E-6);
-        else
-            tanzen = tan(zenith);
-        end
+        # tangente of solar zenithal angle
+        if (abs(0.5*math.pi-zenith) < 1e-6):
+            if(0.5*math.pi-zenith > 0.):
+                tanzen = math.tan(0.5*math.pi-1e-6);
 
-        % critical canyon angle for which solar radiation reaches the road
-        theta0 = asin(min(abs( 1./tanzen)/canAspect, 1. ));
-        end
-        """
-        return self.rural, self.UCM, self.BEM
+            if(0.5*math.pi-zenith <= 0.):
+                tanzen = math.tan(0.5*math.pi+1e-6);
+
+        elif (abs(zenith) <  1e-6):
+            raise Exception("Error at zenith calc.")
+            #tanzen = sign(1.,zenith)*math.tan(1e-6);
+        else:
+            tanzen = math.tan(zenith)
+
+        # critical canyon angle for which solar radiation reaches the road
+        theta0 = math.asin(min(abs( 1./tanzen)/canAspect, 1. ))
+
+        return zenith, tanzen, theta0
