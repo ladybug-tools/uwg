@@ -447,6 +447,7 @@ class UWG(object):
             self.N          #
             self.ph         # per hour
             self.dayType    # 3=Sun, 2=Sat, 1=Weekday
+            self.ceil_time_step # simulation timestep (dt) fitted to weather file timestep
         """
 
 
@@ -490,47 +491,31 @@ class UWG(object):
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
 
-
-        # For testing only create test file
-        #f = open(os.path.join(DIR_UP_PATH,"tests","test_simulation_loop.txt"),'w')
-        simtoggle = True
-        #print self.simTime.nt
-        
-        for it in range(1,self.simTime.nt,1)[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+        for it in range(1,self.simTime.nt,1):#[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
             else:
-                #TODO: this is slightly offset by simTime.nt seconds from rest of timestep due to placement of UpdateDate()
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
-            ceil_time_step = int(math.ceil(it * self.ph))  # simulation time increment raised to weather time step
-
-            """
-            print ceil_time_step, self.simTime.julian, self.simTime.secDay
-            if self.is_near_zero(it%12):#simtoggle:
-                print 'dy: ', round(it*300/3600/24.,2)
-                print 'hr: ', it*300/3600.
-                print 'simday, simjulian:', self.simTime.day, self.simTime.julian
-                print '---'
-                simtoggle = False
-            """
+            self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
+                                                                  # minus one to be consistent with forcIP list index
 
             # Updating forcing instance
-            self.forc.infra = self.forcIP.infra[ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
-            self.forc.wind = max(self.forcIP.wind[ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
-            self.forc.uDir = self.forcIP.uDir[ceil_time_step]          # wind direction
-            self.forc.hum = self.forcIP.hum[ceil_time_step]            # specific humidty (kg kg-1)
-            self.forc.pres = self.forcIP.pres[ceil_time_step]          # Pressure (Pa)
-            self.forc.temp = self.forcIP.temp[ceil_time_step]          # air temperature (C)
-            self.forc.rHum = self.forcIP.rHum[ceil_time_step]          # Relative humidity (%)
-            self.forc.prec = self.forcIP.prec[ceil_time_step]          # Precipitation (mm h-1)
-            self.forc.dir = self.forcIP.dir[ceil_time_step]            # normal solar direct radiation (W m-2)
-            self.forc.dif = self.forcIP.dif[ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
+            self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
+            self.forc.wind = max(self.forcIP.wind[self.ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
+            self.forc.uDir = self.forcIP.uDir[self.ceil_time_step]          # wind direction
+            self.forc.hum = self.forcIP.hum[self.ceil_time_step]            # specific humidty (kg kg-1)
+            self.forc.pres = self.forcIP.pres[self.ceil_time_step]          # Pressure (Pa)
+            self.forc.temp = self.forcIP.temp[self.ceil_time_step]          # air temperature (C)
+            self.forc.rHum = self.forcIP.rHum[self.ceil_time_step]          # Relative humidity (%)
+            self.forc.prec = self.forcIP.prec[self.ceil_time_step]          # Precipitation (mm h-1)
+            self.forc.dif = self.forcIP.dif[self.ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
+            self.forc.dir = self.forcIP.dir[self.ceil_time_step]            # normal solar direct radiation (W m-2)
             self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
 
             # Update solar flux
@@ -547,6 +532,7 @@ class UWG(object):
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
+
             """
             if it == 46:
                 print 'check precision'
@@ -590,7 +576,6 @@ class UWG(object):
                 self.BEM[i].T_wallin = self.BEM[i].wall.layerTemp[-1]
                 self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
-
 
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road

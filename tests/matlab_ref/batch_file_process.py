@@ -1,7 +1,7 @@
 import os
 import re
 
-fname = "building_properties_schedule.txt" #"bemdef_properties.txt"#"building_properties_python.txt"#"building_properties.txt" # insert your file path here
+fname = "simparam_properties.txt" #"bemdef_properties.txt"#"building_properties_python.txt"#"building_properties.txt" # insert your file path here
 curr_dir = os.path.abspath(os.path.dirname(__file__))
 fpath = os.path.join(curr_dir,fname)
 
@@ -31,7 +31,6 @@ def building_properties_matlab():
         #flst[i] = flst[i].replace('uValue', name)
         #flst[i] = "".join(flst[i].split())
         #print flst[i]
-
 
 def building_properties_python():
     """
@@ -191,9 +190,25 @@ def building_properties_schedule():
 
         print a+b+c
 
+def simparam_properties():
+    f = open(fpath,'r')
+    L = f.readlines()
+    f.close()
 
+    simlst = L[:16]
+    for i in xrange(len(simlst)):
+        name = simlst[i].split(" ")[0]
+        name = "".join(name.split()) # removes all white space from string
+        #print "{}".format(name[17:-1])
+
+    simlst = L[17:33]
+    for i in xrange(len(simlst)):
+        name = "".join(simlst[i].split())
+        # %fprintf(fileID, '%.16f\n',horSol);
+        print "fprintf(fileID, {}, obj.{});".format(r".16f\n", name)
 
 if __name__ == "__main__":
+
     if fname=="":
         pass
     elif fname=="building_properties_matlab.txt":
@@ -204,3 +219,5 @@ if __name__ == "__main__":
         bemdef_properties()
     elif fname=="building_properties_schedule.txt":
         building_properties_schedule()
+    elif fname=="simparam_properties.txt":
+        simparam_properties()

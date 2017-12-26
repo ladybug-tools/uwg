@@ -29,36 +29,48 @@ class SolarCalcs(object):
         self.parameter = parameter
         self.rural = rural
 
-    #TODO: Change to OOP
-    #TODO: docuent mutation/i/o in doc strings
     def solarcalcs(self):
         """ Solar Calculation
+        Mutates RSM, BEM, and UCM objects based on following parameters:
+            UCM         # Urban Canopy - Building Energy Model object
+            BEM         # Building Energy Model object
+            simTime     # Simulation time bbject
+            RSM         # Rural Site & Vertical Diffusion Model Object
+            forc        # Forcing object
+            parameter   # Geo Param Object
+            rural       # Rural road Element object
 
         Properties
-            xxx
-        Output
-            self.rural
-            self.UCM
-            self.BEM
+            self.dir   # Direct sunlight
+            self.dif # Diffuse sunlight
+            self.tanzen
+            self.critOrient
+            self.horSol
+
         """
 
-        dir_ = forc.dir     # Direct sunlight (perpendicular to the sun's ray)
-        dif_ = forc.dif     # Diffuse sunlight
+        self.dir = self.forc.dir     # Direct sunlight (perpendicular to the sun's ray)
+        self.dif = self.forc.dif     # Diffuse sunlight
 
-        if dir_ + dif_ > 0.:
-            # Solar angles
-            zenith, tanzen, critOrient = solarangles(self.UCM.canAspect,self.simTime,self.RSM.lon,self.RSM.lat,self.RSM.GMT)
-            #horSol = max(cos(zenith)*dir,0);            % Direct horizontal radiation
+        if self.dir + self.dif > 0.:
+            # calculate zenith tangent, and critOrient solar angles
+            self.solarangles()
+
+            self.horSol = max(math.cos(self.zenith)*self.dir, 0.0)            # Direct horizontal radiation
+
+            # Fractional terms for wall & road
+            self.Kw_term = min(abs(1./self.UCM.canAspect*(0.5-self.critOrient/math.pi) \
+                + 1/math.pi*self.tanzen*(1-math.cos(self.critOrient))),1.)
+            self.Kr_term = min(abs(2.*self.critOrient/math.pi \
+                - (2/math.pi*self.UCM.canAspect*self.tanzen)*(1-math.cos(self.critOrient))), 1-2*self.UCM.canAspect*self.Kw_term)
+
+
+            # Direct and diffuse solar radiation
+            self.bldSol = self.horSol*self.Kw_term + self.UCM.wallConf*self.dif   # Assume trees are shorter than buildings
+            self.roadSol = self.horSol*self.Kr_term + self.UCM.roadConf*self.dif
+            #print self.dif, self.dir
 
             """
-            % Fractional terms for wall & road
-            Kw_term = min(abs(1/UCM.canAspect*(0.5-critOrient/pi)+1/pi*tanzen*(1-cos(critOrient))),1);
-            Kr_term = min(abs(2*critOrient/pi-(2/pi*UCM.canAspect*tanzen)*(1-cos(critOrient))),1-2*UCM.canAspect*Kw_term);
-
-            % Direct and diffuse solar radiation
-            bldSol = horSol*Kw_term+UCM.wallConf*dif;   % Assume trees are shorter than buildings
-            roadSol = horSol*Kr_term+UCM.roadConf*dif;
-
             % Solar reflections
             if simTime.month < parameter.vegStart || simTime.month > parameter.vegEnd
                 alb_road = UCM.road.albedo;
@@ -114,32 +126,37 @@ class SolarCalcs(object):
     end
     """
 
-    def solarangles (self,canAspect,simTime,lon,lat,GMT):
-        """ Calculation based on NOAA
-        Input
-            canAspect   # aspect Ratio of canyon
-            simTime     # simulation parameters
+    def solarangles (self):
+        """
+        Calculation based on NOAA. Solves for zenith angle, tangent of zenithal angle,
+        and critical canyon angle based on following parameters:
+            canAspect       # aspect Ratio of canyon
+            simTime         # simulation parameters
             RSM.lon         # longitude (deg)
             RSM.lat         # latitude (deg)
             RSM.GMT         # GMT hour correction
 
         Properties
-            self.ut # elapsed hours on current day
-            self.ad # fractional year in radians
-            self.eqtime #
-            self.decsol # solar declination angle
-
-        Output
-            zenith      # Angle between normal to earth's surface and sun position
-            tanzen      # tangente of solar zenithal angle
-            theta0      # critical canyon angle for which solar radiation reaches the road
+            self.ut         # elapsed hours on current day
+            self.ad         # fractional year in radians
+            self.eqtime
+            self.decsol     # solar declination angle
+            self.zenith     # Angle between normal to earth's surface and sun position
+            self.tanzen     # tangente of solar zenithal angle
+            self.critOrient # critical canyon angle for which solar radiation reaches the road
         """
-        month = simTime.month
-        day = simTime.day
-        secDay = simTime.secDay    # Total elapsed seconds in simulation
-        inobis = simTime.inobis    # total days for first of month
-                                   #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
 
+        ln = self.RSM.lon
+
+        month = self.simTime.month
+        day = self.simTime.day
+        secDay = self.simTime.secDay    # Total elapsed seconds in simulation
+        inobis = self.simTime.inobis    # total days for first of month
+                                   #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
+        canAspect = self.UCM.canAspect
+        lon = self.RSM.lon
+        lat = self.RSM.lat
+        GMT = self.RSM.GMT
 
         self.ut = (24.0 + (secDay/3600.%24.0)) % 24.0 # Get elapsed hours on current day
 
@@ -166,23 +183,22 @@ class SolarCalcs(object):
         zlat = lat * (math.pi/180.)   # change angle units to radians
 
         # Calculate zenith solar angle
-        zenith = math.acos(math.sin(zlat)*math.sin(self.decsol) + math.cos(zlat)*math.cos(self.decsol)*math.cos(ha))
+        self.zenith = math.acos(math.sin(zlat)*math.sin(self.decsol) + math.cos(zlat)*math.cos(self.decsol)*math.cos(ha))
 
         # tangente of solar zenithal angle
-        if (abs(0.5*math.pi-zenith) < 1e-6):
-            if(0.5*math.pi-zenith > 0.):
-                tanzen = math.tan(0.5*math.pi-1e-6);
+        if (abs(0.5*math.pi-self.zenith) < 1e-6):
+            if(0.5*math.pi-self.zenith > 0.):
+                self.tanzen = math.tan(0.5*math.pi-1e-6);
 
             if(0.5*math.pi-zenith <= 0.):
-                tanzen = math.tan(0.5*math.pi+1e-6);
+                self.tanzen = math.tan(0.5*math.pi+1e-6);
 
-        elif (abs(zenith) <  1e-6):
+        elif (abs(self.zenith) <  1e-6):
+            #TODO: figure out how to translate this
             raise Exception("Error at zenith calc.")
             #tanzen = sign(1.,zenith)*math.tan(1e-6);
         else:
-            tanzen = math.tan(zenith)
+            self.tanzen = math.tan(self.zenith)
 
         # critical canyon angle for which solar radiation reaches the road
-        theta0 = math.asin(min(abs( 1./tanzen)/canAspect, 1. ))
-
-        return zenith, tanzen, theta0
+        self.critOrient = math.asin(min(abs( 1./self.tanzen)/canAspect, 1. ))
