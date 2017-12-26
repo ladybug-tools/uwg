@@ -520,7 +520,9 @@ class UWG(object):
 
             # Update solar flux
             #TODO: write this function
-            #rural,UCM,BEM = solarcalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
+            self.solar = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
+            rural,UCM,BEM = self.solar.solarcalcs()
+
             # Update building & traffic schedule
             # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
             if self.is_near_zero(self.simTime.julian % 7):

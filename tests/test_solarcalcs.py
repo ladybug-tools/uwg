@@ -19,41 +19,33 @@ class TestSolarCalcs(object):
         uwg_param_file_name = "initialize.uwg"
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-        self.uwg.read_epw()
-        self.uwg.read_input()
-
-        self.UCM = self.uwg.UCM              # Urban Canopy - Building Energy Model object
-        self.BEM = self.uwg.BEM              # Building Energy Model object
-        #time step is 5 min
-        self.simTime = self.uwg.simTime      # Simulation time bbject
-        self.RSM = self.uwg.RSM              # Rural Site & Vertical Diffusion Model Object
-        self.forc = self.uwg.forc            # Forcing object
-        self.geoParam = self.uwg.geoParam    # Geo Param Object
-        self.rural = self.uwg.rural          # Rural road Element object
-
-        self.solarcalcs = UWG.SolarCalcs(self.UCM,self.BEM,self.simTime,self.RSM,self.forc, \
-            self.geoParam,self.rural)
 
     def test_solarangles(self):
         """ test solar angles """
 
         self.setup_solarcalcs()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        solar = UWG.SolarCalcs(self.uwg.UCM, self.uwg.BEM, self.uwg.simTime, self.uwg.RSM, \
+            self.uwg.forc, self.uwg.geoParam, self.uwg.rural)
+
         #timestep every 5 minutes (300s)
         for i in xrange(int(12*24*1.5)): #1.5 days, Jan 2nd, 12 noon
-            self.solarcalcs.simTime.UpdateDate()
-        self.solarcalcs.solarangles()
+            solar.simTime.UpdateDate()
+        solar.solarangles()
 
         # test simtime for solar after 1.5 days
-        assert self.solarcalcs.ut == pytest.approx(12.0,abs=1e-15)
-        assert self.solarcalcs.simTime.day == pytest.approx(2.0,abs=1e-15)
-        assert self.solarcalcs.ad == pytest.approx(0.197963373,abs=1e-8)
+        assert solar.ut == pytest.approx(12.0,abs=1e-15)
+        assert solar.simTime.day == pytest.approx(2.0,abs=1e-15)
+        assert solar.ad == pytest.approx(0.197963373,abs=1e-8)
 
-        # recalculate solar angles with new time simulation
-        for i in xrange(12*24*20 + 12*1 + 6): # Incremen time to 22 days, 13hrs, 30min = Jan 22 at 1330
-            self.solarcalcs.simTime.UpdateDate()
+        # recalculate solar angles with new time simulation, add to previous time increment
+        for i in xrange(12*24*20 + 12*1 + 6): # Increment time to 22 days, 13hrs, 30min = Jan 22 at 1330
+            solar.simTime.UpdateDate()
 
         # Run simulation
-        self.solarcalcs.solarangles()
+        solar.solarangles()
 
         # open matlab ref file
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_solarangles.txt")
@@ -64,17 +56,17 @@ class TestSolarCalcs(object):
         matlab_file.close()
 
         uwg_python_val = [
-        self.solarcalcs.simTime.month,
-        self.solarcalcs.simTime.secDay,
-        self.solarcalcs.simTime.day,
-        self.solarcalcs.simTime.hourDay,
-        self.solarcalcs.ut,
-        self.solarcalcs.ad,
-        self.solarcalcs.eqtime,
-        self.solarcalcs.decsol,
-        self.solarcalcs.zenith,
-        self.solarcalcs.tanzen,
-        self.solarcalcs.critOrient
+        solar.simTime.month,
+        solar.simTime.secDay,
+        solar.simTime.day,
+        solar.simTime.hourDay,
+        solar.ut,
+        solar.ad,
+        solar.eqtime,
+        solar.decsol,
+        solar.zenith,
+        solar.tanzen,
+        solar.critOrient
         ]
 
         # matlab ref checking
@@ -87,23 +79,22 @@ class TestSolarCalcs(object):
         """ test solar calculation """
 
         self.setup_solarcalcs()
-        #timestep every 5 minutes (300s)
-        for i in xrange(int(12*24*1.5)): #1.5 days, Jan 2nd, 12 noon
-            self.solarcalcs.simTime.UpdateDate()
-            self.solarcalcs.forc.dir = self.uwg.forcIP.dir[int(math.ceil((i+1)*(self.simTime.dt/3600.)))]
-            self.solarcalcs.forc.dif = self.uwg.forcIP.dif[int(math.ceil((i+1)*(self.simTime.dt/3600.)))]
+        self.uwg.read_epw()
+        self.uwg.read_input()
 
-        # Run simulation
-        self.solarcalcs.solarcalcs()
+        # We subtract 11 hours from total timestep so
+        # we can stop simulation while we still have sun!
+        # New time: Jan 31, 1300
+        self.uwg.simTime.nt -= 12*11
 
-        print self.solarcalcs.dif, 471.
-        print self.solarcalcs.dir, 120.
-        # direct/diffuse radiation on building (W m-2)
-        #assert self.solarcalcs.bldSol == pytest.approx(157.6110002108665,abs=1e-13)
-        # direct/diffuse radiation on road (W m-2)
-        #assert self.solarcalcs.roadSol == pytest.approx(273.6467114464431, abs=1e-13)
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
 
-        """
+        # check date
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 31
+        assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
+
         # open matlab ref file
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_solarcalcs.txt")
         if not os.path.exists(matlab_path):
@@ -112,20 +103,18 @@ class TestSolarCalcs(object):
         uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
         matlab_file.close()
 
+        # redo matlab sim for new date
         uwg_python_val = [
-        self.solarcalcs.horSol,
-        self.Kw_term,
-        self.Kr_term
+        self.uwg.solar.horSol,
+        self.uwg.solar.Kw_term,
+        self.uwg.solar.Kr_term
         ]
-
+        
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
         for i in xrange(len(uwg_matlab_val)):
             print uwg_python_val[i], uwg_matlab_val[i]
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
-
-        """
-
 
 
 if __name__ == "__main__":

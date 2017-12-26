@@ -123,8 +123,9 @@ class SolarCalcs(object):
             UCM.treeLatHeat = 0;
 
         end
-    end
-    """
+        end
+        """
+        return self.rural, self.UCM, self.BEM
 
     def solarangles (self):
         """
