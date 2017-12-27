@@ -46,6 +46,10 @@ class SolarCalcs(object):
             self.tanzen
             self.critOrient
             self.horSol
+            self.Kw_term
+            self.Kr_term
+            self.mr
+            self.mw
 
         """
 
