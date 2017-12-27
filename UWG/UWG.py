@@ -519,9 +519,7 @@ class UWG(object):
             self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
 
             # Update solar flux
-            #TODO: write this function
-            self.solar = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
-            rural,UCM,BEM = self.solar.solarcalcs()
+            self.rural, self.UCM, self.BEM = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural).solarcalcs()
 
             # Update building & traffic schedule
             # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
