@@ -68,63 +68,56 @@ class SolarCalcs(object):
             # Direct and diffuse solar radiation
             self.bldSol = self.horSol*self.Kw_term + self.UCM.wallConf*self.dif   # Assume trees are shorter than buildings
             self.roadSol = self.horSol*self.Kr_term + self.UCM.roadConf*self.dif
-            #print self.dif, self.dir
 
-            """
-            % Solar reflections
-            if simTime.month < parameter.vegStart || simTime.month > parameter.vegEnd
-                alb_road = UCM.road.albedo;
-            else
-                alb_road = UCM.road.albedo*(1-UCM.road.vegCoverage)+parameter.vegAlbedo*UCM.road.vegCoverage;
-            end
+            # Solar reflections. Add diffuse radiation from vegetation to alb_road if in season
+            if self.simTime.month < self.parameter.vegStart or self.simTime.month > self.parameter.vegEnd:
+                alb_road = self.UCM.road.albedo
+            else:
+                alb_road = self.UCM.road.albedo*(1.-self.UCM.road.vegCoverage) + self.parameter.vegAlbedo*self.UCM.road.vegCoverage
 
-            % First set of reflections
-            rr = alb_road*roadSol;
-            rw = UCM.alb_wall*bldSol;
+            # First set of reflections
+            rr = alb_road * self.roadSol
+            rw = self.UCM.alb_wall * self.bldSol
 
-            % bounces
-            mr = (rr+(1-UCM.roadConf)*alb_road*...
-                (rw+UCM.wallConf*UCM.alb_wall*rr))/...
-                (1-(1-2*UCM.wallConf)*UCM.alb_wall+...
-                (1-UCM.roadConf)*UCM.wallConf*alb_road*UCM.alb_wall);
-            mw = (rw+UCM.wallConf*UCM.alb_wall*rr)/...
-                (1-(1-2*UCM.wallConf)*UCM.alb_wall+...
-                (1-UCM.roadConf)*UCM.wallConf*alb_road*UCM.alb_wall);
+            # bounces
+            fr = (1. - (1. - 2.*self.UCM.wallConf) * self.UCM.alb_wall + \
+            (1. - self.UCM.roadConf) * self.UCM.wallConf * alb_road * self.UCM.alb_wall)
 
-            % Receiving solar, including bounces
-            UCM.road.solRec = roadSol+(1-UCM.roadConf)*mw;
-            for j = 1:numel(BEM)
-                BEM(j).roof.solRec = horSol + dif;
-                BEM(j).wall.solRec = bldSol+(1-2*UCM.wallConf)*mw+UCM.wallConf*mr;
-            end
+            self.mr = (rr + (1.0-self.UCM.roadConf) * alb_road * \
+                (rw + self.UCM.wallConf * self.UCM.alb_wall * rr)) / fr
+            self.mw = (rw + self.UCM.wallConf * self.UCM.alb_wall * rr) / fr
 
-            rural.solRec = horSol + dif;            % Solar received by rural
-            UCM.SolRecRoof = horSol + dif;          % Solar received by roof
-            UCM.SolRecRoad = UCM.road.solRec;       % Solar received by road
-            UCM.SolRecWall = bldSol+(1-2*UCM.wallConf)*UCM.road.albedo*roadSol;    % Solar received by wall
 
-            % Vegetation heat (per m^2 of veg)
-            UCM.treeSensHeat = (1-parameter.vegAlbedo)*(1-parameter.treeFLat)*UCM.SolRecRoad;
-            UCM.treeLatHeat = (1-parameter.vegAlbedo)*parameter.treeFLat*UCM.SolRecRoad;
+            # Receiving solar, including bounces (W m-2)
+            self.UCM.road.solRec = self.roadSol + (1 - self.UCM.roadConf)*self.mw
 
-        else    % No Sun
+            for j in xrange(len(self.BEM)):
+                self.BEM[j].roof.solRec = self.horSol + self.dif
+                self.BEM[j].wall.solRec = self.bldSol + (1 - 2*self.UCM.wallConf) * self.mw + self.UCM.wallConf * self.mr
 
-            UCM.road.solRec = 0;
-            rural.solRec = 0;
+            self.rural.solRec = self.horSol + self.dif            # Solar received by rural
+            self.UCM.SolRecRoof = self.horSol + self.dif          # Solar received by roof
+            self.UCM.SolRecRoad = self.UCM.road.solRec            # Solar received by road
+            self.UCM.SolRecWall = self.bldSol+(1-2*self.UCM.wallConf)*self.UCM.road.albedo*self.roadSol    # Solar received by wall
 
-            for j = 1:numel(BEM)
-                BEM(j).roof.solRec = 0;
-                BEM(j).wall.solRec = 0;
-            end
-            UCM.SolRecRoad = 0;         % Solar received by road
-            UCM.SolRecRoof = 0;         % Solar received by roof
-            UCM.SolRecWall = 0;         % Solar received by wall
-            UCM.treeSensHeat = 0;
-            UCM.treeLatHeat = 0;
+            # Vegetation heat (per m^2 of veg)
+            self.UCM.treeSensHeat = (1-self.parameter.vegAlbedo)*(1-self.parameter.treeFLat)*self.UCM.SolRecRoad
+            self.UCM.treeLatHeat = (1-self.parameter.vegAlbedo)*self.parameter.treeFLat*self.UCM.SolRecRoad
 
-        end
-        end
-        """
+        else:    # No Sun
+            self.UCM.road.solRec = 0.
+            self.rural.solRec = 0.
+
+            for j in xrange(len(self.BEM)):
+                self.BEM[j].roof.solRec = 0.
+                self.BEM[j].wall.solRec = 0.
+
+            self.UCM.SolRecRoad = 0.         # Solar received by road
+            self.UCM.SolRecRoof = 0.         # Solar received by roof
+            self.UCM.SolRecWall = 0.         # Solar received by wall
+            self.UCM.treeSensHeat = 0.
+            self.UCM.treeLatHeat = 0.
+
         return self.rural, self.UCM, self.BEM
 
     def solarangles (self):
