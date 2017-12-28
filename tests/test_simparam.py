@@ -17,8 +17,8 @@ class TestSimParam(object):
         # Jan 1 00:00 - Feb 1 00:00
 
         # Month,1,        # starting month (1-12)
-        # Day,1,         # starting day (1-31)
-        # nDay,31,       # number of days to run simultion
+        # Day,1,          # starting day (1-31)
+        # nDay,31,        # number of days to run simultion
         # dtSim,300,      # simulation time step (s)
         # dtWeather,3600, # weather time step (s)
 

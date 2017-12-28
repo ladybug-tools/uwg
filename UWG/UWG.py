@@ -492,6 +492,7 @@ class UWG(object):
         bVent = utilities.zeros(self.N,len(self.BEM))
 
         for it in range(1,self.simTime.nt,1):#[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -586,7 +587,7 @@ class UWG(object):
 
 
             # Calculate urban heat fluxes, update UCM & UBL
-            self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+            #self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
             """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);

@@ -23,7 +23,7 @@ class TestRSMDef(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
-        
+
         # Make RSM instance for rural site parameters
         lat = 1.37
         lon = 103.98
@@ -92,9 +92,6 @@ class TestRSMDef(object):
 
         assert len(self.rural_rsm.densityProfC) == pytest.approx(self.rural_rsm.nzref+1, abs=1e10)
         assert len(self.rural_rsm.densityProfS) == pytest.approx(self.rural_rsm.nzref+2, abs=1e10)
-
-
-
 
 if __name__ == "__main__":
     test_rsm = TestRSMDef()

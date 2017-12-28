@@ -1,7 +1,7 @@
 import os
 import re
 
-fname = "simparam_properties.txt" #"bemdef_properties.txt"#"building_properties_python.txt"#"building_properties.txt" # insert your file path here
+fname = "ucm_properties.txt" #"bemdef_properties.txt"#"building_properties_python.txt"#"building_properties.txt" # insert your file path here
 curr_dir = os.path.abspath(os.path.dirname(__file__))
 fpath = os.path.join(curr_dir,fname)
 
@@ -207,6 +207,18 @@ def simparam_properties():
         # %fprintf(fileID, '%.16f\n',horSol);
         print "fprintf(fileID, {}, obj.{});".format(r".16f\n", name)
 
+def ucm_properties():
+    f = open(fpath,'r')
+    L = f.readlines()
+    f.close()
+
+    proplst = L[:31]
+    for i in xrange(len(proplst)):
+        name = proplst[i].split(" ")[0]
+        name = "".join(name.split()) # removes all white space from string
+        a = "{}".format(name[:])
+        #print "fprintf(fileID, '{}', obj.{});".format(r".16f\n", a)
+        print "self.uwg.UCM.{},".format(a)
 if __name__ == "__main__":
 
     if fname=="":
@@ -221,3 +233,5 @@ if __name__ == "__main__":
         building_properties_schedule()
     elif fname=="simparam_properties.txt":
         simparam_properties()
+    elif fname=="ucm_properties.txt":
+        ucm_properties()

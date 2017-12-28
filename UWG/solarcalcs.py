@@ -1,6 +1,5 @@
 import math
 
-
 class SolarCalcs(object):
     """
     SolarCalcs
@@ -87,10 +86,9 @@ class SolarCalcs(object):
             fr = (1. - (1. - 2.*self.UCM.wallConf) * self.UCM.alb_wall + \
             (1. - self.UCM.roadConf) * self.UCM.wallConf * alb_road * self.UCM.alb_wall)
 
-            self.mr = (rr + (1.0-self.UCM.roadConf) * alb_road * \
-                (rw + self.UCM.wallConf * self.UCM.alb_wall * rr)) / fr
+            # (1.0-self.UCM.roadConf) road to wall view
+            self.mr = (rr + (1.0-self.UCM.roadConf) * alb_road * (rw + self.UCM.wallConf * self.UCM.alb_wall * rr)) / fr
             self.mw = (rw + self.UCM.wallConf * self.UCM.alb_wall * rr) / fr
-
 
             # Receiving solar, including bounces (W m-2)
             self.UCM.road.solRec = self.roadSol + (1 - self.UCM.roadConf)*self.mw
