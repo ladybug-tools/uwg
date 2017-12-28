@@ -21,9 +21,9 @@ class UCMDef(object):
         canWidth;      % canyon width (m)
         bldWidth;      % bld width (m)
         canAspect;     % canyon aspect ratio
-        roadConf;      % road-sky configuration factors
+        roadConf;      % road-sky configuration factors (sky view factor)
         alb_wall;      % average wall albedo
-        wallConf;      % wall-sky configuration factors
+        wallConf;      % wall-sky configuration factors (sky view factor)
         VFwallroad;    % wall-road view factor
         VFroadwall;    % road-wall view factor
         facArea;       % facade area (m2)
@@ -87,9 +87,9 @@ class UCMDef(object):
         d = self.bldWidth/(sqrt(bldDensity))                        # urban area width == sqrt(bldDensity) == ratio of bld footprint_width / urban area footprint
         self.canWidth = d - self.bldWidth                           # canyon width (m) = urban area width - building width
         self.canAspect = bldHeight/self.canWidth                    # canyon aspect ratio
-        self.roadConf = pow(pow(self.canAspect,2)+1,0.5) - self.canAspect   # road-sky configuration factors ??
+        self.roadConf = pow(pow(self.canAspect,2)+1,0.5) - self.canAspect   # road-sky configuration factor (sky view factor SVF)
         self.wallConf = 0.5 * (self.canAspect + 1 -
-            pow(pow(self.canAspect,2)+1,0.5)) / (self.canAspect)    # wall-sky configuration factors ??
+            pow(pow(self.canAspect,2)+1,0.5)) / (self.canAspect)    # wall-sky configuration factor (sky view factor SVF)
         self.facArea = 4*self.bldWidth*bldHeight                    # bld width [m]
         self.roadArea = d*d - pow(self.bldWidth,2)                  # road area [m2] = urban_area_ - bld_area
         self.roofArea = pow(self.bldWidth,2)                        # roof area [m2]

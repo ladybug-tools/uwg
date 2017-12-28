@@ -111,12 +111,12 @@ class Building(object):
             self.Zone = "null"                          # Climate zone number
 
     def __repr__(self):
-        return "Building: Type: {:s}, Era: {:s}, Zone: {:s}; @ Ti: {a}, WWR: {b}".format(
-            self.Type,
-            self.Era,
-            self.Zone,
-            a=self.indoorTemp-273.15,
-            b=self.glazingRatio
+        return "BuildingType: {a}, Era: {b}, Zone: {c}; @ Ti: {d}, WWR: {e}".format(
+            a=self.Type,
+            b=self.Era,
+            c=self.Zone,
+            d=self.indoorTemp-273.15,
+            e=self.glazingRatio
             )
 
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
@@ -143,7 +143,7 @@ class Building(object):
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
         T_can = UCM.canTemp                             # Canyon temperature
 
-        
+
         # Normalize areas to building foot print [m^2/m^2(bld)]
         facArea = UCM.verToHor/UCM.bldDensity           # [m2(facade)/m2(bld)]
         wallArea = facArea*(1.-self.glazingRatio)       # [m2(wall)/m2(bld)]

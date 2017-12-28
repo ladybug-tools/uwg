@@ -52,20 +52,6 @@ class RSMDef(object):
             self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])
             self.dz[zi] = self.z_meso[zi+1] - self.z_meso[zi]
 
-        """
-        f = open('testzmeso.txt','w')
-        for zi in xrange(len(self.z_meso)-1):
-            line = "i={b}\nzmeso={c}\nz={d}\ndz]{e}\n---------\n".format(
-                b= zi,
-                c= self.z_meso[zi],
-                d= self.z[zi],
-                e= self.dz[zi]
-                )
-            f.write(line)
-        f.close()
-        """
-
-
         # Define initial booleans
         ll = True
         mm = True
@@ -105,36 +91,31 @@ class RSMDef(object):
               pp = False
 
 
-        # initialize temperature and pressure vertical profiles at the rural site
+        # Define temperature, pressure and density vertical profiles
+
         self.tempProf = [T_init for x in range(self.nzref+1)]
         self.presProf = [P_init for x in range(self.nzref+1)]
-
         for iz in xrange(1,self.nzref+1):
             self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
                parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
                1./self.tempProf[iz-1]) * 0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
-        self.testvar = 99080.2481868111
+        self.tempRealProf = [T_init for x in range(self.nzref+1)]
+        for iz in xrange(self.nzref+1):
+           self.tempRealProf[iz] = self.tempProf[iz] * (self.presProf[iz] / P_init)**(parameter.r/parameter.cp)
 
-        """
-        self.tempRealProf = ones(1,self.nzref)*T_init;
-        for iz=1:self.nzref;
-           obj.tempRealProf(iz)=obj.tempProf(iz)*...
-               (obj.presProf(iz)/P_init)^(parameter.r/parameter.cp);
-        end
-        obj.densityProfC = ones(1,obj.nzref);
-        for iz=1:obj.nzref;
-           obj.densityProfC(iz)=obj.presProf(iz)/parameter.r/obj.tempRealProf(iz);
-        end
-                        obj.densityProfS = obj.densityProfC(1)*ones(1,obj.nzref+1);
-        for iz=2:obj.nzref;
-           obj.densityProfS(iz)=(obj.densityProfC(iz)*obj.dz(iz-1)+...
-               obj.densityProfC(iz-1)*obj.dz(iz))/(obj.dz(iz-1)+obj.dz(iz));
-        end
-        obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
-        obj.windProf = ones(1,obj.nzref);
+        self.densityProfC = [None for x in range(self.nzref+1)]
+        for iz in xrange(self.nzref+1):
+           self.densityProfC[iz] = self.presProf[iz] / parameter.r / self.tempRealProf[iz]
 
-        """
+        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+2)]
+        for iz in xrange(1,self.nzref+1):
+           self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] +\
+               self.densityProfC[iz-1] * self.dz[iz]) / (self.dz[iz-1]+self.dz[iz])
+
+        self.densityProfS[self.nzref+1] = self.densityProfC[self.nzref]
+        self.windProf = [1 for x in range(self.nzref+1)]
+
     def __repr__(self):
         return "RSM: obstacle ht={a}".format(
             a=self.height

@@ -7,7 +7,6 @@ import sys
 import os
 import cPickle
 
-from test import Test
 from building import Building
 from material import Material
 from element import Element
@@ -15,17 +14,12 @@ from BEMDef import BEMDef
 from schdef import SchDef
 from utilities import read_csv, str2fl
 import utilities
-
-#TODO: Need to swap tests
-#TODO: externalize tests in tests/ module
-#TODO: Change import statements using UWG?
-#TODO: create separate function for pickle serialization
-#TODO: creat DOE class with two functions
+import pprint
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
 
-def readDOE():
+def readDOE(serialize_output=True):
     """
     Read csv files of DOE buildings
     Sheet 1 = BuildingSummary
@@ -60,12 +54,7 @@ def readDOE():
             CLIMATE_ZONE_16]
 
     """
-
-
-    #For Testing only
-    test_readDOE = Test("test_readDOE", True) #Make a test object for reading csv files
-    test_treeDOE = Test("test_treeDOE", True) #Make a test object making matrix of Building, Schedule, refBEM objs
-
+    toggle = True
     #Define constants
     # DOE Building Types
     bldType = [
@@ -86,6 +75,12 @@ def readDOE():
         'SuperMarket',              # 15
         'WareHouse']                # 16
 
+    builtEra = [
+        'Pre80',
+        'Pst80',
+        'New'
+        ]
+
     zoneType = [
         '1A (Miami)',
         '2A (Houston)',
@@ -104,23 +99,19 @@ def readDOE():
         '7 (Duluth)',
         '8 (Fairbanks)']
 
-    builtEra = [
-        'Pre80',
-        'Pst80',
-        'New'
-        ]
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
     Schedule = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)   #Schedule (16,3,16) = SchDef;
     refBEM = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refBEM (16,3,16) = BEMDef;
 
-
-
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
     for i in xrange(16):
+        #print '\tType: ', bldType[i]
+        #print '-----i-------'
+        #print i+1
         # Read building summary (Sheet 1)
         file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe1 = read_csv(file_doe_name_bld)
@@ -130,13 +121,6 @@ def readDOE():
         hCeiling    = str2fl(list_doe1[5][3:6])      # [m] Ceiling height
         ver2hor     = str2fl(list_doe1[7][3:6])      # Wall to Skin Ratio
         AreaRoof    = str2fl(list_doe1[8][3:6])      # [m2] Gross Dimensions - Total area
-
-        #Tests for sheet 1
-        test_readDOE.test_in_string(list_doe1[0][1],"Building Summary")
-        test_readDOE.test_equality(len(nFloor),3,toggle=False)
-        test_readDOE.test_equality_tol(len(AreaRoof),3,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(AreaRoof[0],570.0)
-
 
         # Read zone summary (Sheet 2)
         file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
@@ -153,13 +137,15 @@ def readDOE():
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
-
-
-        #Tests sheet 2
-        test_readDOE.test_equality(list_doe2[0][2],"Zone Summary")
-        test_readDOE.test_equality(len(Elec),3,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(Vent[0],5.34)
-
+        if toggle:
+            import decimal
+            #https://stackoverflow.com/questions/31264275/can-i-convert-any-string-to-float-without-losing-precision-in-python
+            print list_doe2[2][20]
+            dec =  decimal.Decimal(list_doe2[2][20])
+            print dec, type(dec)
+            print decimal.Decimal.from_float(float(dec))
+            print decimal.Decimal.from_float(float(list_doe2[2][20]))
+            toggle = False
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
@@ -177,20 +163,6 @@ def readDOE():
         EffHeat     = str2fl([list_doe3[12][4:20],list_doe3[23][4:20],list_doe3[34][4:20]])    # [%] Heating Efficiency
         FanFlow     = str2fl([list_doe3[13][4:20],list_doe3[24][4:20],list_doe3[35][4:20]])    # [m3/s] Fan Max Flow Rate
 
-        #Test sheet 3
-        test_readDOE.test_equality(list_doe3[0][2],"Location Summary")
-        test_readDOE.test_equality(16,len(TypeWall[0]),toggle=False)
-        test_readDOE.test_equality(16,len(TypeWall[1]),toggle=False)
-        test_readDOE.test_equality(16,len(TypeWall[2]),toggle=False)
-        test_readDOE.test_equality(16,len(RvalWall[0]),toggle=False)
-        if i==0: test_readDOE.test_in_string('SteelFrame',TypeWall[0][0])
-        if i==0: test_readDOE.test_equality_tol(RvalWall[0][0],0.77)
-        if i==0: test_readDOE.test_equality_tol(Uwindow[0][0],5.84,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(SHGC[0][11],0.41,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(HEAT[0][0],174.5,toggle=False)
-        if i==0: test_readDOE.test_equality_tol(FanFlow[2][1],5.67,toggle=False)
-
-
         # Read Schedules (Sheet 4)
         file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=DIR_DOE_PATH,y=i+1)
         list_doe4 = read_csv(file_doe_name_schedules)
@@ -204,18 +176,17 @@ def readDOE():
         SchGas      = str2fl([list_doe4[16][6:30],list_doe4[17][6:30],list_doe4[18][6:30]])   # Gas Equipment Schedule 24 hrs; wkday=sat
         SchSWH      = str2fl([list_doe4[19][6:30],list_doe4[20][6:30],list_doe4[21][6:30]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
-        #Test sheet 4
-        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
-        test_readDOE.test_equality(list_doe4[0][2],"Schedule")
-        test_readDOE.test_equality_tol(len(SchEquip[0]),24)
-        if i==0: test_readDOE.test_equality_tol(SchEquip[1][0],0.1)
-        if i==0: test_readDOE.test_equality_tol(SchSWH[2][23],0.2)
-
         #i = 16 types of buildings
         #print "type: ", bldType[i]
         for j in xrange(3):
             #print '\tera: ', builtEra[j]
+            #print '-----j-------'
+            #print j+1
             for k in xrange(16):
+                #print '\tclimate zone: ', zoneType[k]
+                #print '-----k------'
+                #print k+1
+
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight
@@ -233,7 +204,7 @@ def readDOE():
                     297,                                # coolSetpointNight
                     293,                                # heatSetpointDay = 20 C
                     293,                                # heatSetpointNight
-                    (HVAC[j][k]*1000.0)/AreaFloor[j],   # cooling Capacity converted to W/m2 by era, climate type
+                    (HVAC[j][k]*1000.0)/AreaFloor[j],   # coolCap converted to W/m2 by era, climate type
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
@@ -244,12 +215,6 @@ def readDOE():
                 B.Zone = zoneType[k]
                 refDOE[i][j][k] = B
                 #print '\t\t', B
-
-                # Test for treeDOE
-                if i==0 and j==1 and k==15: test_treeDOE.test_equality_tol(B.uValue,2.96,toggle=False)
-                if i==0 and j==2 and k==2: test_treeDOE.test_equality_tol(B.heatEff,0.7846846244,toggle=False)
-                if i==0 and j==0: test_treeDOE.test_equality_tol(B.vent,5.34/1000.0,toggle=False)
-                if i==1 and j==2 and k==15: test_treeDOE.test_equality_tol(refDOE[i][j][k].vent,1.8/1000.0,toggle=False)
 
                 # Define wall, mass(floor), roof
                 # Referece from E+ for conductivity, thickness (reference below)
@@ -371,8 +336,6 @@ def readDOE():
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k]
 
-                if i==1 and j==1 and k==15: test_treeDOE.test_equality_tol(refBEM[i][j][k].building.FanMax,101.52)
-
                 Schedule[i][j][k] = SchDef()
 
                 Schedule[i][j][k].Elec = SchEquip   # 3x24 matrix of schedule for fraction electricity (WD,Sat,Sun)
@@ -390,20 +353,22 @@ def readDOE():
                 Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
                 Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
-    # Serialize refDOE,refBEM,Schedule and store in resources
 
-    # Create a binary file for serialized obj
-    pickle_readDOE = open(os.path.join(DIR_UP_PATH,'resources','readDOE.pkl'), 'wb')
+    # if not test serialize refDOE,refBEM,Schedule and store in resources
+    if serialize_output:
+        # create a binary file for serialized obj
+        pickle_readDOE = open(os.path.join(DIR_UP_PATH,'resources','readDOE.pkl'), 'wb')
 
-    # resources
-    # Pickle objects, protocol 1 b/c binary file
-    cPickle.dump(refDOE, pickle_readDOE,1)
-    cPickle.dump(refBEM, pickle_readDOE,1)
-    cPickle.dump(Schedule, pickle_readDOE,1)
+        # resources
+        # Pickle objects, protocol 1 b/c binary file
+        cPickle.dump(refDOE, pickle_readDOE,1)
+        cPickle.dump(refBEM, pickle_readDOE,1)
+        cPickle.dump(Schedule, pickle_readDOE,1)
 
-    pickle_readDOE.close()
+        pickle_readDOE.close()
 
-    #print test_treeDOE.test_results()
+    else:
+        return refDOE, refBEM, Schedule
 
 if __name__ == "__main__":
     readDOE()

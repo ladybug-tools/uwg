@@ -12,8 +12,8 @@ from UCMDef import UCMDef
 from forcing import Forcing
 from UBLDef import UBLDef
 from RSMDef import RSMDef
+from solarcalcs import SolarCalcs
 
-from solarcalcs import solarcalcs
 from readDOE import readDOE
 from infracalcs import infracalcs
 from urbflux import urbflux

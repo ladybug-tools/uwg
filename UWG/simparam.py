@@ -42,8 +42,8 @@ class SimParam(object):
         H1 = int((self.inobis[self.month - 1] + DAY - 1) * self.timeDay)
         self.timeInitial = H1 + 8                                           # sensor data in epw for intial time based on julian day & timesteps
         self.timeFinal = int(H1 + self.timeDay * self.days - 1 + 8)         # sensor data in epw for final time based on julian day & timesteps
-        self.secDay = 0
-        self.hourDay = 0
+        self.secDay = 0                                                     # current seconds in day
+        self.hourDay = 0                                                    # current hours in day
 
     def __repr__(self):
         return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(

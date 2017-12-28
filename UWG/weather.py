@@ -33,8 +33,7 @@ class Weather(object):
             raise Exception("Failed to read .epw file! {}".format(e.message))
 
         self.location = self.climate_data[0][1]
-        staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
-        self.staTemp = map(lambda s: s+273.15, staTemp)                             # air temperature (K)
+        self.staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
         self.staRhum = str2fl(map(lambda r: r[8], self.climate_data[HI:HF+1]))      # air relative humidity (%)
         self.staPres = str2fl(map(lambda r: r[9], self.climate_data[HI:HF+1]))      # air pressure (Pa)
         self.staInfra = str2fl(map(lambda r: r[12], self.climate_data[HI:HF+1]))    # horizontal Infrared Radiation Intensity (W m-2)
@@ -46,8 +45,9 @@ class Weather(object):
         self.staRobs = str2fl(map(lambda r: r[33], self.climate_data[HI:HF+1]))     # Precipitation (mm h-1)
         self.staHum = [0.0] * len(self.staTemp)                                     # specific humidty (kgH20 kgN202-1)
         for i in xrange(len(self.staTemp)):
-            staHum = self.HumFromRHumTemp(self.staRhum[i],self.staTemp[i], self.staPres[i])
-            self.staHum[i] = staHum
+            self.staHum[i] = self.HumFromRHumTemp(self.staRhum[i], self.staTemp[i], self.staPres[i])
+
+        self.staTemp = map(lambda s: s+273.15, self.staTemp)                             # air temperature (K)
 
     def __repr__(self):
         return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(
@@ -65,6 +65,8 @@ class Weather(object):
         C11 = 4.1764768e-5
         C12 = -1.4452093e-8
         C13 = 6.5459673
+
+        T += 273.15
 
         PWS = exp(C8/T + C9 + C10*T + C11 * pow(T,2) + C12 * pow(T,3) + C13 * log(T))
         PW = RH*PWS/100.0        # Vapour pressure

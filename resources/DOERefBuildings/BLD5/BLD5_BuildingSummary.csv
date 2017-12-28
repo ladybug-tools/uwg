@@ -1,10 +1,10 @@
-1,Building Summary Medium Office pre-1980 construction,,,,
+1.0000000000000000,Building Summary Medium Office pre-1980 construction,,,,
 UWG,,,Value,Value,Value
-areaFloor,,Total Floor Area (m2),"4,982","4,982","4,982"
-nFloor,,Number of Floors,3,3,3
-glazing,,Total,0.33,0.33,0.33
-hCeiling,,Floor to Ceiling Height (m),2.7,2.7,2.7
-areaWall,,Gross Dimensions - Total Area (m2),"1,978","1,978","1,978"
-ver2hor,,Wall to Skin Ratio,0.54,0.54,0.54
-areaRoof,,Gross Dimensions - Total Area (m2),"1,661","1,661","1,661"
-areaWindow,,Total Area (m2),652.8,652.8,652.8
+areaFloor,,Total Floor Area (m2),4982.2000000000000000,4982.2000000000000000,4982.2000000000000000
+nFloor,,Number of Floors,3.0000000000000000,3.0000000000000000,3.0000000000000000
+glazing,,Total,0.3300000000000000,0.3300000000000000,0.3300000000000000
+hCeiling,,Floor to Ceiling Height (m),2.7400000000000000,2.7400000000000000,2.7400000000000000
+areaWall,,Gross Dimensions - Total Area (m2),1977.6700000000000000,1977.6700000000000000,1977.6700000000000000
+ver2hor,,Wall to Skin Ratio,0.5440000000000000,0.5440000000000000,0.5440000000000000
+areaRoof,,Gross Dimensions - Total Area (m2),1661.0000000000000000,1661.0000000000000000,1661.0000000000000000
+areaWindow,,Total Area (m2),652.8400000000000000,652.8400000000000000,652.8400000000000000

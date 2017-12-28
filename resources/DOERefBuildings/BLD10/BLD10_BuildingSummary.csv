@@ -1,10 +1,10 @@
-1,Building Summary Secondary School pre-1980 construction,,,,
+1.0000000000000000,Building Summary Secondary School pre-1980 construction,,,,
 UWG,,,Value,Value,Value
-areaFloor,,Total Floor Area (m2),"19,592","19,592","19,592"
-nFloor,,Number of Floors,2,2,2
-glazing,,Total,0.34,0.34,0.34
-hCeiling,,Floor to Ceiling Height (m),4,4,4
-areaWall,,Gross Dimensions - Total Area (m2),"6,384.00","6,384.00","6,384.00"
-ver2hor,,Wall to Skin Ratio,0.35,0.35,0.35
-areaRoof,,Gross Dimensions - Total Area (m2),"11,902.00","11,902.00","11,902.00"
-areaWindow,,Total Area (m2),"2,089.2","2,089.2","2,089.2"
+areaFloor,,Total Floor Area (m2),19592.0000000000000000,19592.0000000000000000,19592.0000000000000000
+nFloor,,Number of Floors,2.0000000000000000,2.0000000000000000,2.0000000000000000
+glazing,,Total,0.3400000000000000,0.3400000000000000,0.3400000000000000
+hCeiling,,Floor to Ceiling Height (m),4.0000000000000000,4.0000000000000000,4.0000000000000000
+areaWall,,Gross Dimensions - Total Area (m2),6384.0000000000000000,6384.0000000000000000,6384.0000000000000000
+ver2hor,,Wall to Skin Ratio,0.3500000000000000,0.3500000000000000,0.3500000000000000
+areaRoof,,Gross Dimensions - Total Area (m2),11902.0000000000000000,11902.0000000000000000,11902.0000000000000000
+areaWindow,,Total Area (m2),2089.1700000000000000,2089.1700000000000000,2089.1700000000000000

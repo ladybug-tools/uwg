@@ -1,10 +1,10 @@
-1,Building Summary Primary School pre-1980 construction,,,,
+1.0000000000000000,Building Summary Primary School pre-1980 construction,,,,
 UWG,,,Value,Value,Value
-areaFloor,,Total Floor Area (m2),"6,871","6,871","6,871"
-nFloor,,Number of Floors,1,1,1
-glazing,,Total,0.35,0.35,0.35
-hCeiling,,Floor to Ceiling Height (m),4,4,4
-areaWall,,Gross Dimensions - Total Area (m2),"2,512","2,512","2,512"
-ver2hor,,Wall to Skin Ratio,0.27,0.27,0.27
-areaRoof,,Gross Dimensions - Total Area (m2),"6,871","6,871","6,871"
-areaWindow,,Total Area (m2),879.18,879.18,879.18
+areaFloor,,Total Floor Area (m2),6871.0000000000000000,6871.0000000000000000,6871.0000000000000000
+nFloor,,Number of Floors,1.0000000000000000,1.0000000000000000,1.0000000000000000
+glazing,,Total,0.3500000000000000,0.3500000000000000,0.3500000000000000
+hCeiling,,Floor to Ceiling Height (m),4.0000000000000000,4.0000000000000000,4.0000000000000000
+areaWall,,Gross Dimensions - Total Area (m2),2512.0000000000000000,2512.0000000000000000,2512.0000000000000000
+ver2hor,,Wall to Skin Ratio,0.2700000000000000,0.2700000000000000,0.2700000000000000
+areaRoof,,Gross Dimensions - Total Area (m2),6871.0000000000000000,6871.0000000000000000,6871.0000000000000000
+areaWindow,,Total Area (m2),879.1800000000000000,879.1800000000000000,879.1800000000000000
