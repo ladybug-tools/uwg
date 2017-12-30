@@ -177,10 +177,17 @@ def readDOE(serialize_output=True):
                 #print '\tclimate zone: ', zoneType[k]
 
                 if i==13 and j==0 and k==6:
+                    import decimal
                     print 're-export this with sd >= 16'
-                    print AreaFloor[j]
+                    hvac_=decimal.Decimal(list_doe3[9][4:20][6])
+                    area_=decimal.Decimal.from_float(AreaFloor[j])
+                    print hvac_
+                    print area_
+                    onek_=decimal.Decimal(1000.)
+                    print (hvac_*onek_)/area_
+                    print decimal.Decimal.from_float((float(list_doe3[9][4:20][6]))*1000.0/AreaFloor[j])
                     print '--'
-                    
+
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight

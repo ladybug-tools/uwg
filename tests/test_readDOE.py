@@ -43,7 +43,7 @@ class TestReadDOE(object):
 
     # Calculate the tolerance value from pytest by calculating the number of digits before decimal
     # point then subtract from 15 (conservative) estimate for floating pt precision
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if x > 1. or int(x)==1 else 1e-15
+    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if (x > 1. or int(x)==1) else 1e-15
 
     def test_refDOE(self):
         """ Tests for refDOE (Building class)"""
@@ -178,11 +178,11 @@ class TestReadDOE(object):
                         	assert refDOE[bldType][bldEra][climateZone].heatSetpointNight == pytest.approx(matlab_ref_value, abs=tol), \
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                        #elif bldid == 'coolCap':
-                        #    import decimal
-                        #    assert refDOE[bldType][bldEra][climateZone].coolCap == pytest.approx(matlab_ref_value, abs=tol), \
-                        #	(decimal.Decimal.from_float(refDOE[bldType][bldEra][climateZone].coolCap),decimal.Decimal.from_float(matlab_ref_value))
-                        #        #'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+                        elif bldid == 'coolCap':
+                            import decimal
+                            assert refDOE[bldType][bldEra][climateZone].coolCap == pytest.approx(matlab_ref_value, abs=tol), \
+                        	(decimal.Decimal.from_float(refDOE[bldType][bldEra][climateZone].coolCap),decimal.Decimal.from_float(matlab_ref_value))
+                                #'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bldid == 'heatEff':
                         	assert refDOE[bldType][bldEra][climateZone].heatEff == pytest.approx(matlab_ref_value, abs=tol), \
