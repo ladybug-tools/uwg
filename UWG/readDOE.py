@@ -54,7 +54,7 @@ def readDOE(serialize_output=True):
             CLIMATE_ZONE_16]
 
     """
-    toggle = True
+
     #Define constants
     # DOE Building Types
     bldType = [
@@ -137,15 +137,6 @@ def readDOE(serialize_output=True):
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
-        if toggle:
-            import decimal
-            #https://stackoverflow.com/questions/31264275/can-i-convert-any-string-to-float-without-losing-precision-in-python
-            print list_doe2[2][20]
-            dec =  decimal.Decimal(list_doe2[2][20])
-            print dec, type(dec)
-            print decimal.Decimal.from_float(float(dec))
-            print decimal.Decimal.from_float(float(list_doe2[2][20]))
-            toggle = False
 
         # Read location summary (Sheet 3)
         file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
@@ -184,9 +175,12 @@ def readDOE(serialize_output=True):
             #print j+1
             for k in xrange(16):
                 #print '\tclimate zone: ', zoneType[k]
-                #print '-----k------'
-                #print k+1
 
+                if i==13 and j==0 and k==6:
+                    print 're-export this with sd >= 16'
+                    print AreaFloor[j]
+                    print '--'
+                    
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight
@@ -198,7 +192,7 @@ def readDOE(serialize_output=True):
                     glazing[j],                         # glazing ratio by era
                     Uwindow[j][k],                      # uValue by era, by climate type
                     SHGC[j][k],                         # SHGC, by era, by climate type
-                    'AIR',                              # a/c type
+                    'AIR',                              # cooling condensation system type: AIR, WATER
                     COP[j][k],                          # cop by era, climate type
                     297,                                # coolSetpointDay = 24 C
                     297,                                # coolSetpointNight
@@ -208,7 +202,7 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
-                #Not sure why this isn't in the constructor...
+                #Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 B.Type = bldType[i]
                 B.Era = builtEra[j]

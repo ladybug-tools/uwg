@@ -219,6 +219,7 @@ def ucm_properties():
         a = "{}".format(name[:])
         #print "fprintf(fileID, '{}', obj.{});".format(r".16f\n", a)
         print "self.uwg.UCM.{},".format(a)
+
 if __name__ == "__main__":
 
     if fname=="":
