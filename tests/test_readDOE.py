@@ -178,11 +178,9 @@ class TestReadDOE(object):
                         	assert refDOE[bldType][bldEra][climateZone].heatSetpointNight == pytest.approx(matlab_ref_value, abs=tol), \
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                        elif bldid == 'coolCap':
-                            import decimal
-                            assert refDOE[bldType][bldEra][climateZone].coolCap == pytest.approx(matlab_ref_value, abs=tol), \
-                        	(decimal.Decimal.from_float(refDOE[bldType][bldEra][climateZone].coolCap),decimal.Decimal.from_float(matlab_ref_value))
-                                #'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+                        elif bldid == 'coolCap': # lowest tolerance due to matlab value being less accurate
+                            assert refDOE[bldType][bldEra][climateZone].coolCap == pytest.approx(matlab_ref_value, abs=1e-11), \
+                        	   'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bldid == 'heatEff':
                         	assert refDOE[bldType][bldEra][climateZone].heatEff == pytest.approx(matlab_ref_value, abs=tol), \
@@ -200,9 +198,9 @@ class TestReadDOE(object):
                         	assert refDOE[bldType][bldEra][climateZone].indoorHum == pytest.approx(matlab_ref_value, abs=tol), \
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                        #lif bldid == 'heatCap':
-                        #	assert refDOE[bldType][bldEra][climateZone].heatCap == pytest.approx(matlab_ref_value, abs=tol), \
-                        #		 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+                        elif bldid == 'heatCap': # lowest tolerance due to matlab value being less accurate
+                            assert refDOE[bldType][bldEra][climateZone].heatCap == pytest.approx(matlab_ref_value, abs=1e-11), \
+                                'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bldid == 'copAdj':
                         	assert refDOE[bldType][bldEra][climateZone].copAdj == pytest.approx(matlab_ref_value, abs=tol), \
