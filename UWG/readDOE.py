@@ -15,6 +15,7 @@ from schdef import SchDef
 from utilities import read_csv, str2fl
 import utilities
 import pprint
+from decimal import Decimal
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
@@ -76,28 +77,29 @@ def readDOE(serialize_output=True):
         'WareHouse']                # 16
 
     builtEra = [
-        'Pre80',
-        'Pst80',
-        'New'
+        'Pre80',                    # 1
+        'Pst80',                    # 2
+        'New'                       # 3
         ]
 
     zoneType = [
-        '1A (Miami)',
-        '2A (Houston)',
-        '2B (Phoenix)',
-        '3A (Atlanta)',
-        '3B-CA (Los Angeles)',
-        '3B (Las Vegas)',
-        '3C (San Francisco)',
-        '4A (Baltimore)',
-        '4B (Albuquerque)',
-        '4C (Seattle)',
-        '5A (Chicago)',
-        '5B (Boulder)',
-        '6A (Minneapolis)',
-        '6B (Helena)',
-        '7 (Duluth)',
-        '8 (Fairbanks)']
+        '1A (Miami)',               # 1
+        '2A (Houston)',             # 2
+        '2B (Phoenix)',             # 3
+        '3A (Atlanta)',             # 4
+        '3B-CA (Los Angeles)',      # 5
+        '3B (Las Vegas)',           # 6
+        '3C (San Francisco)',       # 7
+        '4A (Baltimore)',           # 8
+        '4B (Albuquerque)',         # 9
+        '4C (Seattle)',             # 10
+        '5A (Chicago)',             # 11
+        '5B (Boulder)',             # 12
+        '6A (Minneapolis)',         # 13
+        '6B (Helena)',              # 14
+        '7 (Duluth)',               # 15
+        '8 (Fairbanks)'             # 16
+        ]
 
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
@@ -175,7 +177,14 @@ def readDOE(serialize_output=True):
             #print j+1
             for k in xrange(16):
                 #print '\tclimate zone: ', zoneType[k]
-
+                """
+                if i==13 and j ==0 and k==6:
+                    dd = lambda x: Decimal.from_float(x)
+                    print dd(HVAC[j][k])
+                    print HVAC[j][k]
+                    print dd(AreaFloor[j])
+                    print dd(HVAC[j][k]*1000.0/AreaFloor[j])
+                """
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight

@@ -163,7 +163,7 @@ class Element(object):
 
         # flx1                      : net heat flux on surface
         # bc                        : boundary condition parameter (1 or 2)
-        # temp2                     : deep soil temperature (ave of air temperature)
+        # temp2                     : deep soil temperature (avg of air temperature)
         # flx2                      : surface flux (sum of absorbed, emitted, etc.)
 
         fimp = 0.5                  # implicit coefficient

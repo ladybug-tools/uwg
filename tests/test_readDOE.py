@@ -311,7 +311,7 @@ class TestReadDOE(object):
                             	assert refBEM[bldType][bldEra][climateZone].wall.layerThermalCond[0] == pytest.approx(matlab_ref_value, abs=tol), \
                             		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                            #TODO elif bemid == 'wall_layerVolHeat':
+                            #elif bemid == 'wall_layerVolHeat':
                             #	assert refBEM[bldType][bldEra][climateZone].wall.layerVolHeat[0] == pytest.approx(matlab_ref_value, abs=tol), \
                             #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
