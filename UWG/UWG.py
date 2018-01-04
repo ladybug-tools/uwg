@@ -584,7 +584,7 @@ class UWG(object):
             #TODO: Code this (from element class)
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             #TODO: Code this (from RSM class)
-            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
 
             # Calculate urban heat fluxes, update UCM & UBL

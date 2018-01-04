@@ -86,16 +86,16 @@ class Element(object):
         return abs(float(num)) < eps
 
     def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
-        pass
-        """
-        % Calculated per unit area (m^2)
-        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
-        obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
 
-        if (obj.horizontal)     % For roof, mass, road
+        # Calculated per unit area (m^2)
+        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density
+        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
 
-            % Evaporation (m s-1), Film water & soil latent heat
-            if obj.waterStorage > 0
+        if (self.horizontal):     # For roof, mass, road
+            pass
+            """
+            # Evaporation (m s-1), Film water & soil latent heat
+            if self.waterStorage > 0.0:
                 qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
                 eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
                 obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
