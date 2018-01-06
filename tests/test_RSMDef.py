@@ -151,7 +151,7 @@ class TestRSMDef(object):
         assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0,abs=1e-15)
 
 
-        self.setup_open_matlab_ref("matlab_ref_element_surfflux.txt")
+        self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
 
         # Matlab Checking for rural road
 
