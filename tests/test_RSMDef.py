@@ -9,16 +9,16 @@ class TestRSMDef(object):
     Naming: Test prefixed test classes (without an __init__ method)
     for test autodetection by pytest
     """
-    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
-    DIR_EPW_PATH = os.path.join(RESOURCE_PATH,"epw")
+    #RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
+    #DIR_EPW_PATH = os.path.join(RESOURCE_PATH,"epw")
 
+
+    """
+    """
+    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
+    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_rsmdef")
     CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if (x > 1. or int(x)==1) else 1e-15
-
-    """
-    """
-    #DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    #DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    #DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_solarcalcs")
 
     def setup_uwg_integration(self):
         """ set up uwg object from initialize.uwg """
@@ -29,15 +29,8 @@ class TestRSMDef(object):
         uwg_param_file_name = "initialize.uwg"
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-        self.uwg.read_epw()
-        self.uwg.read_input()
 
-        # check date
-        assert self.uwg.simTime.month == 2
-        assert self.uwg.simTime.day == 1
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(0.0,abs=1e-15)
-
-    def setup_init(self):
+    def test_rsm_init(self):
         """
         Initialize RSM instance for rural and urban site parameters
 
@@ -55,19 +48,17 @@ class TestRSMDef(object):
 
         RSM = RSMDef(lat,lon,GMT,rural_height,T_init,P_init,geo_param,self.RESOURCE_PATH)
         USM = RSMDef(lat,lon,GMT,urban_height,T_init,P_init,geo_param,self.RESOURCE_PATH)
-        """
 
-        # Make UWG instance
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = self.RESOURCE_PATH
-        uwg_param_file_name = "initialize.uwg"
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
+        """
+        self.setup_uwg_integration()
+
         self.uwg.read_epw()
         self.uwg.read_input()
 
-    def test_rsm_init(self):
-        self.setup_init()
+        # check date
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 1
+        assert self.uwg.simTime.secDay/3600. == pytest.approx(0.0,abs=1e-15)
 
         # Test z_meso list lenght
         assert len(self.uwg.RSM.z_meso) == pytest.approx(56., abs=1e-6)
@@ -86,11 +77,6 @@ class TestRSMDef(object):
         assert self.uwg.RSM.tempProf[16] == pytest.approx(297.8500, abs=1e-6)
 
         # Test the presProfile with values from UWG_Matlab to 15 digits of precision
-        # Note: 64 bits = 53 bits (significand) + 8 bits (characteristic)
-        # Therefore max fraction size for 53 bits in base 2 is (2^-53 = 1.11e-16)
-        # So for numbers > 0. we have to subtract the 16 significant digits (significand)
-        # from the integer part when testing the numbers
-
         matlab_presProf = [1.009000000000000,1.008490604570617,1.007930481749694,
         1.007314603288614,1.006637447436641,1.005892951541777,1.005074460319214,
         1.004174669438980,1.003185564067109,1.002098351979773,1.000903390854001,
@@ -119,13 +105,13 @@ class TestRSMDef(object):
         1.167716422060640,1.166034753626033,1.165110236615915]
 
         for i in xrange(len(matlab_densityProfS)):
-            tol = self.CALCULATE_TOLERANCE(matlab_presProf[i]*1e5)
+            tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5)
             assert self.uwg.RSM.densityProfS[i] == pytest.approx(matlab_densityProfS[i], abs=tol)
 
         assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref+1, abs=1e-15)
         assert len(self.uwg.RSM.densityProfS) == pytest.approx(self.uwg.RSM.nzref+2, abs=1e-15)
 
-    def _rsm_vdm(self):
+    def test_rsm_vdm(self):
         """ test element SurfFlux against matlab references
 
         TODO: Description of method
@@ -144,6 +130,27 @@ class TestRSMDef(object):
         #TODO: write manual tests to aid understanding
 
         self.setup_uwg_integration()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        # We subtract 15 days and 13 hours from total timestep so
+        # we can stop simulation while we still have sun!
+        # New time: Jan 16, 1230
+        # simTime.nt = simTimeTotalSec/dt - (dt*12*24*15 + dt*12*12), where dt = 300s (5min)
+        self.uwg.simTime.nt -= (12*24*15 + 13*12)
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
+
+        #print 'mth', self.uwg.simTime.month
+        #print 'day', self.uwg.simTime.day
+        #print 'sec', self.uwg.simTime.secDay/3600.
+
+        # check date
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 16
+        assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0,abs=1e-15)
+
+
         self.setup_open_matlab_ref("matlab_ref_element_surfflux.txt")
 
         # Matlab Checking for rural road
