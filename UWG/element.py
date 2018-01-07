@@ -1,3 +1,4 @@
+import math
 
 class Element(object):
     """
@@ -92,17 +93,16 @@ class Element(object):
         self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
 
         if (self.horizontal):     # For roof, mass, road
-            pass
-            """
             # Evaporation (m s-1), Film water & soil latent heat
-            if self.waterStorage > 0.0:
-                qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
-                eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
-                obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
-                obj.waterStorage = max(obj.waterStorage,0);
-            else
-                eg = 0;
-            end
+
+            if self.waterStorage > 0.:
+                qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)
+                eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
+                self.waterStorage = min(self.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax)
+                self.waterStorage = max(self.waterStorage,0.)
+            else:
+                eg = 0.
+            """
             soilLat = eg*parameter.waterDens*parameter.lv;
 
             % Winter, no veg
@@ -223,27 +223,31 @@ class Element(object):
         #t[:] = zx[:]
         #print '----fin----'
 
-"""
 
-function qsat = qsat(temp,pres,parameter)
 
-    gamw = (parameter.cl - parameter.cpv) / parameter.rv;
-    betaw = (parameter.lvtt/parameter.rv) + (gamw * parameter.tt);
-    alpw = log(parameter.estt) + (betaw /parameter.tt) + (gamw *log(parameter.tt));
-    work2 = parameter.r/parameter.rv;
-    foes = zeros(size(temp));
-    work1= zeros(size(temp));
-    qsat = zeros(size(temp));
-    for i=1:size(temp)
-      % saturation vapor pressure
-      foes(i) = exp( alpw - betaw/temp(i) - gamw*log(temp(i))  );
-      work1(i)    = foes(i)/pres(i);
-      % saturation humidity
-      qsat(i) = work2*work1(i) / (1.+(work2-1.)*work1(i));
-    end
+    def qsat(self,temp,pres,parameter):
+        """
+        Calculate (qsat_lst) vector of saturation humidity from:
+            temp = vector of element layer temperatures
+            pres = pressure (at current timestep).
+        """
+        gamw = (parameter.cl - parameter.cpv) / parameter.rv
+        betaw = (parameter.lvtt/parameter.rv) + (gamw * parameter.tt)
+        alpw = math.log(parameter.estt) + (betaw /parameter.tt) + (gamw * math.log(parameter.tt))
+        work2 = parameter.r/parameter.rv
+        foes_lst = [0 for i in xrange(len(temp))]
+        work1_lst = [0 for i in xrange(len(temp))]
+        qsat_lst = [0 for i in xrange(len(temp))]
 
-end
-"""
+        for i in xrange(len(temp)):
+          # saturation vapor pressure
+          foes_lst[i] = math.exp( alpw - betaw/temp[i] - gamw*math.log(temp[i])  )
+          work1_lst[i] = foes_lst[i]/pres[i]
+          # saturation humidity
+          qsat_lst[i] = work2*work1_lst[i] / (1. + (work2-1.) * work1_lst[i])
+
+        return qsat_lst
+
 
 def invert(nz,a,c):
     """

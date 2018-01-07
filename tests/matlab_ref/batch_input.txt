@@ -6,6 +6,6 @@ self.uwg.rural.sens            # surface sensible heat flux (W m-2)
 self.uwg.rural.flux             # external surface heat flux (W m-2)"
 
 prefix2delete=self.uwg.rural.
-prefix2add=RSM
-objectref=rsmdef
+prefix2add=rural
+objectref=element
 methodref=surfflux

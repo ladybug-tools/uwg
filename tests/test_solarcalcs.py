@@ -59,9 +59,6 @@ class TestSolarCalcs(object):
         # Run simulation
         solar.solarangles()
 
-        # open matlab ref file
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarangles.txt")
-
         uwg_python_val = [
         solar.simTime.month,
         solar.simTime.secDay,
@@ -75,6 +72,9 @@ class TestSolarCalcs(object):
         solar.tanzen,
         solar.critOrient
         ]
+
+        # open matlab ref file
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarangles.txt")
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)

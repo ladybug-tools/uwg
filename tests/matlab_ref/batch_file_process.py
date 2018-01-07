@@ -46,8 +46,7 @@ def batch_file_process():
     print "format long;"
     for i in xrange(len(L)):
         L[i] = L[i].split(prefix2delete)[-1] if prefix2delete!="" else L[i]
-        print "fprintf(fileID, '{value}', {prefix}.{value});".format(r".16f\n", value=L[i],prefix=prefix2add)
-    print ""
+        print 'fprintf(fileID, "{value}", {prefix}.{valuename});'.format(value=r"%.16f\n", valuename=L[i], prefix=prefix2add)
     print "fclose(fileID);"
 
 

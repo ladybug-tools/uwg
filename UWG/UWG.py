@@ -517,7 +517,7 @@ class UWG(object):
             self.forc.prec = self.forcIP.prec[self.ceil_time_step]          # Precipitation (mm h-1)
             self.forc.dif = self.forcIP.dif[self.ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
             self.forc.dir = self.forcIP.dir[self.ceil_time_step]            # normal solar direct radiation (W m-2)
-            self.UCM.canHum = self.forc.hum                            # Canyon humidity (absolute) same as rural
+            self.UCM.canHum = self.forc.hum                                 # Canyon humidity (absolute) same as rural
 
             # Update solar flux
             self.solar = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
@@ -579,12 +579,17 @@ class UWG(object):
                 self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
-            # Update rural heat fluxes & update vertical diffusion model (VDM)
-            self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
-            #TODO: Code this (from element class)
-            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
-            #TODO: Code this (from RSM class)
-            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            if it == (self.simTime.nt - (12*24*15 + 12*13)):
+                #print self.simTime.month
+                #print self.simTime.day
+                #print self.simTime.secDay
+                #print '---'
+                # Update rural heat fluxes & update vertical diffusion model (VDM)
+                self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+                #TODO: Code this (from element class)
+                self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
+                #TODO: Code this (from RSM class)
+                #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
 
             # Calculate urban heat fluxes, update UCM & UBL
