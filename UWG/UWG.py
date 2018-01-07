@@ -66,14 +66,14 @@ class UWG(object):
     soil = Material(soilTcond, soilvolHeat)  # Soil material used for soil-depth padding
 
     # Physical constants
-    g = 9.81               # gravity
-    cp = 1004.             # heat capacity for air (J/kg.K)
-    vk = 0.40              # von karman constant
-    r = 287.               # gas constant
-    rv = 461.5             #
-    lv = 2.26e6            # latent heat of evaporation
-    sigma = 5.67e-08       # Stefan Boltzmann constant
-    waterDens = 1000.      # water density (kg/m^3)
+    g = 9.81               # gravity (m s-2)
+    cp = 1004.             # heat capacity for air (J/kg K)
+    vk = 0.40              # von karman constant (dimensionless)
+    r = 287.               # gas constant dry air (J/kg K)
+    rv = 461.5             # gas constant water vapor (J/kg K)
+    lv = 2.26e6            # latent heat of evaporation (J/kg)
+    sigma = 5.67e-08       # Stefan Boltzmann constant (W m-2 K-4)
+    waterDens = 1000.      # water density (kg m-3)
     lvtt = 2.5008e6        #
     tt = 273.16            #
     estt = 611.14          #
@@ -584,7 +584,7 @@ class UWG(object):
             #TODO: Code this (from element class)
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             #TODO: Code this (from RSM class)
-            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
 
             # Calculate urban heat fluxes, update UCM & UBL
