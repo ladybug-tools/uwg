@@ -47,19 +47,20 @@ class TestElement(object):
         # we can stop simulation while we still have sun!
         # New time: Jan 16, 1300
         self.uwg.simTime.nt -= (12*24*15 + 12*13)
-
-        # check date
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 16
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0833333333,abs=1e-15)
-
+        self.uwg.simTime.nt += 1
         # turn rural road waterStorage to 1.
-        self.uwg.rural.waterStorage = 0.005 # .5cm thick film
+        self.uwg.rural.waterStorage = 0.005 # .5cm thick film (from wgmax constant)
 
         # run simulation
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 
+        # check date
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 16
+        assert self.uwg.simTime.secDay == pytest.approx(39900.,abs=1e-15)
+
+        # Check waterStorage
         assert 0.005 == pytest.approx(self.uwg.rural.waterStorage, 1e-15)
 
 
