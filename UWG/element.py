@@ -87,6 +87,10 @@ class Element(object):
         return abs(float(num)) < eps
 
     def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
+        """ Calculate net heat flux, and update element layer temperatures
+
+
+        """
 
         # Calculated per unit area (m^2)
         dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density (kgd m-3)
@@ -94,8 +98,6 @@ class Element(object):
 
         if (self.horizontal):     # For roof, mass, road
             # Evaporation (m s-1), Film water & soil latent heat
-
-            #TODO: this is never implemented b/c waterStorage is hardcoded to 0.
             if self.waterStorage > 0.:
                 qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)
                 eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
@@ -119,17 +121,17 @@ class Element(object):
 
             # Sensible & net heat flux
             self.sens = vegSens + self.aeroCond*(self.layerTemp[0]-tempRef)
-            self.flux = -self.sens + self.solAbs + self.infra - self.lat
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
 
-        else:     # Vertical surface (wall)
+        else:               # For vertical surfaces (wall)
             self.solAbs = (1.-self.albedo)*self.solRec
             self.lat = 0.
 
             # Sensible & net heat flux
             self.sens = self.aeroCond*(self.layerTemp[0]-tempRef)
-            self.flux = -self.sens + self.solAbs + self.infra - self.lat
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
 
-        #self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
+        self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
         #self.T_ext = self.layerTemp[0]
         #self.T_int = self.layerTemp[-1]
 
@@ -214,12 +216,10 @@ class Element(object):
             raise Exception(self.CONDUCTION_INPUT_MSG)
 
         #--------------------------------------------------------------------------
-        # zx=tridiag_ground(za,zb,zc,zy);
         zx = invert(num,za,zy)
-        #t[:] = zx[:]
-        #print '----fin----'
+        #t(:) = zx(:);
 
-
+        return zx[:] # return copy of templayers
 
     def qsat(self,temp,pres,parameter):
         """
@@ -247,21 +247,24 @@ class Element(object):
 
 def invert(nz,a,c):
     """
-    %--------------------------------------------------------------------------
-    % Inversion and resolution of a tridiagonal matrix
-    %          A X = C
-    % Input:
-    %  a(*,1) lower diagonal (Ai,i-1)
-    %  a(*,2) principal diagonal (Ai,i)
-    %  a(*,3) upper diagonal (Ai,i+1)
-    %  c
-    % Output
-    %  x     results
-    %--------------------------------------------------------------------------
+    Inversion and resolution of a tridiagonal matrix
+             A X = C
+    Input:
+     a(*,1) lower diagonal (Ai,i-1)
+     a(*,2) principal diagonal (Ai,i)
+     a(*,3) upper diagonal (Ai,i+1)
+     c
+    Output
+     x     results
+    """
 
-    x = zeros(nz,1);
+    x = [0 for i in xrange(nz)]
 
-    for in=nz-1:-1:1
+    #for in=nz-1:-1:1
+
+    for i in xrange(nz):
+        print i
+    """
         c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
         a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);
     end
@@ -272,6 +275,5 @@ def invert(nz,a,c):
 
     for in=1:nz
         x(in)=c(in)/a(in,2);
-    end
     """
-    return None#x
+    return x
