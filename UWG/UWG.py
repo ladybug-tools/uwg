@@ -402,11 +402,11 @@ class UWG(object):
         for i in xrange(self.nSoil):
             # if soil depth is greater then the thickness of the road
             # we add new slices of soil at max thickness until road is greater or equal
-            if self.depth_soil[i][0] >= sum(newthickness):
-                #to avoid floating point precision problems compare equality
-                is_greater = self.depth_soil[i][0] > sum(newthickness)
-                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
-                while(not is_equal and is_greater):
+
+            is_soildepth_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-15)
+
+            if is_soildepth_equal or self.depth_soil[i][0] > sum(newthickness):
+                while self.depth_soil[i][0] > sum(newthickness):
                     newthickness.append(self.maxThickness)
                     roadMat.append(self.soil)
                 self.soilindex1 = i
@@ -417,22 +417,23 @@ class UWG(object):
 
         # Define Rural Element
         ruralMat, newthickness = procMat(self.rural,self.maxThickness,self.minThickness)
+
         for i in xrange(self.nSoil):
             # if soil depth is greater then the thickness of the road
             # we add new slices of soil at max thickness until road is greater or equal
-            if self.depth_soil[i][0] >= sum(newthickness):
-                #to avoid floating point precision problems compare equality
-                is_greater = self.depth_soil[i][0] > sum(newthickness)
-                is_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-10)
-                while(not is_equal and is_greater):
+
+            is_soildepth_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-15)
+
+            if is_soildepth_equal or self.depth_soil[i][0] > sum(newthickness):
+                while self.depth_soil[i][0] > sum(newthickness):
                     newthickness.append(self.maxThickness)
                     ruralMat.append(self.soil)
+
                 self.soilindex2 = i
                 break
 
         self.rural = Element(self.rural.albedo, self.rural.emissivity, newthickness,\
             ruralMat,self.rural.vegCoverage,self.rural.layerTemp[0],self.rural.horizontal, self.rural._name)
-
 
     def hvac_autosize(self):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
