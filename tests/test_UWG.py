@@ -97,11 +97,11 @@ class TestUWG(object):
 
         #self.road
         # Check the road layer splitting
-        assert len(self.uwg.road.layerThickness) == pytest.approx(10., abs=1e-6)
-        assert self.uwg.road.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
+        assert len(self.uwg.road.layerThickness) == pytest.approx(11., abs=1e-15)
+        assert self.uwg.road.layerThickness[0] == pytest.approx(0.05, abs=1e-15)
 
         # Check the road layer splitting for rural
-        assert len(self.uwg.rural.layerThickness) == pytest.approx(10., abs=1e-6)
+        assert len(self.uwg.rural.layerThickness) == pytest.approx(11., abs=1e-15)
         assert self.uwg.rural.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
 
     def test_procMat(self):
