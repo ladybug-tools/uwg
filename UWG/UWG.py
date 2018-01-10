@@ -405,7 +405,7 @@ class UWG(object):
 
             is_soildepth_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-15)
 
-            if is_soildepth_equal or self.depth_soil[i][0] > sum(newthickness):
+            if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
                     newthickness.append(self.maxThickness)
                     roadMat.append(self.soil)
@@ -424,7 +424,7 @@ class UWG(object):
 
             is_soildepth_equal = self.is_near_zero(self.depth_soil[i][0] - sum(newthickness),1e-15)
 
-            if is_soildepth_equal or self.depth_soil[i][0] > sum(newthickness):
+            if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
                     newthickness.append(self.maxThickness)
                     ruralMat.append(self.soil)
