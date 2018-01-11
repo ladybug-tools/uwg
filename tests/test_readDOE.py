@@ -311,9 +311,9 @@ class TestReadDOE(object):
                             	assert refBEM[bldType][bldEra][climateZone].wall.layerThermalCond[0] == pytest.approx(matlab_ref_value, abs=tol), \
                             		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                            #elif bemid == 'wall_layerVolHeat':
-                            #	assert refBEM[bldType][bldEra][climateZone].wall.layerVolHeat[0] == pytest.approx(matlab_ref_value, abs=tol), \
-                            #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
+                            elif bemid == 'wall_layerVolHeat':
+                            	assert refBEM[bldType][bldEra][climateZone].wall.layerVolHeat[0] == pytest.approx(matlab_ref_value, abs=tol), \
+                            		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                             elif bemid == 'wall_vegCoverage':
                             	assert refBEM[bldType][bldEra][climateZone].wall.vegCoverage == pytest.approx(matlab_ref_value, abs=tol), \
@@ -458,10 +458,12 @@ class TestReadDOE(object):
                             assert flatten_sch == pytest.approx(matlab_ref_value, abs=tol), \
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
+                        # TODO: revise
                         #elif schid == 'Qelec':
                         #    assert Schedule[bldType][bldEra][climateZone].Qelec == pytest.approx(matlab_ref_value, abs=tol), \
                         #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
+                        # TODO: revise
                         #elif schid == 'Qlight':
                         #    assert Schedule[bldType][bldEra][climateZone].Qlight == pytest.approx(matlab_ref_value, abs=tol), \
                         #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
@@ -470,6 +472,7 @@ class TestReadDOE(object):
                         	assert Schedule[bldType][bldEra][climateZone].Nocc == pytest.approx(matlab_ref_value, abs=tol), \
                         		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
+                        # TODO: revise
                         #elif schid == 'Qgas':
                         #	assert Schedule[bldType][bldEra][climateZone].Qgas == pytest.approx(matlab_ref_value, abs=tol), \
                         #		'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
