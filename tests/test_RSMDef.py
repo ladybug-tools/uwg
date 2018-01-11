@@ -30,6 +30,18 @@ class TestRSMDef(object):
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
 
+    def setup_open_matlab_ref(self,matlab_ref_file_path):
+        """ open the matlab reference file """
+
+        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
+        print matlab_path
+        if not os.path.exists(matlab_path):
+            raise Exception("Failed to open {}!".format(matlab_path))
+        matlab_file = open(matlab_path,'r')
+        uwg_matlab_val_ = [float(x) for x in matlab_file.readlines()]
+        matlab_file.close()
+        return uwg_matlab_val_
+
     def test_rsm_init(self):
         """
         Initialize RSM instance for rural and urban site parameters
@@ -151,7 +163,7 @@ class TestRSMDef(object):
         assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0,abs=1e-15)
 
 
-        self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
+        #self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
 
         # Matlab Checking for RSM.VDM
         """
