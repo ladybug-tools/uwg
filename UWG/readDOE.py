@@ -222,7 +222,7 @@ def readDOE(serialize_output=True):
                 Insulation = Material (0.049, 836.8 * 265.0, "Insulation")
                 Gypsum = Material (0.16, 830.0 * 784.9, "Gypsum")
                 Wood = Material (0.11, 1210.0 * 544.62, "Wood")
-                Stucco = Material(0.6918,  837.0 * 1859.0, "Stucco")
+                Stucco = Material(0.6918,  837.0 * 1858.0, "Stucco")
 
                 # Wall (1 in stucco, concrete, insulation, gypsum)
                 # Check TypWall by era, by climate
