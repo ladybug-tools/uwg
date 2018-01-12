@@ -260,8 +260,8 @@ def invert(nz,a,c):
 
     #for in=nz-1:-1:1
 
-    for i in xrange(nz):
-        print i
+    #for i in xrange(nz):
+    #    print i
     """
         c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
         a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);

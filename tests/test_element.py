@@ -25,7 +25,6 @@ class TestElement(object):
         """ open the matlab reference file """
 
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        print matlab_path
         if not os.path.exists(matlab_path):
             raise Exception("Failed to open {}!".format(matlab_path))
         matlab_file = open(matlab_path,'r')
@@ -107,30 +106,26 @@ class TestElement(object):
 
         self.uwg.read_epw()
         self.uwg.read_input()
-        self.uwg.set_input()
-        self.uwg.hvac_autosize()
 
-        # Change vegStart so that vegetation cover can be included in heat calculation
-        self.uwg.geoParam.vegStart = 2
-        """
-        # Reset simulation time so we can capture sun and vegetation covered
-        # February 15th, 13:00
-        startmonth = 1
-        startday = 1
-        days = 31 + 15 # February 15th
-        self.uwg.simTime = UWG.SimParam(self.uwg.simTime.dt,self.uwg.simTime.timeForcing,startmonth,startday,days)
+        # Change time and vegCoverage parameters so we can get
+        # effect of vegetation on surface heat flux
+        self.uwg.vegStart = 2   # February
+        self.uwg.nDay = 31 + 15 # February, 15
+
+        # run simulation
+        self.uwg.set_input()
+
         # We subtract 11 hours from total timestep so still have sun. New time: 1300
         self.uwg.simTime.nt -= 12*11
 
-        # check date
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
+
+        # check date is February 15th, 13:00
         assert self.uwg.simTime.month == 2
         assert self.uwg.simTime.day == 15
         assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
-
-        # run simulation
-        self.uwg.uwg_main()
-
-
+        print self.uwg.simTime.secDay
         uwg_python_val = [
         self.uwg.rural.aeroCond,        # Convection coef (refL UWG, eq.12)
         self.uwg.rural.waterStorage,    # thickness of water film (m) (only for horizontal surfaces)
@@ -139,7 +134,7 @@ class TestElement(object):
         self.uwg.rural.sens,            # surface sensible heat flux (W m-2)
         self.uwg.rural.flux             # external surface heat flux (W m-2)
         ]
-
+        
         # Matlab Checking for rural road
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_element_surfflux.txt")
 
@@ -147,10 +142,10 @@ class TestElement(object):
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            print uwg_python_val[i], uwg_matlab_val[i]
+            pass#print uwg_python_val[i], uwg_matlab_val[i]
             #tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i])
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-        """
+
 
 if __name__ == "__main__":
     te = TestElement()

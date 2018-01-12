@@ -217,13 +217,15 @@ class UWG(object):
                 self._init_param_dict[row[0]] = float(row[1])
 
         ipd = self._init_param_dict
+        
         # Define Simulation and Weather parameters
         self.Month = ipd['Month']                # starting month (1-12)
         self.Day = ipd['Day']                    # starting day (1-31)
         self.nDay = ipd['nDay']                  # number of days
         self.dtSim = ipd['dtSim']                # simulation time step (s)
-
         self.dtWeather = ipd['dtWeather']        # seconds (s)
+
+        # HVAC system and internal laod
         self.autosize = ipd['autosize']          # autosize HVAC (1 or 0) #TODO this isn't implemented
         self.sensOcc = ipd['sensOcc']            # Sensible heat from occupant
         self.LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
