@@ -66,6 +66,7 @@ class TestRSMDef(object):
 
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # check date
         assert self.uwg.simTime.month == 1
@@ -144,6 +145,7 @@ class TestRSMDef(object):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # We subtract 15 days and 13 hours from total timestep so
         # we can stop simulation while we still have sun!

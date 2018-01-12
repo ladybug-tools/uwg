@@ -26,6 +26,7 @@ class TestUCMDef(object):
         self.setup_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
 
         # open matlab ref file

@@ -30,6 +30,7 @@ class TestSimParam(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # Open matlab ref file
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_simparam_init.txt")
@@ -83,6 +84,7 @@ class TestSimParam(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 

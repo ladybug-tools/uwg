@@ -88,8 +88,6 @@ class Element(object):
 
     def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
         """ Calculate net heat flux, and update element layer temperatures
-
-
         """
 
         # Calculated per unit area (m^2)

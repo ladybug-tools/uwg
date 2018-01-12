@@ -48,6 +48,7 @@ class TestUWG(object):
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         #test uwg param dictionary first and last
         assert self.uwg._init_param_dict.has_key('bldHeight') == True
@@ -113,6 +114,7 @@ class TestUWG(object):
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         #test a 0.5m road split into 10 slices of 0.05m
         # base case; min=0.01, max=0.05, stays the same
@@ -172,6 +174,7 @@ class TestUWG(object):
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
         self.uwg.hvac_autosize()
 
         assert self.uwg.BEM[0].building.coolCap == pytest.approx(9999., abs=1e-6)
@@ -185,6 +188,7 @@ class TestUWG(object):
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 

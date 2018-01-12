@@ -42,6 +42,7 @@ class TestElement(object):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # We subtract 11 hours from total timestep so
         # we can stop simulation while we still have sun!
@@ -103,21 +104,32 @@ class TestElement(object):
         #TODO: write manual tests to aid understanding
 
         self.setup_uwg_integration()
+
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
+        self.uwg.hvac_autosize()
 
-        # We subtract 11 hours from total timestep so
-        # we can stop simulation while we still have sun!
-        # New time: Jan 31, 1300
+        # Change vegStart so that vegetation cover can be included in heat calculation
+        self.uwg.geoParam.vegStart = 2
+        """
+        # Reset simulation time so we can capture sun and vegetation covered
+        # February 15th, 13:00
+        startmonth = 1
+        startday = 1
+        days = 31 + 15 # February 15th
+        self.uwg.simTime = UWG.SimParam(self.uwg.simTime.dt,self.uwg.simTime.timeForcing,startmonth,startday,days)
+        # We subtract 11 hours from total timestep so still have sun. New time: 1300
         self.uwg.simTime.nt -= 12*11
 
-        self.uwg.hvac_autosize()
+        # check date
+        assert self.uwg.simTime.month == 2
+        assert self.uwg.simTime.day == 15
+        assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
+
+        # run simulation
         self.uwg.uwg_main()
 
-        # check date
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 31
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
 
         uwg_python_val = [
         self.uwg.rural.aeroCond,        # Convection coef (refL UWG, eq.12)
@@ -138,7 +150,7 @@ class TestElement(object):
             print uwg_python_val[i], uwg_matlab_val[i]
             #tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i])
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-
+        """
 
 if __name__ == "__main__":
     te = TestElement()
