@@ -46,9 +46,10 @@ class SimParam(object):
         self.hourDay = 0                                                    # current hours in day
 
     def __repr__(self):
-        return "SimParam: start={a}/{b}, num time steps={c},for days={d}.".format(
+        return "SimParam: m/d/s= {a}/{b}/{e}\nnumtimesteps={c},fordays={d}\n----".format(
             a=self.month,
-            b=self.day,
+            b=int(self.day),
+            e=int(self.secDay),
             c=self.timeSim,
             d=self.days
             )
