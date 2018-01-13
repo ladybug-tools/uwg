@@ -130,8 +130,8 @@ class Element(object):
             self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
 
         self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
-        #self.T_ext = self.layerTemp[0]
-        #self.T_int = self.layerTemp[-1]
+        self.T_ext = self.layerTemp[0]
+        self.T_int = self.layerTemp[-1]
 
     def Conduction(self, dt, flx1, bc, temp2, flx2):
         """
@@ -243,11 +243,12 @@ class Element(object):
         return qsat_lst
 
 
-def invert(nz,a,c):
+def invert(nz,A,C):
     """
     Inversion and resolution of a tridiagonal matrix
              A X = C
     Input:
+     nz number of layers
      a(*,1) lower diagonal (Ai,i-1)
      a(*,2) principal diagonal (Ai,i)
      a(*,3) upper diagonal (Ai,i+1)
@@ -256,22 +257,16 @@ def invert(nz,a,c):
      x     results
     """
 
-    x = [0 for i in xrange(nz)]
+    X = [i for i in xrange(nz)]
 
-    #for in=nz-1:-1:1
+    for i in xrange(nz-1):
+        C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
+        A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
 
-    #for i in xrange(nz):
-    #    print i
-    """
-        c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
-        a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);
-    end
+    for i in  xrange(1,nz,1):
+        C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
 
-    for in=2:nz
-        c(in)=c(in)-a(in,1)*c(in-1)/a(in-1,2);
-    end
+    for i in xrange(nz):
+        X[i] = C[i]/A[i][1]
 
-    for in=1:nz
-        x(in)=c(in)/a(in,2);
-    """
-    return x
+    return X
