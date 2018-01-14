@@ -218,7 +218,7 @@ class Element(object):
         #--------------------------------------------------------------------------
         zx = self.invert(num,za,zy)
         #t(:) = zx(:);
-        return zx[:] # return copy of templayers
+        return zx # return zx as 1d vector of templayers
 
     def qsat(self,temp,pres,parameter):
         """
