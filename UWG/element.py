@@ -1,3 +1,6 @@
+import math
+import pprint
+pp = lambda x: pprint.pprint(x)
 
 class Element(object):
     """
@@ -85,57 +88,52 @@ class Element(object):
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
-    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
-        pass
+    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux,it):
+        """ Calculate net heat flux, and update element layer temperatures
         """
-        % Calculated per unit area (m^2)
-        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)); % air density
-        obj.aeroCond = 5.8+3.7*windRef;         % Convection coef (ref: UWG, eq. 12))
 
-        if (obj.horizontal)     % For roof, mass, road
+        # Calculated per unit area (m^2)
+        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density (kgd m-3)
+        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
 
-            % Evaporation (m s-1), Film water & soil latent heat
-            if obj.waterStorage > 0
-                qtsat = qsat(obj.layerTemp(1),forc.pres,parameter);
-                eg = obj.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp;
-                obj.waterStorage = min(obj.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax);
-                obj.waterStorage = max(obj.waterStorage,0);
-            else
-                eg = 0;
-            end
-            soilLat = eg*parameter.waterDens*parameter.lv;
+        if (self.horizontal):     # For roof, mass, road
+            # Evaporation (m s-1), Film water & soil latent heat
+            if self.waterStorage > 0.:
+                qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)[0]
+                eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
+                self.waterStorage = min(self.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax)
+                self.waterStorage = max(self.waterStorage,0.) # (m)
+            else:
+                eg = 0.
+            soilLat = eg*parameter.waterDens*parameter.lv
 
-            % Winter, no veg
-            if simTime.month < parameter.vegStart && simTime.month > parameter.vegEnd
-                obj.solAbs = (1-obj.albedo)*obj.solRec;
-                vegLat = 0;
-                vegSens = 0;
-            else    % Summer, veg
-                obj.solAbs = ((1-obj.vegCoverage)*(1-obj.albedo)+...
-                    obj.vegCoverage*(1-parameter.vegAlbedo))*obj.solRec;
-                vegLat = obj.vegCoverage*parameter.grassFLat*(1-parameter.vegAlbedo)*obj.solRec;
-                vegSens = obj.vegCoverage*(1.-parameter.grassFLat)*(1-parameter.vegAlbedo)*obj.solRec;
-            end
-            obj.lat = soilLat + vegLat;
+            # Winter, no veg
+            if simTime.month < parameter.vegStart and simTime.month > parameter.vegEnd:
+                self.solAbs = (1.-self.albedo)*self.solRec # (W m-2)
+                vegLat = 0.
+                vegSens = 0.
+            else:    # Summer, veg
+                self.solAbs = ((1.-self.vegCoverage)*(1.-self.albedo)+self.vegCoverage*(1.-parameter.vegAlbedo))*self.solRec
+                vegLat = self.vegCoverage*parameter.grassFLat*(1.-parameter.vegAlbedo)*self.solRec
+                vegSens = self.vegCoverage*(1.-parameter.grassFLat)*(1.-parameter.vegAlbedo)*self.solRec
 
-            % Sensible & net heat flux
-            obj.sens = vegSens + obj.aeroCond*(obj.layerTemp(1)-tempRef);
-            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
+            self.lat = soilLat + vegLat
 
-        else     % Vertical surface (wall)
-            obj.solAbs = (1-obj.albedo)*obj.solRec;
-            obj.lat = 0;
+            # Sensible & net heat flux
+            self.sens = vegSens + self.aeroCond*(self.layerTemp[0]-tempRef)
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
 
-            % Sensible & net heat flux
-            obj.sens = obj.aeroCond*(obj.layerTemp(1)-tempRef);
-            obj.flux = - obj.sens+obj.solAbs+obj.infra-obj.lat;
-        end
+        else:               # For vertical surfaces (wall)
+            self.solAbs = (1.-self.albedo)*self.solRec
+            self.lat = 0.
 
-        obj.layerTemp = Conduction(obj,simTime.dt,obj.flux,boundCond,forc.deepTemp,intFlux);
-        obj.T_ext = obj.layerTemp(1);
-        obj.T_int = obj.layerTemp(end);
-    end
-    """
+            # Sensible & net heat flux
+            self.sens = self.aeroCond*(self.layerTemp[0]-tempRef)
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
+
+        self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
+        self.T_ext = self.layerTemp[0]
+        self.T_int = self.layerTemp[-1]
 
     def Conduction(self, dt, flx1, bc, temp2, flx2):
         """
@@ -163,7 +161,7 @@ class Element(object):
 
         # flx1                      : net heat flux on surface
         # bc                        : boundary condition parameter (1 or 2)
-        # temp2                     : deep soil temperature (ave of air temperature)
+        # temp2                     : deep soil temperature (avg of air temperature)
         # flx2                      : surface flux (sum of absorbed, emitted, etc.)
 
         fimp = 0.5                  # implicit coefficient
@@ -218,60 +216,58 @@ class Element(object):
             raise Exception(self.CONDUCTION_INPUT_MSG)
 
         #--------------------------------------------------------------------------
-        # zx=tridiag_ground(za,zb,zc,zy);
-        zx = invert(num,za,zy)
-        #t[:] = zx[:]
-        #print '----fin----'
+        zx = self.invert(num,za,zy)
+        #t(:) = zx(:);
+        return zx[:] # return copy of templayers
 
-"""
+    def qsat(self,temp,pres,parameter):
+        """
+        Calculate (qsat_lst) vector of saturation humidity from:
+            temp = vector of element layer temperatures
+            pres = pressure (at current timestep).
+        """
+        gamw = (parameter.cl - parameter.cpv) / parameter.rv
+        betaw = (parameter.lvtt/parameter.rv) + (gamw * parameter.tt)
+        alpw = math.log(parameter.estt) + (betaw /parameter.tt) + (gamw * math.log(parameter.tt))
+        work2 = parameter.r/parameter.rv
+        foes_lst = [0 for i in xrange(len(temp))]
+        work1_lst = [0 for i in xrange(len(temp))]
+        qsat_lst = [0 for i in xrange(len(temp))]
 
-function qsat = qsat(temp,pres,parameter)
+        for i in xrange(len(temp)):
+          # saturation vapor pressure
+          foes_lst[i] = math.exp( alpw - betaw/temp[i] - gamw*math.log(temp[i])  )
+          work1_lst[i] = foes_lst[i]/pres[i]
+          # saturation humidity
+          qsat_lst[i] = work2*work1_lst[i] / (1. + (work2-1.) * work1_lst[i])
 
-    gamw = (parameter.cl - parameter.cpv) / parameter.rv;
-    betaw = (parameter.lvtt/parameter.rv) + (gamw * parameter.tt);
-    alpw = log(parameter.estt) + (betaw /parameter.tt) + (gamw *log(parameter.tt));
-    work2 = parameter.r/parameter.rv;
-    foes = zeros(size(temp));
-    work1= zeros(size(temp));
-    qsat = zeros(size(temp));
-    for i=1:size(temp)
-      % saturation vapor pressure
-      foes(i) = exp( alpw - betaw/temp(i) - gamw*log(temp(i))  );
-      work1(i)    = foes(i)/pres(i);
-      % saturation humidity
-      qsat(i) = work2*work1(i) / (1.+(work2-1.)*work1(i));
-    end
+        return qsat_lst
 
-end
-"""
 
-def invert(nz,a,c):
-    """
-    %--------------------------------------------------------------------------
-    % Inversion and resolution of a tridiagonal matrix
-    %          A X = C
-    % Input:
-    %  a(*,1) lower diagonal (Ai,i-1)
-    %  a(*,2) principal diagonal (Ai,i)
-    %  a(*,3) upper diagonal (Ai,i+1)
-    %  c
-    % Output
-    %  x     results
-    %--------------------------------------------------------------------------
+    def invert(self,nz,A,C):
+        """
+        Inversion and resolution of a tridiagonal matrix
+                 A X = C
+        Input:
+         nz number of layers
+         a(*,1) lower diagonal (Ai,i-1)
+         a(*,2) principal diagonal (Ai,i)
+         a(*,3) upper diagonal (Ai,i+1)
+         c
+        Output
+         x     results
+        """
 
-    x = zeros(nz,1);
+        X = [0 for i in xrange(nz)]
 
-    for in=nz-1:-1:1
-        c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
-        a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);
-    end
+        for i in reversed(xrange(nz-1)):
+            C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
+            A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
 
-    for in=2:nz
-        c(in)=c(in)-a(in,1)*c(in-1)/a(in-1,2);
-    end
+        for i in  xrange(1,nz,1):
+            C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
 
-    for in=1:nz
-        x(in)=c(in)/a(in,2);
-    end
-    """
-    return None#x
+        for i in xrange(nz):
+            X[i] = C[i]/A[i][1]
+
+        return X

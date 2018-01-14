@@ -17,8 +17,8 @@ class TestSimParam(object):
         # Jan 1 00:00 - Feb 1 00:00
 
         # Month,1,        # starting month (1-12)
-        # Day,1,         # starting day (1-31)
-        # nDay,31,       # number of days to run simultion
+        # Day,1,          # starting day (1-31)
+        # nDay,31,        # number of days to run simultion
         # dtSim,300,      # simulation time step (s)
         # dtWeather,3600, # weather time step (s)
 
@@ -30,6 +30,7 @@ class TestSimParam(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # Open matlab ref file
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_simparam_init.txt")
@@ -83,6 +84,7 @@ class TestSimParam(object):
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 

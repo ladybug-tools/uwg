@@ -15,6 +15,7 @@ from schdef import SchDef
 from utilities import read_csv, str2fl
 import utilities
 import pprint
+from decimal import Decimal
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
@@ -54,7 +55,7 @@ def readDOE(serialize_output=True):
             CLIMATE_ZONE_16]
 
     """
-    toggle = True
+
     #Define constants
     # DOE Building Types
     bldType = [
@@ -76,28 +77,29 @@ def readDOE(serialize_output=True):
         'WareHouse']                # 16
 
     builtEra = [
-        'Pre80',
-        'Pst80',
-        'New'
+        'Pre80',                    # 1
+        'Pst80',                    # 2
+        'New'                       # 3
         ]
 
     zoneType = [
-        '1A (Miami)',
-        '2A (Houston)',
-        '2B (Phoenix)',
-        '3A (Atlanta)',
-        '3B-CA (Los Angeles)',
-        '3B (Las Vegas)',
-        '3C (San Francisco)',
-        '4A (Baltimore)',
-        '4B (Albuquerque)',
-        '4C (Seattle)',
-        '5A (Chicago)',
-        '5B (Boulder)',
-        '6A (Minneapolis)',
-        '6B (Helena)',
-        '7 (Duluth)',
-        '8 (Fairbanks)']
+        '1A (Miami)',               # 1
+        '2A (Houston)',             # 2
+        '2B (Phoenix)',             # 3
+        '3A (Atlanta)',             # 4
+        '3B-CA (Los Angeles)',      # 5
+        '3B (Las Vegas)',           # 6
+        '3C (San Francisco)',       # 7
+        '4A (Baltimore)',           # 8
+        '4B (Albuquerque)',         # 9
+        '4C (Seattle)',             # 10
+        '5A (Chicago)',             # 11
+        '5B (Boulder)',             # 12
+        '6A (Minneapolis)',         # 13
+        '6B (Helena)',              # 14
+        '7 (Duluth)',               # 15
+        '8 (Fairbanks)'             # 16
+        ]
 
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
@@ -113,7 +115,7 @@ def readDOE(serialize_output=True):
         #print '-----i-------'
         #print i+1
         # Read building summary (Sheet 1)
-        file_doe_name_bld = "{x}\\BLD{y}\\BLD{y}_BuildingSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
+        file_doe_name_bld = os.path.join("{}".format(DIR_DOE_PATH), "BLD{}".format(i+1),"BLD{}_BuildingSummary.csv".format(i+1))
         list_doe1 = read_csv(file_doe_name_bld)
         #listof(listof 3 era values)
         nFloor      = str2fl(list_doe1[3][3:6])      # Number of Floors, this will be list of floats and str if "basement"
@@ -123,7 +125,7 @@ def readDOE(serialize_output=True):
         AreaRoof    = str2fl(list_doe1[8][3:6])      # [m2] Gross Dimensions - Total area
 
         # Read zone summary (Sheet 2)
-        file_doe_name_zone = "{x}\\BLD{y}\\BLD{y}_ZoneSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
+        file_doe_name_zone = os.path.join("{}".format(DIR_DOE_PATH), "BLD{}".format(i+1),"BLD{}_ZoneSummary.csv".format(i+1))
         list_doe2 = read_csv(file_doe_name_zone)
         #listof(listof 3 eras)
         AreaFloor   = str2fl([list_doe2[2][5],list_doe2[3][5],list_doe2[4][5]])       # [m2]
@@ -137,18 +139,9 @@ def readDOE(serialize_output=True):
         SHW         = str2fl([list_doe2[2][15],list_doe2[3][15],list_doe2[4][15]])    # [Litres/hr] Peak Service Hot Water
         Vent        = str2fl([list_doe2[2][17],list_doe2[3][17],list_doe2[4][17]])    # [L/s/m2] Ventilation
         Infil       = str2fl([list_doe2[2][20],list_doe2[3][20],list_doe2[4][20]])    # Air Changes Per Hour (ACH) Infiltration
-        if toggle:
-            import decimal
-            #https://stackoverflow.com/questions/31264275/can-i-convert-any-string-to-float-without-losing-precision-in-python
-            print list_doe2[2][20]
-            dec =  decimal.Decimal(list_doe2[2][20])
-            print dec, type(dec)
-            print decimal.Decimal.from_float(float(dec))
-            print decimal.Decimal.from_float(float(list_doe2[2][20]))
-            toggle = False
 
         # Read location summary (Sheet 3)
-        file_doe_name_location = "{x}\\BLD{y}\\BLD{y}_LocationSummary.csv".format(x=DIR_DOE_PATH,y=i+1)
+        file_doe_name_location = os.path.join("{}".format(DIR_DOE_PATH), "BLD{}".format(i+1),"BLD{}_LocationSummary.csv".format(i+1))
         list_doe3 = read_csv(file_doe_name_location)
         #(listof (listof 3 eras (listof 16 climate types)))
         TypeWall    = [list_doe3[3][4:20],list_doe3[14][4:20],list_doe3[25][4:20]]            # Construction type
@@ -164,7 +157,7 @@ def readDOE(serialize_output=True):
         FanFlow     = str2fl([list_doe3[13][4:20],list_doe3[24][4:20],list_doe3[35][4:20]])    # [m3/s] Fan Max Flow Rate
 
         # Read Schedules (Sheet 4)
-        file_doe_name_schedules = "{x}\\BLD{y}\\BLD{y}_Schedules.csv".format(x=DIR_DOE_PATH,y=i+1)
+        file_doe_name_schedules = os.path.join("{}".format(DIR_DOE_PATH), "BLD{}".format(i+1),"BLD{}_Schedules.csv".format(i+1))
         list_doe4 = read_csv(file_doe_name_schedules)
 
         #listof(listof weekday, sat, sun (list of 24 fractions)))
@@ -184,9 +177,14 @@ def readDOE(serialize_output=True):
             #print j+1
             for k in xrange(16):
                 #print '\tclimate zone: ', zoneType[k]
-                #print '-----k------'
-                #print k+1
-
+                """
+                if i==13 and j ==0 and k==6:
+                    dd = lambda x: Decimal.from_float(x)
+                    print dd(HVAC[j][k])
+                    print HVAC[j][k]
+                    print dd(AreaFloor[j])
+                    print dd(HVAC[j][k]*1000.0/AreaFloor[j])
+                """
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight
@@ -198,7 +196,7 @@ def readDOE(serialize_output=True):
                     glazing[j],                         # glazing ratio by era
                     Uwindow[j][k],                      # uValue by era, by climate type
                     SHGC[j][k],                         # SHGC, by era, by climate type
-                    'AIR',                              # a/c type
+                    'AIR',                              # cooling condensation system type: AIR, WATER
                     COP[j][k],                          # cop by era, climate type
                     297,                                # coolSetpointDay = 24 C
                     297,                                # coolSetpointNight
@@ -208,7 +206,7 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
-                #Not sure why this isn't in the constructor...
+                #Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 B.Type = bldType[i]
                 B.Era = builtEra[j]
@@ -224,7 +222,7 @@ def readDOE(serialize_output=True):
                 Insulation = Material (0.049, 836.8 * 265.0, "Insulation")
                 Gypsum = Material (0.16, 830.0 * 784.9, "Gypsum")
                 Wood = Material (0.11, 1210.0 * 544.62, "Wood")
-                Stucco = Material(0.6918,  837.0 * 1859.0, "Stucco")
+                Stucco = Material(0.6918,  837.0 * 1858.0, "Stucco")
 
                 # Wall (1 in stucco, concrete, insulation, gypsum)
                 # Check TypWall by era, by climate

@@ -20,12 +20,25 @@ class TestSolarCalcs(object):
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
 
+    def setup_open_matlab_ref(self,matlab_ref_file_path):
+        """ open the matlab reference file """
+
+        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
+        if not os.path.exists(matlab_path):
+            raise Exception("Failed to open {}!".format(matlab_path))
+        matlab_file = open(matlab_path,'r')
+        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
+        matlab_file.close()
+
+        return uwg_matlab_val
+
     def test_solarangles(self):
         """ test solar angles """
 
         self.setup_solarcalcs()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         solar = UWG.SolarCalcs(self.uwg.UCM, self.uwg.BEM, self.uwg.simTime, self.uwg.RSM, \
             self.uwg.forc, self.uwg.geoParam, self.uwg.rural)
@@ -47,14 +60,6 @@ class TestSolarCalcs(object):
         # Run simulation
         solar.solarangles()
 
-        # open matlab ref file
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_solarangles.txt")
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
-
         uwg_python_val = [
         solar.simTime.month,
         solar.simTime.secDay,
@@ -69,6 +74,9 @@ class TestSolarCalcs(object):
         solar.critOrient
         ]
 
+        # open matlab ref file
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarangles.txt")
+
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
         for i in xrange(len(uwg_matlab_val)):
@@ -81,6 +89,7 @@ class TestSolarCalcs(object):
         self.setup_solarcalcs()
         self.uwg.read_epw()
         self.uwg.read_input()
+        self.uwg.set_input()
 
         # We subtract 11 hours from total timestep so
         # we can stop simulation while we still have sun!
@@ -95,7 +104,6 @@ class TestSolarCalcs(object):
         assert self.uwg.simTime.day == 31
         assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
 
-
         # Manual checking
 
         # Total Radiation (W m-2) at 13:00 on Jan 31 w/o reflected sunlight
@@ -103,12 +111,7 @@ class TestSolarCalcs(object):
         assert self.uwg.solar.roadSol == pytest.approx(307.4032644249752, abs=1e-12)
 
         # Matlab Checking
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_solarcalcs.txt")
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarcalcs.txt")
 
         uwg_python_val = [
         self.uwg.solar.horSol,

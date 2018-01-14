@@ -139,18 +139,20 @@ class RSMDef(object):
             self.z_meso.append(z_)
         f.close()
 
-    """
-    % Ref: The UWG (2012), Eq. (4)
-    function obj = VDM(obj,forc,rural,parameter,simTime)
 
-        obj.tempProf(1) = forc.temp;    % Lower boundary condition
-        % compute pressure profile
+    # Ref: The UWG (2012), Eq. (4)
+    def VDM(self,forc,rural,parameter,simTime):
+
+        self.tempProf[0] = forc.temp    # Lower boundary condition
+        """
+        # compute pressure profile
         for iz=obj.nzref:-1:2
            obj.presProf(iz-1)=(obj.presProf(iz)^(parameter.r/parameter.cp)+...
                parameter.g/parameter.cp*(forc.pres^(parameter.r/parameter.cp))*...
                (1./obj.tempProf(iz)+1./obj.tempProf(iz-1))*...
                0.5*obj.dz(iz))^(1./(parameter.r/parameter.cp));
         end
+
         % compute the real temperature profile
         for iz=1:obj.nzref
            obj.tempRealProf(iz)=obj.tempProf(iz)*...
