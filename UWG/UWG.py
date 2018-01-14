@@ -403,7 +403,7 @@ class UWG(object):
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,self.h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
-        self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
+        #self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
 
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
@@ -508,7 +508,7 @@ class UWG(object):
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
 
-        for it in range(1,self.simTime.nt,1):#[:12*24*1]:#*31+1]: # for every simulation time-step (i.e 5 min) defined by uwg
+        for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
 
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -597,14 +597,15 @@ class UWG(object):
                 self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
-            if it == (self.simTime.nt - (12*24*15 + 12*13)):
-                pass
-                #print self.simTime
+
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
             #TODO: Code this (from RSM class)
-            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            if it == 1:#(15*24*12 + 12*11):
+                self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime,1)
+            else:
+                self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime,0)
 
             # Calculate urban heat fluxes, update UCM & UBL
             #self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)

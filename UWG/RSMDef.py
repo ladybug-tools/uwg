@@ -1,4 +1,7 @@
 import os
+import math
+import pprint
+ppr = lambda x: pprint.pprint(x)
 
 class RSMDef(object):
     """
@@ -92,9 +95,9 @@ class RSMDef(object):
 
 
         # Define temperature, pressure and density vertical profiles
-
         self.tempProf = [T_init for x in range(self.nzref+1)]
         self.presProf = [P_init for x in range(self.nzref+1)]
+
         for iz in xrange(1,self.nzref+1):
             self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
                parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
@@ -141,67 +144,66 @@ class RSMDef(object):
 
 
     # Ref: The UWG (2012), Eq. (4)
-    def VDM(self,forc,rural,parameter,simTime):
+    def VDM(self,forc,rural,parameter,simTime,debug):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
-        """
+
         # compute pressure profile
-        for iz=obj.nzref:-1:2
-           obj.presProf(iz-1)=(obj.presProf(iz)^(parameter.r/parameter.cp)+...
-               parameter.g/parameter.cp*(forc.pres^(parameter.r/parameter.cp))*...
-               (1./obj.tempProf(iz)+1./obj.tempProf(iz-1))*...
-               0.5*obj.dz(iz))^(1./(parameter.r/parameter.cp));
-        end
+        for iz in reversed(range(self.nzref)[1:]):
+           self.presProf[iz-1] = (math.pow(self.presProf[iz],parameter.r/parameter.cp) + \
+               parameter.g/parameter.cp*(math.pow(forc.pres,parameter.r/parameter.cp)) * \
+               (1./self.tempProf[iz] + 1./self.tempProf[iz-1]) * \
+               0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
-        % compute the real temperature profile
-        for iz=1:obj.nzref
-           obj.tempRealProf(iz)=obj.tempProf(iz)*...
-               (obj.presProf(iz)/forc.pres)^(parameter.r/parameter.cp);
-        end
-        % compute the density profile
-        for iz=1:obj.nzref
-           obj.densityProfC(iz)=obj.presProf(iz)/parameter.r/obj.tempRealProf(iz);
-        end
-        obj.densityProfS(1)=obj.densityProfC(1);
-        for iz=2:obj.nzref
-           obj.densityProfS(iz)=(obj.densityProfC(iz)*obj.dz(iz-1)+...
-               obj.densityProfC(iz-1)*obj.dz(iz))/(obj.dz(iz-1)+obj.dz(iz));
-        end
-        obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
+        # compute the real temperature profile
+        for iz in xrange(self.nzref):
+            self.tempRealProf[iz]= self.tempProf[iz] * \
+            (self.presProf[iz]/forc.pres)**(parameter.r/parameter.cp)
 
-        % Ref: The UWG (2012), Eq. (5)
-        % compute diffusion coefficient
-        [cd,ustarRur] = DiffusionCoefficient(obj.densityProfC(1),...
-            obj.z,obj.dz,obj.z0r,obj.disp,...
-            obj.tempProf(1),rural.sens,obj.nzref,forc.wind,...
-            obj.tempProf,parameter);
+        # compute the density profile
+        for iz in xrange(self.nzref):
+           self.densityProfC[iz] = self.presProf[iz]/parameter.r/self.tempRealProf[iz]
+
+        self.densityProfS[0] = self.densityProfC[0]
+
+        #for iz=2:obj.nzref
+        for iz in xrange(1,self.nzref):
+           self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] + \
+               self.densityProfC[iz-1] * self.dz[iz])/(self.dz[iz-1] + self.dz[iz])
+
+        self.densityProfS[self.nzref+1] = self.densityProfC[self.nzref]
+
+        # Ref: The UWG (2012), Eq. (5)
+        # compute diffusion coefficient
+        cd,ustarRur = DiffusionCoefficient(self.densityProfC[0], \
+            self.z, self.dz, self.z0r, self.disp, \
+            self.tempProf[0], rural.sens, self.nzref, forc.wind, \
+            self.tempProf, parameter)
+
+        """
         % solve diffusion equation
-        obj.tempProf = DiffusionEquation(obj.nzref,simTime.dt,...
-            obj.tempProf,obj.densityProfC,obj.densityProfS,cd,obj.dz);
+        self.tempProf = DiffusionEquation(self.nzref,simTime.dt,...
+            self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz);
         % compute wind profile
-        for iz=1:obj.nzref
-            obj.windProf(iz) = ustarRur/parameter.vk*...
-                log((obj.z(iz)-obj.disp)/obj.z0r);
+        for iz=1:self.nzref
+            self.windProf(iz) = ustarRur/parameter.vk*...
+                log((self.z(iz)-self.disp)/self.z0r);
         end
         % Average pressure
-        obj.ublPres = 0;
-        for iz=1:obj.nzfor
-            obj.ublPres = obj.ublPres +...
-                obj.presProf(iz)*obj.dz(iz)/...
-                (obj.z(obj.nzref)+obj.dz(obj.nzref)/2);
-        end
-        end
-    end
-end
-"""
+        self.ublPres = 0;
+        for iz=1:self.nzfor
+            self.ublPres = self.ublPres +...
+                self.presProf(iz)*self.dz(iz)/...
+                (self.z(self.nzref)+self.dz(self.nzref)/2);
+        """
 
-"""
-function co = DiffusionEquation(nz,dt,co,da,daz,cd,dz)
-    % Reference?
-
+def DiffusionEquation(nz,dt,co,da,daz,cd,dz):
+    # Reference?
+    """
     cddz = zeros(nz+2,1);
     a = zeros(nz,3);
     c = zeros(nz,1);
+
     %--------------------------------------------------------------------------
     cddz(1)= daz(1)*cd(1)/dz(1);
     for iz=2:nz
@@ -226,66 +228,77 @@ function co = DiffusionEquation(nz,dt,co,da,daz,cd,dz)
     c(nz)  =0;
     %--------------------------------------------------------------------------
     co = Invert (nz,a,c);
+    """
+    return co
 
-end
 
-function [Kt,ustar] = DiffusionCoefficient(rho,z,dz,z0,disp,...
-    tempRur,heatRur,nz,uref,th,parameter)
 
-    % Initialization
-    Kt = zeros(1,nz+1);
-    ws = zeros(1,nz);
-    te = zeros(1,nz);
-    % Friction velocity (Louis 1979)
-    ustar = parameter.vk*uref/log((10.-disp)/z0);
-    % Monin-Obukhov length
-    lengthRur = max(- rho*parameter.cp*ustar^3*tempRur/parameter.vk/parameter.g/heatRur,-50);
-    % Unstable conditions
-    if gt(heatRur,1e-2)
-        % Convective velocity scale
-        wstar = (parameter.g*heatRur*parameter.dayBLHeight/rho/parameter.cp/tempRur)^(1/3);
-        % Wind profile function
-        phi_m = (1-8.*0.1*parameter.dayBLHeight/lengthRur)^(-1./3.);
-        for iz=1:nz
-            % Mixed-layer velocity scale
-            ws(iz) = (ustar^3+phi_m*parameter.vk*wstar^3*z(iz)/parameter.dayBLHeight)^(1./3.);
-            % TKE approximation
-            te(iz) = max(ws(iz)^2.,0.01);
-        end
-    % Stable and neutral conditions
-    else
-        for iz=1:nz
-            % TKE approximation
-            te(iz) = max(ustar^2.,0.01);
-        end
-    end
-    % lenght scales (l_up, l_down, l_k, l_eps)
-    [dlu,dld] = DissipationBougeault(parameter.g,nz,z,dz,te,th);
+def DiffusionCoefficient(rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
+
+    # Initialization
+    Kt = [0 for x in xrange(nz+1)]
+    ws = [0 for x in xrange(nz)]
+    te = [0 for x in xrange(nz)]
+    # Friction velocity (Louis 1979)
+    ustar = parameter.vk * uref/math.log((10.-disp)/z0)
+
+
+    # Monin-Obukhov length
+    lengthRur = max(-rho*parameter.cp*ustar**3*tempRur/parameter.vk/parameter.g/heatRur,-50.)
+
+    # Unstable conditions
+    if heatRur > 1e-2:
+        # Convective velocity scale
+        wstar = (parameter.g*heatRur*parameter.dayBLHeight/rho/parameter.cp/tempRur)**(1/3.)
+        # Wind profile function
+        phi_m = (1-8.*0.1*parameter.dayBLHeight/lengthRur)**(-1./3.)
+
+        for iz in xrange(nz):
+            # Mixed-layer velocity scale
+            ws[iz] = (ustar**3 + phi_m*parameter.vk*wstar**3*z[iz]/parameter.dayBLHeight)**(1/3.)
+            # TKE approximation
+            te[iz] = max(ws[iz]**2., 0.01)
+
+    else: # Stable and neutral conditions
+        for iz in xrange(nz):
+            # TKE approximation
+            te[iz] = max(ustar**2.,0.01)
+
+    # lenght scales (l_up, l_down, l_k, l_eps)
+
+    dlu,dld = DissipationBougeault(parameter.g,nz,z,dz,te,th)
+    """
     [dld,dls,dlk]= LengthBougeault(nz,dld,dlu,z);
     % Boundary-layer diffusion coefficient
     for iz=1:nz
        Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
     end
     Kt(nz+1) = Kt(nz);
+    """
+    return Kt, ustar
 
-end
 
-function [dlu,dld] = DissipationBougeault(g,nz,z,dz,te,pt)
+def DissipationBougeault(g,nz,z,dz,te,pt):
 
-    dlu = zeros(nz,1);
-    dld = zeros(nz,1);
-    for iz=1:nz
-        zup=0.;
-        dlu(iz)=z(nz+1)-z(iz)-dz(iz)/2.;
-        zzz=0.;
-        zup_inf=0.;
-        beta=g/pt(iz);
-        for izz=iz:nz-1
-           dzt=(dz(izz+1)+dz(izz))/2.;
-           zup=zup-beta*pt(iz)*dzt;
-           zup=zup+beta*(pt(izz+1)+pt(izz))*dzt/2.;
-           zzz=zzz+dzt;
-           if (lt(te(iz),zup) && ge(te(iz),zup_inf))
+    dlu = [0 for x in xrange(nz)]
+    dld = [0 for x in xrange(nz)]
+
+    for iz in xrange(nz):
+        zup=0.
+        dlu[iz] = z[nz+1] - z[iz] - dz[iz]/2.
+        zzz=0.
+        zup_inf=0.
+        beta=g/pt[iz]
+
+        for izz in xrange(nz-1):
+           dzt=(dz[izz+1]+dz[izz])/2.
+           zup=zup-beta*pt[iz]*dzt
+           zup=zup+beta*(pt[izz+1]+pt[izz])*dzt/2.
+           zzz=zzz+dzt
+
+           #ge = greater than or equal for vector
+           """
+           if (lt(te[iz],zup) and ge(te(iz),zup_inf))
              bbb=(pt(izz+1)-pt(izz))/dzt;
              if ne(bbb,0)
                 tl=(-beta*(pt(izz)-pt(iz))+...
@@ -319,10 +332,10 @@ function [dlu,dld] = DissipationBougeault(g,nz,z,dz,te,pt)
                dld(iz)=max(1.,zzz-dzt+tl);
             end
             zdo_sup=zdo;
-        end
-    end
-end
+        """
+    return dlu,dld
 
+"""
 function [dld,dls,dlk] = LengthBougeault(nz,dld,dlu,z)
 
     dlg = zeros(nz,1);
@@ -340,35 +353,32 @@ function [dld,dls,dlk] = LengthBougeault(nz,dld,dlu,z)
 
 end
 
-function x = Invert(nz,a,c)
-
-    %--------------------------------------------------------------------------
-    % Inversion and resolution of a tridiagonal matrix
-    %          A X = C
-    % Input:
-    %  a(*,1) lower diagonal (Ai,i-1)
-    %  a(*,2) principal diagonal (Ai,i)
-    %  a(*,3) upper diagonal (Ai,i+1)
-    %  c
-    % Output
-    %  x     results
-    %--------------------------------------------------------------------------
-
-    x = zeros(nz,1);
-
-    for in=nz-1:-1:1
-        c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
-        a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);
-    end
-
-    for in=2:nz
-        c(in)=c(in)-a(in,1)*c(in-1)/a(in-1,2);
-    end
-
-    for in=1:nz
-        x(in)=c(in)/a(in,2);
-    end
-
-end
-
 """
+
+def invert(nz,A,C):
+    """
+    Inversion and resolution of a tridiagonal matrix
+             A X = C
+    Input:
+     nz number of layers
+     a(*,1) lower diagonal (Ai,i-1)
+     a(*,2) principal diagonal (Ai,i)
+     a(*,3) upper diagonal (Ai,i+1)
+     c
+    Output
+     x     results
+    """
+
+    X = [0 for i in xrange(nz)]
+
+    for i in reversed(xrange(nz-1)):
+        C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
+        A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
+
+    for i in  xrange(1,nz,1):
+        C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
+
+    for i in xrange(nz):
+        X[i] = C[i]/A[i][1]
+
+    return X
