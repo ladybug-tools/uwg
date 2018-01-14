@@ -83,8 +83,8 @@ class SolarCalcs(object):
             rw = self.UCM.alb_wall * self.bldSol
 
             # bounces
-            fr = (1. - (1. - 2.*self.UCM.wallConf) * self.UCM.alb_wall + \
-            (1. - self.UCM.roadConf) * self.UCM.wallConf * alb_road * self.UCM.alb_wall)
+            fr = (1. - (1. - 2.*self.UCM.wallConf) * self.UCM.alb_wall + (1. - self.UCM.roadConf) \
+            * self.UCM.wallConf * alb_road * self.UCM.alb_wall)
 
             # (1.0-self.UCM.roadConf) road to wall view
             self.mr = (rr + (1.0-self.UCM.roadConf) * alb_road * (rw + self.UCM.wallConf * self.UCM.alb_wall * rr)) / fr

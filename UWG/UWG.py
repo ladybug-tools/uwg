@@ -606,7 +606,6 @@ class UWG(object):
             #TODO: Code this (from RSM class)
             #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
-
             # Calculate urban heat fluxes, update UCM & UBL
             #self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
             """
