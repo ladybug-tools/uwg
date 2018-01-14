@@ -217,7 +217,7 @@ class UWG(object):
                 self._init_param_dict[row[0]] = float(row[1])
 
         ipd = self._init_param_dict
-        
+
         # Define Simulation and Weather parameters
         self.Month = ipd['Month']                # starting month (1-12)
         self.Day = ipd['Day']                    # starting day (1-31)
@@ -515,7 +515,8 @@ class UWG(object):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
             else:
-                self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month] #soil temperature by depth, by month
+                #TODO check soilindex1
+                self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month-1] #soil temperature by depth, by month
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
 
             # There's probably a better way to update the weather...
@@ -597,16 +598,13 @@ class UWG(object):
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
             if it == (self.simTime.nt - (12*24*15 + 12*13)):
-                #print self.simTime.month
-                #print self.simTime.day
-                #print self.simTime.secDay
-                #print '---'
-                # Update rural heat fluxes & update vertical diffusion model (VDM)
-                self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
-                #TODO: Code this (from element class)
-                self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
-                #TODO: Code this (from RSM class)
-                #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+                pass
+                #print self.simTime
+            # Update rural heat fluxes & update vertical diffusion model (VDM)
+            self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
+            #TODO: Code this (from RSM class)
+            #self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
 
             # Calculate urban heat fluxes, update UCM & UBL
