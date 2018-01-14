@@ -1,4 +1,6 @@
 import math
+import pprint
+pp = lambda x: pprint.pprint(x)
 
 class Element(object):
     """
@@ -86,7 +88,7 @@ class Element(object):
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
-    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
+    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux,it):
         """ Calculate net heat flux, and update element layer temperatures
         """
 
@@ -97,7 +99,7 @@ class Element(object):
         if (self.horizontal):     # For roof, mass, road
             # Evaporation (m s-1), Film water & soil latent heat
             if self.waterStorage > 0.:
-                qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)
+                qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)[0]
                 eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
                 self.waterStorage = min(self.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax)
                 self.waterStorage = max(self.waterStorage,0.) # (m)
@@ -214,9 +216,8 @@ class Element(object):
             raise Exception(self.CONDUCTION_INPUT_MSG)
 
         #--------------------------------------------------------------------------
-        zx = invert(num,za,zy)
+        zx = self.invert(num,za,zy)
         #t(:) = zx(:);
-
         return zx[:] # return copy of templayers
 
     def qsat(self,temp,pres,parameter):
@@ -243,30 +244,30 @@ class Element(object):
         return qsat_lst
 
 
-def invert(nz,A,C):
-    """
-    Inversion and resolution of a tridiagonal matrix
-             A X = C
-    Input:
-     nz number of layers
-     a(*,1) lower diagonal (Ai,i-1)
-     a(*,2) principal diagonal (Ai,i)
-     a(*,3) upper diagonal (Ai,i+1)
-     c
-    Output
-     x     results
-    """
+    def invert(self,nz,A,C):
+        """
+        Inversion and resolution of a tridiagonal matrix
+                 A X = C
+        Input:
+         nz number of layers
+         a(*,1) lower diagonal (Ai,i-1)
+         a(*,2) principal diagonal (Ai,i)
+         a(*,3) upper diagonal (Ai,i+1)
+         c
+        Output
+         x     results
+        """
 
-    X = [i for i in xrange(nz)]
+        X = [0 for i in xrange(nz)]
 
-    for i in xrange(nz-1):
-        C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
-        A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
+        for i in reversed(xrange(nz-1)):
+            C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
+            A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
 
-    for i in  xrange(1,nz,1):
-        C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
+        for i in  xrange(1,nz,1):
+            C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
 
-    for i in xrange(nz):
-        X[i] = C[i]/A[i][1]
+        for i in xrange(nz):
+            X[i] = C[i]/A[i][1]
 
-    return X
+        return X
