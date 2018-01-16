@@ -67,62 +67,62 @@ class RSMDef(object):
             # self.nz0: self.z index >= reference height for weather station
             eq_th = self.is_near_zero(self.z[iz] - parameter.tempHeight)
             if (eq_th == True or self.z[iz] > parameter.tempHeight) and ll==True:
-                self.nz0 = iz   # layer number at zmt (m)
+                self.nz0 = iz+1   # layer number at zmt (m)
                 ll = False
 
             # self.nzref: self.z index >= reference inversion height
             eq_rh = self.is_near_zero(self.z[iz] - parameter.refHeight)
             if (eq_rh == True or self.z[iz] > parameter.refHeight) and mm==True:
-              self.nzref = iz   # layer number at zref (m)
+              self.nzref = iz+1   # layer number at zref (m)
               mm = False
 
             # self.nzfor: self.z index >= nighttime boundary layer height
             eq_nh = self.is_near_zero(self.z[iz] - parameter.nightBLHeight)
             if (eq_nh == True or self.z[iz] > parameter.nightBLHeight) and nn==True:
-              self.nzfor = iz   # layer number at zfor (m)
+              self.nzfor = iz+1   # layer number at zfor (m)
               nn = False
 
             # self.nz10: self.z index >= wind height
             eq_wh = self.is_near_zero(self.z[iz] - parameter.windHeight)
             if (eq_wh == True or self.z[iz] > parameter.windHeight) and oo==True:
-              self.nz10 = iz    # layer number at zmu (m)
+              self.nz10 = iz+1    # layer number at zmu (m)
               oo = False
 
             eq_dh = self.is_near_zero(self.z[iz] - parameter.dayBLHeight)
             if (eq_dh == True or self.z[iz] > parameter.dayBLHeight) and pp==True:
-              self.nzi = iz     # layer number at zi_d (m)
+              self.nzi = iz+1     # layer number at zi_d (m)
               pp = False
 
-
         # Define temperature, pressure and density vertical profiles
-        self.tempProf = [T_init for x in range(self.nzref+1)]
-        self.presProf = [P_init for x in range(self.nzref+1)]
+        self.tempProf = [T_init for x in range(self.nzref)]
+        self.presProf = [P_init for x in range(self.nzref)]
 
-        for iz in xrange(1,self.nzref+1):
+        for iz in xrange(1,self.nzref):
             self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
                parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
                1./self.tempProf[iz-1]) * 0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
-        self.tempRealProf = [T_init for x in range(self.nzref+1)]
-        for iz in xrange(self.nzref+1):
+        self.tempRealProf = [T_init for x in range(self.nzref)]
+        for iz in xrange(self.nzref):
            self.tempRealProf[iz] = self.tempProf[iz] * (self.presProf[iz] / P_init)**(parameter.r/parameter.cp)
 
-        self.densityProfC = [None for x in range(self.nzref+1)]
-        for iz in xrange(self.nzref+1):
+        self.densityProfC = [None for x in range(self.nzref)]
+        for iz in xrange(self.nzref):
            self.densityProfC[iz] = self.presProf[iz] / parameter.r / self.tempRealProf[iz]
 
-        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+2)]
-        for iz in xrange(1,self.nzref+1):
+        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+1)]
+        for iz in xrange(1,self.nzref):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] +\
                self.densityProfC[iz-1] * self.dz[iz]) / (self.dz[iz-1]+self.dz[iz])
 
-        self.densityProfS[self.nzref+1] = self.densityProfC[self.nzref]
-        self.windProf = [1 for x in range(self.nzref+1)]
+        self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
+        self.windProf = [1 for x in range(self.nzref)]
 
     def __repr__(self):
         return "RSM: obstacle ht={a}".format(
             a=self.height
             )
+
     def is_near_zero(self,num,eps=1e-16):
         return abs(float(num)) < eps
 
@@ -144,7 +144,7 @@ class RSMDef(object):
 
 
     # Ref: The UWG (2012), Eq. (4)
-    def VDM(self,forc,rural,parameter,simTime,debug):
+    def VDM(self,forc,rural,parameter,simTime):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
 
@@ -171,7 +171,7 @@ class RSMDef(object):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] + \
                self.densityProfC[iz-1] * self.dz[iz])/(self.dz[iz-1] + self.dz[iz])
 
-        self.densityProfS[self.nzref+1] = self.densityProfC[self.nzref]
+        self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
         # Ref: The UWG (2012), Eq. (5)
         # compute diffusion coefficient
@@ -234,14 +234,12 @@ class RSMDef(object):
 
 
     def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
-
         # Initialization
         Kt = [0 for x in xrange(nz+1)]
         ws = [0 for x in xrange(nz)]
         te = [0 for x in xrange(nz)]
         # Friction velocity (Louis 1979)
         ustar = parameter.vk * uref/math.log((10.-disp)/z0)
-
 
         # Monin-Obukhov length
         lengthRur = max(-rho*parameter.cp*ustar**3*tempRur/parameter.vk/parameter.g/heatRur,-50.)
@@ -267,27 +265,30 @@ class RSMDef(object):
         # lenght scales (l_up, l_down, l_k, l_eps)
 
         dlu,dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
-        print dlu, dld
+
+        dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
+
+        # Boundary-layer diffusion coefficient
         """
-        [dld,dls,dlk]= LengthBougeault(nz,dld,dlu,z);
-        % Boundary-layer diffusion coefficient
         for iz=1:nz
            Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
         end
         Kt(nz+1) = Kt(nz);
         """
+
         return Kt, ustar
 
-
-
     def DissipationBougeault(self,g,nz,z,dz,te,pt):
+        # Note on translation from UWG_Matlab
+        # list length (i.e nz) != list indexing (i.e dlu[0] in python
+        # wherease in matlab it is
 
         dlu = [0 for x in xrange(nz)]
         dld = [0 for x in xrange(nz)]
 
         for iz in xrange(nz):
             zup=0.
-            dlu[iz] = z[nz+1] - z[iz] - dz[iz]/2.
+            dlu[iz] = z[nz] - z[iz] - dz[iz]/2.
             zzz=0.
             zup_inf=0.
             beta=g/pt[iz]
@@ -330,12 +331,14 @@ class RSMDef(object):
 
         return dlu,dld
 
-    """
-    function [dld,dls,dlk] = LengthBougeault(nz,dld,dlu,z)
 
-        dlg = zeros(nz,1);
-        dls = zeros(nz,1);
-        dlk = zeros(nz,1);
+    def LengthBougeault(self,nz,dld,dlu,z):
+
+        dlg = [0 for x in xrange(nz)]
+        dls = [0 for x in xrange(nz)]
+        dlk = [0 for x in xrange(nz)]
+
+        """
         for iz=1:nz
             dlg(iz)=(z(iz)+z(iz+1))/2.;
         end
@@ -344,11 +347,10 @@ class RSMDef(object):
             dld(iz)=min(dld(iz),dlg(iz));
             dls(iz)=sqrt(dlu(iz)*dld(iz));
             dlk(iz)=min(dlu(iz),dld(iz));
-        end
+        """
+        return dld,dls,dlk
 
-    end
 
-    """
 
     def invert(self,nz,A,C):
         """

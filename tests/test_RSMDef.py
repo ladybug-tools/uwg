@@ -79,11 +79,11 @@ class TestRSMDef(object):
         assert self.uwg.RSM.z[1] == pytest.approx(6.2, abs=1e-6)
 
         # Test self.nz0, self.nzref, self.nzfor, self.nz10, self.nzi
-        assert self.uwg.RSM.nz0 == pytest.approx(0, abs=1e-6)
-        assert self.uwg.RSM.nzref == pytest.approx(16, abs=1e-6)
-        assert self.uwg.RSM.nzfor == pytest.approx(12., abs=1e-6)
-        assert self.uwg.RSM.nz10 == pytest.approx(2, abs=1e-6)
-        assert self.uwg.RSM.nzi == pytest.approx(34, abs=1e-6)
+        assert self.uwg.RSM.nz0 == pytest.approx(1, abs=1e-6)
+        assert self.uwg.RSM.nzref == pytest.approx(17, abs=1e-6)
+        assert self.uwg.RSM.nzfor == pytest.approx(13., abs=1e-6)
+        assert self.uwg.RSM.nz10 == pytest.approx(3, abs=1e-6)
+        assert self.uwg.RSM.nzi == pytest.approx(35, abs=1e-6)
 
         # Test the tempProfile
         assert len(self.uwg.RSM.tempProf) == pytest.approx(17, abs=1e-6)
@@ -121,8 +121,8 @@ class TestRSMDef(object):
             tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5)
             assert self.uwg.RSM.densityProfS[i] == pytest.approx(matlab_densityProfS[i], abs=tol)
 
-        assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref+1, abs=1e-15)
-        assert len(self.uwg.RSM.densityProfS) == pytest.approx(self.uwg.RSM.nzref+2, abs=1e-15)
+        assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref, abs=1e-15)
+        assert len(self.uwg.RSM.densityProfS) == pytest.approx(self.uwg.RSM.nzref+1, abs=1e-15)
 
     def test_rsm_vdm(self):
         """ test RSM VDM against matlab references
@@ -131,26 +131,31 @@ class TestRSMDef(object):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
+
+        # Test Jan 1 (winter, no vegetation coverage)
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
+
+        # set_input
         self.uwg.set_input()
 
-        # We subtract 15 days and 13 hours from total timestep so
-        # we can stop simulation while we still have sun!
-        # New time: Jan 16, 1230
-        # simTime.nt = simTimeTotalSec/dt - (dt*12*24*15 + dt*12*12), where dt = 300s (5min)
-        self.uwg.simTime.nt -= (12*24*15 + 13*12)
+
+        # In order to avoid integration effects. Test only first time step
+        # Subtract timestep to stop at 300 sec
+        self.uwg.simTime.nt -= (23*12 + 11)
+
+        # Run simulation
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 
-        print self.uwg.simTime
-
-        """
         # check date
         #print self.uwg.simTime
         assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 16
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0,abs=1e-15)
+        assert self.uwg.simTime.day == 1
+        assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
-
+        """
 
         # Matlab Checking for RSM.VDM
         # 2d matrix = 7 x 16
