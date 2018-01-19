@@ -268,12 +268,12 @@ class RSMDef(object):
 
         dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
 
-        # Boundary-layer diffusion coefficient
         """
-        for iz=1:nz
-           Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
-        end
-        Kt(nz+1) = Kt(nz);
+        # Boundary-layer diffusion coefficient
+        # for iz=1:nz
+        #   Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
+        # end
+        # Kt(nz+1) = Kt(nz);
         """
 
         return Kt, ustar
@@ -338,19 +338,15 @@ class RSMDef(object):
         dls = [0 for x in xrange(nz)]
         dlk = [0 for x in xrange(nz)]
 
-        """
-        for iz=1:nz
-            dlg(iz)=(z(iz)+z(iz+1))/2.;
-        end
+        for iz in xrange(nz):
+            dlg[iz] = (z[iz]+z[iz+1])/2.
 
-        for iz=1:nz
-            dld(iz)=min(dld(iz),dlg(iz));
-            dls(iz)=sqrt(dlu(iz)*dld(iz));
-            dlk(iz)=min(dlu(iz),dld(iz));
-        """
+        for iz in xrange(nz):
+            dld[iz] = min(dld[iz], dlg[iz])
+            dls[iz] = math.sqrt(dlu[iz]*dld[iz])
+            dlk[iz] = min(dlu[iz],dld[iz])
+
         return dld,dls,dlk
-
-
 
     def invert(self,nz,A,C):
         """
