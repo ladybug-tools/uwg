@@ -79,11 +79,11 @@ class TestRSMDef(object):
         assert self.uwg.RSM.z[1] == pytest.approx(6.2, abs=1e-6)
 
         # Test self.nz0, self.nzref, self.nzfor, self.nz10, self.nzi
-        assert self.uwg.RSM.nz0 == pytest.approx(0, abs=1e-6)
-        assert self.uwg.RSM.nzref == pytest.approx(16, abs=1e-6)
-        assert self.uwg.RSM.nzfor == pytest.approx(12., abs=1e-6)
-        assert self.uwg.RSM.nz10 == pytest.approx(2, abs=1e-6)
-        assert self.uwg.RSM.nzi == pytest.approx(34, abs=1e-6)
+        assert self.uwg.RSM.nz0 == pytest.approx(1, abs=1e-6)
+        assert self.uwg.RSM.nzref == pytest.approx(17, abs=1e-6)
+        assert self.uwg.RSM.nzfor == pytest.approx(13., abs=1e-6)
+        assert self.uwg.RSM.nz10 == pytest.approx(3, abs=1e-6)
+        assert self.uwg.RSM.nzi == pytest.approx(35, abs=1e-6)
 
         # Test the tempProfile
         assert len(self.uwg.RSM.tempProf) == pytest.approx(17, abs=1e-6)
@@ -121,65 +121,69 @@ class TestRSMDef(object):
             tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5)
             assert self.uwg.RSM.densityProfS[i] == pytest.approx(matlab_densityProfS[i], abs=tol)
 
-        assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref+1, abs=1e-15)
-        assert len(self.uwg.RSM.densityProfS) == pytest.approx(self.uwg.RSM.nzref+2, abs=1e-15)
+        assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref, abs=1e-15)
+        assert len(self.uwg.RSM.densityProfS) == pytest.approx(self.uwg.RSM.nzref+1, abs=1e-15)
 
     def test_rsm_vdm(self):
-        """ test element SurfFlux against matlab references
-
-        TODO: Description of method
-
-        Example of application:
-        for it in xrange(1,simTime.nt,1):
-            ...
-            rural.SurfFlux(forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux)
+        """ test RSM VDM against matlab references
         """
-        #X: add all the properties from surflux
-        #TODO: Schematizie surfflux from thesis
-        #TODO: output matlab properties
-        #TODO: test/debug final tdd
-        #TODO: describe method
-        #TODO: start translation
-        #TODO: write manual tests to aid understanding
 
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
+
+        # Test Jan 1 (winter, no vegetation coverage)
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
+
+        # set_input
         self.uwg.set_input()
 
-        # We subtract 15 days and 13 hours from total timestep so
-        # we can stop simulation while we still have sun!
-        # New time: Jan 16, 1230
-        # simTime.nt = simTimeTotalSec/dt - (dt*12*24*15 + dt*12*12), where dt = 300s (5min)
-        self.uwg.simTime.nt -= (12*24*15 + 13*12)
+
+        # In order to avoid integration effects. Test only first time step
+        # Subtract timestep to stop at 300 sec
+        self.uwg.simTime.nt -= (23*12 + 11)
+
+        # Run simulation
         self.uwg.hvac_autosize()
         self.uwg.uwg_main()
 
-        #print 'mth', self.uwg.simTime.month
-        #print 'day', self.uwg.simTime.day
-        #print 'sec', self.uwg.simTime.secDay/3600.
-
         # check date
+        #print self.uwg.simTime
         assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 16
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(11.0,abs=1e-15)
+        assert self.uwg.simTime.day == 1
+        assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
-
-        #self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
 
         # Matlab Checking for RSM.VDM
-        """
+        # 2d matrix = 7 x 16
         uwg_python_val = [
+            self.uwg.RSM.presProf,
+            self.uwg.RSM.tempRealProf,
+            self.uwg.RSM.densityProfC,
+            self.uwg.RSM.densityProfS,
+            self.uwg.RSM.tempProf,
+            self.uwg.RSM.windProf,
+            [self.uwg.RSM.ublPres]
         ]
+
+        # Flatten 2d matrix into 1d vector
+        uwg_python_val = reduce(lambda x,y: x+y, uwg_python_val)
+
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
+
         for i in xrange(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
-        """
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+
 
 
 if __name__ == "__main__":
     test_rsm = TestRSMDef()
     test_rsm.test_rsm_init()
+    test_rsm.test_rsm_vdm()

@@ -1,4 +1,7 @@
 import os
+import math
+import pprint
+ppr = lambda x: pprint.pprint(x)
 
 class RSMDef(object):
     """
@@ -64,63 +67,63 @@ class RSMDef(object):
             # self.nz0: self.z index >= reference height for weather station
             eq_th = self.is_near_zero(self.z[iz] - parameter.tempHeight)
             if (eq_th == True or self.z[iz] > parameter.tempHeight) and ll==True:
-                self.nz0 = iz   # layer number at zmt (m)
+                self.nz0 = iz+1   # layer number at zmt (m)
                 ll = False
 
             # self.nzref: self.z index >= reference inversion height
             eq_rh = self.is_near_zero(self.z[iz] - parameter.refHeight)
             if (eq_rh == True or self.z[iz] > parameter.refHeight) and mm==True:
-              self.nzref = iz   # layer number at zref (m)
+              self.nzref = iz+1   # layer number at zref (m)
               mm = False
 
             # self.nzfor: self.z index >= nighttime boundary layer height
             eq_nh = self.is_near_zero(self.z[iz] - parameter.nightBLHeight)
             if (eq_nh == True or self.z[iz] > parameter.nightBLHeight) and nn==True:
-              self.nzfor = iz   # layer number at zfor (m)
+              self.nzfor = iz+1   # layer number at zfor (m)
               nn = False
 
             # self.nz10: self.z index >= wind height
             eq_wh = self.is_near_zero(self.z[iz] - parameter.windHeight)
             if (eq_wh == True or self.z[iz] > parameter.windHeight) and oo==True:
-              self.nz10 = iz    # layer number at zmu (m)
+              self.nz10 = iz+1    # layer number at zmu (m)
               oo = False
 
             eq_dh = self.is_near_zero(self.z[iz] - parameter.dayBLHeight)
             if (eq_dh == True or self.z[iz] > parameter.dayBLHeight) and pp==True:
-              self.nzi = iz     # layer number at zi_d (m)
+              self.nzi = iz+1     # layer number at zi_d (m)
               pp = False
 
-
         # Define temperature, pressure and density vertical profiles
+        self.tempProf = [T_init for x in range(self.nzref)]
+        self.presProf = [P_init for x in range(self.nzref)]
 
-        self.tempProf = [T_init for x in range(self.nzref+1)]
-        self.presProf = [P_init for x in range(self.nzref+1)]
-        for iz in xrange(1,self.nzref+1):
+        for iz in xrange(1,self.nzref):
             self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
                parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
                1./self.tempProf[iz-1]) * 0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
-        self.tempRealProf = [T_init for x in range(self.nzref+1)]
-        for iz in xrange(self.nzref+1):
+        self.tempRealProf = [T_init for x in range(self.nzref)]
+        for iz in xrange(self.nzref):
            self.tempRealProf[iz] = self.tempProf[iz] * (self.presProf[iz] / P_init)**(parameter.r/parameter.cp)
 
-        self.densityProfC = [None for x in range(self.nzref+1)]
-        for iz in xrange(self.nzref+1):
+        self.densityProfC = [None for x in range(self.nzref)]
+        for iz in xrange(self.nzref):
            self.densityProfC[iz] = self.presProf[iz] / parameter.r / self.tempRealProf[iz]
 
-        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+2)]
-        for iz in xrange(1,self.nzref+1):
+        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+1)]
+        for iz in xrange(1,self.nzref):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] +\
                self.densityProfC[iz-1] * self.dz[iz]) / (self.dz[iz-1]+self.dz[iz])
 
-        self.densityProfS[self.nzref+1] = self.densityProfC[self.nzref]
-        self.windProf = [1 for x in range(self.nzref+1)]
+        self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
+        self.windProf = [1 for x in range(self.nzref)]
 
     def __repr__(self):
         return "RSM: obstacle ht={a}".format(
             a=self.height
             )
-    def is_near_zero(self,num,eps=1e-10):
+
+    def is_near_zero(self,num,eps=1e-16):
         return abs(float(num)) < eps
 
     def load_z_meso(self,z_meso_path):
@@ -144,231 +147,228 @@ class RSMDef(object):
     def VDM(self,forc,rural,parameter,simTime):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
-        """
+
         # compute pressure profile
-        for iz=obj.nzref:-1:2
-           obj.presProf(iz-1)=(obj.presProf(iz)^(parameter.r/parameter.cp)+...
-               parameter.g/parameter.cp*(forc.pres^(parameter.r/parameter.cp))*...
-               (1./obj.tempProf(iz)+1./obj.tempProf(iz-1))*...
-               0.5*obj.dz(iz))^(1./(parameter.r/parameter.cp));
-        end
+        for iz in reversed(range(self.nzref)[1:]):
+           self.presProf[iz-1] = (math.pow(self.presProf[iz],parameter.r/parameter.cp) + \
+               parameter.g/parameter.cp*(math.pow(forc.pres,parameter.r/parameter.cp)) * \
+               (1./self.tempProf[iz] + 1./self.tempProf[iz-1]) * \
+               0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
-        % compute the real temperature profile
-        for iz=1:obj.nzref
-           obj.tempRealProf(iz)=obj.tempProf(iz)*...
-               (obj.presProf(iz)/forc.pres)^(parameter.r/parameter.cp);
-        end
-        % compute the density profile
-        for iz=1:obj.nzref
-           obj.densityProfC(iz)=obj.presProf(iz)/parameter.r/obj.tempRealProf(iz);
-        end
-        obj.densityProfS(1)=obj.densityProfC(1);
-        for iz=2:obj.nzref
-           obj.densityProfS(iz)=(obj.densityProfC(iz)*obj.dz(iz-1)+...
-               obj.densityProfC(iz-1)*obj.dz(iz))/(obj.dz(iz-1)+obj.dz(iz));
-        end
-        obj.densityProfS(obj.nzref+1)=obj.densityProfC(obj.nzref);
+        # compute the real temperature profile
+        for iz in xrange(self.nzref):
+            self.tempRealProf[iz]= self.tempProf[iz] * \
+            (self.presProf[iz]/forc.pres)**(parameter.r/parameter.cp)
 
-        % Ref: The UWG (2012), Eq. (5)
-        % compute diffusion coefficient
-        [cd,ustarRur] = DiffusionCoefficient(obj.densityProfC(1),...
-            obj.z,obj.dz,obj.z0r,obj.disp,...
-            obj.tempProf(1),rural.sens,obj.nzref,forc.wind,...
-            obj.tempProf,parameter);
-        % solve diffusion equation
-        obj.tempProf = DiffusionEquation(obj.nzref,simTime.dt,...
-            obj.tempProf,obj.densityProfC,obj.densityProfS,cd,obj.dz);
-        % compute wind profile
-        for iz=1:obj.nzref
-            obj.windProf(iz) = ustarRur/parameter.vk*...
-                log((obj.z(iz)-obj.disp)/obj.z0r);
-        end
-        % Average pressure
-        obj.ublPres = 0;
-        for iz=1:obj.nzfor
-            obj.ublPres = obj.ublPres +...
-                obj.presProf(iz)*obj.dz(iz)/...
-                (obj.z(obj.nzref)+obj.dz(obj.nzref)/2);
-        end
-        end
-    end
-end
-"""
+        # compute the density profile
+        for iz in xrange(self.nzref):
+           self.densityProfC[iz] = self.presProf[iz]/parameter.r/self.tempRealProf[iz]
 
-"""
-function co = DiffusionEquation(nz,dt,co,da,daz,cd,dz)
-    % Reference?
+        self.densityProfS[0] = self.densityProfC[0]
 
-    cddz = zeros(nz+2,1);
-    a = zeros(nz,3);
-    c = zeros(nz,1);
-    %--------------------------------------------------------------------------
-    cddz(1)= daz(1)*cd(1)/dz(1);
-    for iz=2:nz
-       cddz(iz) = 2.*daz(iz)*cd(iz)/(dz(iz)+dz(iz-1));
-    end
-    cddz(nz+1) = daz(nz+1)*cd(nz+1)/dz(nz);
-    %--------------------------------------------------------------------------
-    a(1,1)=0.;
-    a(1,2)=1.;
-    a(1,3)=0.;
-    c(1)=co(1);
-    for iz=2:nz-1
-       dzv=dz(iz);
-       a(iz,1)=-cddz(iz)*dt/dzv/da(iz);
-       a(iz,2)=1+dt*(cddz(iz)+cddz(iz+1))/dzv/da(iz);
-       a(iz,3)=-cddz(iz+1)*dt/dzv/da(iz);
-       c(iz)  =co(iz);
-    end
-    a(nz,1)=-1.;
-    a(nz,2)=1.;
-    a(nz,3)=0.;
-    c(nz)  =0;
-    %--------------------------------------------------------------------------
-    co = Invert (nz,a,c);
+        #for iz=2:obj.nzref
+        for iz in xrange(1,self.nzref):
+           self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] + \
+               self.densityProfC[iz-1] * self.dz[iz])/(self.dz[iz-1] + self.dz[iz])
 
-end
+        self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
-function [Kt,ustar] = DiffusionCoefficient(rho,z,dz,z0,disp,...
-    tempRur,heatRur,nz,uref,th,parameter)
+        # Ref: The UWG (2012), Eq. (5)
+        # compute diffusion coefficient
+        cd,ustarRur = self.DiffusionCoefficient(self.densityProfC[0], \
+            self.z, self.dz, self.z0r, self.disp, \
+            self.tempProf[0], rural.sens, self.nzref, forc.wind, \
+            self.tempProf, parameter)
 
-    % Initialization
-    Kt = zeros(1,nz+1);
-    ws = zeros(1,nz);
-    te = zeros(1,nz);
-    % Friction velocity (Louis 1979)
-    ustar = parameter.vk*uref/log((10.-disp)/z0);
-    % Monin-Obukhov length
-    lengthRur = max(- rho*parameter.cp*ustar^3*tempRur/parameter.vk/parameter.g/heatRur,-50);
-    % Unstable conditions
-    if gt(heatRur,1e-2)
-        % Convective velocity scale
-        wstar = (parameter.g*heatRur*parameter.dayBLHeight/rho/parameter.cp/tempRur)^(1/3);
-        % Wind profile function
-        phi_m = (1-8.*0.1*parameter.dayBLHeight/lengthRur)^(-1./3.);
-        for iz=1:nz
-            % Mixed-layer velocity scale
-            ws(iz) = (ustar^3+phi_m*parameter.vk*wstar^3*z(iz)/parameter.dayBLHeight)^(1./3.);
-            % TKE approximation
-            te(iz) = max(ws(iz)^2.,0.01);
-        end
-    % Stable and neutral conditions
-    else
-        for iz=1:nz
-            % TKE approximation
-            te(iz) = max(ustar^2.,0.01);
-        end
-    end
-    % lenght scales (l_up, l_down, l_k, l_eps)
-    [dlu,dld] = DissipationBougeault(parameter.g,nz,z,dz,te,th);
-    [dld,dls,dlk]= LengthBougeault(nz,dld,dlu,z);
-    % Boundary-layer diffusion coefficient
-    for iz=1:nz
-       Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
-    end
-    Kt(nz+1) = Kt(nz);
 
-end
+        # solve diffusion equation
+        self.tempProf = self.DiffusionEquation(self.nzref,simTime.dt,\
+            self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz)
 
-function [dlu,dld] = DissipationBougeault(g,nz,z,dz,te,pt)
+        # compute wind profile
+        for iz in xrange(self.nzref):
+            self.windProf[iz] = ustarRur/parameter.vk*\
+                math.log((self.z[iz]-self.disp)/self.z0r)
 
-    dlu = zeros(nz,1);
-    dld = zeros(nz,1);
-    for iz=1:nz
-        zup=0.;
-        dlu(iz)=z(nz+1)-z(iz)-dz(iz)/2.;
-        zzz=0.;
-        zup_inf=0.;
-        beta=g/pt(iz);
-        for izz=iz:nz-1
-           dzt=(dz(izz+1)+dz(izz))/2.;
-           zup=zup-beta*pt(iz)*dzt;
-           zup=zup+beta*(pt(izz+1)+pt(izz))*dzt/2.;
-           zzz=zzz+dzt;
-           if (lt(te(iz),zup) && ge(te(iz),zup_inf))
-             bbb=(pt(izz+1)-pt(izz))/dzt;
-             if ne(bbb,0)
-                tl=(-beta*(pt(izz)-pt(iz))+...
-                sqrt( max(0.,(beta*(pt(izz)-pt(iz)))^2.+...
-                2.*bbb*beta*(te(iz)-zup_inf))))/bbb/beta;
-             else
-             tl=(te(iz)-zup_inf)/(beta*(pt(izz)-pt(iz)));
-             end
-             dlu(iz)=max(1.,zzz-dzt+tl);
-           end
-           zup_inf=zup;
-        end
-        zdo=0.;
-        zdo_sup=0.;
-        dld(iz)=z(iz)+dz(iz)/2.;
-        zzz=0.;
-        for izz=iz:-1:2
-            dzt=(dz(izz-1)+dz(izz))/2.;
-            zdo=zdo+beta*pt(iz)*dzt;
-            zdo=zdo-beta*(pt(izz-1)+pt(izz))*dzt/2.;
-            zzz=zzz+dzt;
-            if (lt(te(iz),zdo) && ge(te(iz),zdo_sup))
-               bbb=(pt(izz)-pt(izz-1))/dzt;
-               if ne(bbb,0.)
-                 tl=(beta*(pt(izz)-pt(iz))+...
-                 sqrt( max(0.,(beta*(pt(izz)-pt(iz)))^2.+...
-                 2.*bbb*beta*(te(iz)-zdo_sup))))/bbb/beta;
-               else
-                 tl=(te(iz)-zdo_sup)/(beta*(pt(izz)-pt(iz)));
-               end
-               dld(iz)=max(1.,zzz-dzt+tl);
-            end
-            zdo_sup=zdo;
-        end
-    end
-end
+        # Average pressure
+        self.ublPres = 0.
+        for iz in xrange(self.nzfor):
+            self.ublPres = self.ublPres + \
+                self.presProf[iz]*self.dz[iz]/(self.z[self.nzref-1]+self.dz[self.nzref-1]/2.)
 
-function [dld,dls,dlk] = LengthBougeault(nz,dld,dlu,z)
 
-    dlg = zeros(nz,1);
-    dls = zeros(nz,1);
-    dlk = zeros(nz,1);
-    for iz=1:nz
-        dlg(iz)=(z(iz)+z(iz+1))/2.;
-    end
+    def DiffusionEquation(self,nz,dt,co,da,daz,cd,dz):
 
-    for iz=1:nz
-        dld(iz)=min(dld(iz),dlg(iz));
-        dls(iz)=sqrt(dlu(iz)*dld(iz));
-        dlk(iz)=min(dlu(iz),dld(iz));
-    end
+        cddz = [0 for i in xrange(nz+2)]
+        a = [[0 for j in xrange(3)] for i in xrange(nz)]
+        c = [0 for i in xrange(nz)]
 
-end
+        #print a
+        #--------------------------------------------------------------------------
+        cddz[0] = daz[0]*cd[0]/dz[0]
+        for iz in xrange(1,nz):
+           cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
 
-function x = Invert(nz,a,c)
+        cddz[nz] = daz[nz]*cd[nz]/dz[nz]
+        #--------------------------------------------------------------------------
 
-    %--------------------------------------------------------------------------
-    % Inversion and resolution of a tridiagonal matrix
-    %          A X = C
-    % Input:
-    %  a(*,1) lower diagonal (Ai,i-1)
-    %  a(*,2) principal diagonal (Ai,i)
-    %  a(*,3) upper diagonal (Ai,i+1)
-    %  c
-    % Output
-    %  x     results
-    %--------------------------------------------------------------------------
+        a[0][0] = 0.
+        a[0][1] = 1.
+        a[0][2] = 0.
+        c[0] = co[0]
 
-    x = zeros(nz,1);
+        for iz in xrange(1,nz):
+           dzv = dz[iz]
+           a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
+           a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
+           a[iz][2]=-cddz[iz+1]*dt/dzv/da[iz]
+           c[iz]=co[iz]
 
-    for in=nz-1:-1:1
-        c(in)=c(in)-a(in,3)*c(in+1)/a(in+1,2);
-        a(in,2)=a(in,2)-a(in,3)*a(in+1,1)/a(in+1,2);
-    end
+        a[nz-1][0]=-1.
+        a[nz-1][1]=1.
+        a[nz-1][2]=0.
+        c[nz-1]=0.
 
-    for in=2:nz
-        c(in)=c(in)-a(in,1)*c(in-1)/a(in-1,2);
-    end
+        #--------------------------------------------------------------------------
+        co = self.invert (nz,a,c);
 
-    for in=1:nz
-        x(in)=c(in)/a(in,2);
-    end
+        return co
 
-end
+    def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
+        # Initialization
+        Kt = [0 for x in xrange(nz+1)]
+        ws = [0 for x in xrange(nz)]
+        te = [0 for x in xrange(nz)]
+        # Friction velocity (Louis 1979)
+        ustar = parameter.vk * uref/math.log((10.-disp)/z0)
 
-"""
+        # Monin-Obukhov length
+        lengthRur = max(-rho*parameter.cp*ustar**3*tempRur/parameter.vk/parameter.g/heatRur,-50.)
+
+        # Unstable conditions
+        if heatRur > 1e-2:
+            # Convective velocity scale
+            wstar = (parameter.g*heatRur*parameter.dayBLHeight/rho/parameter.cp/tempRur)**(1/3.)
+            # Wind profile function
+            phi_m = (1-8.*0.1*parameter.dayBLHeight/lengthRur)**(-1./3.)
+
+            for iz in xrange(nz):
+                # Mixed-layer velocity scale
+                ws[iz] = (ustar**3 + phi_m*parameter.vk*wstar**3*z[iz]/parameter.dayBLHeight)**(1/3.)
+                # TKE approximation
+                te[iz] = max(ws[iz]**2., 0.01)
+
+        else: # Stable and neutral conditions
+            for iz in xrange(nz):
+                # TKE approximation
+                te[iz] = max(ustar**2.,0.01)
+
+        # lenght scales (l_up, l_down, l_k, l_eps)
+
+        dlu,dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
+
+        dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
+
+        # Boundary-layer diffusion coefficient
+        for iz in xrange(nz):
+           Kt[iz] = 0.4*dlk[iz]*math.sqrt(te[iz])
+        Kt[nz] = Kt[nz-1]
+
+        return Kt, ustar
+
+    def DissipationBougeault(self,g,nz,z,dz,te,pt):
+        # Note on translation from UWG_Matlab
+        # list length (i.e nz) != list indexing (i.e dlu[0] in python
+        # wherease in matlab it is
+
+        dlu = [0 for x in xrange(nz)]
+        dld = [0 for x in xrange(nz)]
+
+        for iz in xrange(nz):
+            zup=0.
+            dlu[iz] = z[nz] - z[iz] - dz[iz]/2.
+            zzz=0.
+            zup_inf=0.
+            beta=g/pt[iz]
+
+            for izz in xrange(nz-1):
+                dzt=(dz[izz+1]+dz[izz])/2.
+                zup=zup-beta*pt[iz]*dzt
+                zup=zup+beta*(pt[izz+1]+pt[izz])*dzt/2.
+                zzz=zzz+dzt
+
+                if (te[iz]<zup) and ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf)):
+                    bbb=(pt[izz+1]-pt[izz])/dzt
+                    if not self.is_near_zero(bbb-0.):
+                        tl=(-beta*(pt[izz]-pt[iz])+ \
+                        math.sqrt( max(0.,(beta*(pt[izz]-pt[iz]))**2.+ \
+                        2.*bbb*beta*(te[iz]-zup_inf))))/bbb/beta
+                    else:
+                        tl=(te[iz]-zup_inf)/(beta*(pt[izz]-pt[iz]))
+                    dlu[iz]=max(1.,zzz-dzt+tl)
+                zup_inf=zup
+            zdo=0.
+            zdo_sup=0.
+            dld[iz]=z[iz]+dz[iz]/2.
+            zzz=0.
+            for izz in reversed(range(iz)[1:]):
+                dzt=(dz[izz-1]+dz[izz])/2.
+                zdo=zdo+beta*pt[iz]*dzt
+                zdo=zdo-beta*(pt[izz-1]+pt[izz])*dzt/2.
+                zzz=zzz+dzt
+                if (te[iz]<zdo) and ((te[iz]>zdo_sup) or self.is_near_zero(te[iz]-zdo_sup)):
+                    bbb=(pt[izz]-pt[izz-1])/dzt
+                    if not self.is_near_zero(bbb-0.):
+                        tl=(beta*(pt[izz]-pt[iz])+ \
+                            math.sqrt( max(0.,(beta*(pt[izz]-pt[iz]))**2.+ \
+                            2.*bbb*beta*(te[iz]-zdo_sup))))/bbb/beta
+                    else:
+                        tl=(te[iz]-zdo_sup)/(beta*(pt[izz]-pt[iz]))
+                    dld[iz]=max(1.,zzz-dzt+tl)
+                zdo_sup=zdo
+
+        return dlu,dld
+
+    def LengthBougeault(self,nz,dld,dlu,z):
+
+        dlg = [0 for x in xrange(nz)]
+        dls = [0 for x in xrange(nz)]
+        dlk = [0 for x in xrange(nz)]
+
+        for iz in xrange(nz):
+            dlg[iz] = (z[iz]+z[iz+1])/2.
+
+        for iz in xrange(nz):
+            dld[iz] = min(dld[iz], dlg[iz])
+            dls[iz] = math.sqrt(dlu[iz]*dld[iz])
+            dlk[iz] = min(dlu[iz],dld[iz])
+
+        return dld,dls,dlk
+
+    def invert(self,nz,A,C):
+        """
+        Inversion and resolution of a tridiagonal matrix
+                 A X = C
+        Input:
+         nz number of layers
+         a(*,1) lower diagonal (Ai,i-1)
+         a(*,2) principal diagonal (Ai,i)
+         a(*,3) upper diagonal (Ai,i+1)
+         c
+        Output
+         x     results
+        """
+
+        X = [0 for i in xrange(nz)]
+
+        for i in reversed(xrange(nz-1)):
+            C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
+            A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
+
+        for i in  xrange(1,nz,1):
+            C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
+
+        for i in xrange(nz):
+            X[i] = C[i]/A[i][1]
+
+        return X

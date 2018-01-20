@@ -169,13 +169,13 @@ class Element(object):
         num = len(t)                # number of layers
 
         # Mean thermal conductivity over distance between 2 layers (W/mK)
-        tcp = map(lambda tcon: 0, range(num))
+        tcp = [0 for x in xrange(num)]
         # Thermal capacity times layer depth (J/m2K)
-        hcp = map(lambda tcap: 0, range(num))
+        hcp = [0 for x in xrange(num)]
         # lower, main, and upper diagonals
-        za = map(lambda y_: map(lambda x_: 0, range(3)), range(num))
+        za = [[0 for y in xrange(3)] for x in xrange(num)]
         # RHS
-        zy = map(lambda rhs_: 0, range(num))
+        zy = [0 for x in xrange(num)]
 
         #--------------------------------------------------------------------------
         # Define the column vectors for heat capactiy and conductivity
@@ -216,9 +216,10 @@ class Element(object):
             raise Exception(self.CONDUCTION_INPUT_MSG)
 
         #--------------------------------------------------------------------------
+
         zx = self.invert(num,za,zy)
         #t(:) = zx(:);
-        return zx[:] # return copy of templayers
+        return zx # return zx as 1d vector of templayers
 
     def qsat(self,temp,pres,parameter):
         """

@@ -46,12 +46,11 @@ class SimParam(object):
         self.hourDay = 0                                                    # current hours in day
 
     def __repr__(self):
-        return "SimParam: m/d/s= {a}/{b}/{e}\nnumtimesteps={c},fordays={d}\n----".format(
+        return "SimParam: m/d/s= {a}/{b}/{f} ({e}s)\n---".format(
             a=self.month,
             b=int(self.day),
-            e=int(self.secDay),
-            c=self.timeSim,
-            d=self.days
+            f=self.secDay/3600.,
+            e=int(self.secDay)
             )
 
     def is_near_zero(self,num,eps=1e-10):
