@@ -180,58 +180,59 @@ class RSMDef(object):
             self.tempProf[0], rural.sens, self.nzref, forc.wind, \
             self.tempProf, parameter)
 
-        """
-        % solve diffusion equation
-        self.tempProf = DiffusionEquation(self.nzref,simTime.dt,...
-            self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz);
-        % compute wind profile
-        for iz=1:self.nzref
-            self.windProf(iz) = ustarRur/parameter.vk*...
-                log((self.z(iz)-self.disp)/self.z0r);
-        end
-        % Average pressure
-        self.ublPres = 0;
-        for iz=1:self.nzfor
-            self.ublPres = self.ublPres +...
-                self.presProf(iz)*self.dz(iz)/...
-                (self.z(self.nzref)+self.dz(self.nzref)/2);
-        """
+
+        # solve diffusion equation
+        self.tempProf = self.DiffusionEquation(self.nzref,simTime.dt,\
+            self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz)
+
+        # compute wind profile
+        for iz in xrange(self.nzref):
+            self.windProf[iz] = ustarRur/parameter.vk*\
+                math.log((self.z[iz]-self.disp)/self.z0r)
+
+        # Average pressure
+        self.ublPres = 0.
+        for iz in xrange(self.nzfor):
+            self.ublPres = self.ublPres + \
+                self.presProf[iz]*self.dz[iz]/(self.z[self.nzref-1]+self.dz[self.nzref-1]/2.)
+
 
     def DiffusionEquation(self,nz,dt,co,da,daz,cd,dz):
-        # Reference?
-        """
-        cddz = zeros(nz+2,1);
-        a = zeros(nz,3);
-        c = zeros(nz,1);
 
-        %--------------------------------------------------------------------------
-        cddz(1)= daz(1)*cd(1)/dz(1);
-        for iz=2:nz
-           cddz(iz) = 2.*daz(iz)*cd(iz)/(dz(iz)+dz(iz-1));
-        end
-        cddz(nz+1) = daz(nz+1)*cd(nz+1)/dz(nz);
-        %--------------------------------------------------------------------------
-        a(1,1)=0.;
-        a(1,2)=1.;
-        a(1,3)=0.;
-        c(1)=co(1);
-        for iz=2:nz-1
-           dzv=dz(iz);
-           a(iz,1)=-cddz(iz)*dt/dzv/da(iz);
-           a(iz,2)=1+dt*(cddz(iz)+cddz(iz+1))/dzv/da(iz);
-           a(iz,3)=-cddz(iz+1)*dt/dzv/da(iz);
-           c(iz)  =co(iz);
-        end
-        a(nz,1)=-1.;
-        a(nz,2)=1.;
-        a(nz,3)=0.;
-        c(nz)  =0;
-        %--------------------------------------------------------------------------
-        co = Invert (nz,a,c);
-        """
+        cddz = [0 for i in xrange(nz+2)]
+        a = [[0 for j in xrange(3)] for i in xrange(nz)]
+        c = [0 for i in xrange(nz)]
+
+        #print a
+        #--------------------------------------------------------------------------
+        cddz[0] = daz[0]*cd[0]/dz[0]
+        for iz in xrange(1,nz):
+           cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
+
+        cddz[nz] = daz[nz]*cd[nz]/dz[nz]
+        #--------------------------------------------------------------------------
+
+        a[0][0] = 0.
+        a[0][1] = 1.
+        a[0][2] = 0.
+        c[0] = co[0]
+
+        for iz in xrange(1,nz):
+           dzv = dz[iz]
+           a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
+           a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
+           a[iz][2]=-cddz[iz+1]*dt/dzv/da[iz]
+           c[iz]=co[iz]
+
+        a[nz-1][0]=-1.
+        a[nz-1][1]=1.
+        a[nz-1][2]=0.
+        c[nz-1]=0.
+
+        #--------------------------------------------------------------------------
+        co = self.invert (nz,a,c);
+
         return co
-
-
 
     def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
         # Initialization
@@ -268,13 +269,10 @@ class RSMDef(object):
 
         dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
 
-        """
         # Boundary-layer diffusion coefficient
-        # for iz=1:nz
-        #   Kt(iz) = 0.4*dlk(iz)*sqrt(te(iz));
-        # end
-        # Kt(nz+1) = Kt(nz);
-        """
+        for iz in xrange(nz):
+           Kt[iz] = 0.4*dlk[iz]*math.sqrt(te[iz])
+        Kt[nz] = Kt[nz-1]
 
         return Kt, ustar
 
@@ -330,7 +328,6 @@ class RSMDef(object):
                 zdo_sup=zdo
 
         return dlu,dld
-
 
     def LengthBougeault(self,nz,dld,dlu,z):
 

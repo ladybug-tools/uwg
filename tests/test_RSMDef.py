@@ -155,7 +155,6 @@ class TestRSMDef(object):
         assert self.uwg.simTime.day == 1
         assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
-        """
 
         # Matlab Checking for RSM.VDM
         # 2d matrix = 7 x 16
@@ -166,7 +165,7 @@ class TestRSMDef(object):
             self.uwg.RSM.densityProfS,
             self.uwg.RSM.tempProf,
             self.uwg.RSM.windProf,
-            self.uwg.RSM.ublPres
+            [self.uwg.RSM.ublPres]
         ]
 
         # Flatten 2d matrix into 1d vector
@@ -178,13 +177,13 @@ class TestRSMDef(object):
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            print uwg_python_val[i], uwg_matlab_val[i]
+            #print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-        """
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+
 
 
 if __name__ == "__main__":
     test_rsm = TestRSMDef()
-    #test_rsm.test_rsm_init()
+    test_rsm.test_rsm_init()
     test_rsm.test_rsm_vdm()
