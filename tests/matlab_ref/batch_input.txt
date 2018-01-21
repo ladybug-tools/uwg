@@ -1,11 +1,33 @@
-self.uwg.rural.aeroCond        # Convection coef (refL UWG, eq.12)
-self.uwg.rural.waterStorage    # thickness of water film (m) (only for horizontal surfaces)
-self.uwg.rural.solAbs          # solar radiation absorbed (W m-2)
-self.uwg.rural.lat             # surface latent heat flux (W m-2)
-self.uwg.rural.sens            # surface sensible heat flux (W m-2)
-self.uwg.rural.flux             # external surface heat flux (W m-2)"
+self.uwg.BEM[0].building.floorHeight,        # floor height (m)
+self.uwg.BEM[0].building.intHeat,            # timestep internal heat gains (W m-2 bld) (sensible only)
+self.uwg.BEM[0].building.intHeatNight,       # nighttime internal heat gains (W m-2 floor)
+self.uwg.BEM[0].building.intHeatDay,         # daytime internal heat gains (W m-2 floor)
+self.uwg.BEM[0].building.intHeatFRad,        # radiant fraction of internal gains
+self.uwg.BEM[0].building.intHeatFLat,        # latent fraction of internal gains
+self.uwg.BEM[0].building.infil,              # Infiltration (ACH)
+self.uwg.BEM[0].building.vent,               # Ventilation (ACH)
+self.uwg.BEM[0].building.glazingRatio,       # glazing ratio
+self.uwg.BEM[0].building.uValue,             # window U-value (W m-2 K-1) (including film coeff)
+self.uwg.BEM[0].building.shgc,               # window SHGC
+self.uwg.BEM[0].building.condType,           # cooling condensation system type {'AIR', 'WATER'}
+self.uwg.BEM[0].building.cop,                # COP of the cooling system (nominal)
+self.uwg.BEM[0].building.coolSetpointDay,    # daytime indoor cooling set-point (K)
+self.uwg.BEM[0].building.coolSetpointNight,  # nighttime indoor cooling set-point (K)
+self.uwg.BEM[0].building.heatSetpointDay,    # daytime indoor heating set-point (K)
+self.uwg.BEM[0].building.heatSetpointNight,  # nighttime indoor heating set-point (K)
+self.uwg.BEM[0].building.coolCap,            # rated cooling system capacity (W m-2)
+self.uwg.BEM[0].building.heatCap,            # default heating system capacity (W m-2)
+self.uwg.BEM[0].building.heatEff,            # heating system efficiency (-)
+self.uwg.BEM[0].building.canyon_fraction,    # fraction of waste heat released to canyon, default = 1
+self.uwg.BEM[0].building.mSys,               # HVAC supply mass flowrate (kg s-1 m-2)
+self.uwg.BEM[0].building.indoorTemp,         # indoor air temperature (K)
+self.uwg.BEM[0].building.indoorHum,          # indoor specific humidity (kg / kg)
+self.uwg.BEM[0].building.FanMax,             # max fan flow rate (m^3/s) per DOE
+self.uwg.BEM[0].building.Type,               # DOE reference building type
+self.uwg.BEM[0].building.Era,                # PRE80, PST80, NEW
+self.uwg.BEM[0].building.Zone                # Climate zone number
 
-prefix2delete=self.uwg.rural.
-prefix2add=rural
-objectref=element
-methodref=surfflux
+prefix2delete=self.uwg.BEM[0].building.
+prefix2add=BEM(1).building
+objectref=
+methodref=
