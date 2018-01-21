@@ -94,16 +94,48 @@ class TestBEM(object):
                 tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
                 assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
-    def _bem_building_bemcalc_largeoffice(self):
+    def test_bem_building_bemcalc_largeoffice(self):
         """
         test for bem.building bemcalc
         """
 
         self.setup_uwg_integration()
-        self.setup_uwg_parameters()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        # Test Jan 1 (winter, no vegetation coverage)
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
+
+        # set_input
+        self.uwg.set_input()
+
+        # In order to avoid integration effects. Test only first time step
+        # Subtract timestep to stop at 300 sec
+        self.uwg.simTime.nt -= (23*12 + 11)
+
+        # Run simulation
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
+
+        # check date
+        #print self.uwg.simTime
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 1
+        assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
+
 
         # Calculated values
         uwg_python_val = [
+            # changes from constructor
+            self.uwg.BEM[0].building.intHeat,            # timestep internal heat gains (W m-2 bld) (sensible only)
+            self.uwg.BEM[0].building.intHeatNight,       # nighttime internal heat gains (W m-2 floor)
+            self.uwg.BEM[0].building.intHeatDay,         # daytime internal heat gains (W m-2 floor)
+            self.uwg.BEM[0].building.indoorTemp,         # indoor air temperature (K)
+            self.uwg.BEM[0].building.indoorHum,          # indoor specific humidity (kg / kg)
+            # new values
+            """
             self.uwg.BEM[0].building.Twb,                # wetbulb temperature
             self.uwg.BEM[0].building.Tdp,                # dew point
             self.uwg.BEM[0].building.indoorRhum,         # indoor relative humidity
@@ -133,13 +165,19 @@ class TestBEM(object):
             self.uwg.BEM[0].building.GasTotal,           # total gas consumption - (W/m^2) of floor
             self.uwg.BEM[0].building.Qhvac,              # total heat removed (sensible + latent)
             self.uwg.BEM[0].building.Qheat               # total heat added (sensible only)
+            """
         ]
 
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_bem_building_bemcalc_largeoffice.txt")
 
+        # matlab ref checking
+        #assert len(uwg_matlab_val) == len(uwg_python_val)
 
-
-
+        for i in xrange(len(uwg_matlab_val)):
+            print uwg_python_val[i], uwg_matlab_val[i]
+            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
 if __name__ == "__main__":
     b = TestBEM()
     b.test_bem_building_init_largeoffice()
+    b.test_bem_building_bemcalc_largeoffice()
