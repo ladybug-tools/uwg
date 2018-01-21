@@ -36,6 +36,7 @@ from forcing import Forcing
 from UBLDef import UBLDef
 from RSMDef import RSMDef
 from solarcalcs import SolarCalcs
+import urbflux
 
 from readDOE import readDOE
 from urbflux import urbflux
@@ -278,7 +279,7 @@ class UWG(object):
         self.cRoad = ipd['cRoad']                # road volumetric heat capacity (J/m^3 K)
 
         #TODO: Include optional parameters from intialize.uwg here after testing
-        self.bld = ipd['bld']                    # fraction of building type/era
+        self.bld = ipd['bld']                    # 16x3 matrix of fraction of building type by era
         self.albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         self.vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
         self.glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
@@ -601,12 +602,13 @@ class UWG(object):
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
-            
+
             #TODO: Code this (from RSM class)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
-            #self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+            self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+
             """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);
