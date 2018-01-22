@@ -174,7 +174,8 @@ class TestBEM(object):
         #assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            print uwg_python_val[i], uwg_matlab_val[i]
+            if i<len(uwg_python_val):
+                print uwg_python_val[i], uwg_matlab_val[i]
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
 if __name__ == "__main__":
