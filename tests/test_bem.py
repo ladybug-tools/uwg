@@ -139,7 +139,6 @@ class TestBEM(object):
             self.uwg.BEM[0].building.Twb,                # wetbulb temperature
             self.uwg.BEM[0].building.Tdp,                # dew point
             self.uwg.BEM[0].building.indoorRhum,         # indoor relative humidity
-            self.uwg.BEM[0].building.area_floor,         # total floor space of the BEM
             self.uwg.BEM[0].building.nFloor,             # number of floors
             self.uwg.BEM[0].building.RadFOcc,            # Radiant fraction of occupant
             self.uwg.BEM[0].building.LatFOcc,            # Latent fraction of occupant
@@ -173,9 +172,9 @@ class TestBEM(object):
         # matlab ref checking
         #assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
-            if i<len(uwg_python_val):
-                print uwg_python_val[i], uwg_matlab_val[i]
+        #for i in xrange(len(uwg_matlab_val)):
+            #if i<len(uwg_python_val):
+                #print uwg_python_val[i], uwg_matlab_val[i]
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
 if __name__ == "__main__":

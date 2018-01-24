@@ -143,7 +143,6 @@ class Building(object):
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
         T_can = UCM.canTemp                             # Canyon temperature
 
-
         # Normalize areas to building foot print [m^2/m^2(bld)]
         facArea = UCM.verToHor/UCM.bldDensity           # [m2(facade)/m2(bld)]
         wallArea = facArea*(1.-self.glazingRatio)       # [m2(wall)/m2(bld)]
@@ -174,13 +173,12 @@ class Building(object):
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
             return
 
-        """
+
         # -------------------------------------------------------------
         # Heat fluxes (per m^2 of bld footprint)
         # -------------------------------------------------------------
         # Solar Heat Gain: solar radiation received (W m-2) * area * SHGC
         winTrans = (BEM.wall.solRec * self.shgc * winArea)
-
 
         # Latent heat infiltration & ventilation (W/m^2 of bld footprint) from
         # volInfil/volVent: [m3 s-1 m-2 (bld/facade#)]
@@ -195,31 +193,34 @@ class Building(object):
 
         # Heat/Cooling load (W/m^2 of bld footprint), if any
         self.sensCoolDemand = max(
-            wallArea*zac_in_wall*(T_wall - T_cool) +            # wall flux based on cooling setpoint
-            massArea*zac_in_mass*(T_mass-T_cool) +              # + mass flux based on cooling setpoint
-            winArea*self.uValue*(T_can-T_cool) +                # + window flux based on cooling setpoint
-            zac_in_ceil *(T_ceil-T_cool) +                      # + ceiling flux based on cooling setpoint
-            self.intHeat +                                      # + sensible internal gain flux
-            volInfil * dens * parameter.cp * (T_can-T_cool) +   # Infiltration sensible energy from canyon
-            volVent * dens * parameter.cp * (T_can-T_cool) +    # Ventilation sensible energy from canyon
-            winTrans,                                           # solar heat gain through window
+            wallArea*zac_in_wall*(T_wall - T_cool) +            # wall load
+            massArea*zac_in_mass*(T_mass-T_cool) +              # mass load
+            winArea*self.uValue*(T_can-T_cool) +                # window load due to temp delta
+            zac_in_ceil *(T_ceil-T_cool) +                      # ceiling load
+            self.intHeat +                                      # internal load
+            volInfil * dens * parameter.cp * (T_can-T_cool) +   # infiltration load
+            volVent * dens * parameter.cp * (T_can-T_cool) +    # ventilation load
+            winTrans,                                           # solar load through window
             0.)
 
 
-        self.sensHeatDemand = max(-(wallArea*zac_in_wall*(T_wall-T_heat)+...
-            massArea*zac_in_mass*(T_mass-T_heat)+...
-            winArea*self.uValue*(T_can-T_heat)+...
-            zac_in_ceil*(T_ceil-T_heat)+...
-            self.intHeat+...
-            volInfil*dens*parameter.cp*(T_can-T_heat)+...
-            volVent*dens*parameter.cp*(T_can-T_heat) + ...
-            winTrans),0)
+        self.sensHeatDemand = max(
+            -(wallArea*zac_in_wall*(T_wall-T_heat) +            # wall load
+            massArea*zac_in_mass*(T_mass-T_heat) +              # mass load
+            winArea*self.uValue*(T_can-T_heat) +                # window load due to temp delta
+            zac_in_ceil*(T_ceil-T_heat) +                       # ceiling load
+            self.intHeat +                                      # internal load
+            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load
+            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load
+            winTrans),                                          # solar load through window
+            0.)
 
-        % -------------------------------------------------------------
-        % HVAC system (cooling demand = W/m^2 bld footprint)
-        % -------------------------------------------------------------
-        if self.sensCoolDemand > 0 && UCM.canTemp > 288
-
+        # -------------------------------------------------------------
+        # HVAC system (cooling demand = W/m^2 bld footprint)
+        # -------------------------------------------------------------
+        if self.sensCoolDemand > 0. and UCM.canTemp > 288.:
+            pass
+        """
             % Cooling energy is the equivalent energy to bring a vol
             % where sensCoolDemand = dens * Cp * x * (T_indoor - 10C) &
             % given 7.8g/kg of air at 10C, assume 7g/kg of air
