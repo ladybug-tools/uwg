@@ -189,7 +189,7 @@ class Building(object):
 
         QLinfil = volInfil * dens * parameter.lv * (UCM.canHum - self.indoorHum)
         QLvent = volVent * dens * parameter.lv * (UCM.canHum - self.indoorHum)
-        QLintload = self.intHeat * self.intHeatFLat #Qlatent Internal load = timestep internal gain * internal gain latent fraction
+        QLintload = self.intHeat * self.intHeatFLat # Qlatent Internal load = timestep internal gain * internal gain latent fraction
 
         # Heat/Cooling load (W/m^2 of bld footprint), if any
         self.sensCoolDemand = max(
@@ -198,8 +198,8 @@ class Building(object):
             winArea*self.uValue*(T_can-T_cool) +                # window load due to temp delta
             zac_in_ceil *(T_ceil-T_cool) +                      # ceiling load
             self.intHeat +                                      # internal load
-            volInfil * dens * parameter.cp * (T_can-T_cool) +   # infiltration load
-            volVent * dens * parameter.cp * (T_can-T_cool) +    # ventilation load
+            volInfil*dens*parameter.cp*(T_can-T_cool) +         # infiltration load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
+            volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
             winTrans,                                           # solar load through window
             0.)
 
@@ -210,8 +210,8 @@ class Building(object):
             winArea*self.uValue*(T_can-T_heat) +                # window load due to temp delta
             zac_in_ceil*(T_ceil-T_heat) +                       # ceiling load
             self.intHeat +                                      # internal load
-            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load
-            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load
+            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
+            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
             winTrans),                                          # solar load through window
             0.)
 
@@ -219,52 +219,50 @@ class Building(object):
         # HVAC system (cooling demand = W/m^2 bld footprint)
         # -------------------------------------------------------------
         if self.sensCoolDemand > 0. and UCM.canTemp > 288.:
-            pass
-        """
-            % Cooling energy is the equivalent energy to bring a vol
-            % where sensCoolDemand = dens * Cp * x * (T_indoor - 10C) &
-            % given 7.8g/kg of air at 10C, assume 7g/kg of air
-            % dehumDemand = x * dens * (self.indoorHum -
-            % 0.9*0.0078)*parameter.lv
-            VolCool = self.sensCoolDemand / (dens*parameter.cp*(T_indoor-283.15))
-            self.dehumDemand = max(VolCool * dens * (self.indoorHum - 0.9*0.0078)*parameter.lv,0)
+            # Cooling energy is the equivalent energy to bring a vol
+            # where sensCoolDemand = dens * Cp * x * (T_indoor - 10C) &
+            # given 7.8g/kg of air at 10C, assume 7g/kg of air
+            # dehumDemand = x * dens * (self.indoorHum -
+            # 0.9*0.0078)*parameter.lv
+            VolCool = self.sensCoolDemand / (dens*parameter.cp*(T_indoor-283.15)) # m3
+            self.dehumDemand = max(VolCool * dens * (self.indoorHum - 0.9*0.0078)*parameter.lv, 0.)
 
-            if (self.dehumDemand + self.sensCoolDemand) > (self.coolCap * self.nFloor)
+            if (self.dehumDemand + self.sensCoolDemand) > (self.coolCap * self.nFloor): # if cooling demand greater then hvac cooling capacity
                 self.Qhvac = self.coolCap * self.nFloor
                 VolCool = VolCool / (self.dehumDemand + self.sensCoolDemand) * (self.coolCap * self.nFloor)
                 self.sensCoolDemand = self.sensCoolDemand * (self.coolCap * self.nFloor) / (self.dehumDemand + self.sensCoolDemand)
                 self.dehumDemand = self.dehumDemand * (self.coolCap * self.nFloor) / (self.dehumDemand + self.sensCoolDemand)
-            else
+            else:
                 self.Qhvac = self.dehumDemand + self.sensCoolDemand
-            end
-            Qdehum = VolCool * dens * parameter.lv * (self.indoorHum - 0.9*0.0078)
-            self.coolConsump =(max(self.sensCoolDemand+self.dehumDemand,0))/self.copAdj
 
-            % Waste heat from HVAC (per m^2 building foot print)
-            if strcmp(self.condType,'AIR')
+            Qdehum = VolCool * dens * parameter.lv * (self.indoorHum - 0.9*0.0078)
+            self.coolConsump = (max(self.sensCoolDemand+self.dehumDemand,0.0))/self.copAdj
+
+            # Waste heat from HVAC (per m^2 building foot print)
+            if (self.condType == 'AIR'):
                 self.sensWaste = max(self.sensCoolDemand+self.dehumDemand,0)+self.coolConsump
                 self.latWaste = 0.0
-            elseif strcmp(self.condType,'WAT') % Not sure if this works well
+            elif (self.condType == 'WAT'): # Not sure if this works well
                 self.sensWaste = max(self.sensCoolDemand+self.dehumDemand,0)+self.coolConsump*(1.-evapEff)
                 self.latWaste = max(self.sensCoolDemand+self.dehumDemand,0)+self.coolConsump*evapEff
-            end
-            self.sensHeatDemand = 0
 
-        % -------------------------------------------------------------
-        % Heating system (heating demand = W/m^2 bld footprint)
-        % -------------------------------------------------------------
-        elseif self.sensHeatDemand > 0 && UCM.canTemp < 288
+            self.sensHeatDemand = 0.
 
-            % limit on heating capacity
-            self.Qheat = min(self.sensHeatDemand,self.heatCap*self.nFloor)
+        # -------------------------------------------------------------
+        # HVAC system (heating demand = W/m^2 bld footprint)
+        # -------------------------------------------------------------
+        elif self.sensHeatDemand > 0. and UCM.canTemp < 288.:
+
+            # limit on heating capacity
+            self.Qheat = min(self.sensHeatDemand, self.heatCap*self.nFloor)
             self.heatConsump  = self.Qheat / self.heatEff
-            self.sensWaste = self.heatConsump - self.Qheat         % waste per footprint
-            self.heatConsump = self.heatConsump/self.nFloor        % adjust to be per floor area
-            self.sensHeatDemand = self.Qheat/self.nFloor           % adjust to be per floor area
-            Qdehum = 0
-            self.sensCoolDemand = 0
-        end
+            self.sensWaste = self.heatConsump - self.Qheat         # waste per footprint
+            self.heatConsump = self.heatConsump/self.nFloor        # adjust to be per floor area
+            self.sensHeatDemand = self.Qheat/self.nFloor           # adjust to be per floor area
+            Qdehum = 0.0
+            self.sensCoolDemand = 0.0
 
+        """
         % -------------------------------------------------------------
         % Evolution of the internal temperature and humidity
         % -------------------------------------------------------------
