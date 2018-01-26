@@ -134,10 +134,10 @@ class Building(object):
         Qdehum = 0
         dens =  psychrometrics.moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
-        volVent = self.vent*self.nFloor                 # total vent volumetric flow for mass [m3 s-1 m-2 (bld/area)]
-        volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1 m-2 (bld/facade#)]
+        volVent = self.vent * self.nFloor               # total vent volumetric flow [m3 s-1]
+        volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1]
         T_wall = BEM.wall.layerTemp[-1]                 # Inner layer
-        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s per m-2 (bld/area)]
+        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s]
         T_ceil = BEM.roof.layerTemp[-1]                 # Inner layer
         T_mass = BEM.mass.layerTemp[0]                  # Outer layer
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
@@ -198,8 +198,8 @@ class Building(object):
             winArea*self.uValue*(T_can-T_cool) +                # window load due to temp delta
             zac_in_ceil *(T_ceil-T_cool) +                      # ceiling load
             self.intHeat +                                      # internal load
-            volInfil*dens*parameter.cp*(T_can-T_cool) +         # infiltration load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
-            volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
+            volInfil*dens*parameter.cp*(T_can-T_cool) +         # infiltration load (volInfil = m3 s-1)
+            volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load (volVent = m3 s-1)
             winTrans,                                           # solar load through window
             0.)
 
@@ -210,8 +210,8 @@ class Building(object):
             winArea*self.uValue*(T_can-T_heat) +                # window load due to temp delta
             zac_in_ceil*(T_ceil-T_heat) +                       # ceiling load
             self.intHeat +                                      # internal load
-            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
-            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load TODO: cp = J/kg K (UWG.m) shouldn't this be /300s?
+            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load
+            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load
             winTrans),                                          # solar load through window
             0.)
 
@@ -262,57 +262,62 @@ class Building(object):
             Qdehum = 0.0
             self.sensCoolDemand = 0.0
 
-        """
-        % -------------------------------------------------------------
-        % Evolution of the internal temperature and humidity
-        % -------------------------------------------------------------
-        % wall, mass, roof, intload, infil, vent, hvac, heat, window
-        Q = self.intHeat + winTrans + self.Qheat-self.sensCoolDemand
 
-        H1 = T_wall*wallArea*zac_in_wall + ...
-            T_mass*massArea*zac_in_mass + ...
-            T_ceil*zac_in_ceil + ...
-            T_can*winArea*self.uValue + ...
-            T_can*volInfil * dens * parameter.cp + ...
-            T_can*volVent * dens * parameter.cp
+        # -------------------------------------------------------------
+        # Evolution of the internal temperature and humidity
+        # -------------------------------------------------------------
+        # wall, mass, roof, intload, infil, vent, hvac, heat, window
 
-        H2 = wallArea*zac_in_wall + ...
-            massArea*zac_in_mass + ...
-            zac_in_ceil + ...
-            winArea*self.uValue + ...
-            volInfil * dens * parameter.cp + ...
-            volVent * dens * parameter.cp
+        Q = self.intHeat + winTrans + self.Qheat - self.sensCoolDemand
 
+        H1 = (T_wall*wallArea*zac_in_wall +
+            T_mass*massArea*zac_in_mass +
+            T_ceil*zac_in_ceil +
+            T_can*winArea*self.uValue +
+            T_can*volInfil * dens * parameter.cp +
+            T_can*volVent * dens * parameter.cp)
+
+        H2 = (wallArea*zac_in_wall +
+            massArea*zac_in_mass +
+            zac_in_ceil +
+            winArea*self.uValue +
+            volInfil * dens * parameter.cp +
+            volVent * dens * parameter.cp)
+
+        # Assumes air temperature of control volume is sum of surface boundary temperatures
+        # weighted by area and heat transfer coefficient + generated heat
         self.indoorTemp = (H1 + Q)/H2
-        self.indoorHum = self.indoorHum + simTime.dt/(dens * parameter.lv * UCM.bldHeight) * (...
-            QLintload + QLinfil + QLvent - Qdehum)
-        [~,~,self.indoorRhum,~,~,~] = Psychrometrics (self.indoorTemp, self.indoorHum, forc.pres)
+        self.indoorHum = self.indoorHum + simTime.dt/(dens * parameter.lv * UCM.bldHeight) * \
+            (QLintload + QLinfil + QLvent - Qdehum)
 
-        % These are used for element calculation (per m^2 of element area)
-        self.fluxWall = zac_in_wall *(T_indoor - T_wall)
-        self.fluxRoof = zac_in_ceil *(T_indoor - T_ceil)
-        self.fluxMass = zac_in_mass *(T_indoor - T_mass) + self.intHeat * self.intHeatFRad/massArea
+        # Calculate relative humidity (Pw/Pws*100) using pressurce, indoor temperature, humidity
+        _Tdb, _w, _phi, _h, _Tdp, _v = psychrometrics.psychrometrics(self.indoorTemp, self.indoorHum, forc.pres)
+        self.indoorRhum = _phi
 
-        % These are for record keeping only, per m^2 of floor area
+        # These are used for element calculation (per m^2 of element area)
+        self.fluxWall = zac_in_wall * (T_indoor - T_wall)
+        self.fluxRoof = zac_in_ceil * (T_indoor - T_ceil)
+        self.fluxMass = zac_in_mass * (T_indoor - T_mass) + self.intHeat * self.intHeatFRad/massArea
+
+        # These are for record keeping only, per m^2 of floor area (W m-2)
         self.fluxSolar = winTrans/self.nFloor
         self.fluxWindow = winArea * self.uValue *(T_can - T_indoor)/self.nFloor
         self.fluxInterior = self.intHeat * self.intHeatFRad *(1.-self.intHeatFLat)/self.nFloor
-        self.fluxInfil= volInfil * dens * parameter.cp *(T_can - T_indoor)/self.nFloor
-        self.fluxVent = volVent * dens * parameter.cp *(T_can - T_indoor)/self.nFloor
+        self.fluxInfil= volInfil * dens * parameter.cp *(T_can - T_indoor)/self.nFloor # volInfil = m3 s-1
+        self.fluxVent = volVent * dens * parameter.cp *(T_can - T_indoor)/self.nFloor  # volVent = m3 s-1
         self.coolConsump = self.coolConsump/self.nFloor
         self.sensCoolDemand = self.sensCoolDemand/self.nFloor
 
-        % Total Electricity/building floor area (W/m^2)
+        # Total Electricity/building floor area (W/m^2)
         self.ElecTotal = self.coolConsump + BEM.Elec + BEM.Light
 
-        % Waste heat to canyon, W/m^2 of building + water
-        CpH20 = 4200            % heat capacity of water
-        T_hot = 49 + 273.15     % Service water temp (assume no storage)
-        self.sensWaste = self.sensWaste + (1/self.heatEff-1)*(volSWH*CpH20*(T_hot - forc.waterTemp)) + BEM.Gas*(1-self.heatEff)*self.nFloor
+        # Waste heat to canyon, W/m^2 of building + water
+        CpH20 = 4200.           # heat capacity of water
+        T_hot = 49 + 273.15     # Service water temp (assume no storage)
+        self.sensWaste = self.sensWaste + (1/self.heatEff-1.)*(volSWH*CpH20*(T_hot - forc.waterTemp)) + BEM.Gas*(1-self.heatEff)*self.nFloor
 
-        % Gas equip per floor + water usage per floor + heating/floor
+        # Gas equip per floor + water usage per floor + heating/floor
         self.GasTotal = BEM.Gas + volSWH*CpH20*(T_hot - forc.waterTemp)/self.nFloor/self.heatEff + self.heatConsump
-        """
 
 """
 function r = root_finder(f,a,b)

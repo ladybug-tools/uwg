@@ -12,7 +12,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     UCM.roofTemp = 0.       # Average urban roof temperature
     UCM.wallTemp = 0.       # Average urban wall temperature
 
-
+    
     for j in xrange(len(BEM)):
         # Building energy model
         BEM[j].building.BEMCalc(UCM, BEM[j], forc, parameter, simTime)
