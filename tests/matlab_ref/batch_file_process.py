@@ -40,15 +40,20 @@ def batch_file_process():
             L[i] = line
             i += 1
 
+    # For uwg_python_val
+    #for i in xrange(len(L)):
+    #    L[i] = L[i].split(prefix2delete)[-1] if prefix2delete!="" else L[i]
+    #    print '{prefix}.{valuename},'.format(valuename=L[i], prefix=prefix2add)
 
     # create three outputs
+    print "%%{"
     print "fileID = fopen('..\\UWG_Python\\tests\\matlab_ref\\matlab_{}\\matlab_ref_{}.txt','w');".format(objectref,objectref+"_"+methodref)
     print "format long;"
     for i in xrange(len(L)):
         L[i] = L[i].split(prefix2delete)[-1] if prefix2delete!="" else L[i]
         print 'fprintf(fileID, "{value}", {prefix}.{valuename});'.format(value=r"%.16f\n", valuename=L[i], prefix=prefix2add)
     print "fclose(fileID);"
-
+    print "%}%"
 
 
 if __name__ == "__main__":

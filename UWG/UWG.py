@@ -36,9 +36,13 @@ from forcing import Forcing
 from UBLDef import UBLDef
 from RSMDef import RSMDef
 from solarcalcs import SolarCalcs
+import urbflux
 
 from readDOE import readDOE
 from urbflux import urbflux
+
+import pprint
+pp = lambda x: pprint.pprint(x)
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -278,7 +282,7 @@ class UWG(object):
         self.cRoad = ipd['cRoad']                # road volumetric heat capacity (J/m^3 K)
 
         #TODO: Include optional parameters from intialize.uwg here after testing
-        self.bld = ipd['bld']                    # fraction of building type/era
+        self.bld = ipd['bld']                    # 16x3 matrix of fraction of building type by era
         self.albRoof = ipd['albRoof']            # roof albedo (0 - 1)
         self.vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
         self.glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
@@ -403,7 +407,7 @@ class UWG(object):
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,self.h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
-        #self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
+        self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
 
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
@@ -515,9 +519,8 @@ class UWG(object):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
             else:
-                #TODO check soilindex1
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month-1] #soil temperature by depth, by month
-                self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
+                self.forc.waterTemp = self.Tsoil[2][self.simTime.month-1]
 
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
@@ -601,12 +604,13 @@ class UWG(object):
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
-            
+
             #TODO: Code this (from RSM class)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
-            #self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+            self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+
             """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);

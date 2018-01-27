@@ -1,11 +1,39 @@
-self.uwg.rural.aeroCond        # Convection coef (refL UWG, eq.12)
-self.uwg.rural.waterStorage    # thickness of water film (m) (only for horizontal surfaces)
-self.uwg.rural.solAbs          # solar radiation absorbed (W m-2)
-self.uwg.rural.lat             # surface latent heat flux (W m-2)
-self.uwg.rural.sens            # surface sensible heat flux (W m-2)
-self.uwg.rural.flux             # external surface heat flux (W m-2)"
+self.uwg.BEM[0].building.intHeat,            # timestep internal heat gains (W m-2 bld) (sensible only)
+self.uwg.BEM[0].building.intHeatNight,       # nighttime internal heat gains (W m-2 floor)
+self.uwg.BEM[0].building.intHeatDay,         # daytime internal heat gains (W m-2 floor)
+self.uwg.BEM[0].building.indoorTemp,         # indoor air temperature (K)
+self.uwg.BEM[0].building.indoorHum,          # indoor specific humidity (kg / kg)
+self.uwg.BEM[0].building.Twb,                # wetbulb temperature
+self.uwg.BEM[0].building.Tdp,                # dew point
+self.uwg.BEM[0].building.indoorRhum,         # indoor relative humidity
+self.uwg.BEM[0].building.area_floor,         # total floor space of the BEM
+self.uwg.BEM[0].building.nFloor,             # number of floors
+self.uwg.BEM[0].building.RadFOcc,            # Radiant fraction of occupant
+self.uwg.BEM[0].building.LatFOcc,            # Latent fraction of occupant
+self.uwg.BEM[0].building.RadFEquip,          # Radiant fraction of equipment
+self.uwg.BEM[0].building.RadFLight,          # Radiant fraction of light
+self.uwg.BEM[0].building.sensCoolDemand,     # building sensible cooling demand (W m-2)
+self.uwg.BEM[0].building.sensHeatDemand,     # building sensible heating demand (W m-2)
+self.uwg.BEM[0].building.copAdj,             # adjusted COP per temperature
+self.uwg.BEM[0].building.dehumDemand,        # dehumidification energy (W m-2)
+self.uwg.BEM[0].building.coolConsump,        # cooling energy consumption (W m-2)
+self.uwg.BEM[0].building.heatConsump,        # heating energy consumption (W m-2)
+self.uwg.BEM[0].building.sensWaste,          # sensible waste heat (W m-2)
+self.uwg.BEM[0].building.latWaste,           # lat waste heat (W m-2)
+self.uwg.BEM[0].building.fluxMass,           # mass surface heat flux (W m-2) (mass to indoor air)
+self.uwg.BEM[0].building.fluxWall,           # wall surface heat flux (W m-2) (wall to inside)
+self.uwg.BEM[0].building.fluxRoof,           # roof surface heat flux (W m-2) (roof to inside)
+self.uwg.BEM[0].building.fluxSolar,          # solar heat gain (W m-2) through window (SHGC)
+self.uwg.BEM[0].building.fluxWindow,         # heat gain/loss from window (U-value)
+self.uwg.BEM[0].building.fluxInterior,       # internal heat gain adjusted for latent/LW heat (W m-2)
+self.uwg.BEM[0].building.fluxInfil,          # heat flux from infiltration (W m-2)
+self.uwg.BEM[0].building.fluxVent,           # heat flux from ventilation (W m-2)
+self.uwg.BEM[0].building.ElecTotal,          # total electricity consumption - (W/m^2) of floor
+self.uwg.BEM[0].building.GasTotal,           # total gas consumption - (W/m^2) of floor
+self.uwg.BEM[0].building.Qhvac,              # total heat removed (sensible + latent)
+self.uwg.BEM[0].building.Qheat               # total heat added (sensible only)
 
-prefix2delete=self.uwg.rural.
-prefix2add=rural
-objectref=element
-methodref=surfflux
+prefix2delete=self.uwg.BEM[0].building.
+prefix2add=BEM(1).building
+objectref=
+methodref=

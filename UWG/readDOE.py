@@ -332,7 +332,7 @@ def readDOE(serialize_output=True):
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
-                refBEM[i][j][k].building.FanMax = FanFlow[j][k]
+                refBEM[i][j][k].building.FanMax = FanFlow[j][k] # max fan flow rate (m^3/s) per DOE
 
                 Schedule[i][j][k] = SchDef()
 
