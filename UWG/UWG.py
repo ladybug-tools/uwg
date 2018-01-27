@@ -41,6 +41,9 @@ import urbflux
 from readDOE import readDOE
 from urbflux import urbflux
 
+import pprint
+pp = lambda x: pprint.pprint(x)
+
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
 
@@ -516,9 +519,8 @@ class UWG(object):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.waterTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp)) - 10.      # for BUBBLE/CAPITOUL/Singapore only
             else:
-                #TODO check soilindex1
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month-1] #soil temperature by depth, by month
-                self.forc.waterTemp = self.Tsoil[2][self.simTime.month]
+                self.forc.waterTemp = self.Tsoil[2][self.simTime.month-1]
 
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()

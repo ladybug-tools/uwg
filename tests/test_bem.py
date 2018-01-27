@@ -94,9 +94,9 @@ class TestBEM(object):
                 tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
                 assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
-    def test_bem_building_bemcalc_largeoffice(self):
+    def test_bem_building_bemcalc_largeoffice_cooling(self):
         """
-        test for bem.building bemcalc
+        test for bem.building bemcalc during cooling period
         """
 
         self.setup_uwg_integration()
@@ -127,6 +127,7 @@ class TestBEM(object):
 
 
         # Calculated values
+        # commneted out properties are instantiated building variables that are never actually set in UWG_Matlab
         uwg_python_val = [
             # changes from constructor
             self.uwg.BEM[0].building.intHeat,            # timestep internal heat gains (W m-2 bld) (sensible only)
@@ -135,15 +136,13 @@ class TestBEM(object):
             self.uwg.BEM[0].building.indoorTemp,         # indoor air temperature (K)
             self.uwg.BEM[0].building.indoorHum,          # indoor specific humidity (kg / kg)
             # new values
-            """
-            self.uwg.BEM[0].building.Twb,                # wetbulb temperature
-            self.uwg.BEM[0].building.Tdp,                # dew point
+            #self.uwg.BEM[0].building.Tdp,               # dew point
             self.uwg.BEM[0].building.indoorRhum,         # indoor relative humidity
             self.uwg.BEM[0].building.nFloor,             # number of floors
-            self.uwg.BEM[0].building.RadFOcc,            # Radiant fraction of occupant
-            self.uwg.BEM[0].building.LatFOcc,            # Latent fraction of occupant
-            self.uwg.BEM[0].building.RadFEquip,          # Radiant fraction of equipment
-            self.uwg.BEM[0].building.RadFLight,          # Radiant fraction of light
+            #self.uwg.BEM[0].building.RadFOcc,            # Radiant fraction of occupant
+            #self.uwg.BEM[0].building.LatFOcc,            # Latent fraction of occupant
+            #self.uwg.BEM[0].building.RadFEquip,          # Radiant fraction of equipment
+            #self.uwg.BEM[0].building.RadFLight,          # Radiant fraction of light
             self.uwg.BEM[0].building.sensCoolDemand,     # building sensible cooling demand (W m-2)
             self.uwg.BEM[0].building.sensHeatDemand,     # building sensible heating demand (W m-2)
             self.uwg.BEM[0].building.copAdj,             # adjusted COP per temperature
@@ -151,7 +150,7 @@ class TestBEM(object):
             self.uwg.BEM[0].building.coolConsump,        # cooling energy consumption (W m-2)
             self.uwg.BEM[0].building.heatConsump,        # heating energy consumption (W m-2)
             self.uwg.BEM[0].building.sensWaste,          # sensible waste heat (W m-2)
-            self.uwg.BEM[0].building.latWaste,           # lat waste heat (W m-2)
+            #self.uwg.BEM[0].building.latWaste,           # lat waste heat (W m-2)
             self.uwg.BEM[0].building.fluxMass,           # mass surface heat flux (W m-2) (mass to indoor air)
             self.uwg.BEM[0].building.fluxWall,           # wall surface heat flux (W m-2) (wall to inside)
             self.uwg.BEM[0].building.fluxRoof,           # roof surface heat flux (W m-2) (roof to inside)
@@ -161,23 +160,22 @@ class TestBEM(object):
             self.uwg.BEM[0].building.fluxInfil,          # heat flux from infiltration (W m-2)
             self.uwg.BEM[0].building.fluxVent,           # heat flux from ventilation (W m-2)
             self.uwg.BEM[0].building.ElecTotal,          # total electricity consumption - (W/m^2) of floor
-            self.uwg.BEM[0].building.GasTotal,           # total gas consumption - (W/m^2) of floor
+            self.uwg.BEM[0].building.GasTotal,   ##        # total gas consumption - (W/m^2) of floor
             self.uwg.BEM[0].building.Qhvac,              # total heat removed (sensible + latent)
             self.uwg.BEM[0].building.Qheat               # total heat added (sensible only)
-            """
         ]
 
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_bem_building_bemcalc_largeoffice.txt")
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_bem_building_bemcalc_largeoffice_cooling.txt")
 
-        # matlab ref checking
-        #assert len(uwg_matlab_val) == len(uwg_python_val)
+        #matlab ref checking
+        assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        #for i in xrange(len(uwg_matlab_val)):
-            #if i<len(uwg_python_val):
-                #print uwg_python_val[i], uwg_matlab_val[i]
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+        for i in xrange(len(uwg_matlab_val)):
+            #print i, uwg_python_val[i], ' == ', uwg_matlab_val[i]
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
 if __name__ == "__main__":
     b = TestBEM()
-    b.test_bem_building_init_largeoffice()
-    b.test_bem_building_bemcalc_largeoffice()
+    #b.test_bem_building_init_largeoffice()
+    b.test_bem_building_bemcalc_largeoffice_cooling()

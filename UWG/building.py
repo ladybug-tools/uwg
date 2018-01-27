@@ -130,8 +130,8 @@ class Building(object):
         self.heatConsump  = 0.0                         # heating energy consumption (W m-2)
         self.sensWaste = 0.0                            # Sensible waste heat (W m-2)
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
-        self.Qhvac = 0                                  # Total heat removed (sensible + latent)
-        Qdehum = 0
+        self.Qhvac = 0.0                                  # Total heat removed (sensible + latent)
+        Qdehum = 0.0
         dens =  psychrometrics.moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent * self.nFloor               # total vent volumetric flow [m3 s-1]
@@ -158,7 +158,6 @@ class Building(object):
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
             self.intHeat = self.intHeatDay*self.nFloor
-
 
         # Indoor convection heat transfer coefficients
         zac_in_wall = 3.076                             # wall heat convection coefficeint
@@ -318,6 +317,8 @@ class Building(object):
 
         # Gas equip per floor + water usage per floor + heating/floor
         self.GasTotal = BEM.Gas + volSWH*CpH20*(T_hot - forc.waterTemp)/self.nFloor/self.heatEff + self.heatConsump
+
+
 
 """
 function r = root_finder(f,a,b)
