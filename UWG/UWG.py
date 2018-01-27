@@ -604,13 +604,11 @@ class UWG(object):
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
-
-            #TODO: Code this (from RSM class)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
-
+            
             """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);

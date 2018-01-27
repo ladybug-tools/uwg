@@ -8,11 +8,11 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     T_can = UCM.canTemp
     Cp = parameter.cp
     UCM.Q_roof = 0.
-    sigma = 5.67e-8        # Stephan-Boltzman constant
+    sigma = 5.67e-8         # Stephan-Boltzman constant
     UCM.roofTemp = 0.       # Average urban roof temperature
     UCM.wallTemp = 0.       # Average urban wall temperature
 
-    
+
     for j in xrange(len(BEM)):
         # Building energy model
         BEM[j].building.BEMCalc(UCM, BEM[j], forc, parameter, simTime)
@@ -31,12 +31,8 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
         # calculates the infrared radiation for wall, taking into account radiation exchange from road
         _infra_road_, BEM[j].wall.infra = infracalcs(UCM, forc, UCM.road.emissivity, e_wall, UCM.roadTemp, T_wall)
 
-        # Update element temperatures
-        BEM[j].building.fluxMass = 100.0 # (w/m2) TEMPORARY DELETE THIS
-        # this function will mutate BEM[j].mass.layerTemp
-        BEM[j].mass.Conduction(simTime.dt, BEM[j].building.fluxMass, 1, 0, BEM[j].building.fluxMass)
-
-
+        % Update element temperatures
+        BEM(j).mass.layerTemp = Conduction(BEM(j).mass,simTime.dt,BEM(j).building.fluxMass,1,0,BEM(j).building.fluxMass);
         BEM(j).roof = SurfFlux(BEM(j).roof,forc,parameter,simTime,UCM.canHum,T_can,max(forc.wind,UCM.canWind),1,BEM(j).building.fluxRoof);
         BEM(j).wall = SurfFlux(BEM(j).wall,forc,parameter,simTime,UCM.canHum,T_can,UCM.canWind,1,BEM(j).building.fluxWall);
 
