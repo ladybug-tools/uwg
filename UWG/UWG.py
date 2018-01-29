@@ -602,8 +602,9 @@ class UWG(object):
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
 
+            self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
+
             """
-            UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);
 
             % Experimental code to run diffusion model in the urban area
