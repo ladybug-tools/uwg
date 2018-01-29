@@ -41,7 +41,6 @@ import urbflux
 from readDOE import readDOE
 from urbflux import urbflux
 
-import pprint
 pp = lambda x: pprint.pprint(x)
 
 class UWG(object):
@@ -400,11 +399,6 @@ class UWG(object):
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
 
-        #print '---i---'
-        #print self.BEM[0].frac
-        #print self.BEM[1].frac
-        #print '---f---'
-
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat,self.lon,self.GMT,self.h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
         self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
@@ -470,7 +464,6 @@ class UWG(object):
             self.dayType    # 3=Sun, 2=Sat, 1=Weekday
             self.ceil_time_step # simulation timestep (dt) fitted to weather file timestep
         """
-
 
         self.N = int(self.simTime.days * 24)       # total number of hours in simulation
         n = 0
@@ -603,12 +596,12 @@ class UWG(object):
 
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
-            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0., it)
+            self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
-            
+
             """
             UCM = UCModel(UCM,BEM,UBL.ublTemp,forc,geoParam);
             UBL = UBLModel(UBL,UCM,RSM,rural,forc,geoParam,simTime);

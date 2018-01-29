@@ -88,7 +88,7 @@ class Element(object):
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
-    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux,it):
+    def SurfFlux(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
         """ Calculate net heat flux, and update element layer temperatures
         """
 
@@ -134,6 +134,55 @@ class Element(object):
         self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
         self.T_ext = self.layerTemp[0]
         self.T_int = self.layerTemp[-1]
+
+    def SurfFluxTest(self,forc,parameter,simTime,humRef,tempRef,windRef,boundCond,intFlux):
+        """ Calculate net heat flux, and update element layer temperatures
+        """
+
+        # Calculated per unit area (m^2)
+        dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density (kgd m-3)
+        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
+
+        if (self.horizontal):     # For roof, mass, road
+            # Evaporation (m s-1), Film water & soil latent heat
+            if self.waterStorage > 0.:
+                qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)[0]
+                eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
+                self.waterStorage = min(self.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax)
+                self.waterStorage = max(self.waterStorage,0.) # (m)
+            else:
+                eg = 0.
+            soilLat = eg*parameter.waterDens*parameter.lv
+
+            # Winter, no veg
+            if simTime.month < parameter.vegStart and simTime.month > parameter.vegEnd:
+                self.solAbs = (1.-self.albedo)*self.solRec # (W m-2)
+                vegLat = 0.
+                vegSens = 0.
+            else:    # Summer, veg
+                self.solAbs = ((1.-self.vegCoverage)*(1.-self.albedo)+self.vegCoverage*(1.-parameter.vegAlbedo))*self.solRec
+                vegLat = self.vegCoverage*parameter.grassFLat*(1.-parameter.vegAlbedo)*self.solRec
+                vegSens = self.vegCoverage*(1.-parameter.grassFLat)*(1.-parameter.vegAlbedo)*self.solRec
+
+            self.lat = soilLat + vegLat
+
+            # Sensible & net heat flux
+            self.sens = vegSens + self.aeroCond*(self.layerTemp[0]-tempRef)
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
+
+        else:               # For vertical surfaces (wall)
+            self.solAbs = (1.-self.albedo)*self.solRec
+            self.lat = 0.
+
+            # Sensible & net heat flux
+            self.sens = self.aeroCond*(self.layerTemp[0]-tempRef)
+            self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)
+
+        self.layerTemp = self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
+        self.T_ext = self.layerTemp[0]
+        self.T_int = self.layerTemp[-1]
+
+        print '00', self.layerTemp[0]
 
     def Conduction(self, dt, flx1, bc, temp2, flx2):
         """

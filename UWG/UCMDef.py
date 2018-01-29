@@ -122,6 +122,9 @@ class UCMDef(object):
         self.facAbsor = (1-r_glaze)*(1-alb_wall) + r_glaze*(1-0.75*SHGC) # avg facade absorptivity (-) == wall_mat_fraction * absorption + window_frac * non_solar_heat_gain
         self.roadAbsor = (1-road.vegCoverage)*(1-road.albedo)       # average road absorptivity
         self.sensHeat = 0.0                                         # urban sensible heat [W m-2]
+        # Variables set in urbflux.py
+        self.latHeat = None                                         # urban latent heat [W m-2]
+        self.windProf = []                                          # wind profile
 
     def __repr__(self):
         return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(
