@@ -71,6 +71,7 @@ class UCMDef(object):
         ElecTotal;     % Total Electricity consumption of urban area
         GasTotal;      % Total Gas consumption of the urban area
     """
+    CANYON_TEMP_BOUND_ERROR = "Something obviously went wrong (UCMDef.py)... "
 
     def __init__(self,bldHeight,bldDensity,verToHor,treeCoverage,sensAnthrop,latAnthrop,
         initialTemp,initialHum,initialWind,parameter,r_glaze,SHGC,alb_wall,road):
@@ -153,84 +154,81 @@ class UCMDef(object):
         self.roofTemp = 0.
         self.wallTemp = 0.
 
-        """
-        % Road to Canyon
-        T_road = self.road.layerTemp(1);
-        h_conv = self.road.aeroCond;
-        H1 = T_road*h_conv*self.roadArea;       % Heat (Sens) from road surface
-        H2 = h_conv*self.roadArea;
-        H1 = H1 + T_ubl*self.roadArea*self.uExch*Cp_air*dens_ubl; % Heat from UBL
-        H2 = H2 + self.roadArea*self.uExch*Cp_air*dens_ubl;
-        Q = (self.roofArea+self.roadArea)*(self.sensAnthrop + self.treeSensHeat*self.treeCoverage);
 
-        % Building energy output to canyon, in terms of absolute (total) values
-        for j = 1:numel(BEM)
+        # Road to Canyon
+        T_road = self.road.layerTemp[0]
+        h_conv = self.road.aeroCond
+        H1 = T_road*h_conv*self.roadArea       # Heat (Sens) from road surface
+        H2 = h_conv*self.roadArea
+        H1 = H1 + T_ubl*self.roadArea*self.uExch*Cp_air*dens_ubl # Heat from UBL
+        H2 = H2 + self.roadArea*self.uExch*Cp_air*dens_ubl
+        Q = (self.roofArea+self.roadArea)*(self.sensAnthrop + self.treeSensHeat*self.treeCoverage)
 
-            % Re-naming variable for readability
-            building = BEM(j).building;
-            wall = BEM(j).wall;
-            T_indoor = building.indoorTemp;
-            T_wall = wall.layerTemp(1);
-            R_glazing= building.glazingRatio;
-            A_wall = (1-R_glazing)*self.facArea;
-            A_window = R_glazing*self.facArea;
-            U_window = building.uValue;
+        # Building energy output to canyon, in terms of absolute (total) values
+        for j in xrange(len(BEM)):
+            # Re-naming variable for readability
+            building = BEM[j].building
+            wall = BEM[j].wall
+            T_indoor = building.indoorTemp
+            T_wall = wall.layerTemp[0]
+            R_glazing = building.glazingRatio
+            A_wall = (1.-R_glazing)*self.facArea
+            A_window = R_glazing*self.facArea
+            U_window = building.uValue
 
-            H1 = H1 + BEM(j).frac*(...
-                T_indoor*A_window*U_window + ...    % window U
-                T_wall*A_wall*h_conv + ...          % Wall conv
-                T_indoor*self.roofArea*BEM(j).building.vent*BEM(j).building.nFloor*Cp_air*dens + ...       % Vent
-                T_indoor*self.roofArea*BEM(j).building.infil*self.bldHeight/3600*Cp_air*dens);              % Infil
+            H1 = H1 + BEM[j].frac*(                 # fraction of the urban floor space of this typology
+                T_indoor*A_window*U_window +        # window U
+                T_wall*A_wall*h_conv +              # Wall conv
+                T_indoor*self.roofArea*BEM[j].building.vent*BEM[j].building.nFloor*Cp_air*dens +            # Vent
+                T_indoor*self.roofArea*BEM[j].building.infil*self.bldHeight/3600.0*Cp_air*dens)             # Infil
 
-            H2 = H2 + BEM(j).frac*(...
-                A_window*U_window + ...
-                A_wall*h_conv + ...
-                self.roofArea*BEM(j).building.vent*BEM(j).building.nFloor*Cp_air*dens + ...    % Vent
-                self.roofArea*BEM(j).building.infil*self.bldHeight/3600*Cp_air*dens);           % Infil
+            H2 = H2 + BEM[j].frac*(
+                A_window*U_window +
+                A_wall*h_conv +
+                self.roofArea*BEM[j].building.vent*BEM[j].building.nFloor*Cp_air*dens +                     # Vent
+                self.roofArea*BEM[j].building.infil*self.bldHeight/3600.0*Cp_air*dens)                      # Infil
 
-            Q = Q + BEM(j).frac*(...
-                self.roofArea*building.sensWaste*self.h_mix + ...         % HVAC waste heat
-                A_window*BEM(j).wall.solRec*(1-BEM(j).building.shgc));  % heat that didn't make it to inside
+            Q = Q + BEM[j].frac*(
+                self.roofArea*building.sensWaste*self.h_mix +           # HVAC waste heat
+                A_window*BEM[j].wall.solRec*(1.0-BEM[j].building.shgc))   # heat that didn't make it to inside
 
-            self.wallTemp = self.wallTemp + BEM(j).frac*T_wall;
-            self.roofTemp = self.roofTemp + BEM(j).frac*BEM(j).roof.layerTemp(1);
-            self.Q_ubl = self.Q_ubl + BEM(j).frac*self.bldDensity*(BEM(j).roof.sens + BEM(j).building.sensWaste*(1-self.h_mix)); % Changed by Jiachen Mao in March 2017
+            self.wallTemp = self.wallTemp + BEM[j].frac*T_wall
+            self.roofTemp = self.roofTemp + BEM[j].frac*BEM[j].roof.layerTemp[0]
+            self.Q_ubl = self.Q_ubl + BEM[j].frac*self.bldDensity*(BEM[j].roof.sens + BEM[j].building.sensWaste*(1.-self.h_mix)) # Changed by Jiachen Mao in March 2017
 
-        end
+        # Solve for canyon temperature
+        self.canTemp = (H1 + Q)/H2
 
-        % Solve for canyon temperature
-        self.canTemp = (H1 + Q)/H2;
+        # Heat flux based per m^2 of urban area
+        self.Q_road = h_conv*(T_road-self.canTemp)*(1.-self.bldDensity)  # Sensible heat from road (W/m^2 of urban area)
+        self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1.-self.bldDensity)
+        self.Q_wall = h_conv*(self.wallTemp-self.canTemp)*(self.verToHor)
+        self.Q_traffic = self.sensAnthrop
 
-        % Heat flux based per m^2 of urban area
-        self.Q_road = h_conv*(T_road-self.canTemp)*(1-self.bldDensity);  % Sensible heat from road (W/m^2 of urban area)
-        self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1-self.bldDensity);
-        self.Q_wall = h_conv*(self.wallTemp-self.canTemp)*(self.verToHor);
-        self.Q_traffic = self.sensAnthrop;
+        # Building energy output to canyon, per m^2 of urban area
+        T_can = self.canTemp
+        for j in xrange(len(BEM)):
+            V_vent = BEM[j].building.vent*BEM[j].building.nFloor  # ventilation volume per m^2 of building
+            V_infil = BEM[j].building.infil*self.bldHeight/3600.0
+            T_indoor = BEM[j].building.indoorTemp
+            U_window = BEM[j].building.uValue                     # Added by Jiachen Mao in March 2017
+            R_glazing = BEM[j].building.glazingRatio              # Changed by Jiachen Mao in March 2017
 
-        % Building energy output to canyon, per m^2 of urban area
-        T_can = self.canTemp;
-        for j = 1:numel(BEM)
-            V_vent = BEM(j).building.vent*BEM(j).building.nFloor; % ventilation volume per m^2 of building
-            V_infil = BEM(j).building.infil*self.bldHeight/3600;
-            T_indoor = BEM(j).building.indoorTemp;
-            R_glazing= building.glazingRatio;
+            self.Q_window = self.Q_window + BEM[j].frac*self.verToHor*R_glazing*U_window*(T_indoor-T_can)
+            self.Q_window = self.Q_window + BEM[j].frac*self.verToHor*R_glazing*BEM[j].wall.solRec*(1.-BEM[j].building.shgc)
+            self.Q_vent = self.Q_vent + BEM[j].frac*self.bldDensity*Cp_air*dens*(V_vent + V_infil)*(T_indoor-T_can)
+            self.Q_hvac = self.Q_hvac + BEM[j].frac*self.bldDensity*BEM[j].building.sensWaste*self.h_mix
 
-            self.Q_window = self.Q_window + BEM(j).frac*self.verToHor*R_glazing*U_window*(T_indoor-T_can);
-            self.Q_window = self.Q_window + BEM(j).frac*self.verToHor*R_glazing*BEM(j).wall.solRec*(1-BEM(j).building.shgc);
-            self.Q_vent = self.Q_vent + BEM(j).frac*self.bldDensity*Cp_air*dens*(V_vent + V_infil)*(T_indoor-T_can);
-            self.Q_hvac = self.Q_hvac + BEM(j).frac*self.bldDensity*BEM(j).building.sensWaste*self.h_mix;
+            self.Q_roof = self.Q_roof + BEM[j].frac*self.bldDensity*BEM[j].roof.sens
 
-            self.Q_roof = self.Q_roof + BEM(j).frac*self.bldDensity*BEM(j).roof.sens;
+            # Total Electrical & Gas power in MW
+            self.ElecTotal = self.ElecTotal + BEM[j].fl_area*BEM[j].building.ElecTotal/1.e6
+            self.GasTotal = self.GasTotal + BEM[j].fl_area*BEM[j].building.GasTotal/1.e6
 
-            % Total Electrical & Gas power in MW
-            self.ElecTotal = self.ElecTotal + BEM(j).fl_area*BEM(j).building.ElecTotal/1e6;
-            self.GasTotal = self.GasTotal + BEM(j).fl_area*BEM(j).building.GasTotal/1e6;
-        end
 
-        % Sensible Heat
-        self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof;
+        # Sensible Heat
+        self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
 
-        % Error checking
-        if self.canTemp > 350 || self.canTemp < 250
-            disp('Something obviously went wrong (UCMDef.m)... ');
-        """
+        # Error checking
+        if self.canTemp > 350. or self.canTemp < 250:
+            raise Exception(self.CANYON_TEMP_BOUND_ERROR)

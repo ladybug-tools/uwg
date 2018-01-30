@@ -3,13 +3,16 @@ import UWG
 import os
 import math
 import pprint
+import decimal
+
+dd = lambda x: decimal.Decimal.from_float(x)
 
 class TestUCMDef(object):
 
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
     DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ucm")
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if (x > 1. or int(x)==1) else 1e-15
+    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(abs(x))) + 1)) if (abs(x) > 1. or abs(int(x))==1) else 1e-15
 
 
     def setup_uwg_integration(self):
@@ -120,7 +123,7 @@ class TestUCMDef(object):
         uwg_python_val = [
             # heat load building
             self.uwg.UCM.Q_wall,        # convective sensible heat flux from building roof
-            self.uwg.UCM.Q_window,      # sensible heat flux from window (via U-factor)
+            self.uwg.UCM.Q_window,   ##   # sensible heat flux from window (via U-factor)
             self.uwg.UCM.Q_hvac,        # sensible heat flux from HVAC waste
             self.uwg.UCM.ElecTotal,     # total electricity consumption of urban area
             self.uwg.UCM.GasTotal,      # total gas consumption of urban area
@@ -133,23 +136,24 @@ class TestUCMDef(object):
             self.uwg.UCM.roofTemp,      # average roof temp (K)
             self.uwg.UCM.wallTemp,      # average wall temp (K)
             # Sensible heat
-            #self.treeSenseHeat,         # sensible heat from trees
-            #self.sensHeat,              # urban sensible heat
-            #self.canTemp                # canyon air temp (K)
+            self.uwg.UCM.treeSensHeat,         # sensible heat from trees
+            self.uwg.UCM.sensHeat,          ##    # urban sensible heat
+            self.uwg.UCM.canTemp                # canyon air temp (K)
         ]
 
         # Get uwg_matlab values
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_ucm_ucmodel.txt")
 
         # matlab ref checking
-        #assert len(uwg_matlab_val) == len(uwg_python_val)
+        assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            if i < len(uwg_python_val):
-                print uwg_python_val[i], uwg_matlab_val[i]
-            #tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            print dd(uwg_python_val[i])
+            print dd(uwg_matlab_val[i])
+            print '---.1234567890123456'
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            print tol
             #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-
 
 
 if __name__ == "__main__":
