@@ -12,7 +12,7 @@ class TestUCMDef(object):
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
     DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ucm")
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(abs(x))) + 1)) if (abs(x) > 1. or abs(int(x))==1) else 1e-15
+    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1))
 
 
     def setup_uwg_integration(self):
@@ -29,7 +29,6 @@ class TestUCMDef(object):
         """ open the matlab reference file """
 
         matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        print matlab_path
         if not os.path.exists(matlab_path):
             raise Exception("Failed to open {}!".format(matlab_path))
         matlab_file = open(matlab_path,'r')
@@ -88,6 +87,9 @@ class TestUCMDef(object):
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
 
+    def is_near_zero(self,num,eps=1e-15):
+        return abs(float(num)) < eps
+
     def test_ucm_ucmodel(self):
         """ test ucm ucmodel """
 
@@ -118,7 +120,6 @@ class TestUCMDef(object):
         assert self.uwg.simTime.day == 1
         assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
-
         # Get UWG values
         uwg_python_val = [
             # heat load building
@@ -147,14 +148,32 @@ class TestUCMDef(object):
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
+        cl = lambda x,p: 1*10**-(p - int(math.log10(x)))
+        x = 1.
+        """
+        10. = 1e-13
+        1. = 1e-14 = log10(1) = 0; 10^0=1
+        .1 = 1e-15
+        .01 = 1e-16
+        .001 = 1e-17
+        """
+        #print int(math.log10(x))
+        #print cl(x) #=1e-15
+
         for i in xrange(len(uwg_matlab_val)):
             print dd(uwg_python_val[i])
             print dd(uwg_matlab_val[i])
             print '---.1234567890123456'
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            #tol = cl(abs(uwg_python_val[i]))
+            #print tol
+            if self.is_near_zero(uwg_python_val[i]):
+                tol = 1e-15
+            else:
+                tol = cl(abs(uwg_python_val[i]),12.0)
             print tol
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+            #if i==0:
+            #    break
 
 if __name__ == "__main__":
     tucm = TestUCMDef()
