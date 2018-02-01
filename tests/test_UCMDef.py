@@ -12,8 +12,7 @@ class TestUCMDef(object):
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
     DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ucm")
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1))
-
+    CALCULATE_TOLERANCE = lambda s,x,p: 1*10**-(p - 1 - int(math.log10(x))) if abs(float(x)) > 1e-15 else 1e-15
 
     def setup_uwg_integration(self):
         """ set up uwg object from initialize.uwg """
@@ -84,11 +83,8 @@ class TestUCMDef(object):
         assert len(uwg_matlab_val) == len(uwg_python_val)
         for i in xrange(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
-
-    def is_near_zero(self,num,eps=1e-15):
-        return abs(float(num)) < eps
 
     def test_ucm_ucmodel(self):
         """ test ucm ucmodel """
@@ -148,32 +144,12 @@ class TestUCMDef(object):
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        cl = lambda x,p: 1*10**-(p - int(math.log10(x)))
-        x = 1.
-        """
-        10. = 1e-13
-        1. = 1e-14 = log10(1) = 0; 10^0=1
-        .1 = 1e-15
-        .01 = 1e-16
-        .001 = 1e-17
-        """
-        #print int(math.log10(x))
-        #print cl(x) #=1e-15
-
         for i in xrange(len(uwg_matlab_val)):
-            print dd(uwg_python_val[i])
-            print dd(uwg_matlab_val[i])
-            print '---.1234567890123456'
-            #tol = cl(abs(uwg_python_val[i]))
-            #print tol
-            if self.is_near_zero(uwg_python_val[i]):
-                tol = 1e-15
-            else:
-                tol = cl(abs(uwg_python_val[i]),12.0)
-            print tol
+            tol = self.CALCULATE_TOLERANCE(abs(uwg_python_val[i]),15.0)
+            tol = 10**(math.log10(tol)+2) # Lowering tolerance by two orders of magnitude
+            #print '-'*int(-(-15-math.log10(tol)))+'.123456789012345', tol
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-            #if i==0:
-            #    break
+
 
 if __name__ == "__main__":
     tucm = TestUCMDef()
