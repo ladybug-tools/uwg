@@ -179,12 +179,17 @@ def readDOE(serialize_output=True):
                 #print '\tclimate zone: ', zoneType[k]
                 """
                 if i==13 and j ==0 and k==6:
+                    print bldType[i]
+                    print builtEra[j]
+                    print zoneType[k]
+
                     dd = lambda x: Decimal.from_float(x)
-                    print dd(HVAC[j][k])
-                    print HVAC[j][k]
-                    print dd(AreaFloor[j])
-                    print dd(HVAC[j][k]*1000.0/AreaFloor[j])
+                    #print dd(HVAC[j][k])
+                    #print HVAC[j][k]
+                    #print dd(AreaFloor[j])
+                    print dd((HVAC[j][k]*1000.0)/AreaFloor[j])
                 """
+
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
                     1,                                  # intHeatNight
@@ -206,6 +211,7 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
+                
                 #Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 B.Type = bldType[i]
