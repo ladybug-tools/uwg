@@ -1,22 +1,15 @@
-self.uwg.UCM.Q_wall,        # convective sensible heat flux from building roof
-self.uwg.UCM.Q_window,      # sensible heat flux from window (via U-factor)
-self.uwg.UCM.Q_hvac,        # sensible heat flux from HVAC waste
-self.uwg.UCM.ElecTotal,     # total electricity consumption of urban area
-self.uwg.UCM.GasTotal,      # total gas consumption of urban area
-# heat load road/canyon/ubl
-self.uwg.UCM.Q_road,        # convective sensible heat flux from road
-self.uwg.UCM.Q_traffic,     # net sensible heat flux from traffic
-self.uwg.UCM.Q_vent,        # convective heat exchange from ventilation/infiltration
-self.uwg.UCM.Q_ubl,         # convective heat exchange with UBL layer
-# Building temperature
-self.uwg.UCM.roofTemp,      # average roof temp (K)
-self.uwg.UCM.wallTemp,      # average wall temp (K)
-# Sensible heat
-self.treeSenseHeat,         # sensible heat from trees
-self.sensHeat,              # urban sensible heat
-self.canTemp                # canyon air temp (K)
+self.uwg.UBL.location,            # relative location within a city (N,NE,E,SE,S,SW,W,NW,C)
+self.uwg.UBL.charLength,          # characteristic length of the urban area (m)
+self.uwg.UBL.perimeter,
+self.uwg.UBL.urbArea,             # horizontal urban area (m2)
+self.uwg.UBL.orthLength,          # length of the side of the urban area orthogonal to wind dir (m)
+self.uwg.UBL.paralLength,         # length of the side of the urban area parallel to wind dir (m)
+self.uwg.UBL.ublTemp,             # urban boundary layer temperature (K)
+self.uwg.UBL.ublTempdx,           # urban boundary layer temperature discretization (K)
+self.uwg.UBL.dayBLHeight,         # daytime mixing height, orig = 700
+self.uwg.UBL.nightBLHeight        # Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m); orig 80
 
-prefix2delete=self.uwg.UCM.
+prefix2delete=self.uwg.UBL.
 prefix2add=obj.
-objectref=UCM
-methodref=UCModel
+objectref=UBL
+methodref=init
