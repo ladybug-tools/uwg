@@ -120,7 +120,7 @@ class TestUCMDef(object):
         uwg_python_val = [
             # heat load building
             self.uwg.UCM.Q_wall,        # convective sensible heat flux from building roof
-            self.uwg.UCM.Q_window,   ##   # sensible heat flux from window (via U-factor)
+            self.uwg.UCM.Q_window,      # sensible heat flux from window (via U-factor)
             self.uwg.UCM.Q_hvac,        # sensible heat flux from HVAC waste
             self.uwg.UCM.ElecTotal,     # total electricity consumption of urban area
             self.uwg.UCM.GasTotal,      # total gas consumption of urban area
@@ -133,9 +133,9 @@ class TestUCMDef(object):
             self.uwg.UCM.roofTemp,      # average roof temp (K)
             self.uwg.UCM.wallTemp,      # average wall temp (K)
             # Sensible heat
-            self.uwg.UCM.treeSensHeat,         # sensible heat from trees
-            self.uwg.UCM.sensHeat,          ##    # urban sensible heat
-            self.uwg.UCM.canTemp                # canyon air temp (K)
+            self.uwg.UCM.treeSensHeat,  # sensible heat from trees
+            self.uwg.UCM.sensHeat,      # urban sensible heat
+            self.uwg.UCM.canTemp        # canyon air temp (K)
         ]
 
         # Get uwg_matlab values
