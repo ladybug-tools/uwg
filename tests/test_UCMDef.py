@@ -45,35 +45,35 @@ class TestUCMDef(object):
 
         # Get uwg_python values
         uwg_python_val = [
-            self.uwg.UCM.h_mix,
-            self.uwg.UCM.bldHeight,
-            self.uwg.UCM.verToHor,
-            self.uwg.UCM.bldDensity,
-            self.uwg.UCM.treeCoverage,
-            self.uwg.UCM.sensAnthrop,
-            self.uwg.UCM.latAnthrop,
-            self.uwg.UCM.roadShad,
-            self.uwg.UCM.bldWidth,
-            self.uwg.UCM.canWidth,
-            self.uwg.UCM.canAspect,
-            self.uwg.UCM.roadConf,
-            self.uwg.UCM.wallConf,
-            self.uwg.UCM.facArea,
-            self.uwg.UCM.roadArea,
-            self.uwg.UCM.roofArea,
-            self.uwg.UCM.canTemp,
-            self.uwg.UCM.roadTemp,
-            self.uwg.UCM.canHum,
-            self.uwg.UCM.ublWind,
-            self.uwg.UCM.canWind,
-            self.uwg.UCM.ustar,
-            self.uwg.UCM.ustarMod,
-            self.uwg.UCM.z0u,
-            self.uwg.UCM.l_disp,
-            self.uwg.UCM.alb_wall,
-            self.uwg.UCM.facAbsor,
-            self.uwg.UCM.roadAbsor,
-            self.uwg.UCM.sensHeat
+            self.uwg.UCM.h_mix,         # waste heat mix into canyon ratio
+            self.uwg.UCM.bldHeight,     # average building height (m)
+            self.uwg.UCM.verToHor,      # vertical-to-horizontal urban area ratio
+            self.uwg.UCM.bldDensity,    # horizontal building density (footprint)
+            self.uwg.UCM.treeCoverage,  # horizontal tree coverage (footprint)
+            self.uwg.UCM.sensAnthrop,   # sensible heat anthropogenic (W m-2)
+            self.uwg.UCM.latAnthrop,    # latent heat anthropogenic (W m-2)
+            self.uwg.UCM.roadShad,      # shadow fraction of road
+            self.uwg.UCM.bldWidth,      # building width (m)
+            self.uwg.UCM.canWidth,      # canyon width (m)
+            self.uwg.UCM.canAspect,     # canyon aspect ratio
+            self.uwg.UCM.roadConf,      # road sky view factor
+            self.uwg.UCM.wallConf,      # wall sky view factor
+            self.uwg.UCM.facArea,       # facade area (m2)
+            self.uwg.UCM.roadArea,      # road area (m2)
+            self.uwg.UCM.roofArea,      # roof area (m2)
+            self.uwg.UCM.canTemp,       # canyon air temperature (db) (K)
+            self.uwg.UCM.roadTemp,      # avg road temperature
+            self.uwg.UCM.canHum,        # canyon specific humidity (kgv kgda-1)
+            self.uwg.UCM.ublWind,       # urban boundary layer wind velocity (m s-1)
+            self.uwg.UCM.canWind,       # urban canyon wind velocity (m s-1)
+            self.uwg.UCM.ustar,         # friction velocity (m s-1)
+            self.uwg.UCM.ustarMod,      # modified friction velocity (m s-1)
+            self.uwg.UCM.z0u,           # urban roughness length (m)
+            self.uwg.UCM.l_disp,        # urban displacement length (m)
+            self.uwg.UCM.alb_wall,      # albedo of wall
+            self.uwg.UCM.facAbsor,      # absorptivity of wall
+            self.uwg.UCM.roadAbsor,     # average road absorptivity
+            self.uwg.UCM.sensHeat       # urban sensible heat [W m-2]
         ]
 
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_ucm_init.txt")
@@ -120,7 +120,7 @@ class TestUCMDef(object):
         uwg_python_val = [
             # heat load building
             self.uwg.UCM.Q_wall,        # convective sensible heat flux from building roof
-            self.uwg.UCM.Q_window,   ##   # sensible heat flux from window (via U-factor)
+            self.uwg.UCM.Q_window,      # sensible heat flux from window (via U-factor)
             self.uwg.UCM.Q_hvac,        # sensible heat flux from HVAC waste
             self.uwg.UCM.ElecTotal,     # total electricity consumption of urban area
             self.uwg.UCM.GasTotal,      # total gas consumption of urban area
@@ -133,9 +133,9 @@ class TestUCMDef(object):
             self.uwg.UCM.roofTemp,      # average roof temp (K)
             self.uwg.UCM.wallTemp,      # average wall temp (K)
             # Sensible heat
-            self.uwg.UCM.treeSensHeat,         # sensible heat from trees
-            self.uwg.UCM.sensHeat,          ##    # urban sensible heat
-            self.uwg.UCM.canTemp                # canyon air temp (K)
+            self.uwg.UCM.treeSensHeat,  # sensible heat from trees
+            self.uwg.UCM.sensHeat,      # urban sensible heat
+            self.uwg.UCM.canTemp        # canyon air temp (K)
         ]
 
         # Get uwg_matlab values
