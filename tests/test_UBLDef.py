@@ -51,7 +51,7 @@ class TestUBLDef(object):
             self.uwg.UBL.orthLength,          # length of the side of the urban area orthogonal to wind dir (m)
             self.uwg.UBL.paralLength,         # length of the side of the urban area parallel to wind dir (m)
             self.uwg.UBL.ublTemp,             # urban boundary layer temperature (K)
-            reduce(lambda x,y:x+y,(self.uwg.UBL.ublTempdx)), # urban boundary layer temperature discretization (K)
+            reduce(lambda x,y:x+y, self.uwg.UBL.ublTempdx), # urban boundary layer temperature discretization (K)
             self.uwg.UBL.dayBLHeight,         # daytime mixing height, orig = 700
             self.uwg.UBL.nightBLHeight        # Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m); orig 80
         ]
@@ -100,7 +100,8 @@ class TestUBLDef(object):
         uwg_python_val = [
             self.uwg.UBL.ublTemp,               # urban boundary layer temperature (K)
             reduce(lambda x,y:x+y,self.uwg.UBL.ublTempdx), # urban boundary layer temperature discretaization (K)
-            self.uwg.UBL.nightBLHeight,         # night boundary layer height (m)
+            self.uwg.UBL.dayBLHeight,         # night boundary layer height (m)
+            self.uwg.UBL.nightBLHeight         # night boundary layer height (m)
         ]
 
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_ublmodel.txt")
@@ -109,10 +110,9 @@ class TestUBLDef(object):
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            print uwg_python_val[i], uwg_matlab_val[i]
+            #print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
-
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
 
 
 if __name__ == "__main__":
