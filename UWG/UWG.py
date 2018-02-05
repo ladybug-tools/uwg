@@ -37,6 +37,7 @@ from UBLDef import UBLDef
 from RSMDef import RSMDef
 from solarcalcs import SolarCalcs
 import urbflux
+from psychrometrics import psychrometrics
 
 from readDOE import readDOE
 from urbflux import urbflux
@@ -459,25 +460,32 @@ class UWG(object):
     def uwg_main(self):
         """ Section 7 - UWG main section
 
-            self.N          #
-            self.ph         # per hour
-            self.dayType    # 3=Sun, 2=Sat, 1=Weekday
-            self.ceil_time_step # simulation timestep (dt) fitted to weather file timestep
+            self.N                  # Total hours in simulation
+            self.ph                 # per hour
+            self.dayType            # 3=Sun, 2=Sat, 1=Weekday
+            self.ceil_time_step     # simulation timestep (dt) fitted to weather file timestep
+
+            # Output of object instance vector
+            self.WeatherData        # Nx1 vector of forc instance
+            self.UCMData            # Nx1 vector of UCM instance
+            self.UBLData            # Nx1 vector of UBL instance
+            self.RSMData            # Nx1 vector of RSM instance
+            self.USMData            # Nx1 vector of USM instance
+
         """
 
         self.N = int(self.simTime.days * 24)       # total number of hours in simulation
-        n = 0
-        self.ph = self.simTime.dt/3600.       # dt (simulation time step) in hours
+        n = 0                                      # weather time step counter
+        self.ph = self.simTime.dt/3600.            # dt (simulation time step) in hours
 
         # Data dump variables
         time = range(self.N)
-        #TODO: Similar to readDOE Schedule initialization - init list where empty object is every item
-        #WeatherData(self.N, 1) = Forcing() #Empty object
-        #UCMData(N,1) = UCMDef
-        #UBLData (N,1) = UBLDef;
-        #RSMData (N,1) = RSMDef;
-        #USMData (N,1) = RSMDef;
 
+        self.WeatherData = [None for x in xrange(self.N)]
+        self.UCMData = [None for x in xrange(self.N)]
+        self.UBLData = [None for x in xrange(self.N)]
+        self.RSMData = [None for x in xrange(self.N)]
+        self.USMData = [None for x in xrange(self.N)]
 
         bTemp = utilities.zeros(self.N,len(self.BEM))
         bRHum = utilities.zeros(self.N,len(self.BEM))
@@ -505,7 +513,7 @@ class UWG(object):
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
 
-        for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+        for it in range(1,self.simTime.nt-(30*24*12 + 12*12)):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
 
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -604,59 +612,59 @@ class UWG(object):
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
-            """
+
             # Experimental code to run diffusion model in the urban area
-            Uroad = UCM.road;
-            Uroad.sens = UCM.sensHeat;
-            Uforc = forc;
-            Uforc.wind = UCM.canWind;
-            Uforc.temp = UCM.canTemp;
-            USM = VDM(USM,Uforc,Uroad,geoParam,simTime);
+            Uroad = self.UCM.road
+            Uroad.sens = self.UCM.sensHeat
+            Uforc = self.forc
+            Uforc.wind = self.UCM.canWind
+            Uforc.temp = self.UCM.canTemp
+            self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
 
-            % Update variables to output data dump
-            if mod(simTime.secDay,simTime.timePrint) == 0 && n < N
-                n = n + 1;
-                WeatherData (n) = forc;
-                [~,~,UCM.canRHum,~,UCM.Tdp,~] = Psychrometrics (UCM.canTemp, UCM.canHum, forc.pres);
-                UBLData (n) = UBL;
-                UCMData (n) = UCM;
-                USMData (n) = USM;
-                RSMData (n) = RSM;
+            # SimParam(self.dtSim,self.dtWeather,self.Month,self.Day,self.nDay)
+            # __init__(self,dt,timefor,M,DAY,days)
 
-                for i = 1:numel(BEM)
-                    bTemp(n,i) = BEM(i).building.indoorTemp;
-                    bVent(n,i) = BEM(i).building.vent;
-                    bRHum(n,i) = BEM(i).building.indoorRhum;
-                    bPelec(n,i) = BEM(i).building.ElecTotal;    % HVAC + Lighting + Elec Equip
-                    bQgas(n,i) = BEM(i).building.GasTotal;
-                    bPequip(n,i) = BEM(i).Elec;                 % Electric equipment only
-                    bPlight(n,i) = BEM(i).Light;
-                    bQocc(n,i) = BEM(i).Qocc;
-                    bFluxMass(n,i) = -BEM(i).building.fluxMass*2;    % Assume floor & ceiling
-                    bFluxWall(n,i) = -BEM(i).building.fluxWall*UCM.verToHor/UCM.bldDensity/BEM(i).building.nFloor;
-                    bFluxRoof(n,i) = -BEM(i).building.fluxRoof/BEM(i).building.nFloor;
-                    bFluxSolar(n,i) = BEM(i).building.fluxSolar;
-                    bFluxWindow(n,i) = BEM(i).building.fluxWindow;
-                    bFluxInfil(n,i) = BEM(i).building.fluxInfil;
-                    bFluxVent(n,i) = BEM(i).building.fluxVent;
-                    bCoolConsump(n,i) = BEM(i).building.coolConsump;
-                    bHeatConsump(n,i) = BEM(i).building.sensHeatDemand/BEM(i).building.heatEff;
-                    bCoolDemand(n,i) = BEM(i).building.sensCoolDemand;
-                    bHeatDemand(n,i) = BEM(i).building.sensHeatDemand;
-                    bTwallext(n,i) = BEM(i).T_wallex;
-                    bTroofext(n,i) = BEM(i).T_roofex;
-                    bTwallin(n,i) = BEM(i).T_wallin;
-                    bTroofin(n,i) = BEM(i).T_roofin;
-                    bTmassin(n,i) = BEM(i).mass.layerTemp(1);
-                    bCOP(n,i) = BEM(i).building.copAdj;
-                end
-                progressbar(it/simTime.nt); % Print progress
-            end
+            # Update variables to output data dump when:
+            #   secDay reaches weather timestep interval (timePrint) &&
+            #   weather step counter (n) total number of hours in simulation (N)
 
-        end
-        progressbar(1); % Close progress bar
+            if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
 
-        """
+                self.WeatherData[n] = self.forc
+                _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
+                self.UBLData[n] = self.UBL
+                self.UCMData[n] = self.UCM
+                self.USMData[n] = self.USM
+                self.RSMData[n] = self.RSM
+
+                for i in xrange(len(self.BEM)):
+                    bTemp[n][i] = self.BEM[i].building.indoorTemp
+                    bVent[n][i] = self.BEM[i].building.vent
+                    bRHum[n][i] = self.BEM[i].building.indoorRhum
+                    bPelec[n][i] = self.BEM[i].building.ElecTotal            # HVAC + Lighting + Elec Equip
+                    bQgas[n][i] = self.BEM[i].building.GasTotal
+                    bPequip[n][i] = self.BEM[i].Elec                         # Electric equipment only
+                    bPlight[n][i] = self.BEM[i].Light
+                    bQocc[n][i] = self.BEM[i].Qocc
+                    bFluxMass[n][i] = -self.BEM[i].building.fluxMass*2       # Assume floor & ceiling
+                    bFluxWall[n][i] = -self.BEM[i].building.fluxWall*self.UCM.verToHor/self.UCM.bldDensity/ self.BEM[i].building.nFloor
+                    bFluxRoof[n][i] = -self.BEM[i].building.fluxRoof/ self.BEM[i].building.nFloor
+                    bFluxSolar[n][i] = self.BEM[i].building.fluxSolar
+                    bFluxWindow[n][i] = self.BEM[i].building.fluxWindow
+                    bFluxInfil[n][i] = self.BEM[i].building.fluxInfil
+                    bFluxVent[n][i] = self.BEM[i].building.fluxVent
+                    bCoolConsump[n][i] = self.BEM[i].building.coolConsump
+                    bHeatConsump[n][i] = self.BEM[i].building.sensHeatDemand/ self.BEM[i].building.heatEff
+                    bCoolDemand[n][i] = self.BEM[i].building.sensCoolDemand
+                    bHeatDemand[n][i] = self.BEM[i].building.sensHeatDemand
+                    bTwallext[n][i] = self.BEM[i].T_wallex
+                    bTroofext[n][i] = self.BEM[i].T_roofex
+                    bTwallin[n][i] = self.BEM[i].T_wallin
+                    bTroofin[n][i] = self.BEM[i].T_roofin
+                    bTmassin[n][i] = self.BEM[i].mass.layerTemp[0]
+                    bCOP[n][i] = self.BEM[i].building.copAdj
+
+                n += 1
 
             #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
             #    a=it,
@@ -667,41 +675,42 @@ class UWG(object):
 
     def write_epw(self):
         """ Section 8 - Writing new EPW file
+        """
 
-        """
-        pass
-        """
         print 'Calculating new Temperature and humidity values'
 
+        epw_prec = 16 # precision of epw file input
 
-        for iJ in xrange(len(UCMData)):
-            print self.epwinput.values#{iJ+simTime.timeInitial-8,7}{1,1} = num2str(UCMData(iJ).canTemp- 273.15,'%0.1f'); % dry bulb temperature  [C]
-            epwinput.values{iJ+simTime.timeInitial-8,8}{1,1} = num2str(UCMData(iJ).Tdp,'%0.1f'); % dew point temperature [C]
-            epwinput.values{iJ+simTime.timeInitial-8,9}{1,1} = num2str(UCMData(iJ).canRHum,'%0.0f'); % relative humidity     [%]
-            epwinput.values{iJ+simTime.timeInitial-8,22}{1,1} = num2str(WeatherData(iJ).wind,'%0.1f'); % wind speed [m/s]
+        for iJ in xrange(len(self.UCMData)):
+            # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw
+            # [6 to 21]                       = column data of epw
+            self.epwinput[iJ+self.simTime.timeInitial-8][6] = "{0:.{1}f}".format(self.UCMData[iJ].canTemp - 273.15, epw_prec) # dry bulb temperature  [?C]
+            self.epwinput[iJ+self.simTime.timeInitial-8][7] = "{0:.{1}f}".format(self.UCMData[iJ].Tdp, epw_prec)              # dew point temperature [?C]
+            self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
+            self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)         # wind speed [m/s]
 
-        disp('writing new EPW file');
+        print 'Writing new EPW file'
 
-        % Writing new EPW file
-        new_climate_file = strcat(newPathName,'\',newFileName,'.epw');
-        epwnewid = fopen(new_climate_file,'w');
+        # Writing new EPW file
+        epw_new_id = open(self.newPathName, "w")
 
-        for i = 1:8
-            fprintf(epwnewid,'%s\r\n',header{i});
-        end
+        for i in xrange(8):
+            new_epw_line = '{}\r\n'.format(self._header[i])
+            epw_new_id.write(new_epw_line)
 
-        for i = 1:size(epwinput.values,1)
-            printme = [];
-            for e = 1:34
-                printme = [printme epwinput.values{i,e}{1,1} ','];
-            end
-            printme = [printme epwinput.values{i,e}{1,1}];
-            fprintf(epwnewid,'%s\r\n',printme);
-        end
-        disp(['New climate file generated: ',new_climate_file]);
+        #'1990,12,31,24,60,C9C9C9C9*0?9?9?9?9?9?9?9A7A7B8B8A7A7*0E8*0*0,25.1,23.7,92,100900,0,1415,389,0,0,0,0,0,0,0,350,0.5,5,1,11.2,22000,0,999999919,0,0.1600,0,88,0.000,0.0,0.0'
+        for i in xrange(len(self.epwinput)):
+            printme = ""
+            for ei in xrange(34):
+                printme += "{}".format(self.epwinput[i][ei]) + ','
+            printme = printme + "{}".format(self.epwinput[i][ei])
+            new_epw_line = "{0}\r\n".format(printme)
+            epw_new_id.write(new_epw_line)
 
-        return None
-        """
+        epw_new_id.close()
+
+        print 'New climate file generated: {0}'.format(self.newPathName)
+
 
 def procMat(materials,max_thickness,min_thickness):
     """ Processes material layer so that a material with single

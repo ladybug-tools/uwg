@@ -33,7 +33,7 @@ class Weather(object):
             raise Exception("Failed to read .epw file! {}".format(e.message))
 
         self.location = self.climate_data[0][1]
-        self.staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))
+        self.staTemp = str2fl(map(lambda r: r[6], self.climate_data[HI:HF+1]))      # drybulb [C]
         self.staRhum = str2fl(map(lambda r: r[8], self.climate_data[HI:HF+1]))      # air relative humidity (%)
         self.staPres = str2fl(map(lambda r: r[9], self.climate_data[HI:HF+1]))      # air pressure (Pa)
         self.staInfra = str2fl(map(lambda r: r[12], self.climate_data[HI:HF+1]))    # horizontal Infrared Radiation Intensity (W m-2)

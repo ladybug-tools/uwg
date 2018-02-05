@@ -1,5 +1,5 @@
 
-import psychrometrics
+from psychrometrics import psychrometrics, moist_air_density
 
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
@@ -132,7 +132,7 @@ class Building(object):
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
         self.Qhvac = 0.0                                  # Total heat removed (sensible + latent)
         Qdehum = 0.0
-        dens =  psychrometrics.moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
+        dens =  moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent * self.nFloor               # total vent volumetric flow [m3 s-1]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1]
@@ -290,7 +290,7 @@ class Building(object):
             (QLintload + QLinfil + QLvent - Qdehum)
 
         # Calculate relative humidity (Pw/Pws*100) using pressurce, indoor temperature, humidity
-        _Tdb, _w, _phi, _h, _Tdp, _v = psychrometrics.psychrometrics(self.indoorTemp, self.indoorHum, forc.pres)
+        _Tdb, _w, _phi, _h, _Tdp, _v = psychrometrics(self.indoorTemp, self.indoorHum, forc.pres)
         self.indoorRhum = _phi
 
         # These are used for element calculation (per m^2 of element area)

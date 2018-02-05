@@ -33,7 +33,7 @@ class Forcing (object):
             self.pres = None
             self.temp = None
             self.rHum = None
-            self.dir = None     #TODO: Check Energyplus Datafile lists this as Wh/m2 https://bigladdersoftware.com/epx/docs/8-3/auxiliary-programs/energyplus-weather-file-epw-data-dictionary.html
+            self.dir = None
             self.dif = None
             self.prec = None
             self.wind = None
