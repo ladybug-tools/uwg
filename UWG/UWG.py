@@ -163,12 +163,12 @@ class UWG(object):
             for j in xrange(12):
                 self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15 # 12 months of soil T for specific depth
 
-        # Set new directory path for the moprhed EPW file.
+        # Set new directory path for the moprhed EPW file
         if self.destinationDir is None:
             destinationDir = self.epwDir
         if self.destinationFile is None:
-            destinationFile = self.epwFileName.lower().strip('.epw') + '_UWG.epw'
-        self.newPathName = destinationDir + destinationFile
+            destinationFile = self.epwFileName.strip('.epw') + '_UWG.epw'
+        self.newPathName = os.path.join(destinationDir, destinationFile)
 
     def read_input(self):
         """Section 3 - Read Input File (.m, file)
@@ -513,7 +513,7 @@ class UWG(object):
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
 
-        for it in range(1,self.simTime.nt-(30*24*12 + 12*12)):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+        for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
 
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -677,7 +677,7 @@ class UWG(object):
         """ Section 8 - Writing new EPW file
         """
 
-        print 'Calculating new Temperature and humidity values'
+        #print 'Calculating new Temperature and humidity values'
 
         epw_prec = 16 # precision of epw file input
 
@@ -689,13 +689,14 @@ class UWG(object):
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
             self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)         # wind speed [m/s]
 
-        print 'Writing new EPW file'
+        #print 'Writing new EPW file'
 
         # Writing new EPW file
         epw_new_id = open(self.newPathName, "w")
 
         for i in xrange(8):
-            new_epw_line = '{}\r\n'.format(self._header[i])
+            print reduce(lambda x,y: x+","+y, self._header[i])
+            new_epw_line = '{}\r\n'.format(reduce(lambda x,y: x+","+y, self._header[i]))
             epw_new_id.write(new_epw_line)
 
         #'1990,12,31,24,60,C9C9C9C9*0?9?9?9?9?9?9?9A7A7B8B8A7A7*0E8*0*0,25.1,23.7,92,100900,0,1415,389,0,0,0,0,0,0,0,350,0.5,5,1,11.2,22000,0,999999919,0,0.1600,0,88,0.000,0.0,0.0'
@@ -709,7 +710,7 @@ class UWG(object):
 
         epw_new_id.close()
 
-        print 'New climate file generated: {0}'.format(self.newPathName)
+        #print 'New climate file generated: {0}'.format(self.newPathName)
 
 
 def procMat(materials,max_thickness,min_thickness):
@@ -765,8 +766,10 @@ if __name__ == "__main__":
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     epwDir = os.path.join(DIR_UP_PATH,"resources","epw")
     epwFileName = "SGP_Singapore.486980_IWEC.epw"
+    #epwFileName = "USA_PA_Philadelphia.Intl.AP.724080_TMY3.epw"
     uwgParamDir = os.path.join(DIR_UP_PATH,"resources")
     uwgParamFileName = "initialize.uwg"
+
     uwg = UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
     uwg.read_epw()
     uwg.read_input()

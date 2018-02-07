@@ -90,7 +90,7 @@ hvac,0,       # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natur
 # Simulation parameters,
 Month,1,        # starting month (1-12)
 Day,1,          # starting day (1-31)
-nDay,31,        # number of days to run simultion
+nDay,5,        # number of days to run simultion
 dtSim,300,      # simulation time step (s)
 dtWeather,3600, # weather time step (s)
 
