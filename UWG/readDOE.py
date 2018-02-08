@@ -16,9 +16,58 @@ from utilities import read_csv, str2fl
 import utilities
 import pprint
 from decimal import Decimal
+from math import log10
+pp = lambda x: pprint.pprint(x)
 
 DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
+
+
+#Define standaards
+
+# DOE Building Types
+BLDTYPE = [
+    'FullServiceRestaurant',    # 1
+    'Hospital',                 # 2
+    'LargeHotel',               # 3
+    'LargeOffice',              # 4
+    'MedOffice',                # 5
+    'MidRiseApartment',         # 6
+    'OutPatient',               # 7
+    'PrimarySchool',            # 8
+    'QuickServiceRestaurant',   # 9
+    'SecondarySchool',          # 10
+    'SmallHotel',               # 11
+    'SmallOffice',              # 12
+    'StandAloneRetail',         # 13
+    'StripMall',                # 14
+    'SuperMarket',              # 15
+    'WareHouse']                # 16
+
+BUILTERA = [
+    'Pre80',                    # 1
+    'Pst80',                    # 2
+    'New'                       # 3
+    ]
+
+ZONETYPE = [
+    '1A (Miami)',               # 1
+    '2A (Houston)',             # 2
+    '2B (Phoenix)',             # 3
+    '3A (Atlanta)',             # 4
+    '3B-CA (Los Angeles)',      # 5
+    '3B (Las Vegas)',           # 6
+    '3C (San Francisco)',       # 7
+    '4A (Baltimore)',           # 8
+    '4B (Albuquerque)',         # 9
+    '4C (Seattle)',             # 10
+    '5A (Chicago)',             # 11
+    '5B (Boulder)',             # 12
+    '6A (Minneapolis)',         # 13
+    '6B (Helena)',              # 14
+    '7 (Duluth)',               # 15
+    '8 (Fairbanks)'             # 16
+    ]
 
 def readDOE(serialize_output=True):
     """
@@ -56,52 +105,6 @@ def readDOE(serialize_output=True):
 
     """
 
-    #Define constants
-    # DOE Building Types
-    bldType = [
-        'FullServiceRestaurant',    # 1
-        'Hospital',                 # 2
-        'LargeHotel',               # 3
-        'LargeOffice',              # 4
-        'MedOffice',                # 5
-        'MidRiseApartment',         # 6
-        'OutPatient',               # 7
-        'PrimarySchool',            # 8
-        'QuickServiceRestaurant',   # 9
-        'SecondarySchool',          # 10
-        'SmallHotel',               # 11
-        'SmallOffice',              # 12
-        'StandAloneRetail',         # 13
-        'StripMall',                # 14
-        'SuperMarket',              # 15
-        'WareHouse']                # 16
-
-    builtEra = [
-        'Pre80',                    # 1
-        'Pst80',                    # 2
-        'New'                       # 3
-        ]
-
-    zoneType = [
-        '1A (Miami)',               # 1
-        '2A (Houston)',             # 2
-        '2B (Phoenix)',             # 3
-        '3A (Atlanta)',             # 4
-        '3B-CA (Los Angeles)',      # 5
-        '3B (Las Vegas)',           # 6
-        '3C (San Francisco)',       # 7
-        '4A (Baltimore)',           # 8
-        '4B (Albuquerque)',         # 9
-        '4C (Seattle)',             # 10
-        '5A (Chicago)',             # 11
-        '5B (Boulder)',             # 12
-        '6A (Minneapolis)',         # 13
-        '6B (Helena)',              # 14
-        '7 (Duluth)',               # 15
-        '8 (Fairbanks)'             # 16
-        ]
-
-
     #Nested, nested lists of Building, SchDef, BEMDef objects
     refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
     Schedule = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)   #Schedule (16,3,16) = SchDef;
@@ -111,7 +114,7 @@ def readDOE(serialize_output=True):
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
     for i in xrange(16):
-        #print '\tType: ', bldType[i]
+        #print '\tType: ', BLDTYPE[i]
         #print '-----i-------'
         #print i+1
         # Read building summary (Sheet 1)
@@ -170,18 +173,18 @@ def readDOE(serialize_output=True):
         SchSWH      = str2fl([list_doe4[19][6:30],list_doe4[20][6:30],list_doe4[21][6:30]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
         #i = 16 types of buildings
-        #print "type: ", bldType[i]
+        #print "type: ", BLDTYPE[i]
         for j in xrange(3):
-            #print '\tera: ', builtEra[j]
+            #print '\tera: ', BUILTERA[j]
             #print '-----j-------'
             #print j+1
             for k in xrange(16):
-                #print '\tclimate zone: ', zoneType[k]
+                #print '\tclimate zone: ', ZONETYPE[k]
                 """
                 if i==13 and j ==0 and k==6:
-                    print bldType[i]
-                    print builtEra[j]
-                    print zoneType[k]
+                    print BLDTYPE[i]
+                    print BUILTERA[j]
+                    print ZONETYPE[k]
 
                     dd = lambda x: Decimal.from_float(x)
                     #print dd(HVAC[j][k])
@@ -211,12 +214,12 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
-                
+
                 #Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
-                B.Type = bldType[i]
-                B.Era = builtEra[j]
-                B.Zone = zoneType[k]
+                B.Type = BLDTYPE[i]
+                B.Era = BUILTERA[j]
+                B.Zone = ZONETYPE[k]
                 refDOE[i][j][k] = B
                 #print '\t\t', B
 
@@ -375,7 +378,19 @@ def readDOE(serialize_output=True):
         return refDOE, refBEM, Schedule
 
 if __name__ == "__main__":
-    readDOE()
+    bld, bem, sched = readDOE(False)
+
+    indexdocstr = ""
+
+    padding = lambda x: "----" if x==0 else "-"*abs(int(log10(x))-4)
+    indexdocstr += "BLDTYPE\n"
+    for i in xrange(16): indexdocstr += "{0}{1}{2}".format(i, padding(i) , BLDTYPE[i]+"\n")
+    indexdocstr += "BUILTERA\n"
+    for i in xrange(3): indexdocstr += "{0}{1}{2}".format(i, padding(i) , BUILTERA[i]+"\n")
+    indexdocstr += "ZONETYPE\n"
+    for i in xrange(16): indexdocstr += "{0}{1}{2}".format(i, padding(i) , ZONETYPE[i]+"\n")
+
+    print "Created bld, bem, sched => 3d matrices of building, BEMdef, and Schedule objects.\nindexdocstr => Matrix index table."
 
 
 # Material ref from E+
