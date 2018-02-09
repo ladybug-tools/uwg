@@ -689,7 +689,7 @@ class UWG(object):
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
             self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)         # wind speed [m/s]
 
-        #print 'Writing new EPW file'
+        print 'Writing new EPW file'
 
         # Writing new EPW file
         epw_new_id = open(self.newPathName, "w")
@@ -699,7 +699,6 @@ class UWG(object):
             new_epw_line = '{}\r\n'.format(reduce(lambda x,y: x+","+y, self._header[i]))
             epw_new_id.write(new_epw_line)
 
-        #'1990,12,31,24,60,C9C9C9C9*0?9?9?9?9?9?9?9A7A7B8B8A7A7*0E8*0*0,25.1,23.7,92,100900,0,1415,389,0,0,0,0,0,0,0,350,0.5,5,1,11.2,22000,0,999999919,0,0.1600,0,88,0.000,0.0,0.0'
         for i in xrange(len(self.epwinput)):
             printme = ""
             for ei in xrange(34):
@@ -710,7 +709,7 @@ class UWG(object):
 
         epw_new_id.close()
 
-        #print 'New climate file generated: {0}'.format(self.newPathName)
+        print 'New climate file generated: {0}'.format(self.newPathName)
 
 
 def procMat(materials,max_thickness,min_thickness):

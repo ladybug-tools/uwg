@@ -168,7 +168,6 @@ class TestUWG(object):
         assert len(newthickness) == pytest.approx(3, abs=1e-6)
         assert sum(newthickness) == pytest.approx(0.04*3, abs=1e-6)
 
-
     def test_hvac_autosize(self):
 
         self.setup_init_uwg()
@@ -182,7 +181,6 @@ class TestUWG(object):
         assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
         assert len(self.uwg.BEM) == pytest.approx(2, abs=1e-6)
-
 
     def test_uwg_main(self):
         self.setup_init_uwg()
@@ -213,6 +211,55 @@ class TestUWG(object):
         assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
         assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
 
+    def test_uwg_output(self):
+        self.setup_init_uwg()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        # Test all year
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1 # 365
+
+        self.uwg.set_input()
+        self.uwg.hvac_autosize()
+        self.uwg.uwg_main()
+
+        # shorten some variable names
+        ti = self.uwg.simTime.timeInitial
+        tf = self.uwg.simTime.timeFinal
+        matlab_fname = "SGP_Singapore.486980_IWEC_UWG_Matlab.epw"
+
+        # Get matlab data
+        matlab_path_name = os.path.join(self.DIR_UP_PATH,"tests","matlab_ref","matlab_uwg",matlab_fname)
+
+        # Get Matlab EPW file
+        if not os.path.exists(matlab_path_name):
+            raise Exception("Param file: '{}' does not exist.".format(matlab_path_name))
+
+        # Open .uwg file and feed csv data to initializeDataFile
+        try:
+            new_epw = UWG.utilities.read_csv(matlab_path_name)
+        except Exception as e:
+            raise Exception("Failed to read .uwg file! {}".format(e.message))
+
+        matlab_weather = UWG.weather.Weather(matlab_path_name,ti,tf)
+
+        # Make weather files for testing
+        python_weather = UWG.weather.Weather(self.uwg.newPathName,ti,tf)
+        matlab_weather = UWG.weather.Weather(matlab_path_name, ti, tf)
+        print '\n'
+
+        assert len(python_weather.staTemp) == pytest.approx(len(matlab_weather.staTemp), abs=1e-15)
+
+        # compare per hours
+        for i in xrange(len(python_weather.staTemp)):
+            print python_weather.staTemp[i], matlab_weather.staTemp[i] # dry bulb temperature  [?C]
+            print python_weather.staTdp[i], matlab_weather.staTdp[i]   # dew point temperature [?C]
+            print python_weather.staRhum[i], matlab_weather.staRhum[i] # relative humidity     [%]
+            print python_weather.staUmod[i], matlab_weather.staUmod[i] # wind speed [m/s]
+            print '---'
+
 
 if __name__ == "__main__":
     test = TestUWG()
@@ -220,4 +267,5 @@ if __name__ == "__main__":
     #test.test_read_input()
     #test.test_procMat()
     #test.test_hvac_autosize()
-    test.test_uwg_main()
+    #test.test_uwg_main()
+    test.test_uwg_output()
