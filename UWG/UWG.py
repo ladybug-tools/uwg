@@ -20,7 +20,6 @@ import os
 import math
 import cPickle
 import copy
-import pprint
 import utilities
 
 from simparam import SimParam
@@ -42,7 +41,11 @@ from psychrometrics import psychrometrics
 from readDOE import readDOE
 from urbflux import urbflux
 
+import pprint
+import decimal
+
 pp = lambda x: pprint.pprint(x)
+dd = lambda x: decimal.Decimal.from_float(x)
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -486,7 +489,7 @@ class UWG(object):
         self.UBLData = [None for x in xrange(self.N)]
         self.RSMData = [None for x in xrange(self.N)]
         self.USMData = [None for x in xrange(self.N)]
-
+        """
         bTemp = utilities.zeros(self.N,len(self.BEM))
         bRHum = utilities.zeros(self.N,len(self.BEM))
         bPelec = utilities.zeros(self.N,len(self.BEM))
@@ -512,8 +515,9 @@ class UWG(object):
         bTmassin = utilities.zeros(self.N,len(self.BEM))
         bCOP = utilities.zeros(self.N,len(self.BEM))
         bVent = utilities.zeros(self.N,len(self.BEM))
-
-        for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+        """
+        simtimemode = self.simTime.nt# - 30*24*12 + 12*22
+        for it in range(1,simtimemode,1):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
 
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -539,7 +543,8 @@ class UWG(object):
             self.forc.prec = self.forcIP.prec[self.ceil_time_step]          # Precipitation (mm h-1)
             self.forc.dif = self.forcIP.dif[self.ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
             self.forc.dir = self.forcIP.dir[self.ceil_time_step]            # normal solar direct radiation (W m-2)
-            self.UCM.canHum = self.forc.hum                                 # Canyon humidity (absolute) same as rural
+            self.UCM.canHum = copy.copy(self.forc.hum)                      # Canyon humidity (absolute) same as rural
+
 
             # Update solar flux
             self.solar = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
@@ -612,31 +617,52 @@ class UWG(object):
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
-
             # Experimental code to run diffusion model in the urban area
-            Uroad = self.UCM.road
-            Uroad.sens = self.UCM.sensHeat
-            Uforc = self.forc
-            Uforc.wind = self.UCM.canWind
-            Uforc.temp = self.UCM.canTemp
+            Uroad = copy.copy(self.UCM.road)
+            Uroad.sens = copy.copy(self.UCM.sensHeat)
+            Uforc = copy.copy(self.forc)
+            Uforc.wind = copy.copy(self.UCM.canWind)
+            Uforc.temp = copy.copy(self.UCM.canTemp)
+            #print 'd2', it, self.forc.wind
+
             self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
 
+            #print 'd3', it, self.forc.wind
             # SimParam(self.dtSim,self.dtWeather,self.Month,self.Day,self.nDay)
             # __init__(self,dt,timefor,M,DAY,days)
 
             # Update variables to output data dump when:
             #   secDay reaches weather timestep interval (timePrint) &&
             #   weather step counter (n) total number of hours in simulation (N)
-
+            #print it, self.simTime.secDay, self.UCM.canTemp-273.15
+            #print it, self.UCM.canTemp-273.15
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
 
-                self.WeatherData[n] = self.forc
+                #print '-------'
+                #print "hr", self.simTime.secDay ,self.simTime.secDay / self.simTime.timePrint
+                #print self.UCM.canTemp-273.15
+                #print '-------'
+                self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
-                self.UBLData[n] = self.UBL
-                self.UCMData[n] = self.UCM
-                self.USMData[n] = self.USM
-                self.RSMData[n] = self.RSM
+                """
+                print it
+                print dd(self.UCM.canRHum)
+                print '00.1234567890123456'
+                print '--'
+                print dd(self.UCM.canTemp)
+                print dd(self.UCM.canHum)
+                print dd( self.forc.pres)
+                print '---------------'
+                """
+                self.UBLData[n] = copy.copy(self.UBL)
+                self.UCMData[n] = copy.copy(self.UCM)
+                self.USMData[n] = copy.copy(self.USM)
+                self.RSMData[n] = copy.copy(self.RSM)
 
+                #print '--hr--'
+                #print it, self.forc.wind
+                #print '--hr--'
+                """
                 for i in xrange(len(self.BEM)):
                     bTemp[n][i] = self.BEM[i].building.indoorTemp
                     bVent[n][i] = self.BEM[i].building.vent
@@ -663,15 +689,16 @@ class UWG(object):
                     bTroofin[n][i] = self.BEM[i].T_roofin
                     bTmassin[n][i] = self.BEM[i].mass.layerTemp[0]
                     bCOP[n][i] = self.BEM[i].building.copAdj
-
+                """
                 n += 1
-
+            #print '--------'
             #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
             #    a=it,
             #    b= ceil_time_step,
             #    c= it * self.ph
             #    )
         #f.close()
+
 
     def write_epw(self):
         """ Section 8 - Writing new EPW file
@@ -681,13 +708,16 @@ class UWG(object):
 
         epw_prec = 16 # precision of epw file input
 
+        #print self.UCMData[0].canTemp - 273.15
+
         for iJ in xrange(len(self.UCMData)):
             # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw
             # [6 to 21]                       = column data of epw
+
             self.epwinput[iJ+self.simTime.timeInitial-8][6] = "{0:.{1}f}".format(self.UCMData[iJ].canTemp - 273.15, epw_prec) # dry bulb temperature  [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][7] = "{0:.{1}f}".format(self.UCMData[iJ].Tdp, epw_prec)              # dew point temperature [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
-            self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)         # wind speed [m/s]
+            self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)        # wind speed [m/s]
 
         print 'Writing new EPW file'
 
@@ -695,7 +725,7 @@ class UWG(object):
         epw_new_id = open(self.newPathName, "w")
 
         for i in xrange(8):
-            print reduce(lambda x,y: x+","+y, self._header[i])
+            #print reduce(lambda x,y: x+","+y, self._header[i])
             new_epw_line = '{}\r\n'.format(reduce(lambda x,y: x+","+y, self._header[i]))
             epw_new_id.write(new_epw_line)
 
