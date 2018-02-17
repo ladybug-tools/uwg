@@ -21,6 +21,7 @@ import math
 import cPickle
 import copy
 import utilities
+import logging
 
 from simparam import SimParam
 from weather import  Weather
@@ -233,7 +234,7 @@ class UWG(object):
         self.dtWeather = ipd['dtWeather']        # seconds (s)
 
         # HVAC system and internal laod
-        self.autosize = ipd['autosize']          # autosize HVAC (1 or 0) #TODO this isn't implemented
+        self.autosize = ipd['autosize']          # autosize HVAC (1 or 0)
         self.sensOcc = ipd['sensOcc']            # Sensible heat from occupant
         self.LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
         self.RadFOcc = ipd['RadFOcc']            # Radiant heat fraction from occupant (normally 0.2)
@@ -457,8 +458,9 @@ class UWG(object):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
 
         for i in xrange(len(self.BEM)):
-            self.BEM[i].building.coolCap = 9999.
-            self.BEM[i].building.heatCap = 9999.
+            if not self.is_near_zero(self.autosize):
+                self.BEM[i].building.coolCap = 9999.
+                self.BEM[i].building.heatCap = 9999.
 
     def uwg_main(self):
         """ Section 7 - UWG main section
@@ -573,6 +575,7 @@ class UWG(object):
                 print 'hum', self.forc.hum
                 print '---f----'
             """
+
             # Update the energy components for building types defined in initialize.uwg
             for i in xrange(len(self.BEM)):
                 # Set temperature
@@ -612,9 +615,12 @@ class UWG(object):
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
+
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
+
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
+
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
             # Experimental code to run diffusion model in the urban area
@@ -636,7 +642,10 @@ class UWG(object):
             #   weather step counter (n) total number of hours in simulation (N)
             #print it, self.simTime.secDay, self.UCM.canTemp-273.15
             #print it, self.UCM.canTemp-273.15
+            logging.info("{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
+
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
+                logging.info("\n\n{0} ----sim time step (n) = {1}----".format(__name__, n))
 
                 #print '-------'
                 #print "hr", self.simTime.secDay ,self.simTime.secDay / self.simTime.timePrint
@@ -644,6 +653,10 @@ class UWG(object):
                 #print '-------'
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
+
+                #print self.UCM.canTemp
+                #raise Exception
+
                 """
                 print it
                 print dd(self.UCM.canRHum)
@@ -707,8 +720,6 @@ class UWG(object):
         #print 'Calculating new Temperature and humidity values'
 
         epw_prec = 16 # precision of epw file input
-
-        #print self.UCMData[0].canTemp - 273.15
 
         for iJ in xrange(len(self.UCMData)):
             # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw

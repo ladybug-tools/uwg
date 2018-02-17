@@ -1,6 +1,8 @@
 
 from psychrometrics import psychrometrics, moist_air_density
 
+import logging
+
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
 Translated to Python by Chris Mackey (chris@mackeyarchitecture.com) and Saeran Vasanthakumar (saeranv@gmail.com) - August 2017
@@ -111,15 +113,16 @@ class Building(object):
             self.Zone = "null"                          # Climate zone number
 
     def __repr__(self):
-        return "BuildingType: {a}, Era: {b}, Zone: {c}; @ Ti: {d}, WWR: {e}".format(
+        return "BuildingType: {a}, Era: {b}, Zone: {c}".format(
             a=self.Type,
             b=self.Era,
-            c=self.Zone,
-            d=self.indoorTemp-273.15,
-            e=self.glazingRatio
+            c=self.Zone
             )
 
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
+
+        logging.info("{0} {1}".format(__name__, self.__repr__()))
+
         # Building Energy Model
         self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
         self.nFloor = max(UCM.bldHeight/float(self.floorHeight),1)   # At least one floor
@@ -130,7 +133,7 @@ class Building(object):
         self.heatConsump  = 0.0                         # heating energy consumption (W m-2)
         self.sensWaste = 0.0                            # Sensible waste heat (W m-2)
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
-        self.Qhvac = 0.0                                  # Total heat removed (sensible + latent)
+        self.Qhvac = 0.0                                # Total heat removed (sensible + latent)
         Qdehum = 0.0
         dens =  moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
@@ -151,10 +154,12 @@ class Building(object):
 
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
         if simTime.secDay/3600. < parameter.nightSetEnd or simTime.secDay/3600. >= parameter.nightSetStart:
+            logging.debug("{} Night setpoints".format(__name__))
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
+            logging.debug("{} Day setpoints".format(__name__))
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
             self.intHeat = self.intHeatDay*self.nFloor
@@ -251,9 +256,9 @@ class Building(object):
         # HVAC system (heating demand = W/m^2 bld footprint)
         # -------------------------------------------------------------
         elif self.sensHeatDemand > 0. and UCM.canTemp < 288.:
-
             # limit on heating capacity
             self.Qheat = min(self.sensHeatDemand, self.heatCap*self.nFloor)
+
             self.heatConsump  = self.Qheat / self.heatEff
             self.sensWaste = self.heatConsump - self.Qheat         # waste per footprint
             self.heatConsump = self.heatConsump/self.nFloor        # adjust to be per floor area
