@@ -462,7 +462,7 @@ class UWG(object):
                 self.BEM[i].building.coolCap = 9999.
                 self.BEM[i].building.heatCap = 9999.
 
-    def uwg_main(self):
+    def uwg_main(self,sim_start_hour=0,sim_end_hour=24):
         """ Section 7 - UWG main section
 
             self.N                  # Total hours in simulation
@@ -491,35 +491,19 @@ class UWG(object):
         self.UBLData = [None for x in xrange(self.N)]
         self.RSMData = [None for x in xrange(self.N)]
         self.USMData = [None for x in xrange(self.N)]
-        """
-        bTemp = utilities.zeros(self.N,len(self.BEM))
-        bRHum = utilities.zeros(self.N,len(self.BEM))
-        bPelec = utilities.zeros(self.N,len(self.BEM))
-        bQgas = utilities.zeros(self.N,len(self.BEM))
-        bPequip = utilities.zeros(self.N,len(self.BEM))
-        bPlight = utilities.zeros(self.N,len(self.BEM))
-        bQocc = utilities.zeros(self.N,len(self.BEM))
-        bFluxMass = utilities.zeros(self.N,len(self.BEM))
-        bFluxRoof = utilities.zeros(self.N,len(self.BEM))
-        bFluxWall = utilities.zeros(self.N,len(self.BEM))
-        bFluxSolar = utilities.zeros(self.N,len(self.BEM))
-        bFluxWindow = utilities.zeros(self.N,len(self.BEM))
-        bFluxInfil = utilities.zeros(self.N,len(self.BEM))
-        bFluxVent = utilities.zeros(self.N,len(self.BEM))
-        bCoolConsump = utilities.zeros(self.N,len(self.BEM))
-        bHeatConsump = utilities.zeros(self.N,len(self.BEM))
-        bCoolDemand = utilities.zeros(self.N,len(self.BEM))
-        bHeatDemand = utilities.zeros(self.N,len(self.BEM))
-        bTwallext = utilities.zeros(self.N,len(self.BEM))
-        bTroofext = utilities.zeros(self.N,len(self.BEM))
-        bTwallin = utilities.zeros(self.N,len(self.BEM))
-        bTroofin = utilities.zeros(self.N,len(self.BEM))
-        bTmassin = utilities.zeros(self.N,len(self.BEM))
-        bCOP = utilities.zeros(self.N,len(self.BEM))
-        bVent = utilities.zeros(self.N,len(self.BEM))
-        """
-        simtimemode = self.simTime.nt# - 30*24*12 + 12*22
-        for it in range(1,simtimemode,1):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+
+        # Only for testing = Adjust hours if neccessary
+        sim_start_hour = 13
+        sim_end_hour =   20
+        for si in xrange(int(3600./self.simTime.dt*sim_start_hour)):
+            self.simTime.UpdateDate()
+        _substep = (3600/self.simTime.dt*(sim_start_hour + (24-sim_end_hour)%24))
+        sim_step_halt = int(self.simTime.nt - _substep)
+
+        self.N -= int(_substep/(3600./self.simTime.dt))  # total number of hours in simulation
+
+        for it in range(1,sim_step_halt,1):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+
 
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -534,6 +518,10 @@ class UWG(object):
             self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
                                                                   # minus one to be consistent with forcIP list index
 
+            logging.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
+
+            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
             self.forc.wind = max(self.forcIP.wind[self.ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)
@@ -546,7 +534,6 @@ class UWG(object):
             self.forc.dif = self.forcIP.dif[self.ceil_time_step]            # horizontal solar diffuse radiation (W m-2)
             self.forc.dir = self.forcIP.dir[self.ceil_time_step]            # normal solar direct radiation (W m-2)
             self.UCM.canHum = copy.copy(self.forc.hum)                      # Canyon humidity (absolute) same as rural
-
 
             # Update solar flux
             self.solar = SolarCalcs(self.UCM, self.BEM, self.simTime, self.RSM, self.forc, self.geoParam, self.rural)
@@ -563,18 +550,6 @@ class UWG(object):
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
-
-            """
-            if it == 46:
-                print 'check precision'
-                print 'it', it
-                print 'ceil', math.ceil(it*self.ph)
-                print 'infra', self.forc.infra
-                print 'wind', self.forc.wind
-                print 'uDir', self.forc.uDir
-                print 'hum', self.forc.hum
-                print '---f----'
-            """
 
             # Update the energy components for building types defined in initialize.uwg
             for i in xrange(len(self.BEM)):
@@ -610,11 +585,13 @@ class UWG(object):
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
 
+            print 'bt,', self.BEM[0].building.indoorTemp-273.15
+            print 'bt,', self.BEM[1].building.indoorTemp-273.15
+
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
-
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
@@ -623,95 +600,49 @@ class UWG(object):
 
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
+            print self.UCM.canTemp-273.15
+
             # Experimental code to run diffusion model in the urban area
             Uroad = copy.copy(self.UCM.road)
             Uroad.sens = copy.copy(self.UCM.sensHeat)
             Uforc = copy.copy(self.forc)
             Uforc.wind = copy.copy(self.UCM.canWind)
             Uforc.temp = copy.copy(self.UCM.canTemp)
-            #print 'd2', it, self.forc.wind
 
             self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
 
-            #print 'd3', it, self.forc.wind
-            # SimParam(self.dtSim,self.dtWeather,self.Month,self.Day,self.nDay)
-            # __init__(self,dt,timefor,M,DAY,days)
+            logging.info("dbT = {}".format(self.UCM.canTemp-273.15))
+            if n > 0:
+                logging.info("dpT = {}".format(self.UCM.Tdp))
+                logging.info("RH  = {}".format(self.UCM.canRHum))
 
-            # Update variables to output data dump when:
-            #   secDay reaches weather timestep interval (timePrint) &&
-            #   weather step counter (n) total number of hours in simulation (N)
-            #print it, self.simTime.secDay, self.UCM.canTemp-273.15
-            #print it, self.UCM.canTemp-273.15
-            logging.info("{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
+
+
 
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
-                logging.info("\n\n{0} ----sim time step (n) = {1}----".format(__name__, n))
 
-                #print '-------'
-                #print "hr", self.simTime.secDay ,self.simTime.secDay / self.simTime.timePrint
-                #print self.UCM.canTemp-273.15
-                #print '-------'
+                logging.info("{0} ----sim time step = {1}----\n\n".format(__name__, n))
+
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
+                if self.simTime.secDay/3600. > 18.0: print '-------------'
+                print'-------------'
+                print self.UCM.canTemp-273.15
+                print self.UCM.canRHum
+                print'-------------'
 
-                #print self.UCM.canTemp
-                #raise Exception
+                if self.simTime.secDay/3600. > 18.0: print '-------------'
 
-                """
-                print it
-                print dd(self.UCM.canRHum)
-                print '00.1234567890123456'
-                print '--'
-                print dd(self.UCM.canTemp)
-                print dd(self.UCM.canHum)
-                print dd( self.forc.pres)
-                print '---------------'
-                """
                 self.UBLData[n] = copy.copy(self.UBL)
                 self.UCMData[n] = copy.copy(self.UCM)
                 self.USMData[n] = copy.copy(self.USM)
                 self.RSMData[n] = copy.copy(self.RSM)
 
-                #print '--hr--'
-                #print it, self.forc.wind
-                #print '--hr--'
-                """
-                for i in xrange(len(self.BEM)):
-                    bTemp[n][i] = self.BEM[i].building.indoorTemp
-                    bVent[n][i] = self.BEM[i].building.vent
-                    bRHum[n][i] = self.BEM[i].building.indoorRhum
-                    bPelec[n][i] = self.BEM[i].building.ElecTotal            # HVAC + Lighting + Elec Equip
-                    bQgas[n][i] = self.BEM[i].building.GasTotal
-                    bPequip[n][i] = self.BEM[i].Elec                         # Electric equipment only
-                    bPlight[n][i] = self.BEM[i].Light
-                    bQocc[n][i] = self.BEM[i].Qocc
-                    bFluxMass[n][i] = -self.BEM[i].building.fluxMass*2       # Assume floor & ceiling
-                    bFluxWall[n][i] = -self.BEM[i].building.fluxWall*self.UCM.verToHor/self.UCM.bldDensity/ self.BEM[i].building.nFloor
-                    bFluxRoof[n][i] = -self.BEM[i].building.fluxRoof/ self.BEM[i].building.nFloor
-                    bFluxSolar[n][i] = self.BEM[i].building.fluxSolar
-                    bFluxWindow[n][i] = self.BEM[i].building.fluxWindow
-                    bFluxInfil[n][i] = self.BEM[i].building.fluxInfil
-                    bFluxVent[n][i] = self.BEM[i].building.fluxVent
-                    bCoolConsump[n][i] = self.BEM[i].building.coolConsump
-                    bHeatConsump[n][i] = self.BEM[i].building.sensHeatDemand/ self.BEM[i].building.heatEff
-                    bCoolDemand[n][i] = self.BEM[i].building.sensCoolDemand
-                    bHeatDemand[n][i] = self.BEM[i].building.sensHeatDemand
-                    bTwallext[n][i] = self.BEM[i].T_wallex
-                    bTroofext[n][i] = self.BEM[i].T_roofex
-                    bTwallin[n][i] = self.BEM[i].T_wallin
-                    bTroofin[n][i] = self.BEM[i].T_roofin
-                    bTmassin[n][i] = self.BEM[i].mass.layerTemp[0]
-                    bCOP[n][i] = self.BEM[i].building.copAdj
-                """
-                n += 1
-            #print '--------'
-            #fchk = "it: {a}\ncitph: {b}\nitph: {c}\n----\n".format(
-            #    a=it,
-            #    b= ceil_time_step,
-            #    c= it * self.ph
-            #    )
-        #f.close()
+                logging.info("dbT = {}".format(self.UCMData[n].canTemp-273.15))
+                logging.info("dpT = {}".format(self.UCMData[n].Tdp))
+                logging.info("RH  = {}".format(self.UCMData[n].canRHum))
 
+                n += 1
 
     def write_epw(self):
         """ Section 8 - Writing new EPW file

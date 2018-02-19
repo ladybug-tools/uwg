@@ -1,3 +1,5 @@
+import logging
+
 class UBLDef(object):
     """
     %   Class definition for the Urban Boundary Layer (UBL)
@@ -70,6 +72,9 @@ class UBLDef(object):
                 or (sunlight > nightlimit) and (time > noon) or (self.sensHeat > 150.0)
         if is_day:
             # Circulation velocity per Bueno 'the UWG', eq 8
+
+            logging.debug("{} Day ubl calcs".format(__name__))
+
             h_UBL = self.dayBLHeight            # Day boundary layer height
             eqTemp = RSM.tempProf[RSM.nzref-1]
             eqWind = RSM.windProf[RSM.nzref-1]
@@ -92,6 +97,7 @@ class UBLDef(object):
         # Night
         # ---------------------------------------------------------------------
         else:
+            logging.debug("{} Night ubl calcs".format(__name__))
             h_UBL = self.nightBLHeight      # Night boundary layer height
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             self.ublTemp, self.ublTempdx = self.NightForc(self.ublTempdx,simTime.dt, \

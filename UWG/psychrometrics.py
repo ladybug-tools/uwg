@@ -30,7 +30,7 @@ def psychrometrics (Tdb_in, w_in, P):
 
     # phi (RH) calculation from Tdb and w
     Pw = (w*P)/(0.621945 + w)                             # partial pressure of water vapor [1]
-    Pws = saturation_pressure(Tdb)                      # Get saturation pressure for given Tdb
+    Pws = saturation_pressure(Tdb)                        # Get saturation pressure for given Tdb
     phi = Pw/Pws*100.0
 
     # enthalpy calculation from Tdb and w
@@ -40,9 +40,15 @@ def psychrometrics (Tdb_in, w_in, P):
     v = 0.287042 * (Tdb+273.15)*(1+1.607858*w)/P        # ?
 
     # dew point calculation from w
-    pw = (w*P)/(0.621945 + w) # water vapor partial pressure in kPa
-    alpha = log(pw)
-    Tdp = 6.54 + 14.526*alpha + pow(alpha,2)*0.7389 + pow(alpha,3)*0.09486 + pow(pw,0.1984)*0.4569  # valid for Tdp between 0 C and 93 C
+    _pw = (w*P)/(0.621945 + w) # water vapor partial pressure in kPa
+    alpha = log(_pw)
+
+    """
+    tdp == humidity, Pressure
+    rh  == humdiity, Pressure, Tdb
+    """
+
+    Tdp = 6.54 + 14.526*alpha + pow(alpha,2)*0.7389 + pow(alpha,3)*0.09486 + pow(_pw,0.1984)*0.4569  # valid for Tdp between 0 C and 93 C
 
     # [1] Derivation of Pw
     # w = 0.621945 * Pw / (P - Pw)
@@ -59,9 +65,9 @@ def psychrometrics (Tdb_in, w_in, P):
 
 def saturation_pressure(Tdb_):
     T = Tdb_ + 273.15
-    Pws = exp(-1*(5.8002206e3) / T+1.3914993 + (4.8640239e-2)*T*(-1.) + (4.1764768e-5)*pow(T,2) - (1.4452093e-8)*pow(T,3) + 6.5459673*log(T))  #in Pa
-    Pws = Pws/1000.                                                               # in kPa
-    return Pws
+    _Pws = exp(-1*(5.8002206e3) / T+1.3914993 + (4.8640239e-2)*T*(-1.) + (4.1764768e-5)*pow(T,2) - (1.4452093e-8)*pow(T,3) + 6.5459673*log(T))  #in Pa
+    _Pws = _Pws/1000.                                                               # in kPa
+    return _Pws
 
 def moist_air_density(P,Tdb,H):
     # Moist air density [kgv/ m-3] given dry bulb temperature, humidity ratio, and pressure.

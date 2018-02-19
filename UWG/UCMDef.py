@@ -1,5 +1,6 @@
 
 from math import sqrt, pow
+import copy
 
 class UCMDef(object):
     """
@@ -126,6 +127,8 @@ class UCMDef(object):
         # Variables set in urbflux()
         self.latHeat = None                                         # urban latent heat [W m-2]
         self.windProf = []                                          # wind profile
+        self.canRHum = None
+        self.Tdp = None
 
     def __repr__(self):
         return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(
@@ -198,7 +201,7 @@ class UCMDef(object):
 
         # Solve for canyon temperature
         self.canTemp = (H1 + Q)/H2
-
+        
         # Heat flux based per m^2 of urban area
         self.Q_road = h_conv*(T_road-self.canTemp)*(1.-self.bldDensity)  # Sensible heat from road (W/m^2 of urban area)
         self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1.-self.bldDensity)
@@ -206,7 +209,7 @@ class UCMDef(object):
         self.Q_traffic = self.sensAnthrop
 
         # Building energy output to canyon, per m^2 of urban area
-        T_can = self.canTemp
+        T_can = copy.copy(self.canTemp)
         for j in xrange(len(BEM)):
             V_vent = BEM[j].building.vent*BEM[j].building.nFloor  # ventilation volume per m^2 of building
             V_infil = BEM[j].building.infil*self.bldHeight/3600.0

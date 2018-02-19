@@ -1,4 +1,6 @@
 import math
+import logging
+
 
 class SolarCalcs(object):
     """
@@ -56,6 +58,9 @@ class SolarCalcs(object):
         self.dif = self.forc.dif     # Diffuse sunlight
 
         if self.dir + self.dif > 0.:
+
+            logging.debug("{} Solar radiation > 0".format(__name__))
+
             # calculate zenith tangent, and critOrient solar angles
             self.solarangles()
 
@@ -107,6 +112,9 @@ class SolarCalcs(object):
             self.UCM.treeLatHeat = (1-self.parameter.vegAlbedo)*self.parameter.treeFLat*self.UCM.SolRecRoad
 
         else:    # No Sun
+
+            logging.debug("{} Solar radiation = 0".format(__name__))
+
             self.UCM.road.solRec = 0.
             self.rural.solRec = 0.
 

@@ -137,7 +137,7 @@ class TestOutput(object):
             #print epwwtr.staUmod[i],'\n--'
             print '----#'
 
-    def test_uwg_output_cooldemand_5_1_1300(self):
+    def test_uwg_output_cooldemand_6_1_1300(self):
         """
         Initial conditions:
             - day time
@@ -146,7 +146,7 @@ class TestOutput(object):
         """
 
         # Set up logger
-        log_path = os.path.join("log", "test_uwg_output_cooldemand_5_1_1300.log")
+        log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
         logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
         self.setup_uwg_integration(epw_file_name="CAN_ON_Toronto.716240_CWEC.epw")
@@ -161,16 +161,9 @@ class TestOutput(object):
         self.uwg.set_input()
         self.uwg.hvac_autosize()
 
-        for i in xrange(12*13):
-            self.uwg.simTime.UpdateDate()
-
-        print 'mth', self.uwg.simTime.month
-        print 'day', self.uwg.simTime.day
-        print 'hr', self.uwg.simTime.secDay/3600.
-        print '------------------'
-
-        self.uwg.uwg_main()
-        self.uwg.write_epw()
+        # 0 - 23
+        self.uwg.uwg_main(0,0)
+        #self.uwg.write_epw()
 
         # shorten some variable names
         ti = self.uwg.simTime.timeInitial
@@ -199,11 +192,11 @@ class TestOutput(object):
         #print '\n'
 
         assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)
-
+        """
         # compare per hours
         lstlen = len(pywtr.staTemp)
         for i in xrange(0,lstlen,1):
-            print 'hr:', i
+            print 'hr:', i + 14
             # dry bulb temperature  [?C]
             print 'Tdb'
             print pywtr.staTemp[i]-273.15
@@ -224,8 +217,7 @@ class TestOutput(object):
             #print matwtr.staUmod[i]
             #print epwwtr.staUmod[i],'\n--'
             print '----#'
-
-
+        """
 
     def test_uwg_output_cooldemand_1_1_0000(self):
         """
@@ -308,6 +300,6 @@ if __name__ == "__main__":
     #print "coolemand 1 1 0000\n"
     #test.test_uwg_output_cooldemand_1_1_0000()
     #print "cooldemand 1 1 13000\n"
-    test.test_uwg_output_cooldemand_5_1_1300()
+    test.test_uwg_output_cooldemand_6_1_1300()
     #print "heatdemand 1 1 0000\n"
     #test.test_uwg_output_heatdemand_1_1_0000()

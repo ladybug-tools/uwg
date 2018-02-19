@@ -119,9 +119,12 @@ class Building(object):
             c=self.Zone
             )
 
+    def is_near_zero(self,val,tol=1e-14):
+        return abs(float(val)) < tol
+
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
 
-        logging.info("{0} {1}".format(__name__, self.__repr__()))
+        logging.debug("{0} {1}".format(__name__, self.__repr__()))
 
         # Building Energy Model
         self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
@@ -153,13 +156,16 @@ class Building(object):
         massArea = 2*self.nFloor-1                      # ceiling/floor (top & bottom)
 
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
-        if simTime.secDay/3600. < parameter.nightSetEnd or simTime.secDay/3600. >= parameter.nightSetStart:
+        isEqualNightStart = self.is_near_zero((simTime.secDay/3600.) - parameter.nightSetStart)
+        if simTime.secDay/3600. < parameter.nightSetEnd or (simTime.secDay/3600. > parameter.nightSetStart or isEqualNightStart):
             logging.debug("{} Night setpoints".format(__name__))
+
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
             logging.debug("{} Day setpoints".format(__name__))
+
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
             self.intHeat = self.intHeatDay*self.nFloor
@@ -168,9 +174,10 @@ class Building(object):
         zac_in_wall = 3.076                             # wall heat convection coefficeint
         zac_in_mass = 3.076                             # mass heat convection coefficeint
         #Note: may have to change to try/catch loop
+
         if T_ceil > T_indoor:                           # set higher ceiling heat convection coefficient
             zac_in_ceil  = 0.948                        #  -  based on heat is higher on ceiling
-        elif T_ceil <= T_indoor:
+        elif (T_ceil < T_indoor) or self.is_near_zero(T_ceil-T_indoor):
             zac_in_ceil  = 4.040
         else:
             print T_ceil, T_indoor
