@@ -515,12 +515,15 @@ class UWG(object):
 
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
-            self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
-                                                                  # minus one to be consistent with forcIP list index
+
+            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
 
             logging.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
 
-            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+
+            self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
+                                                                  # minus one to be consistent with forcIP list index
+
 
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
@@ -584,10 +587,6 @@ class UWG(object):
                 self.BEM[i].T_roofex = self.BEM[i].roof.layerTemp[0]
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
-
-            print 'bt,', self.BEM[0].building.indoorTemp-273.15
-            print 'bt,', self.BEM[1].building.indoorTemp-273.15
-
             # Update rural heat fluxes & update vertical diffusion model (VDM)
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
@@ -600,7 +599,7 @@ class UWG(object):
 
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
-            print self.UCM.canTemp-273.15
+            #print self.UCM.canTemp-273.15
 
             # Experimental code to run diffusion model in the urban area
             Uroad = copy.copy(self.UCM.road)
@@ -625,8 +624,11 @@ class UWG(object):
 
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
-                if self.simTime.secDay/3600. > 18.0: print '-------------'
+                if self.is_near_zero(self.simTime.secDay/3600.-16.0):
+                    print '>>>>>>>>>>>>>>>>'
                 print'-------------'
+                print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+
                 print self.UCM.canTemp-273.15
                 print self.UCM.canRHum
                 print'-------------'

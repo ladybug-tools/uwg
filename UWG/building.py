@@ -158,13 +158,13 @@ class Building(object):
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
         isEqualNightStart = self.is_near_zero((simTime.secDay/3600.) - parameter.nightSetStart)
         if simTime.secDay/3600. < parameter.nightSetEnd or (simTime.secDay/3600. > parameter.nightSetStart or isEqualNightStart):
-            logging.debug("{} Night setpoints".format(__name__))
+            logging.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
-            logging.debug("{} Day setpoints".format(__name__))
+            logging.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
@@ -183,7 +183,6 @@ class Building(object):
             print T_ceil, T_indoor
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
             return
-
 
         # -------------------------------------------------------------
         # Heat fluxes (per m^2 of bld footprint)
@@ -214,7 +213,6 @@ class Building(object):
             winTrans,                                           # solar load through window
             0.)
 
-
         self.sensHeatDemand = max(
             -(wallArea*zac_in_wall*(T_wall-T_heat) +            # wall load
             massArea*zac_in_mass*(T_mass-T_heat) +              # mass load
@@ -237,7 +235,6 @@ class Building(object):
             # 0.9*0.0078)*parameter.lv
             VolCool = self.sensCoolDemand / (dens*parameter.cp*(T_indoor-283.15)) # m3
             self.dehumDemand = max(VolCool * dens * (self.indoorHum - 0.9*0.0078)*parameter.lv, 0.)
-
             if (self.dehumDemand + self.sensCoolDemand) > (self.coolCap * self.nFloor): # if cooling demand greater then hvac cooling capacity
                 self.Qhvac = self.coolCap * self.nFloor
                 VolCool = VolCool / (self.dehumDemand + self.sensCoolDemand) * (self.coolCap * self.nFloor)

@@ -54,7 +54,7 @@ class UBLDef(object):
         for iz in xrange(RSM.nzref):
             refDens = refDens + RSM.densityProfC[iz] * RSM.dz[iz] / (RSM.z[RSM.nzref-1] + RSM.dz[RSM.nzref-1]/2.)
 
-        forDens = 0
+        forDens = 0.
         for iz in xrange(RSM.nzfor):
             forDens = forDens + RSM.densityProfC[iz] * RSM.dz[iz] / (RSM.z[RSM.nzfor-1] + RSM.dz[RSM.nzfor-1]/2.)
 
@@ -79,6 +79,7 @@ class UBLDef(object):
             eqTemp = RSM.tempProf[RSM.nzref-1]
             eqWind = RSM.windProf[RSM.nzref-1]
 
+
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             u_circ = k_w*(g*heatDif/Cp/refDens/eqTemp*h_UBL)**(1./3.)
 
@@ -86,12 +87,10 @@ class UBLDef(object):
                 advCoef  = self.orthLength*eqWind*simTime.dt/self.urbArea*1.4
                 self.ublTemp = (Csurf + advCoef * eqTemp + self.ublTemp)/(1. + advCoef)
                 self.ublTempdx = [self.ublTemp for x in xrange(len(self.ublTempdx))]
-
             else:                   # Convective problem
                 advCoef  = self.perimeter*u_circ*simTime.dt/self.urbArea*1.4
                 self.ublTemp = (Csurf+advCoef*eqTemp + self.ublTemp)/(1 + advCoef)
                 self.ublTempdx = [self.ublTemp for x in xrange(len(self.ublTempdx))]
-
 
         # ---------------------------------------------------------------------
         # Night
@@ -102,7 +101,6 @@ class UBLDef(object):
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             self.ublTemp, self.ublTempdx = self.NightForc(self.ublTempdx,simTime.dt, \
                 h_UBL,self.paralLength,self.charLength,RSM,Csurf)
-
 
     def NightForc(self,ublTempdx,dt,h_UBL,paralLength,charLength,RSM,Csurf):
         # Night forcing (RSM.nzfor = number of layers of forcing)

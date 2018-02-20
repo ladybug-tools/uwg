@@ -137,6 +137,33 @@ class TestOutput(object):
             #print epwwtr.staUmod[i],'\n--'
             print '----#'
 
+    def test_uwg_output_work(self):
+        """
+        Initial conditions:
+            - day time
+            - after vegstart
+            - sensHeatDemand
+        """
+
+        # Set up logger
+        log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
+        logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
+
+        self.setup_uwg_integration(epw_file_name="CAN_ON_Toronto.716240_CWEC.epw")
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        # Test all year
+        self.uwg.Month = 6
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
+
+        self.uwg.set_input()
+        self.uwg.hvac_autosize()
+
+        # 0 - 23
+        self.uwg.uwg_main(0,0)
+
     def test_uwg_output_cooldemand_6_1_1300(self):
         """
         Initial conditions:
@@ -192,7 +219,7 @@ class TestOutput(object):
         #print '\n'
 
         assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)
-        """
+
         # compare per hours
         lstlen = len(pywtr.staTemp)
         for i in xrange(0,lstlen,1):
@@ -217,7 +244,7 @@ class TestOutput(object):
             #print matwtr.staUmod[i]
             #print epwwtr.staUmod[i],'\n--'
             print '----#'
-        """
+
 
     def test_uwg_output_cooldemand_1_1_0000(self):
         """
@@ -300,6 +327,12 @@ if __name__ == "__main__":
     #print "coolemand 1 1 0000\n"
     #test.test_uwg_output_cooldemand_1_1_0000()
     #print "cooldemand 1 1 13000\n"
-    test.test_uwg_output_cooldemand_6_1_1300()
+
+    #$ warble bug
+    #test.test_uwg_output_cooldemand_6_1_1300()
+
     #print "heatdemand 1 1 0000\n"
     #test.test_uwg_output_heatdemand_1_1_0000()
+
+    #
+    test.test_uwg_output_work()

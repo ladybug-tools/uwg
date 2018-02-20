@@ -163,6 +163,7 @@ class UCMDef(object):
         h_conv = self.road.aeroCond
         H1 = T_road*h_conv*self.roadArea       # Heat (Sens) from road surface
         H2 = h_conv*self.roadArea
+
         H1 = H1 + T_ubl*self.roadArea*self.uExch*Cp_air*dens_ubl # Heat from UBL
         H2 = H2 + self.roadArea*self.uExch*Cp_air*dens_ubl
         Q = (self.roofArea+self.roadArea)*(self.sensAnthrop + self.treeSensHeat*self.treeCoverage)
@@ -201,7 +202,8 @@ class UCMDef(object):
 
         # Solve for canyon temperature
         self.canTemp = (H1 + Q)/H2
-        
+
+
         # Heat flux based per m^2 of urban area
         self.Q_road = h_conv*(T_road-self.canTemp)*(1.-self.bldDensity)  # Sensible heat from road (W/m^2 of urban area)
         self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1.-self.bldDensity)

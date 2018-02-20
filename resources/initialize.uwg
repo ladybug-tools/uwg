@@ -62,9 +62,9 @@ bld,
 0,0,0,    # FullServiceRestaurant
 0,0,0,    # Hospital
 0,0,0,    # LargeHotel
-0,0.4,0,  # LargeOffice
+0,0,0,  # LargeOffice
 0,0,0,    # MediumOffice
-0,0.6,0,  # MidRiseApartment
+0,1,0,  # MidRiseApartment
 0,0,0,    # OutPatient
 0,0,0,    # PrimarySchool
 0,0,0,    # QuickServiceRestaurant
