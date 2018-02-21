@@ -196,6 +196,7 @@ class Building(object):
         # dens: kga m-3
         # UCM.canHum: canyon specific humidity (kgv kga-1)
         # indoorHum: indoor kv kga-1
+        # QL = W m-2
 
         QLinfil = volInfil * dens * parameter.lv * (UCM.canHum - self.indoorHum)
         QLvent = volVent * dens * parameter.lv * (UCM.canHum - self.indoorHum)
@@ -295,7 +296,8 @@ class Building(object):
         # Assumes air temperature of control volume is sum of surface boundary temperatures
         # weighted by area and heat transfer coefficient + generated heat
         self.indoorTemp = (H1 + Q)/H2
-        self.indoorHum = self.indoorHum + simTime.dt/(dens * parameter.lv * UCM.bldHeight) * \
+
+        self.indoorHum = self.indoorHum + (simTime.dt/(dens * parameter.lv * UCM.bldHeight)) * \
             (QLintload + QLinfil + QLvent - Qdehum)
 
         # Calculate relative humidity (Pw/Pws*100) using pressurce, indoor temperature, humidity

@@ -74,7 +74,7 @@ class UBLDef(object):
             # Circulation velocity per Bueno 'the UWG', eq 8
 
             logging.debug("{} Day ubl calcs".format(__name__))
-
+            print "{} Day ubl calcs".format(__name__)
             h_UBL = self.dayBLHeight            # Day boundary layer height
             eqTemp = RSM.tempProf[RSM.nzref-1]
             eqWind = RSM.windProf[RSM.nzref-1]
@@ -101,6 +101,7 @@ class UBLDef(object):
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             self.ublTemp, self.ublTempdx = self.NightForc(self.ublTempdx,simTime.dt, \
                 h_UBL,self.paralLength,self.charLength,RSM,Csurf)
+            print "{} Night ubl calcs".format(__name__)
 
     def NightForc(self,ublTempdx,dt,h_UBL,paralLength,charLength,RSM,Csurf):
         # Night forcing (RSM.nzfor = number of layers of forcing)

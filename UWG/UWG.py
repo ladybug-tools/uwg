@@ -524,7 +524,6 @@ class UWG(object):
             self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
                                                                   # minus one to be consistent with forcIP list index
 
-
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
             self.forc.wind = max(self.forcIP.wind[self.ceil_time_step], self.geoParam.windMin) # wind speed (m s-1)

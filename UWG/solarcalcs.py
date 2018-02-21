@@ -162,7 +162,7 @@ class SolarCalcs(object):
         lat = self.RSM.lat
         GMT = self.RSM.GMT
 
-        self.ut = (24.0 + (secDay/3600.%24.0)) % 24.0 # Get elapsed hours on current day
+        self.ut = (24 + (int(secDay)/3600%24)) % 24 # Get elapsed hours on current day
 
         ibis = range(len(inobis))
 

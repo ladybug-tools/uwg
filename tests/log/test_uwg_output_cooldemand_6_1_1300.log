@@ -550,7 +550,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.0833333333
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6630357613
+INFO:root:dbT = 17.6630351263
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -559,7 +559,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.1666666667
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6555638991
+INFO:root:dbT = 17.6555626221
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -568,7 +568,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.25
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6551715743
+INFO:root:dbT = 17.6551691497
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -577,7 +577,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.3333333333
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6553146889
+INFO:root:dbT = 17.6553105834
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -586,7 +586,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.4166666667
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6547649226
+INFO:root:dbT = 17.6547587201
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -595,7 +595,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.5
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6530268124
+INFO:root:dbT = 17.6530182429
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -604,7 +604,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.5833333333
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6502997859
+INFO:root:dbT = 17.6502886907
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -613,7 +613,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.6666666667
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6468707537
+INFO:root:dbT = 17.6468570472
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -622,7 +622,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.75
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6429882421
+INFO:root:dbT = 17.6429718815
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -631,7 +631,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.8333333333
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6388228321
+INFO:root:dbT = 17.6388037996
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -640,7 +640,7 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @18.9166666667
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6344842018
+INFO:root:dbT = 17.634462495
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:
@@ -649,126 +649,126 @@ DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.0
 DEBUG:root:UWG.UBLDef Night ubl calcs
-INFO:root:dbT = 17.6300893128
+INFO:root:dbT = 17.6300717271
 INFO:root:dpT = 16.3508184339
 INFO:root:RH  = 91.8985252917
 INFO:root:UWG.UWG ----sim time step = 5----
 
 
-INFO:root:dbT = 17.6300893128
+INFO:root:dbT = 17.6300717271
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.0833333333, s=68700.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.0833333333
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6410365939
+INFO:root:dbT = 17.6410191537
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.1666666667, s=69000.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.1666666667
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6214048811
+INFO:root:dbT = 17.6213972639
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.25, s=69300.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.25
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6139769999
+INFO:root:dbT = 17.6139727024
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.3333333333, s=69600.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.3333333333
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.613292544
+INFO:root:dbT = 17.6132916299
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.4166666667, s=69900.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.4166666667
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6141887208
+INFO:root:dbT = 17.614189761
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.5, s=70200.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.5
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6154029409
+INFO:root:dbT = 17.6154042857
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.5833333333, s=70500.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.5833333333
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6165162193
+INFO:root:dbT = 17.6165177878
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.6666666667, s=70800.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.6666666667
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6174916331
+INFO:root:dbT = 17.6174934783
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.75, s=71100.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.75
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6183332221
+INFO:root:dbT = 17.6183352857
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.8333333333, s=71400.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.8333333333
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6190632514
+INFO:root:dbT = 17.6190654881
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=19.9166666667, s=71700.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @19.9166666667
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.6197007678
+INFO:root:dbT = 17.6197031396
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:
 UWG.UWG m=6, d=1, h=20.0, s=72000.0
 DEBUG:root:UWG.solarcalcs Solar radiation > 0
 DEBUG:root:UWG.building BuildingType: MidRiseApartment, Era: Pst80, Zone: 1A (Miami)
 DEBUG:root:UWG.building Night setpoints @20.0
 DEBUG:root:UWG.UBLDef Day ubl calcs
-INFO:root:dbT = 17.615663123
+INFO:root:dbT = 17.6156655904
 INFO:root:dpT = 16.6447007408
-INFO:root:RH  = 93.8081929949
+INFO:root:RH  = 93.8082970785
 INFO:root:UWG.UWG ----sim time step = 6----
 
 
-INFO:root:dbT = 17.615663123
+INFO:root:dbT = 17.6156655904
 INFO:root:dpT = 17.2386380822
-INFO:root:RH  = 97.5085268215
+INFO:root:RH  = 97.5085116404
