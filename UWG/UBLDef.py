@@ -79,6 +79,7 @@ class UBLDef(object):
             eqTemp = RSM.tempProf[RSM.nzref-1]
             eqWind = RSM.windProf[RSM.nzref-1]
 
+            print 'eqT', eqTemp
 
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             u_circ = k_w*(g*heatDif/Cp/refDens/eqTemp*h_UBL)**(1./3.)
@@ -91,6 +92,8 @@ class UBLDef(object):
                 advCoef  = self.perimeter*u_circ*simTime.dt/self.urbArea*1.4
                 self.ublTemp = (Csurf+advCoef*eqTemp + self.ublTemp)/(1 + advCoef)
                 self.ublTempdx = [self.ublTemp for x in xrange(len(self.ublTempdx))]
+
+
 
         # ---------------------------------------------------------------------
         # Night

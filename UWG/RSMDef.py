@@ -144,7 +144,7 @@ class RSMDef(object):
 
 
     # Ref: The UWG (2012), Eq. (4)
-    def VDM(self,forc,rural,parameter,simTime):
+    def VDM(self,forc,rural,parameter,simTime,printChk):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
 
@@ -173,6 +173,17 @@ class RSMDef(object):
 
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
+        """
+        print 'de', self.densityProfC[0]
+        print 'z', self.z[0]
+        print 'dz', self.dz[0]
+        print 'zo', self.z0r
+        print 'di', self.disp
+        print 'tp', self.tempProf[0]
+        print 'rs', rural.sens
+        print 'nz', self.nzref
+        print 'fw', forc.wind
+        """
         # Ref: The UWG (2012), Eq. (5)
         # compute diffusion coefficient
         cd,ustarRur = self.DiffusionCoefficient(self.densityProfC[0], \
@@ -180,11 +191,11 @@ class RSMDef(object):
             self.tempProf[0], rural.sens, self.nzref, forc.wind, \
             self.tempProf, parameter)
 
-
         # solve diffusion equation
         self.tempProf = self.DiffusionEquation(self.nzref,simTime.dt,\
             self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz)
-
+        print 'tprsm', self.tempProf[self.nzref-1]
+        print '----'
         # compute wind profile
         for iz in xrange(self.nzref):
             self.windProf[iz] = ustarRur/parameter.vk*\
@@ -196,6 +207,11 @@ class RSMDef(object):
             self.ublPres = self.ublPres + \
                 self.presProf[iz]*self.dz[iz]/(self.z[self.nzref-1]+self.dz[self.nzref-1]/2.)
 
+
+        #TODO: delete
+        #if printChk:
+        #    print 'tp', round(self.tempProf[0],2),
+        #    print round(self.tempProf[-1],2)
 
     def DiffusionEquation(self,nz,dt,co,da,daz,cd,dz):
 

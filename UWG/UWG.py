@@ -493,8 +493,8 @@ class UWG(object):
         self.USMData = [None for x in xrange(self.N)]
 
         # Only for testing = Adjust hours if neccessary
-        sim_start_hour = 13
-        sim_end_hour =   20
+        sim_start_hour = 6
+        sim_end_hour =   7
         for si in xrange(int(3600./self.simTime.dt*sim_start_hour)):
             self.simTime.UpdateDate()
         _substep = (3600/self.simTime.dt*(sim_start_hour + (24-sim_end_hour)%24))
@@ -516,13 +516,13 @@ class UWG(object):
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
 
-            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
 
             logging.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
 
-
-            self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
-                                                                  # minus one to be consistent with forcIP list index
+            #TODO: add start hours to forcIP
+            _it = it + 3600/self.simTime.dt*sim_start_hour
+            self.ceil_time_step = int(math.ceil(_it * self.ph))-1  # simulation time increment raised to weather time step
+                                                                   # minus one to be consistent with forcIP list index
 
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
@@ -587,9 +587,12 @@ class UWG(object):
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
             # Update rural heat fluxes & update vertical diffusion model (VDM)
+
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
-            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            #TODO: delte false as check
+            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime,False)
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
@@ -598,8 +601,12 @@ class UWG(object):
 
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
-            #print self.UCM.canTemp-273.15
 
+            print '-'
+            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+            #print self.UCM.canTemp-273.15
+            #print self.UCM.canRHum
+            break
             # Experimental code to run diffusion model in the urban area
             Uroad = copy.copy(self.UCM.road)
             Uroad.sens = copy.copy(self.UCM.sensHeat)
@@ -607,15 +614,13 @@ class UWG(object):
             Uforc.wind = copy.copy(self.UCM.canWind)
             Uforc.temp = copy.copy(self.UCM.canTemp)
 
-            self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
+            #TODO: delte true as check
+            self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime,True)
 
             logging.info("dbT = {}".format(self.UCM.canTemp-273.15))
             if n > 0:
                 logging.info("dpT = {}".format(self.UCM.Tdp))
                 logging.info("RH  = {}".format(self.UCM.canRHum))
-
-
-
 
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
 
@@ -627,12 +632,9 @@ class UWG(object):
                     print '>>>>>>>>>>>>>>>>'
                 print'-------------'
                 print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
-
                 print self.UCM.canTemp-273.15
                 print self.UCM.canRHum
                 print'-------------'
-
-                if self.simTime.secDay/3600. > 18.0: print '-------------'
 
                 self.UBLData[n] = copy.copy(self.UBL)
                 self.UCMData[n] = copy.copy(self.UCM)
