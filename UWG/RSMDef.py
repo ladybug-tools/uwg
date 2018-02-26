@@ -2,7 +2,7 @@ import os
 import math
 import pprint
 ppr = lambda x: pprint.pprint(x)
-
+import pdb
 class RSMDef(object):
     """
     % Rural Site & Vertical Diffusion Model (VDM)
@@ -173,17 +173,6 @@ class RSMDef(object):
 
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
-        """
-        print 'de', self.densityProfC[0]
-        print 'z', self.z[0]
-        print 'dz', self.dz[0]
-        print 'zo', self.z0r
-        print 'di', self.disp
-        print 'tp', self.tempProf[0]
-        print 'rs', rural.sens
-        print 'nz', self.nzref
-        print 'fw', forc.wind
-        """
         # Ref: The UWG (2012), Eq. (5)
         # compute diffusion coefficient
         cd,ustarRur = self.DiffusionCoefficient(self.densityProfC[0], \
@@ -191,11 +180,24 @@ class RSMDef(object):
             self.tempProf[0], rural.sens, self.nzref, forc.wind, \
             self.tempProf, parameter)
 
+        #print self.tempProf[1]-273.15
+        #print '-'
+        #print 'cd',cd[0]
+        #ppr(self.nzref)
+        #ppr(simTime.dt)
+        #ppr(self.tempProf)
+        #ppr(self.densityProfC)
+        #ppr(self.densityProfS)
+        #ppr(cd)
+        #ppr(self.dz)
         # solve diffusion equation
+        #if simTime.secDay== 65100:
+        #    pdb.set_trace()
         self.tempProf = self.DiffusionEquation(self.nzref,simTime.dt,\
             self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz)
-        print 'tprsm', self.tempProf[self.nzref-1]
-        print '----'
+
+        #print 'tprsm', self.tempProf[self.nzref-1]
+        #print '----'
         # compute wind profile
         for iz in xrange(self.nzref):
             self.windProf[iz] = ustarRur/parameter.vk*\
@@ -219,26 +221,31 @@ class RSMDef(object):
         a = [[0 for j in xrange(3)] for i in xrange(nz)]
         c = [0 for i in xrange(nz)]
 
-        #print a
         #--------------------------------------------------------------------------
         cddz[0] = daz[0]*cd[0]/dz[0]
+        #ppr(cd)
         for iz in xrange(1,nz):
-           cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
-
+            #if iz==1:
+                #print daz[iz]
+                #print cd[iz]
+                #print (dz[iz]+dz[iz-1])
+            cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
         cddz[nz] = daz[nz]*cd[nz]/dz[nz]
         #--------------------------------------------------------------------------
+        #print 'cd', cddz[1]
 
         a[0][0] = 0.
         a[0][1] = 1.
         a[0][2] = 0.
         c[0] = co[0]
 
-        for iz in xrange(1,nz):
-           dzv = dz[iz]
-           a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
-           a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
-           a[iz][2]=-cddz[iz+1]*dt/dzv/da[iz]
-           c[iz]=co[iz]
+        for iz in xrange(1,nz-1):
+            #print iz
+            dzv = dz[iz]
+            a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
+            a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
+            a[iz][2]=-cddz[iz+1]*dt/dzv/da[iz]
+            c[iz]=co[iz]
 
         a[nz-1][0]=-1.
         a[nz-1][1]=1.
@@ -246,8 +253,8 @@ class RSMDef(object):
         c[nz-1]=0.
 
         #--------------------------------------------------------------------------
-        co = self.invert (nz,a,c);
-
+        co = self.invert(nz,a,c);
+        #print 'chk-', co[1]-273.15
         return co
 
     def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
@@ -255,6 +262,7 @@ class RSMDef(object):
         Kt = [0 for x in xrange(nz+1)]
         ws = [0 for x in xrange(nz)]
         te = [0 for x in xrange(nz)]
+
         # Friction velocity (Louis 1979)
         ustar = parameter.vk * uref/math.log((10.-disp)/z0)
 
@@ -280,14 +288,20 @@ class RSMDef(object):
                 te[iz] = max(ustar**2.,0.01)
 
         # lenght scales (l_up, l_down, l_k, l_eps)
-
         dlu,dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
 
+        #TODO: test
+        #ppr(dlu) #GOOD
+        #ppr(dld)
+
         dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
+
+
 
         # Boundary-layer diffusion coefficient
         for iz in xrange(nz):
            Kt[iz] = 0.4*dlk[iz]*math.sqrt(te[iz])
+
         Kt[nz] = Kt[nz-1]
 
         return Kt, ustar
@@ -307,13 +321,33 @@ class RSMDef(object):
             zup_inf=0.
             beta=g/pt[iz]
 
-            for izz in xrange(nz-1):
+            for izz in xrange(iz,nz-1):
+                #TODO: test dzt
                 dzt=(dz[izz+1]+dz[izz])/2.
+                #if iz==0:
+                #    print dz[izz+1]
+                #    print dz[izz]
+                #    print "/"
                 zup=zup-beta*pt[iz]*dzt
+                #if iz==0:
+                #    print zup
                 zup=zup+beta*(pt[izz+1]+pt[izz])*dzt/2.
                 zzz=zzz+dzt
-
+                #if iz==0:
+                #    print beta
+                #    print pt[izz+1]
+                #    print pt[izz]
+                #    print dzt
+                #    print zup
+                #    print '/'
+                #TODO: NEEDS TO BE TESTED
+                #if True:#iz==0:
+                    #print (te[iz]<zup),
+                    #print ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf))
+                    #print te[iz], zup
+                    #print iz+1, '-', izz+1
                 if (te[iz]<zup) and ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf)):
+                    #if iz==1: print 'true'
                     bbb=(pt[izz+1]-pt[izz])/dzt
                     if not self.is_near_zero(bbb-0.):
                         tl=(-beta*(pt[izz]-pt[iz])+ \
@@ -323,11 +357,16 @@ class RSMDef(object):
                         tl=(te[iz]-zup_inf)/(beta*(pt[izz]-pt[iz]))
                     dlu[iz]=max(1.,zzz-dzt+tl)
                 zup_inf=zup
+            #TODO: test this
+            #print iz, dld[iz]
+            #print '--err--'
             zdo=0.
             zdo_sup=0.
             dld[iz]=z[iz]+dz[iz]/2.
             zzz=0.
-            for izz in reversed(range(iz)[1:]):
+
+            for izz in xrange(iz,0,-1):
+                #print iz+1, '-', izz+1
                 dzt=(dz[izz-1]+dz[izz])/2.
                 zdo=zdo+beta*pt[iz]*dzt
                 zdo=zdo-beta*(pt[izz-1]+pt[izz])*dzt/2.
@@ -342,7 +381,7 @@ class RSMDef(object):
                         tl=(te[iz]-zdo_sup)/(beta*(pt[izz]-pt[iz]))
                     dld[iz]=max(1.,zzz-dzt+tl)
                 zdo_sup=zdo
-
+            #print 'endloop'#print iz, dld[iz]
         return dlu,dld
 
     def LengthBougeault(self,nz,dld,dlu,z):

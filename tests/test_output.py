@@ -156,7 +156,7 @@ class TestOutput(object):
         # Test all year
         self.uwg.Month = 6
         self.uwg.Day = 1
-        self.uwg.nDay = 1
+        self.uwg.nDay = 2
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
@@ -171,7 +171,6 @@ class TestOutput(object):
             - after vegstart
             - sensHeatDemand
         """
-
         # Set up logger
         log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
         logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
@@ -181,7 +180,7 @@ class TestOutput(object):
         self.uwg.read_input()
 
         # Test all year
-        self.uwg.Month = 6
+        self.uwg.Month = 1
         self.uwg.Day = 1
         self.uwg.nDay = 1
 
@@ -190,7 +189,7 @@ class TestOutput(object):
 
         # 0 - 23
         self.uwg.uwg_main(0,0)
-        #self.uwg.write_epw()
+        self.uwg.write_epw()
 
         # shorten some variable names
         ti = self.uwg.simTime.timeInitial
@@ -223,27 +222,25 @@ class TestOutput(object):
         # compare per hours
         lstlen = len(pywtr.staTemp)
         for i in xrange(0,lstlen,1):
-            print 'hr:', i + 14
+            #print 'hr:', i
             # dry bulb temperature  [?C]
-            print 'Tdb'
-            print pywtr.staTemp[i]-273.15
-            print matwtr.staTemp[i]-273.15
-            print epwwtr.staTemp[i]-273.15,'\n--'
+            #print 'Tdb'
+            print (pywtr.staTemp[i]-273.15)-(matwtr.staTemp[i]-273.15)
+            #print epwwtr.staTemp[i]-273.15,'\n--'
             # dew point temperature [?C]
             #print 'Tdp'
             #print pywtr.staTdp[i]
             #print matwtr.staTdp[i]
             #print epwwtr.staTdp[i],'\n--'
             # relative humidity     [%]
-            print 'RH'
-            print pywtr.staRhum[i]
-            print matwtr.staRhum[i]
-            print epwwtr.staRhum[i],'\n--'
+            #print 'RH'
+            #print pywtr.staRhum[i]-matwtr.staRhum[i]
+            #print epwwtr.staRhum[i],'\n--'
             # wind speed [m/s]
             #print pywtr.staUmod[i]
             #print matwtr.staUmod[i]
             #print epwwtr.staUmod[i],'\n--'
-            print '----#'
+            #print '----#'
 
 
     def test_uwg_output_cooldemand_1_1_0000(self):

@@ -48,6 +48,11 @@ import decimal
 pp = lambda x: pprint.pprint(x)
 dd = lambda x: decimal.Decimal.from_float(x)
 
+# For logging
+import pandas as pd
+import numpy as np
+import pdb
+
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
 
@@ -493,8 +498,8 @@ class UWG(object):
         self.USMData = [None for x in xrange(self.N)]
 
         # Only for testing = Adjust hours if neccessary
-        sim_start_hour = 6
-        sim_end_hour =   7
+        sim_start_hour = 0
+        sim_end_hour =   0#23
         for si in xrange(int(3600./self.simTime.dt*sim_start_hour)):
             self.simTime.UpdateDate()
         _substep = (3600/self.simTime.dt*(sim_start_hour + (24-sim_end_hour)%24))
@@ -587,7 +592,7 @@ class UWG(object):
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
             # Update rural heat fluxes & update vertical diffusion model (VDM)
-
+            #print '-'
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
 
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
@@ -600,13 +605,18 @@ class UWG(object):
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
 
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
+            #if self.is_near_zero(self.simTime.secDay/3600. - (18. + 2*self.ph)):
+                #pdb.set_trace()
+                #break
 
+            #print "\n{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+            #print '--'
+            print round(self.simTime.secDay/3600.,2)
+            #print "{}".format(str(dd(self.UCM.canTemp-273.15))[:16])
 
-            print '-'
-            print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
-            #print self.UCM.canTemp-273.15
+            #print '12.3456789012'
             #print self.UCM.canRHum
-            break
+            #break
             # Experimental code to run diffusion model in the urban area
             Uroad = copy.copy(self.UCM.road)
             Uroad.sens = copy.copy(self.UCM.sensHeat)
@@ -628,13 +638,13 @@ class UWG(object):
 
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
-                if self.is_near_zero(self.simTime.secDay/3600.-16.0):
-                    print '>>>>>>>>>>>>>>>>'
-                print'-------------'
-                print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
-                print self.UCM.canTemp-273.15
-                print self.UCM.canRHum
-                print'-------------'
+                #if self.is_near_zero(self.simTime.secDay/3600.-16.0):
+                #    print '>>>>>>>>>>>>>>>>'
+                #print'-------------'
+                #print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+                #print self.UCM.canTemp-273.15
+                #print self.UCM.canRHum
+                #print'-------------'
 
                 self.UBLData[n] = copy.copy(self.UBL)
                 self.UCMData[n] = copy.copy(self.UCM)

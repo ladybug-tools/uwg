@@ -5,7 +5,7 @@ pp = lambda t: pprint.pprint(t)
 pl = lambda t: map(lambda t_: pp(t_), t)
 
 
-def scratch(s="self.densityProfC[0],self.z, self.dz"):
+def text_parse(s="self.densityProfC[0],self.z, self.dz"):
     s = str(s) if type(s) != type("") else s
     #remove white space and split
     sp = lambda t: "".join(t.split()).split(",")
@@ -20,6 +20,13 @@ def scratch(s="self.densityProfC[0],self.z, self.dz"):
     print ''
     pl(up(s))
 
+def scratch():
+    for iz in xrange(0,17,1):
+        print iz+1
+        for izz in xrange(iz,0,-1):
+            #for izz in reversed(range(iz)[1:]):
+            print iz+1, '-', izz+1
+        print '--------'
+
 if __name__ == "__main__":
-    s_ = "self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind"
-    scratch(s_)
+    scratch()

@@ -233,7 +233,8 @@ class UCMDef(object):
 
         # Sensible Heat
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
-
+        #print 'cT'
+        #print self.canTemp-273.15
         # Error checking
         if self.canTemp > 350. or self.canTemp < 250:
             raise Exception(self.CANYON_TEMP_BOUND_ERROR)
