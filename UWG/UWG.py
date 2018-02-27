@@ -508,8 +508,6 @@ class UWG(object):
         self.N -= int(_substep/(3600./self.simTime.dt))  # total number of hours in simulation
 
         for it in range(1,sim_step_halt,1):#self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
-
-
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -611,7 +609,8 @@ class UWG(object):
 
             #print "\n{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
             #print '--'
-            print round(self.simTime.secDay/3600.,2)
+
+            #print round(self.simTime.secDay/3600.,2)
             #print "{}".format(str(dd(self.UCM.canTemp-273.15))[:16])
 
             #print '12.3456789012'
@@ -662,13 +661,11 @@ class UWG(object):
         """
 
         #print 'Calculating new Temperature and humidity values'
-
         epw_prec = 16 # precision of epw file input
 
         for iJ in xrange(len(self.UCMData)):
             # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw
             # [6 to 21]                       = column data of epw
-
             self.epwinput[iJ+self.simTime.timeInitial-8][6] = "{0:.{1}f}".format(self.UCMData[iJ].canTemp - 273.15, epw_prec) # dry bulb temperature  [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][7] = "{0:.{1}f}".format(self.UCMData[iJ].Tdp, epw_prec)              # dew point temperature [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
@@ -743,7 +740,6 @@ def procMat(materials,max_thickness,min_thickness):
             newthickness = [materials.layerThickness[0]/2., materials.layerThickness[0]/2.]
             newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
     return newmat, newthickness
-
 
 if __name__ == "__main__":
 

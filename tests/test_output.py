@@ -146,23 +146,24 @@ class TestOutput(object):
         """
 
         # Set up logger
-        log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
-        logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
+        #log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
+        #logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
-        self.setup_uwg_integration(epw_file_name="CAN_ON_Toronto.716240_CWEC.epw")
+        self.setup_uwg_integration(epw_file_name="SGP_Singapore.486980_IWEC.epw") #"CAN_ON_Toronto.716240_CWEC.epw")
         self.uwg.read_epw()
         self.uwg.read_input()
 
         # Test all year
-        self.uwg.Month = 6
+        self.uwg.Month = 1
         self.uwg.Day = 1
-        self.uwg.nDay = 2
+        self.uwg.nDay = 365
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
 
         # 0 - 23
         self.uwg.uwg_main(0,0)
+        self.uwg.write_epw()
 
     def test_uwg_output_cooldemand_6_1_1300(self):
         """
@@ -182,7 +183,7 @@ class TestOutput(object):
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
-        self.uwg.nDay = 1
+        self.uwg.nDay = 365
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
@@ -208,12 +209,12 @@ class TestOutput(object):
             new_epw = UWG.utilities.read_csv(matlab_path_name)
         except Exception as e:
             raise Exception("Failed to read .uwg file! {}".format(e.message))
-
         matlab_weather = UWG.weather.Weather(matlab_path_name,ti,tf)
 
         # Make weather files for testing
         pywtr = UWG.weather.Weather(self.uwg.newPathName,ti,tf)
         matwtr = UWG.weather.Weather(matlab_path_name, ti, tf)
+
         epwwtr = self.uwg.weather
         #print '\n'
 
@@ -241,7 +242,6 @@ class TestOutput(object):
             #print matwtr.staUmod[i]
             #print epwwtr.staUmod[i],'\n--'
             #print '----#'
-
 
     def test_uwg_output_cooldemand_1_1_0000(self):
         """
