@@ -607,7 +607,9 @@ class UWG(object):
                 #pdb.set_trace()
                 #break
 
-            #print "\n{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+            #print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
+            #print "{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay)
+
             #print '--'
 
             #print round(self.simTime.secDay/3600.,2)
@@ -641,7 +643,9 @@ class UWG(object):
                 #    print '>>>>>>>>>>>>>>>>'
                 #print'-------------'
                 #print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
-                #print self.UCM.canTemp-273.15
+                #print "{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay)
+
+                print self.UCM.canTemp-273.15
                 #print self.UCM.canRHum
                 #print'-------------'
 

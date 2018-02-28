@@ -151,17 +151,17 @@ class TestOutput(object):
         #logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
         self.setup_uwg_integration(
-            epw_file_name="USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw",
-            initialize_file_name="initialize_boston.uwg"
+            epw_file_name="CHN_Beijing.Beijing.545110_IWEC.epw",#USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw",
+            initialize_file_name="initialize_beijing.uwg"
             )#"SGP_Singapore.486980_IWEC.epw") #"CAN_ON_Toronto.716240_CWEC.epw")
 
         self.uwg.read_epw()
         self.uwg.read_input()
 
         # Test all year
-        self.uwg.Month = 1
-        self.uwg.Day = 1
-        self.uwg.nDay = 31
+        self.uwg.Month = 8
+        self.uwg.Day = 7
+        self.uwg.nDay = 14
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
