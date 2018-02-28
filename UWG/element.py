@@ -118,7 +118,6 @@ class Element(object):
                 vegSens = self.vegCoverage*(1.-parameter.grassFLat)*(1.-parameter.vegAlbedo)*self.solRec
 
             self.lat = soilLat + vegLat
-
             # Sensible & net heat flux
             self.sens = vegSens + self.aeroCond*(self.layerTemp[0]-tempRef)
             self.flux = -self.sens + self.solAbs + self.infra - self.lat # (W m-2)

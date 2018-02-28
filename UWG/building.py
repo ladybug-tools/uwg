@@ -1,5 +1,7 @@
 
-import psychrometrics
+from psychrometrics import psychrometrics, moist_air_density
+
+import logging
 
 """
 Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
@@ -111,15 +113,19 @@ class Building(object):
             self.Zone = "null"                          # Climate zone number
 
     def __repr__(self):
-        return "BuildingType: {a}, Era: {b}, Zone: {c}; @ Ti: {d}, WWR: {e}".format(
+        return "BuildingType: {a}, Era: {b}, Zone: {c}".format(
             a=self.Type,
             b=self.Era,
-            c=self.Zone,
-            d=self.indoorTemp-273.15,
-            e=self.glazingRatio
+            c=self.Zone
             )
 
+    def is_near_zero(self,val,tol=1e-14):
+        return abs(float(val)) < tol
+
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
+
+        logging.debug("{0} {1}".format(__name__, self.__repr__()))
+
         # Building Energy Model
         self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
         self.nFloor = max(UCM.bldHeight/float(self.floorHeight),1)   # At least one floor
@@ -130,9 +136,9 @@ class Building(object):
         self.heatConsump  = 0.0                         # heating energy consumption (W m-2)
         self.sensWaste = 0.0                            # Sensible waste heat (W m-2)
         self.dehumDemand  = 0.0                         # dehumidification energy (W m-2)
-        self.Qhvac = 0.0                                  # Total heat removed (sensible + latent)
+        self.Qhvac = 0.0                                # Total heat removed (sensible + latent)
         Qdehum = 0.0
-        dens =  psychrometrics.moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
+        dens =  moist_air_density(forc.pres,self.indoorTemp,self.indoorHum)# [kgv/ m-3] Moist air density given dry bulb temperature, humidity ratio, and pressure
         evapEff = 1.                                    # evaporation efficiency in the condenser
         volVent = self.vent * self.nFloor               # total vent volumetric flow [m3 s-1]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1]
@@ -150,11 +156,16 @@ class Building(object):
         massArea = 2*self.nFloor-1                      # ceiling/floor (top & bottom)
 
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
-        if simTime.secDay/3600. < parameter.nightSetEnd or simTime.secDay/3600. >= parameter.nightSetStart:
+        isEqualNightStart = self.is_near_zero((simTime.secDay/3600.) - parameter.nightSetStart)
+        if simTime.secDay/3600. < parameter.nightSetEnd or (simTime.secDay/3600. > parameter.nightSetStart or isEqualNightStart):
+            logging.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
+
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
+            logging.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
+
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
             self.intHeat = self.intHeatDay*self.nFloor
@@ -163,15 +174,15 @@ class Building(object):
         zac_in_wall = 3.076                             # wall heat convection coefficeint
         zac_in_mass = 3.076                             # mass heat convection coefficeint
         #Note: may have to change to try/catch loop
+
         if T_ceil > T_indoor:                           # set higher ceiling heat convection coefficient
             zac_in_ceil  = 0.948                        #  -  based on heat is higher on ceiling
-        elif T_ceil <= T_indoor:
+        elif (T_ceil < T_indoor) or self.is_near_zero(T_ceil-T_indoor):
             zac_in_ceil  = 4.040
         else:
             print T_ceil, T_indoor
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
             return
-
 
         # -------------------------------------------------------------
         # Heat fluxes (per m^2 of bld footprint)
@@ -185,6 +196,7 @@ class Building(object):
         # dens: kga m-3
         # UCM.canHum: canyon specific humidity (kgv kga-1)
         # indoorHum: indoor kv kga-1
+        # QL = W m-2
 
         QLinfil = volInfil * dens * parameter.lv * (UCM.canHum - self.indoorHum)
         QLvent = volVent * dens * parameter.lv * (UCM.canHum - self.indoorHum)
@@ -201,7 +213,6 @@ class Building(object):
             volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load (volVent = m3 s-1)
             winTrans,                                           # solar load through window
             0.)
-
 
         self.sensHeatDemand = max(
             -(wallArea*zac_in_wall*(T_wall-T_heat) +            # wall load
@@ -225,7 +236,6 @@ class Building(object):
             # 0.9*0.0078)*parameter.lv
             VolCool = self.sensCoolDemand / (dens*parameter.cp*(T_indoor-283.15)) # m3
             self.dehumDemand = max(VolCool * dens * (self.indoorHum - 0.9*0.0078)*parameter.lv, 0.)
-
             if (self.dehumDemand + self.sensCoolDemand) > (self.coolCap * self.nFloor): # if cooling demand greater then hvac cooling capacity
                 self.Qhvac = self.coolCap * self.nFloor
                 VolCool = VolCool / (self.dehumDemand + self.sensCoolDemand) * (self.coolCap * self.nFloor)
@@ -251,9 +261,9 @@ class Building(object):
         # HVAC system (heating demand = W/m^2 bld footprint)
         # -------------------------------------------------------------
         elif self.sensHeatDemand > 0. and UCM.canTemp < 288.:
-
             # limit on heating capacity
             self.Qheat = min(self.sensHeatDemand, self.heatCap*self.nFloor)
+
             self.heatConsump  = self.Qheat / self.heatEff
             self.sensWaste = self.heatConsump - self.Qheat         # waste per footprint
             self.heatConsump = self.heatConsump/self.nFloor        # adjust to be per floor area
@@ -286,11 +296,12 @@ class Building(object):
         # Assumes air temperature of control volume is sum of surface boundary temperatures
         # weighted by area and heat transfer coefficient + generated heat
         self.indoorTemp = (H1 + Q)/H2
-        self.indoorHum = self.indoorHum + simTime.dt/(dens * parameter.lv * UCM.bldHeight) * \
+
+        self.indoorHum = self.indoorHum + (simTime.dt/(dens * parameter.lv * UCM.bldHeight)) * \
             (QLintload + QLinfil + QLvent - Qdehum)
 
         # Calculate relative humidity (Pw/Pws*100) using pressurce, indoor temperature, humidity
-        _Tdb, _w, _phi, _h, _Tdp, _v = psychrometrics.psychrometrics(self.indoorTemp, self.indoorHum, forc.pres)
+        _Tdb, _w, _phi, _h, _Tdp, _v = psychrometrics(self.indoorTemp, self.indoorHum, forc.pres)
         self.indoorRhum = _phi
 
         # These are used for element calculation (per m^2 of element area)

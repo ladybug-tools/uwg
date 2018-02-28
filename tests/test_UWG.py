@@ -168,7 +168,6 @@ class TestUWG(object):
         assert len(newthickness) == pytest.approx(3, abs=1e-6)
         assert sum(newthickness) == pytest.approx(0.04*3, abs=1e-6)
 
-
     def test_hvac_autosize(self):
 
         self.setup_init_uwg()
@@ -182,7 +181,6 @@ class TestUWG(object):
         assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
         assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
         assert len(self.uwg.BEM) == pytest.approx(2, abs=1e-6)
-
 
     def test_uwg_main(self):
         self.setup_init_uwg()
@@ -213,11 +211,11 @@ class TestUWG(object):
         assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
         assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
 
-
 if __name__ == "__main__":
     test = TestUWG()
     #test.test_read_epw()
     #test.test_read_input()
     #test.test_procMat()
     #test.test_hvac_autosize()
-    test.test_uwg_main()
+    #test.test_uwg_main()
+    test.test_uwg_output()

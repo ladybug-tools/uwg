@@ -1,4 +1,6 @@
 import math
+import logging
+
 
 class SolarCalcs(object):
     """
@@ -56,11 +58,13 @@ class SolarCalcs(object):
         self.dif = self.forc.dif     # Diffuse sunlight
 
         if self.dir + self.dif > 0.:
+
+            logging.debug("{} Solar radiation > 0".format(__name__))
+
             # calculate zenith tangent, and critOrient solar angles
             self.solarangles()
 
             self.horSol = max(math.cos(self.zenith)*self.dir, 0.0)            # Direct horizontal radiation
-
             # Fractional terms for wall & road
             self.Kw_term = min(abs(1./self.UCM.canAspect*(0.5-self.critOrient/math.pi) \
                 + 1/math.pi*self.tanzen*(1-math.cos(self.critOrient))),1.)
@@ -107,6 +111,9 @@ class SolarCalcs(object):
             self.UCM.treeLatHeat = (1-self.parameter.vegAlbedo)*self.parameter.treeFLat*self.UCM.SolRecRoad
 
         else:    # No Sun
+
+            logging.debug("{} Solar radiation = 0".format(__name__))
+
             self.UCM.road.solRec = 0.
             self.rural.solRec = 0.
 
@@ -154,8 +161,7 @@ class SolarCalcs(object):
         lat = self.RSM.lat
         GMT = self.RSM.GMT
 
-        self.ut = (24.0 + (secDay/3600.%24.0)) % 24.0 # Get elapsed hours on current day
-
+        self.ut = (24. + (int(secDay)/3600.%24.)) % 24. # Get elapsed hours on current day
         ibis = range(len(inobis))
 
         for JI in xrange(1,12):
@@ -163,7 +169,7 @@ class SolarCalcs(object):
 
         date = day + inobis[month-1]-1 # Julian day of the year
         # divide circle by 365 days, multiply by elapsed days + hours
-        self.ad = 2.0 * math.pi/365. * (date-1 + (self.ut-12/24.))     # Fractional year (radians)
+        self.ad = 2.0 * math.pi/365. * (date-1 + (self.ut-(12/24.)))     # Fractional year (radians)
 
         self.eqtime = 229.18 * (0.000075+0.001868*math.cos(self.ad)-0.032077*math.sin(self.ad) - \
             0.01461*math.cos(2*self.ad)-0.040849*math.sin(2*self.ad))
@@ -175,6 +181,7 @@ class SolarCalcs(object):
 
         time_offset = self.eqtime - 4. * lon + 60 * GMT
         tst = secDay + time_offset * 60
+
         ha = (tst/4./60.-180.) * math.pi/180.
         zlat = lat * (math.pi/180.)   # change angle units to radians
 

@@ -1,5 +1,6 @@
 
 from math import sqrt, pow
+import copy
 
 class UCMDef(object):
     """
@@ -126,6 +127,8 @@ class UCMDef(object):
         # Variables set in urbflux()
         self.latHeat = None                                         # urban latent heat [W m-2]
         self.windProf = []                                          # wind profile
+        self.canRHum = None
+        self.Tdp = None
 
     def __repr__(self):
         return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(
@@ -160,6 +163,7 @@ class UCMDef(object):
         h_conv = self.road.aeroCond
         H1 = T_road*h_conv*self.roadArea       # Heat (Sens) from road surface
         H2 = h_conv*self.roadArea
+
         H1 = H1 + T_ubl*self.roadArea*self.uExch*Cp_air*dens_ubl # Heat from UBL
         H2 = H2 + self.roadArea*self.uExch*Cp_air*dens_ubl
         Q = (self.roofArea+self.roadArea)*(self.sensAnthrop + self.treeSensHeat*self.treeCoverage)
@@ -199,6 +203,7 @@ class UCMDef(object):
         # Solve for canyon temperature
         self.canTemp = (H1 + Q)/H2
 
+
         # Heat flux based per m^2 of urban area
         self.Q_road = h_conv*(T_road-self.canTemp)*(1.-self.bldDensity)  # Sensible heat from road (W/m^2 of urban area)
         self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1.-self.bldDensity)
@@ -206,7 +211,7 @@ class UCMDef(object):
         self.Q_traffic = self.sensAnthrop
 
         # Building energy output to canyon, per m^2 of urban area
-        T_can = self.canTemp
+        T_can = copy.copy(self.canTemp)
         for j in xrange(len(BEM)):
             V_vent = BEM[j].building.vent*BEM[j].building.nFloor  # ventilation volume per m^2 of building
             V_infil = BEM[j].building.infil*self.bldHeight/3600.0
@@ -228,7 +233,8 @@ class UCMDef(object):
 
         # Sensible Heat
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
-
+        #print 'cT'
+        #print self.canTemp-273.15
         # Error checking
         if self.canTemp > 350. or self.canTemp < 250:
             raise Exception(self.CANYON_TEMP_BOUND_ERROR)
