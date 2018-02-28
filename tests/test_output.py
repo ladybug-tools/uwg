@@ -32,12 +32,13 @@ class TestOutput(object):
     DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ubl")
     CALCULATE_TOLERANCE = lambda s,x,p: 1*10**-(p - 1 - int(math.log10(x))) if abs(float(x)) > 1e-15 else 1e-15
 
-    def setup_uwg_integration(self, epw_file_name="SGP_Singapore.486980_IWEC.epw"):
+    def setup_uwg_integration(self,
+        epw_file_name="SGP_Singapore.486980_IWEC.epw", initialize_file_name="initialize.uwg"):
         """ set up uwg object from initialize.uwg """
 
         epw_dir = self.DIR_EPW_PATH
         uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
+        uwg_param_file_name = initialize_file_name
 
         self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
 
@@ -149,14 +150,18 @@ class TestOutput(object):
         #log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
         #logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
-        self.setup_uwg_integration(epw_file_name="SGP_Singapore.486980_IWEC.epw") #"CAN_ON_Toronto.716240_CWEC.epw")
+        self.setup_uwg_integration(
+            epw_file_name="USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw",
+            initialize_file_name="initialize_boston.uwg"
+            )#"SGP_Singapore.486980_IWEC.epw") #"CAN_ON_Toronto.716240_CWEC.epw")
+
         self.uwg.read_epw()
         self.uwg.read_input()
 
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
-        self.uwg.nDay = 365
+        self.uwg.nDay = 31
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
