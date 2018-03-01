@@ -645,7 +645,7 @@ class UWG(object):
                 #print "{},h={},s={}".format(self.simTime.day, round(self.simTime.secDay/3600.,2), int(self.simTime.secDay))
                 #print "{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay)
 
-                print self.UCM.canTemp-273.15
+                #print self.UCM.canTemp-273.15
                 #print self.UCM.canRHum
                 #print'-------------'
 
@@ -663,8 +663,7 @@ class UWG(object):
     def write_epw(self):
         """ Section 8 - Writing new EPW file
         """
-
-        #print 'Calculating new Temperature and humidity values'
+        print 'Calculating new Temperature and humidity values from month: {} day: {} for {} days'.format(int(self.Month), int(self.Day), int(self.nDay))
         epw_prec = 16 # precision of epw file input
 
         for iJ in xrange(len(self.UCMData)):
