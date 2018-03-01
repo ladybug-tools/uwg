@@ -7,7 +7,7 @@ Version 4.2
 Original Author: B. Bueno
 Edited by A. Nakano & Lingfu Zhang
 Modified by Joseph Yang (joeyang@mit.edu) - May, 2016
-Translated to Python by Chris Mackey (chris@mackeyarchitecture.com) - May, 2017
+Translated to Python by Saeran Vasanthakumar - February, 2018
 
 Original Pulbication on the UWG's Methods:
 Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2013).
