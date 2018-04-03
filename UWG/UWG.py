@@ -49,9 +49,9 @@ pp = lambda x: pprint.pprint(x)
 dd = lambda x: decimal.Decimal.from_float(x)
 
 # For logging
-import pandas as pd
-import numpy as np
-import pdb
+#import pandas as pd
+#import numpy as np
+#import pdb
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.

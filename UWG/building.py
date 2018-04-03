@@ -213,7 +213,7 @@ class Building(object):
             volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load (volVent = m3 s-1)
             winTrans,                                           # solar load through window
             0.)
-
+            
         self.sensHeatDemand = max(
             -(wallArea*zac_in_wall*(T_wall-T_heat) +            # wall load
             massArea*zac_in_mass*(T_mass-T_heat) +              # mass load
