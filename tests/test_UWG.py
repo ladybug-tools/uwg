@@ -182,13 +182,13 @@ class TestUWG(object):
         assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
         assert len(self.uwg.BEM) == pytest.approx(2, abs=1e-6)
 
-    def test_uwg_main(self):
+    def test_simulate(self):
         self.setup_init_uwg()
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
         self.uwg.hvac_autosize()
-        self.uwg.uwg_main()
+        self.uwg.simulate()
 
         # Parameters from initialize.uwg
         # Month = 1;              % starting month (1-12)
@@ -217,5 +217,5 @@ if __name__ == "__main__":
     #test.test_read_input()
     #test.test_procMat()
     #test.test_hvac_autosize()
-    #test.test_uwg_main()
+    #test.test_simulate()
     test.test_uwg_output()

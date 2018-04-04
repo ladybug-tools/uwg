@@ -88,7 +88,7 @@ class TestUBLDef(object):
 
         # Run simulation
         self.uwg.hvac_autosize()
-        self.uwg.uwg_main()
+        self.uwg.simulate()
 
         # check date
         #print self.uwg.simTime

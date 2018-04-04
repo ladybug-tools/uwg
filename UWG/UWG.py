@@ -297,8 +297,6 @@ class UWG(object):
         self.glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
         self.hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
-
-
     def set_input(self):
         """Section 4 - Create UWG objects from input parameters
 
@@ -467,7 +465,7 @@ class UWG(object):
                 self.BEM[i].building.coolCap = 9999.
                 self.BEM[i].building.heatCap = 9999.
 
-    def uwg_main(self,sim_start_hour=0,sim_end_hour=24):
+    def simulate(self,sim_start_hour=0,sim_end_hour=24):
         """ Section 7 - UWG main section
 
             self.N                  # Total hours in simulation
@@ -696,6 +694,16 @@ class UWG(object):
 
         print 'New climate file generated: {0}'.format(self.newPathName)
 
+    def run(self):
+
+        # run main class methods
+        self.read_epw()
+        self.read_input()
+        self.set_input()
+        self.hvac_autosize()
+        self.simulate()
+        self.write_epw()
+
 
 def procMat(materials,max_thickness,min_thickness):
     """ Processes material layer so that a material with single
@@ -746,17 +754,11 @@ def procMat(materials,max_thickness,min_thickness):
 
 if __name__ == "__main__":
 
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    epwDir = os.path.join(DIR_UP_PATH,"resources","epw")
-    epwFileName = "SGP_Singapore.486980_IWEC.epw"
-    #epwFileName = "USA_PA_Philadelphia.Intl.AP.724080_TMY3.epw"
-    uwgParamDir = os.path.join(DIR_UP_PATH,"resources")
-    uwgParamFileName = "initialize.uwg"
+    path_up_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    epw_dir = os.path.join(path_up_dir,"resources","epw")
+    epw_filename = "SGP_Singapore.486980_IWEC.epw"
+    uwg_param_dir = os.path.join(path_up_dir,"resources")
+    uwg_param_filename = "initialize.uwg"
 
-    uwg = UWG(epwDir, epwFileName, uwgParamDir, uwgParamFileName)
-    uwg.read_epw()
-    uwg.read_input()
-    uwg.set_input()
-    uwg.hvac_autosize()
-    uwg.uwg_main()
-    uwg.write_epw()
+    uwg = UWG(epw_dir, epw_filename, uwg_param_dir, uwg_param_filename)
+    uwg.run()
