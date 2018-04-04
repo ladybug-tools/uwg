@@ -18,10 +18,7 @@ The [original Urban Weather Generator](http://urbanmicroclimate.scripts.mit.edu/
 This repository is a Python translation of the original [MATLAB Urban Weather Generator](https://github.com/hansukyang/UWG_Matlab).
 
 # Quickstart Example
-Here is a Python example that shows how to create and run an Urban Weather Generator object. The quickstart example file is available [at resources/quickstart.py](https://github.com/ladybug-tools/urbanWeatherGen/resources/quickstart.py).
-
-Run it through your command prompt in the main urbanWeatherGen directory with:
-```python -m resources.quickstart```
+Here is a Python example that shows how to create and run an Urban Weather Generator object. The quickstart example file is available [at resources/quickstart.py](https://github.com/ladybug-tools/urbanWeatherGen/blob/master/resources/quickstart.py). Run it through your command prompt in the main urbanWeatherGen directory with the following: ```python -m resources.quickstart```
 
 ```python
 import UWG
