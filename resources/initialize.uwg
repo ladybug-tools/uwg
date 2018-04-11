@@ -8,7 +8,7 @@
 # =================================================
 
 # Urban characteristics
-bldHeight,51,     # average building height (m)
+bldHeight,10,     # average building height (m)
 bldDensity,0.5,   # urban area building plan density (0-1)
 verToHor,0.8,     # urban area vertical to horizontal ratio
 h_mix,1,           # fraction of building HVAC waste heat set to the street canyon [as opposed to the roof]
