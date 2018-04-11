@@ -144,7 +144,7 @@ class RSMDef(object):
 
 
     # Ref: The UWG (2012), Eq. (4)
-    def VDM(self,forc,rural,parameter,simTime,printChk):
+    def VDM(self,forc,rural,parameter,simTime):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
 
@@ -163,10 +163,8 @@ class RSMDef(object):
         # compute the density profile
         for iz in xrange(self.nzref):
            self.densityProfC[iz] = self.presProf[iz]/parameter.r/self.tempRealProf[iz]
-
         self.densityProfS[0] = self.densityProfC[0]
 
-        #for iz=2:obj.nzref
         for iz in xrange(1,self.nzref):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] + \
                self.densityProfC[iz-1] * self.dz[iz])/(self.dz[iz-1] + self.dz[iz])
@@ -180,24 +178,11 @@ class RSMDef(object):
             self.tempProf[0], rural.sens, self.nzref, forc.wind, \
             self.tempProf, parameter)
 
-        #print self.tempProf[1]-273.15
-        #print '-'
-        #print 'cd',cd[0]
-        #ppr(self.nzref)
-        #ppr(simTime.dt)
-        #ppr(self.tempProf)
-        #ppr(self.densityProfC)
-        #ppr(self.densityProfS)
-        #ppr(cd)
-        #ppr(self.dz)
+
         # solve diffusion equation
-        #if simTime.secDay== 65100:
-        #    pdb.set_trace()
         self.tempProf = self.DiffusionEquation(self.nzref,simTime.dt,\
             self.tempProf,self.densityProfC,self.densityProfS,cd,self.dz)
 
-        #print 'tprsm', self.tempProf[self.nzref-1]
-        #print '----'
         # compute wind profile
         for iz in xrange(self.nzref):
             self.windProf[iz] = ustarRur/parameter.vk*\
@@ -208,12 +193,6 @@ class RSMDef(object):
         for iz in xrange(self.nzfor):
             self.ublPres = self.ublPres + \
                 self.presProf[iz]*self.dz[iz]/(self.z[self.nzref-1]+self.dz[self.nzref-1]/2.)
-
-
-        #TODO: delete
-        #if printChk:
-        #    print 'tp', round(self.tempProf[0],2),
-        #    print round(self.tempProf[-1],2)
 
     def DiffusionEquation(self,nz,dt,co,da,daz,cd,dz):
 
@@ -262,7 +241,6 @@ class RSMDef(object):
         Kt = [0 for x in xrange(nz+1)]
         ws = [0 for x in xrange(nz)]
         te = [0 for x in xrange(nz)]
-
         # Friction velocity (Louis 1979)
         ustar = parameter.vk * uref/math.log((10.-disp)/z0)
 

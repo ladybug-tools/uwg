@@ -592,14 +592,11 @@ class UWG(object):
             self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
 
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
-            #TODO: delte false as check
-            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime,False)
+            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime, self.RSM)
-
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
-
             self.UBL.UBLModel(self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
             #if self.is_near_zero(self.simTime.secDay/3600. - (18. + 2*self.ph)):
                 #pdb.set_trace()
@@ -616,15 +613,24 @@ class UWG(object):
             #print '12.3456789012'
             #print self.UCM.canRHum
             #break
+            """
             # Experimental code to run diffusion model in the urban area
+
+            # N.B Commented out in python UWG because computed wind speed in
+            # urban VDM: y = =0.84*ln((2-x/20)/0.51) results in negative log
+            # for building heights >= 40m. In matlab, negative log is converted
+            # to complex number, so error isn't thrown, resulting in wind speeds
+            # approaching negative inf as approach 40m from either - and + side.
+            # Therefore, this seems to be a bug that appears only in VDMs run
+            # with urban reference heights, so it is commented out in this translation.
+
             Uroad = copy.copy(self.UCM.road)
             Uroad.sens = copy.copy(self.UCM.sensHeat)
             Uforc = copy.copy(self.forc)
             Uforc.wind = copy.copy(self.UCM.canWind)
             Uforc.temp = copy.copy(self.UCM.canTemp)
-
-            #TODO: delte true as check
-            self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime,True)
+            self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
+            """
 
             logging.info("dbT = {}".format(self.UCM.canTemp-273.15))
             if n > 0:
@@ -649,7 +655,7 @@ class UWG(object):
 
                 self.UBLData[n] = copy.copy(self.UBL)
                 self.UCMData[n] = copy.copy(self.UCM)
-                self.USMData[n] = copy.copy(self.USM)
+                #self.USMData[n] = copy.copy(self.USM)
                 self.RSMData[n] = copy.copy(self.RSM)
 
                 logging.info("dbT = {}".format(self.UCMData[n].canTemp-273.15))

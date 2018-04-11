@@ -92,7 +92,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     intAdv1 -= c2
     intAdv2 -= c3
     UBL.advHeat = UBL.paralLength*Cp*forDens*(intAdv1-(UBL.ublTemp*intAdv2))/UBL.urbArea
-
+    
     # ---------------------------------------------------------------------
     # Convective heat flux to UBL from UCM (see Appendix - Bueno (2014))
     # ---------------------------------------------------------------------
@@ -114,7 +114,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
 
     # Canyon wind speed, Eq. 27 Chp. 3 Hanna and Britter, 2002
     # assuming CD = 1 and lambda_f = verToHor/4
-    UCM.canWind = UCM.ustarMod*(UCM.verToHor/8)**(-1/2.)
+    UCM.canWind = UCM.ustarMod*(UCM.verToHor/8.)**(-1/2.)
 
     # Canyon turbulent velocities
     UCM.turbU = 2.4*UCM.ustarMod
