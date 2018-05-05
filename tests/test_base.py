@@ -8,9 +8,9 @@ class TestBase(object):
     """
 
     DIR_CURR = os.path.abspath(os.path.dirname(__file__))
-    DIR_EPW_PATH = os.path.join(DIR_CURR,"..","resources","epw")
-    DIR_UWGPARAM_PATH = os.path.join(DIR_CURR,"..","resources","parameters")
-    DIR_DESTINATION_PATH = os.path.join(DIR_CURR,"..","resources","epw_uwg")
+    DIR_EPW_PATH = os.path.join(DIR_CURR,"epw")
+    DIR_UWGPARAM_PATH = os.path.join(DIR_CURR,"parameters")
+    DIR_DESTINATION_PATH = os.path.join(DIR_CURR,"epw_uwg")
     DIR_MATLAB_PATH = os.path.join(DIR_CURR, "matlab_ref")
 
     def CALCULATE_TOLERANCE(self,x,p):
