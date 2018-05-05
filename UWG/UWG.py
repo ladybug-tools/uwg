@@ -618,12 +618,8 @@ class UWG(object):
 
             # N.B Commented out in python UWG because computed wind speed in
             # urban VDM: y = =0.84*ln((2-x/20)/0.51) results in negative log
-            # for building heights >= 40m. In matlab, negative log is converted
-            # to complex number, so error isn't thrown, resulting in wind speeds
-            # approaching negative inf as approach 40m from either - and + side.
-            # Therefore, this seems to be a bug that appears only in VDMs run
-            # with urban reference heights, so it is commented out in this translation.
-
+            # for building heights >= 40m.
+            
             Uroad = copy.copy(self.UCM.road)
             Uroad.sens = copy.copy(self.UCM.sensHeat)
             Uforc = copy.copy(self.forc)

@@ -68,7 +68,8 @@ def saturation_pressure(Tdb_):
 
     # N.B In Matlab, negative values are converted to complex values.
     # log(-x) = log(x) + log(-1) = log(x) + i*pi
-    # Python will throw an exception. 
+    # Python will throw an exception. Negative value occurs here if
+    # simulation timestep (dtSim) is large, i.e 3600s.
     _Pws = exp(-1*(5.8002206e3) / T+1.3914993 + (4.8640239e-2)*T*(-1.) + (4.1764768e-5)*pow(T,2) - (1.4452093e-8)*pow(T,3) + 6.5459673*log(T))  #in Pa
     _Pws = _Pws/1000.                                                               # in kPa
     return _Pws
