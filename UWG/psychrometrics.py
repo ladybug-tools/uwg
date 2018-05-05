@@ -66,6 +66,23 @@ def moist_air_density(P,Tdb,H):
     moist_air_density = P/(1000*0.287042*Tdb*(1.+1.607858*H))
     return moist_air_density
 
+def HumFromRHumTemp(RH,T,P):
+    # Derive Specific HUmidity [kgh20/kgn202] from RH, T and Pa
+    # Saturation vapour pressure from ASHRAE
+    C8 = -5.8002206e3
+    C9 = 1.3914993
+    C10 = -4.8640239e-2
+    C11 = 4.1764768e-5
+    C12 = -1.4452093e-8
+    C13 = 6.5459673
+
+    T += 273.15
+
+    PWS = exp(C8/T + C9 + C10*T + C11 * pow(T,2) + C12 * pow(T,3) + C13 * log(T))
+    PW = RH*PWS/100.0        # Vapour pressure
+    W = 0.62198*PW/(P-PW)    # 4. Specific humidity
+    return W
+
 """
 function psat = psat(temp,parameter)
     gamw  = (parameter.cl - parameter.cpv) / parameter.rv;

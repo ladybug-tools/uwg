@@ -187,8 +187,7 @@ class RSMDef(object):
         # N.B In Matlab, negative values are converted to complex values.
         # log(-x) = log(x) + log(-1) = log(x) + i*pi
         # Python will throw an exception. Negative value occurs here if
-        # VDM is run for average obstacle height >= 4m.
-
+        # VDM is run for average obstacle height ~ 4m.
         for iz in xrange(self.nzref):
             self.windProf[iz] = ustarRur/parameter.vk*\
                 math.log((self.z[iz]-self.disp)/self.z0r)

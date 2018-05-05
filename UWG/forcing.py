@@ -48,7 +48,7 @@ class Forcing (object):
             self.rHum = weather.staRhum
             self.dir = weather.staDir
             self.dif = weather.staDif
-            self.prec = map(lambda p: p/3.6e6, weather.staRobs)
+            self.prec = [p/3.6e6 for p in weather.staRobs]
             self.wind = weather.staUmod
 
     def __repr__(self):
