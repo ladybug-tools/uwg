@@ -11,7 +11,7 @@ __pycache__/
 .ipynb_checkpoints
 
 #testing resources
-#tests/log/
+tests/log/
 
 #epw
 resources/epw
