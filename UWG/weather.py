@@ -50,7 +50,7 @@ class Weather(object):
         for i in xrange(len(self.staTemp)):
             self.staHum[i] = HumFromRHumTemp(self.staRhum[i], self.staTemp[i], self.staPres[i])
 
-        self.staTemp = map(lambda s: s+273.15, self.staTemp)                        # air temperature (K)
+        self.staTemp = [s+273.15 for s in self.staTemp]                             # air temperature (K)
 
     def __repr__(self):
         return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(
