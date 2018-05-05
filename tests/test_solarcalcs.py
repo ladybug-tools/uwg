@@ -3,39 +3,14 @@ import UWG
 import os
 import math
 import pprint
+from test_base import TestBase
 
-class TestSolarCalcs(object):
-
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_solarcalcs")
-
-    def setup_solarcalcs(self):
-        """ set up solarcalcs object from initialize.uwg """
-
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-
-    def setup_open_matlab_ref(self,matlab_ref_file_path):
-        """ open the matlab reference file """
-
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
-
-        return uwg_matlab_val
+class TestSolarCalcs(TestBase):
 
     def test_solarangles(self):
         """ test solar angles """
 
-        self.setup_solarcalcs()
+        self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -75,7 +50,7 @@ class TestSolarCalcs(object):
         ]
 
         # open matlab ref file
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarangles.txt")
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_solarcalcs","matlab_ref_solarangles.txt")
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
@@ -86,7 +61,7 @@ class TestSolarCalcs(object):
     def test_solarcalcs(self):
         """ test solar calculation """
 
-        self.setup_solarcalcs()
+        self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -97,7 +72,7 @@ class TestSolarCalcs(object):
         self.uwg.simTime.nt -= 12*11
 
         self.uwg.hvac_autosize()
-        self.uwg.uwg_main()
+        self.uwg.simulate()
 
         # check date
         assert self.uwg.simTime.month == 1
@@ -111,7 +86,7 @@ class TestSolarCalcs(object):
         assert self.uwg.solar.roadSol == pytest.approx(307.4032644249752, abs=1e-12)
 
         # Matlab Checking
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_solarcalcs.txt")
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_solarcalcs","matlab_ref_solarcalcs.txt")
 
         uwg_python_val = [
         self.uwg.solar.horSol,

@@ -23,6 +23,7 @@ class Weather(object):
         staHum    % specific humidty (kg kg-1)
     """
 
+    #TODO: change to xrange
     def __init__(self,climate_file,HI,HF):
         #HI: Julian start date
         #HF: Julian final date

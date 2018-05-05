@@ -59,7 +59,8 @@ class UWG(object):
         destinationDir: Optional destination directory for the morphed EPW file.
             If left blank, the morphed file will be written into the same directory
             as the rural EPW file (the epwDir).
-
+        destinationFileName: Optional destination file name for the morphed EPW file.
+            If left blank, the morphed file will append "_UWG" to the original file name.
     returns:
         newClimateFile: the path to a new EPW file that has been morphed to account
             for uban conditions.
@@ -96,13 +97,13 @@ class UWG(object):
     # File path parameter
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
-    def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFile=None):
+    def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFileName=None):
         self.epwDir = epwDir
         self.epwFileName = epwFileName
         self.uwgParamDir = uwgParamDir
         self.uwgParamFileName = uwgParamFileName
         self.destinationDir = destinationDir
-        self.destinationFile = destinationFile
+        self.destinationFileName = destinationFileName
         self._init_param_dict = None
 
     def __repr__(self):
@@ -165,10 +166,10 @@ class UWG(object):
 
         # Set new directory path for the moprhed EPW file
         if self.destinationDir is None:
-            destinationDir = self.epwDir
-        if self.destinationFile is None:
-            destinationFile = self.epwFileName.strip('.epw') + '_UWG.epw'
-        self.newPathName = os.path.join(destinationDir, destinationFile)
+            self.destinationDir = self.epwDir
+        if self.destinationFileName is None:
+            self.destinationFileName = self.epwFileName.strip('.epw') + '_UWG.epw'
+        self.newPathName = os.path.join(self.destinationDir, self.destinationFileName)
 
     def read_input(self):
         """Section 3 - Read Input File (.m, file)

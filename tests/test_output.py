@@ -2,17 +2,18 @@ import pytest
 import UWG
 import os
 import math
-
 import pprint
 import decimal
 
 import logging
 
-dd = lambda x: decimal.Decimal.from_float(x)
-pp = lambda x: pprint.pprint(x)
+from test_base import TestBase
+
+dd = decimal.Decimal.from_float
+pp = pprint.pprint
 
 
-class TestOutput(object):
+class TestOutput(TestBase):
     """
     # Three checks
     # 1 check at time < parameter.nightSetStart && time > parameter.nightSetEnd || check is day || check dir + dif > 0
@@ -27,31 +28,6 @@ class TestOutput(object):
     CRITICAL                            # Program may not be able to run
 
     """
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ubl")
-    CALCULATE_TOLERANCE = lambda s,x,p: 1*10**-(p - 1 - int(math.log10(x))) if abs(float(x)) > 1e-15 else 1e-15
-
-    def setup_uwg_integration(self,
-        epw_file_name="SGP_Singapore.486980_IWEC.epw", initialize_file_name="initialize.uwg"):
-        """ set up uwg object from initialize.uwg """
-
-        epw_dir = self.DIR_EPW_PATH
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = initialize_file_name
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-
-    def setup_open_matlab_ref(self,matlab_ref_file_path):
-        """ open the matlab reference file """
-
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val_ = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
-        return uwg_matlab_val_
 
     def test_uwg_output_heatdemand_1_1_0000(self):
         """
@@ -61,7 +37,7 @@ class TestOutput(object):
             - sensHeatDemand
         """
 
-        self.setup_uwg_integration(epw_file_name="CAN_ON_Toronto.716240_CWEC.epw")
+        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
         self.uwg.read_epw()
         self.uwg.read_input()
 
@@ -82,7 +58,7 @@ class TestOutput(object):
         #print 'hr', self.uwg.simTime.secDay/3600.
         #print '------------------'
 
-        self.uwg.uwg_main()
+        self.uwg.simulate()
         self.uwg.write_epw()
 
         # shorten some variable names
@@ -91,7 +67,7 @@ class TestOutput(object):
         matlab_fname = "CAN_ON_Toronto.716240_CWEC_heatdemand_UWG_Matlab.epw"
 
         # Get matlab data
-        matlab_path_name = os.path.join(self.DIR_UP_PATH,"tests","matlab_ref","matlab_output",matlab_fname)
+        matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",matlab_fname)
 
         # Get Matlab EPW file
         if not os.path.exists(matlab_path_name):
@@ -151,8 +127,8 @@ class TestOutput(object):
         #logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
         self.setup_uwg_integration(
-            epw_file_name="CHN_Beijing.Beijing.545110_IWEC.epw",#USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw",
-            initialize_file_name="initialize_beijing.uwg"
+            epw_file="CHN_Beijing.Beijing.545110_IWEC.epw",#USA_MA_Boston-Logan.Intl.AP.725090_TMY3.epw",
+            uwg_param_file="initialize_beijing.uwg"
             )#"SGP_Singapore.486980_IWEC.epw") #"CAN_ON_Toronto.716240_CWEC.epw")
 
         self.uwg.read_epw()
@@ -167,7 +143,7 @@ class TestOutput(object):
         self.uwg.hvac_autosize()
 
         # 0 - 23
-        self.uwg.uwg_main(0,0)
+        self.uwg.simulate(0,0)
         self.uwg.write_epw()
 
     def test_uwg_output_cooldemand_6_1_1300(self):
@@ -178,10 +154,10 @@ class TestOutput(object):
             - sensHeatDemand
         """
         # Set up logger
-        log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
+        log_path = os.path.join(self.DIR_CURR,"..","tests","log","test_uwg_output_cooldemand_6_1_1300.log")
         logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
 
-        self.setup_uwg_integration(epw_file_name="CAN_ON_Toronto.716240_CWEC.epw")
+        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
         self.uwg.read_epw()
         self.uwg.read_input()
 
@@ -194,16 +170,18 @@ class TestOutput(object):
         self.uwg.hvac_autosize()
 
         # 0 - 23
-        self.uwg.uwg_main(0,0)
+        self.uwg.simulate(0,0)
         self.uwg.write_epw()
 
         # shorten some variable names
         ti = self.uwg.simTime.timeInitial
         tf = self.uwg.simTime.timeFinal
+        #TODO: need to generate matlab cooldemand
+        
         matlab_fname = "CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw"
 
         # Get matlab data
-        matlab_path_name = os.path.join(self.DIR_UP_PATH,"tests","matlab_ref","matlab_output",matlab_fname)
+        matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",matlab_fname)
 
         # Get Matlab EPW file
         if not os.path.exists(matlab_path_name):
@@ -266,7 +244,7 @@ class TestOutput(object):
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
-        self.uwg.uwg_main()
+        self.uwg.simulate()
         self.uwg.write_epw()
 
         # shorten some variable names
@@ -275,7 +253,7 @@ class TestOutput(object):
         matlab_fname = "SGP_Singapore.486980_IWEC_UWG_Matlab.epw"
 
         # Get matlab data
-        matlab_path_name = os.path.join(self.DIR_UP_PATH,"tests","matlab_ref","matlab_output",matlab_fname)
+        matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",matlab_fname)
 
         # Get Matlab EPW file
         if not os.path.exists(matlab_path_name):
