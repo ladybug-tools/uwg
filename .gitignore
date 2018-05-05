@@ -9,3 +9,11 @@ __pycache__/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+#testing resources
+#tests/log/
+
+#epw
+resources/epw
+resources/epw_uwg
+resources/parameters
