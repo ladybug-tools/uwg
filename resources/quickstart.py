@@ -1,17 +1,11 @@
-import UWG
-import os
+from UWG import UWG
 
-# Gets path of current directory
-CURR_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
-
-# To run UWG provide the following inputs
-epw_directory = os.path.join(CURR_DIRECTORY,"epw")  # EPW file directory
+# Define the .epw, .uwg filenames to create an UWG object.
+# UWG will look for the .epw file int the UWG/resources/epw folder,
+# and the .uwg file in the UWG/resources/parameters folder.
 epw_filename = "SGP_Singapore.486980_IWEC.epw"      # EPW file name
-uwg_param_directory = CURR_DIRECTORY                # .uwg file directory
-uwg_param_filename = "initialize.uwg"               # .uwg file name
+param_filename = "initialize_singapore.uwg"         # .uwg file name
 
-# Initialize the UWG object
-uwg = UWG.UWG(epw_directory, epw_filename, uwg_param_directory, uwg_param_filename)
-
-# Run the simulation
+# Initialize the UWG object and run the simulation
+uwg = UWG(epw_filename, param_filename)
 uwg.run()

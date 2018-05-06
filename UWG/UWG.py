@@ -38,15 +38,14 @@ from RSMDef import RSMDef
 from solarcalcs import SolarCalcs
 import urbflux
 from psychrometrics import psychrometrics
-
 from readDOE import readDOE
 from urbflux import urbflux
 
 # For debugging only
 #import pprint
 #import decimal
-#pp = lambda x: pprint.pprint(x)
-#dd = lambda x: decimal.Decimal.from_float(x)
+#pp = pprint.pprint
+#dd = decimal.Decimal.from_float
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -97,14 +96,22 @@ class UWG(object):
     # File path parameter
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
-    def __init__(self, epwDir, epwFileName, uwgParamDir, uwgParamFileName, destinationDir=None, destinationFileName=None):
-        self.epwDir = epwDir
+    def __init__(self, epwFileName, uwgParamFileName, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+        # User defined
         self.epwFileName = epwFileName
-        self.uwgParamDir = uwgParamDir
         self.uwgParamFileName = uwgParamFileName
-        self.destinationDir = destinationDir
-        self.destinationFileName = destinationFileName
+
+        # If user does not overload
+        self.destinationFileName = destinationFileName if destinationFileName else self.epwFileName.strip('.epw') + '_UWG.epw'
+        self.epwDir = epwDir if epwDir else os.path.join(self.RESOURCE_PATH, "epw")
+        self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(self.RESOURCE_PATH,"parameters")
+        self.destinationDir = destinationDir if destinationDir else os.path.join(self.RESOURCE_PATH,"epw_uwg")
+
+        # init UWG variables
         self._init_param_dict = None
+
+        # Logger will be disabled by default unless explicitly called in tests
+        self.logger = logging.getLogger(__name__)
 
     def __repr__(self):
         return "UWG: {} ".format(self.epwFileName)
@@ -165,10 +172,6 @@ class UWG(object):
                 self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15 # 12 months of soil T for specific depth
 
         # Set new directory path for the moprhed EPW file
-        if self.destinationDir is None:
-            self.destinationDir = self.epwDir
-        if self.destinationFileName is None:
-            self.destinationFileName = self.epwFileName.strip('.epw') + '_UWG.epw'
         self.newPathName = os.path.join(self.destinationDir, self.destinationFileName)
 
     def read_input(self):
@@ -189,7 +192,7 @@ class UWG(object):
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
 
         if not os.path.exists(uwg_param_file_path):
-            raise Exception("Param file: '{}' does not exist.".format(uwg_param_file))
+            raise Exception("Param file: '{}' does not exist.".format(uwg_param_file_path))
 
         # Open .uwg file and feed csv data to initializeDataFile
         try:
@@ -491,6 +494,7 @@ class UWG(object):
 
         self.N -= int(_substep/(3600./self.simTime.dt))  # total number of hours in simulation
 
+        self.logger.info("Start simulation")
         #for it in range(1,self.simTime.nt,1):
         for it in range(1,sim_step_halt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
@@ -505,7 +509,7 @@ class UWG(object):
             self.simTime.UpdateDate()
 
             #TODO: disable
-            logging.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
+            self.logger.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
 
             #TODO: add start hours to forcIP
             _it = it + 3600/self.simTime.dt*sim_start_hour
@@ -599,7 +603,7 @@ class UWG(object):
             """
 
             # TODO: disable
-            logging.info("dbT = {}".format(self.UCM.canTemp-273.15))
+            self.logger.info("dbT = {}".format(self.UCM.canTemp-273.15))
             if n > 0:
                 logging.info("dpT = {}".format(self.UCM.Tdp))
                 logging.info("RH  = {}".format(self.UCM.canRHum))
@@ -607,7 +611,7 @@ class UWG(object):
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
 
                 #TODO: disable
-                logging.info("{0} ----sim time step = {1}----\n\n".format(__name__, n))
+                self.logger.info("{0} ----sim time step = {1}----\n\n".format(__name__, n))
 
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(self.UCM.canTemp, self.UCM.canHum, self.forc.pres)
@@ -616,9 +620,9 @@ class UWG(object):
                 self.UCMData[n] = copy.copy(self.UCM)
                 self.RSMData[n] = copy.copy(self.RSM)
 
-                logging.info("dbT = {}".format(self.UCMData[n].canTemp-273.15))
-                logging.info("dpT = {}".format(self.UCMData[n].Tdp))
-                logging.info("RH  = {}".format(self.UCMData[n].canRHum))
+                self.logger.info("dbT = {}".format(self.UCMData[n].canTemp-273.15))
+                self.logger.info("dpT = {}".format(self.UCMData[n].Tdp))
+                self.logger.info("RH  = {}".format(self.UCMData[n].canRHum))
 
                 n += 1
 
