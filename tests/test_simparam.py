@@ -63,9 +63,9 @@ class TestSimParam(TestBase):
         # nDay,150,       # number of days to run simultion
         # dtSim,300,      # simulation time step (s)
         # dtWeather,3600, # weather time step (s)
-        uwg_test_param_dir= os.path.join(self.DIR_MATLAB_PATH,"matlab_simparam")
-        self.setup_uwg_integration(uwg_param_file="initialize_simparam.uwg",uwg_param_dir=uwg_test_param_dir)
 
+        self.setup_uwg_integration(uwg_param_file="initialize_simparam.uwg")
+        
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()

@@ -15,27 +15,20 @@ pp = pprint.pprint
 
 class TestOutput(TestBase):
     """
-    # Three checks
-    # 1 check at time < parameter.nightSetStart && time > parameter.nightSetEnd || check is day || check dir + dif > 0
-    # 2 check month > vegStart and month < vegEnd
-    # 3 check if self.sensCoolDemand > 0. and UCM.canTemp > 288. #288~15 || check if self.sensHeatDemand > 0. and UCM.canTemp < 288.
-
-    # LOGGER LEVELS
-    DEBUG                               # Detailed information
-    INFO                                # Confirm things are working as expected
-    WARNING                             # Indication something unexpected has happened
-    ERROR                               # Error occurs
-    CRITICAL                            # Program may not be able to run
+    Three checks
+    1 check at time < parameter.nightSetStart && time > parameter.nightSetEnd || check is day || check dir + dif > 0
+    2 check month > vegStart and month < vegEnd
+    3 check if self.sensCoolDemand > 0. and UCM.canTemp > 288. #288~15 || check if self.sensHeatDemand > 0. and UCM.canTemp < 288.
 
     """
-
+    """
     def test_uwg_output_heatdemand_1_1_0000(self):
-        """
-        Initial conditions:
-            - night time
-            - before vegstart
-            - sensHeatDemand
-        """
+        #
+        #Initial conditions:
+        #    - night time
+        #    - before vegstart
+        #    - sensHeatDemand
+        #
 
         self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
         self.uwg.read_epw()
@@ -115,12 +108,12 @@ class TestOutput(TestBase):
             print '----#'
 
     def test_uwg_output_work(self):
-        """
-        Initial conditions:
-            - day time
-            - after vegstart
-            - sensHeatDemand
-        """
+        #"
+        #Initial conditions:
+        #    - day time
+        #    - after vegstart
+        #    - sensHeatDemand
+        #"
 
         # Set up logger
         #log_path = os.path.join(self.DIR_UP_PATH,"tests","log","test_uwg_output_cooldemand_6_1_1300.log")
@@ -145,7 +138,7 @@ class TestOutput(TestBase):
         # 0 - 23
         self.uwg.simulate(0,0)
         self.uwg.write_epw()
-
+    """
     def test_uwg_output_cooldemand_6_1_1300(self):
         """
         Initial conditions:
@@ -153,18 +146,20 @@ class TestOutput(TestBase):
             - after vegstart
             - sensHeatDemand
         """
-        # Set up logger
-        log_path = os.path.join(self.DIR_CURR,"..","tests","log","test_uwg_output_cooldemand_6_1_1300.log")
-        logging.basicConfig(filename=log_path, filemode="w",level=logging.DEBUG)
+        # set up the logger
+        self.set_log_file("test_uwg_output_cooldemand_6_1_1300.log",log_level=logging.INFO)
 
         self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
+
+        self.uwg.logger.critical("Cool demand output")
+
         self.uwg.read_epw()
         self.uwg.read_input()
 
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
-        self.uwg.nDay = 365
+        self.uwg.nDay = 1#365
 
         self.uwg.set_input()
         self.uwg.hvac_autosize()
@@ -176,17 +171,15 @@ class TestOutput(TestBase):
         # shorten some variable names
         ti = self.uwg.simTime.timeInitial
         tf = self.uwg.simTime.timeFinal
-        #TODO: need to generate matlab cooldemand
-        
-        matlab_fname = "CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw"
 
+        """
+        #TODO: need to generate matlab cooldemand
+        matlab_fname = "CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw"
         # Get matlab data
         matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",matlab_fname)
-
         # Get Matlab EPW file
         if not os.path.exists(matlab_path_name):
             raise Exception("Param file: '{}' does not exist.".format(matlab_path_name))
-
         # Open .uwg file and feed csv data to initializeDataFile
         try:
             new_epw = UWG.utilities.read_csv(matlab_path_name)
@@ -225,14 +218,15 @@ class TestOutput(TestBase):
             #print matwtr.staUmod[i]
             #print epwwtr.staUmod[i],'\n--'
             #print '----#'
-
-    def test_uwg_output_cooldemand_1_1_0000(self):
         """
+    """
+    def test_uwg_output_cooldemand_1_1_0000(self):
+        "
         Initial conditions:
             - night time
             - before vegstart
             - sensCoolDemand
-        """
+        "
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.read_input()
@@ -300,7 +294,7 @@ class TestOutput(TestBase):
             #print epwwtr.staUmod[i],'\n--'
             print '----#'
 
-
+    """
 
 if __name__ == "__main__":
     test = TestOutput()
@@ -309,10 +303,10 @@ if __name__ == "__main__":
     #print "cooldemand 1 1 13000\n"
 
     #$ warble bug
-    #test.test_uwg_output_cooldemand_6_1_1300()
+    test.test_uwg_output_cooldemand_6_1_1300()
 
     #print "heatdemand 1 1 0000\n"
     #test.test_uwg_output_heatdemand_1_1_0000()
 
     #
-    test.test_uwg_output_work()
+    #test.test_uwg_output_work()
