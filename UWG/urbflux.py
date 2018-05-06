@@ -1,5 +1,5 @@
 from infracalcs import infracalcs
-from math import *
+from math import log
 
 def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     """
@@ -12,7 +12,6 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     sigma = 5.67e-8         # Stephan-Boltzman constant
     UCM.roofTemp = 0.       # Average urban roof temperature
     UCM.wallTemp = 0.       # Average urban wall temperature
-
 
     for j in xrange(len(BEM)):
         # Building energy model
@@ -92,7 +91,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     intAdv1 -= c2
     intAdv2 -= c3
     UBL.advHeat = UBL.paralLength*Cp*forDens*(intAdv1-(UBL.ublTemp*intAdv2))/UBL.urbArea
-    
+
     # ---------------------------------------------------------------------
     # Convective heat flux to UBL from UCM (see Appendix - Bueno (2014))
     # ---------------------------------------------------------------------

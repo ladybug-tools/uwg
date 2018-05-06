@@ -1,4 +1,3 @@
-
 from math import sqrt, pow
 import copy
 
@@ -157,7 +156,6 @@ class UCMDef(object):
         self.roofTemp = 0.
         self.wallTemp = 0.
 
-
         # Road to Canyon
         T_road = self.road.layerTemp[0]
         h_conv = self.road.aeroCond
@@ -203,7 +201,6 @@ class UCMDef(object):
         # Solve for canyon temperature
         self.canTemp = (H1 + Q)/H2
 
-
         # Heat flux based per m^2 of urban area
         self.Q_road = h_conv*(T_road-self.canTemp)*(1.-self.bldDensity)  # Sensible heat from road (W/m^2 of urban area)
         self.Q_ubl = self.Q_ubl + self.uExch*Cp_air*dens*(self.canTemp-T_ubl)*(1.-self.bldDensity)
@@ -230,11 +227,9 @@ class UCMDef(object):
             self.ElecTotal = self.ElecTotal + BEM[j].fl_area*BEM[j].building.ElecTotal/1.e6
             self.GasTotal = self.GasTotal + BEM[j].fl_area*BEM[j].building.GasTotal/1.e6
 
-
         # Sensible Heat
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
-        #print 'cT'
-        #print self.canTemp-273.15
+
         # Error checking
         if self.canTemp > 350. or self.canTemp < 250:
             raise Exception(self.CANYON_TEMP_BOUND_ERROR)

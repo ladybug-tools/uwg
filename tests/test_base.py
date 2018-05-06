@@ -68,3 +68,5 @@ class TestBase(object):
         logging.basicConfig(level=log_level,
                             filename=log_file_path,
                             filemode="w")
+        # To stream to console
+        #logging.basicConfig(level=logging.DEBUG)
