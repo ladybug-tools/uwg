@@ -601,8 +601,7 @@ class UWG(object):
             Uforc.temp = copy.copy(self.UCM.canTemp)
             self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
             """
-
-            # TODO: disable
+            
             self.logger.info("dbT = {}".format(self.UCM.canTemp-273.15))
             if n > 0:
                 logging.info("dpT = {}".format(self.UCM.Tdp))

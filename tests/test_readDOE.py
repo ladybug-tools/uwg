@@ -1,13 +1,17 @@
 import pytest
 import os
-import UWG
-from decimal import Decimal
 import copy
-import pprint
 import math
 
+import UWG
+from test_base import TestBase
 
-class TestReadDOE(object):
+from pprint import pprint
+from decimal import Decimal
+dd = Decimal.from_float
+pp = pprint
+
+class TestReadDOE(TestBase):
     """Test for readDOE.py
 
     Test matrix of ref data as nested nested lists [16, 3, 16]:
@@ -39,15 +43,11 @@ class TestReadDOE(object):
 
     DIR_CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
     DIR_MATLAB_PATH = os.path.join(DIR_CURRENT_PATH,"matlab_ref","matlab_readDOE")
-    DD = lambda s,x: Decimal.from_float(x)
-
-    # Calculate the tolerance value from pytest by calculating the number of digits before decimal
-    # point then subtract from 15 (conservative) estimate for floating pt precision
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if (x > 1. or int(x)==1) else 1e-15
 
     def test_refDOE(self):
         """ Tests for refDOE (Building class)"""
 
+        # Run readDOE.py
         refDOE, refBEM, Schedule = UWG.readDOE(serialize_output=False)
 
         bldlst = [
@@ -101,13 +101,9 @@ class TestReadDOE(object):
 
                         if bldid != 'condType':
                             matlab_ref_value = float(matlab_ref_value)
-                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value)
+                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value,14.0)
                         else:
                             matlab_ref_value = 'AIR'
-
-                        #if tol > 1e-14:
-                        #print tol, matlab_ref_value
-                        #print '--'
 
                         # run tests
                         if bldid == 'floorHeight':
@@ -260,7 +256,7 @@ class TestReadDOE(object):
                         for climateZone in xrange(16):  # ZoneType
                             # next line
                             matlab_ref_value = float(matlab_file.next())
-                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value)
+                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value,15.0)
 
                             # run tests
                             if bemid == 'mass_albedo':
@@ -418,10 +414,10 @@ class TestReadDOE(object):
                             assert len(matlab_ref_value) == pytest.approx(24.0*3.,abs=1e-3)
 
                             # Calculate tolerances and set minimum one for all
-                            tol = min([self.CALCULATE_TOLERANCE(x) for x in matlab_ref_value])
+                            tol = min([self.CALCULATE_TOLERANCE(x,15.0) for x in matlab_ref_value])
                         else:
                             matlab_ref_value = float(matlab_file.next())
-                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value)
+                            tol = self.CALCULATE_TOLERANCE(matlab_ref_value,15.0)
 
                         if schid == 'Elec': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
                             flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Elec)

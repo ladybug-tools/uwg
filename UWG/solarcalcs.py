@@ -1,7 +1,6 @@
 import math
 import logging
 
-
 class SolarCalcs(object):
     """
     SolarCalcs
@@ -29,6 +28,9 @@ class SolarCalcs(object):
         self.forc = forc
         self.parameter = parameter
         self.rural = rural
+
+        # Logger will be disabled by default unless explicitly called in tests
+        self.logger = logging.getLogger(__name__)
 
     def solarcalcs(self):
         """ Solar Calculation
@@ -59,7 +61,7 @@ class SolarCalcs(object):
 
         if self.dir + self.dif > 0.:
 
-            logging.debug("{} Solar radiation > 0".format(__name__))
+            self.logger.debug("{} Solar radiation > 0".format(__name__))
 
             # calculate zenith tangent, and critOrient solar angles
             self.solarangles()
@@ -112,7 +114,7 @@ class SolarCalcs(object):
 
         else:    # No Sun
 
-            logging.debug("{} Solar radiation = 0".format(__name__))
+            self.logger.debug("{} Solar radiation = 0".format(__name__))
 
             self.UCM.road.solRec = 0.
             self.rural.solRec = 0.
@@ -155,7 +157,7 @@ class SolarCalcs(object):
         day = self.simTime.day
         secDay = self.simTime.secDay    # Total elapsed seconds in simulation
         inobis = self.simTime.inobis    # total days for first of month
-                                   #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
+                                        #  i.e [0,31,59,90,120,151,181,212,243,273,304,334]
         canAspect = self.UCM.canAspect
         lon = self.RSM.lon
         lat = self.RSM.lat

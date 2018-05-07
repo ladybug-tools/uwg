@@ -37,6 +37,9 @@ class UBLDef(object):
         self.dayBLHeight = dayBLHeight                              # daytime mixing height, orig = 700
         self.nightBLHeight = nightBLHeight                          # Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m); orig 80
 
+        # Logger will be disabled by default unless explicitly called in tests
+        self.logger = logging.getLogger(__name__)
+
     def is_near_zero(self, num, eps=1e-14):
         return abs(float(num)) < eps
 
@@ -72,14 +75,10 @@ class UBLDef(object):
                 or (sunlight > nightlimit) and (time > noon) or (self.sensHeat > 150.0)
         if is_day:
             # Circulation velocity per Bueno 'the UWG', eq 8
-            logging.debug("{} Day ubl calcs".format(__name__))
-            #print "{} Day ubl calcs".format(__name__)
+            self.logger.debug("{} Day ubl calcs".format(__name__))
             h_UBL = self.dayBLHeight            # Day boundary layer height
             eqTemp = RSM.tempProf[RSM.nzref-1]
             eqWind = RSM.windProf[RSM.nzref-1]
-
-            #TODO: test
-            #print 'eqT', eqTemp
 
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             u_circ = k_w*(g*heatDif/Cp/refDens/eqTemp*h_UBL)**(1./3.)
@@ -99,15 +98,13 @@ class UBLDef(object):
         # Night
         # ---------------------------------------------------------------------
         else:
-            #print "{} Night ubl calcs".format(__name__)
-            #logging.debug("{} Night ubl calcs".format(__name__))
+            self.logger.debug("{} Night ubl calcs".format(__name__))
             h_UBL = self.nightBLHeight      # Night boundary layer height
             Csurf = UCM.Q_ubl*simTime.dt/(h_UBL*refDens*Cp)
             self.ublTemp, self.ublTempdx = self.NightForc(self.ublTempdx,simTime.dt, \
                 h_UBL,self.paralLength,self.charLength,RSM,Csurf)
 
-            #print 'ublTemp', self.ublTemp
-        #print self.ublTemp-273.15
+        self.logger.debug("ublTemp = {}".format(self.ublTemp))
 
     def NightForc(self,ublTempdx,dt,h_UBL,paralLength,charLength,RSM,Csurf):
         # Night forcing (RSM.nzfor = number of layers of forcing)
@@ -127,7 +124,6 @@ class UBLDef(object):
         ublTempdx[0] = (Csurf + advCoef1 + ublTempdx[0])/(1 + advCoef2)
         ublTemp = ublTempdx[0]
 
-        #for i=2:(charLength/paralLength)
         for i in xrange(1,int(charLength)/int(paralLength)):
             eqTemp = ublTempdx[i-1]
             ublTempdx[i] = (Csurf + advCoef2*eqTemp + ublTempdx[i])/(1 + advCoef2)
