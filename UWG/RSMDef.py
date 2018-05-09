@@ -1,8 +1,9 @@
 import os
 import math
-import pprint
-ppr = lambda x: pprint.pprint(x)
-import pdb
+from pprint import pprint
+
+ppr = pprint
+
 class RSMDef(object):
     """
     % Rural Site & Vertical Diffusion Model (VDM)
@@ -272,13 +273,7 @@ class RSMDef(object):
         # lenght scales (l_up, l_down, l_k, l_eps)
         dlu,dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
 
-        #TODO: test
-        #ppr(dlu) #GOOD
-        #ppr(dld)
-
         dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
-
-
 
         # Boundary-layer diffusion coefficient
         for iz in xrange(nz):
@@ -303,33 +298,15 @@ class RSMDef(object):
             zup_inf=0.
             beta=g/pt[iz]
 
+            # N.B This is easy to break in python due to
+            # dependence on white-space to demarcate functions.
             for izz in xrange(iz,nz-1):
-                #TODO: test dzt
                 dzt=(dz[izz+1]+dz[izz])/2.
-                #if iz==0:
-                #    print dz[izz+1]
-                #    print dz[izz]
-                #    print "/"
                 zup=zup-beta*pt[iz]*dzt
-                #if iz==0:
-                #    print zup
                 zup=zup+beta*(pt[izz+1]+pt[izz])*dzt/2.
                 zzz=zzz+dzt
-                #if iz==0:
-                #    print beta
-                #    print pt[izz+1]
-                #    print pt[izz]
-                #    print dzt
-                #    print zup
-                #    print '/'
-                #TODO: NEEDS TO BE TESTED
-                #if True:#iz==0:
-                    #print (te[iz]<zup),
-                    #print ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf))
-                    #print te[iz], zup
-                    #print iz+1, '-', izz+1
+
                 if (te[iz]<zup) and ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf)):
-                    #if iz==1: print 'true'
                     bbb=(pt[izz+1]-pt[izz])/dzt
                     if not self.is_near_zero(bbb-0.):
                         tl=(-beta*(pt[izz]-pt[iz])+ \
@@ -339,16 +316,13 @@ class RSMDef(object):
                         tl=(te[iz]-zup_inf)/(beta*(pt[izz]-pt[iz]))
                     dlu[iz]=max(1.,zzz-dzt+tl)
                 zup_inf=zup
-            #TODO: test this
-            #print iz, dld[iz]
-            #print '--err--'
+
             zdo=0.
             zdo_sup=0.
             dld[iz]=z[iz]+dz[iz]/2.
             zzz=0.
 
             for izz in xrange(iz,0,-1):
-                #print iz+1, '-', izz+1
                 dzt=(dz[izz-1]+dz[izz])/2.
                 zdo=zdo+beta*pt[iz]*dzt
                 zdo=zdo-beta*(pt[izz-1]+pt[izz])*dzt/2.
@@ -363,7 +337,7 @@ class RSMDef(object):
                         tl=(te[iz]-zdo_sup)/(beta*(pt[izz]-pt[iz]))
                     dld[iz]=max(1.,zzz-dzt+tl)
                 zdo_sup=zdo
-            #print 'endloop'#print iz, dld[iz]
+
         return dlu,dld
 
     def LengthBougeault(self,nz,dld,dlu,z):
