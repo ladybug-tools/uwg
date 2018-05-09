@@ -271,9 +271,9 @@ class RSMDef(object):
                 te[iz] = max(ustar**2.,0.01)
 
         # lenght scales (l_up, l_down, l_k, l_eps)
-        dlu,dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
-
-        dld,dls,dlk = self.LengthBougeault(nz,dld,dlu,z)
+        self.dlu, self.dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
+        
+        self.dld,dls,dlk = self.LengthBougeault(nz,self.dld,self.dlu,z)
 
         # Boundary-layer diffusion coefficient
         for iz in xrange(nz):

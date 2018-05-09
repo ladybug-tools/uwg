@@ -1,52 +1,20 @@
-import os
 import pytest
 import UWG
 import math
+from test_base import TestBase
 
-class TestRSMDef(object):
+class TestRSMDef(TestBase):
     """Test for RSMDef.py - Rural Site & Vertical Diffusion Model (RSM & VDM)
 
     Naming: Test prefixed test classes (without an __init__ method)
     for test autodetection by pytest
     """
-    #RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
-    #DIR_EPW_PATH = os.path.join(RESOURCE_PATH,"epw")
-
-
-    """
-    """
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_rsmdef")
-    CALCULATE_TOLERANCE = lambda s,x: 1*10**-(15.0 - (int(math.log10(x)) + 1)) if (x > 1. or int(x)==1) else 1e-15
-
-    def setup_uwg_integration(self):
-        """ set up uwg object from initialize.uwg """
-
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-
-    def setup_open_matlab_ref(self,matlab_ref_file_path):
-        """ open the matlab reference file """
-
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        print matlab_path
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val_ = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
-        return uwg_matlab_val_
 
     def test_rsm_init(self):
         """
-        Initialize RSM instance for rural and urban site parameters
+        Test Initialize RSM instance for rural site parameters
 
-        Reference construction:
+        Reference init:
 
         lat = 1.37
         lon = 103.98
@@ -59,11 +27,9 @@ class TestRSMDef(object):
         self.uwg.geoParam # geographic parameters
 
         RSM = RSMDef(lat,lon,GMT,rural_height,T_init,P_init,geo_param,self.RESOURCE_PATH)
-        USM = RSMDef(lat,lon,GMT,urban_height,T_init,P_init,geo_param,self.RESOURCE_PATH)
 
         """
         self.setup_uwg_integration()
-
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -101,7 +67,7 @@ class TestRSMDef(object):
         assert self.uwg.RSM.presProf[-1] == pytest.approx(0.990802481868362e5, abs=1e-10)
         # Test all
         for i in xrange(1,len(matlab_presProf)-1):
-            tol = self.CALCULATE_TOLERANCE(matlab_presProf[i]*1e5)
+            tol = self.CALCULATE_TOLERANCE(matlab_presProf[i]*1e5,15.0)
             assert self.uwg.RSM.presProf[i] == pytest.approx(matlab_presProf[i]*1e5, abs=tol)
 
         # Test the tempRealProf
@@ -118,7 +84,7 @@ class TestRSMDef(object):
         1.167716422060640,1.166034753626033,1.165110236615915]
 
         for i in xrange(len(matlab_densityProfS)):
-            tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5)
+            tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5,15.0)
             assert self.uwg.RSM.densityProfS[i] == pytest.approx(matlab_densityProfS[i], abs=tol)
 
         assert len(self.uwg.RSM.densityProfC) == pytest.approx(self.uwg.RSM.nzref, abs=1e-15)
@@ -171,19 +137,69 @@ class TestRSMDef(object):
         # Flatten 2d matrix into 1d vector
         uwg_python_val = reduce(lambda x,y: x+y, uwg_python_val)
 
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_rsmdef_vdm.txt")
+        # Matlab checking
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_rsmdef","matlab_ref_rsmdef_vdm.txt")
 
-        # matlab ref checking
+        # Matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i])
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
 
+    def test_rsm_dissipation_bougeault(self):
+        """ test RSM VDM against matlab references
+        """
+
+        self.setup_uwg_integration()
+        self.uwg.read_epw()
+        self.uwg.read_input()
+
+        # Test Jan 1 (winter, no vegetation coverage)
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
+
+        # set_input
+        self.uwg.set_input()
+
+        # Run simulation
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+
+        # check date
+        #print self.uwg.simTime
+        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.day == 2
+        assert self.uwg.simTime.secDay == pytest.approx(0.0,abs=1e-15)
+
+        # Matlab Checking for RSM.VDM
+        # 2d matrix = 7 x 16
+        uwg_python_val = [
+            self.uwg.RSM.dld,
+            self.uwg.RSM.dlu,
+        ]
+
+        # Flatten 2d matrix into 1d vector
+        uwg_python_val = reduce(lambda x,y: x+y, uwg_python_val)
+
+        """
+        # Matlab checking
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_rsmdef","matlab_ref_rsmdef_dissipation_bougeault.txt")
+
+        # Matlab ref checking
+        assert len(uwg_matlab_val) == len(uwg_python_val)
+
+        for i in xrange(len(uwg_matlab_val)):
+            #print uwg_python_val[i], uwg_matlab_val[i]
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+        """
 
 
 if __name__ == "__main__":
     test_rsm = TestRSMDef()
-    test_rsm.test_rsm_init()
-    test_rsm.test_rsm_vdm()
+    #test_rsm.test_rsm_init()
+    #test_rsm.test_rsm_vdm()
+    test_rsm.test_rsm_dissipation_bougeault()
