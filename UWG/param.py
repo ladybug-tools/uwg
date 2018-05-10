@@ -1,6 +1,6 @@
 class Param(object):
     """
-    PARAMETERS
+    Geographic Parameters
     """
 
     def __init__(self, dayBLHeight, nightBLHeight, refHeight, tempHeight, windHeight,

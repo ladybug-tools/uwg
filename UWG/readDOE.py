@@ -1,8 +1,3 @@
-"""
-Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
-Translated to Python by Saeran Vasanthakumar (saeranv@gmail.com) - April, 2017
-"""
-
 import sys
 import os
 import cPickle
@@ -14,16 +9,18 @@ from BEMDef import BEMDef
 from schdef import SchDef
 from utilities import read_csv, str2fl
 import utilities
-import pprint
-from decimal import Decimal
-from math import log10
-pp = lambda x: pprint.pprint(x)
-
-DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DIR_DOE_PATH = os.path.join(DIR_UP_PATH,"resources","DOERefBuildings")
 
 
-#Define standaards
+# For debugging only
+#import pprint
+#import decimal
+#pp = pprint.pprint
+#dd = decimal.Decimal.from_float
+
+DIR_CURR = os.path.abspath(os.path.dirname(__file__))
+DIR_DOE_PATH = os.path.join(DIR_CURR,"..","resources","DOERefBuildings")
+
+# Define standards: 16 buiding types, 3 built eras, 16 climate zones
 
 # DOE Building Types
 BLDTYPE = [
@@ -114,9 +111,10 @@ def readDOE(serialize_output=True):
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
 
     for i in xrange(16):
-        #print '\tType: ', BLDTYPE[i]
-        #print '-----i-------'
-        #print i+1
+
+        #i = 16 types of buildings
+        #print "\tType: {} @i={}".format(BLDTYPE[i], i)
+
         # Read building summary (Sheet 1)
         file_doe_name_bld = os.path.join("{}".format(DIR_DOE_PATH), "BLD{}".format(i+1),"BLD{}_BuildingSummary.csv".format(i+1))
         list_doe1 = read_csv(file_doe_name_bld)
@@ -172,26 +170,16 @@ def readDOE(serialize_output=True):
         SchGas      = str2fl([list_doe4[16][6:30],list_doe4[17][6:30],list_doe4[18][6:30]])   # Gas Equipment Schedule 24 hrs; wkday=sat
         SchSWH      = str2fl([list_doe4[19][6:30],list_doe4[20][6:30],list_doe4[21][6:30]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
-        #i = 16 types of buildings
-        #print "type: ", BLDTYPE[i]
-        for j in xrange(3):
-            #print '\tera: ', BUILTERA[j]
-            #print '-----j-------'
-            #print j+1
-            for k in xrange(16):
-                #print '\tclimate zone: ', ZONETYPE[k]
-                """
-                if i==13 and j ==0 and k==6:
-                    print BLDTYPE[i]
-                    print BUILTERA[j]
-                    print ZONETYPE[k]
 
-                    dd = lambda x: Decimal.from_float(x)
-                    #print dd(HVAC[j][k])
-                    #print HVAC[j][k]
-                    #print dd(AreaFloor[j])
-                    print dd((HVAC[j][k]*1000.0)/AreaFloor[j])
-                """
+        for j in xrange(3):
+
+            # j = 3 built eras
+            #print"\tEra: {} @j={}".format(BUILTERA[j], j)
+
+            for k in xrange(16):
+
+                # k = 16 climate zones
+                #print "\tClimate zone: {} @k={}".format(ZONETYPE[k], k)
 
                 B = Building(
                     hCeiling[j],                        # floorHeight by era
@@ -200,7 +188,7 @@ def readDOE(serialize_output=True):
                     0.1,                                # intHeatFRad
                     0.1,                                # intHeatFLat
                     Infil[j],                           # infil (ACH) by era
-                    Vent[j]/1000,                       # vent (m^3/s/m^2) by era, converted from liters
+                    Vent[j]/1000.,                      # vent (m^3/s/m^2) by era, converted from liters
                     glazing[j],                         # glazing ratio by era
                     Uwindow[j][k],                      # uValue by era, by climate type
                     SHGC[j][k],                         # SHGC, by era, by climate type
@@ -214,17 +202,15 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
-
                 #Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 B.Type = BLDTYPE[i]
                 B.Era = BUILTERA[j]
                 B.Zone = ZONETYPE[k]
                 refDOE[i][j][k] = B
-                #print '\t\t', B
 
                 # Define wall, mass(floor), roof
-                # Referece from E+ for conductivity, thickness (reference below)
+                # Reference from E+ for conductivity, thickness (reference below)
 
                 # Material: (thermalCond, volHeat = specific heat * density)
                 Concrete = Material (1.311, 836.8 * 2240,"Concrete")
@@ -363,10 +349,12 @@ def readDOE(serialize_output=True):
 
     # if not test serialize refDOE,refBEM,Schedule and store in resources
     if serialize_output:
-        # create a binary file for serialized obj
-        pickle_readDOE = open(os.path.join(DIR_UP_PATH,'resources','readDOE.pkl'), 'wb')
 
-        # resources
+        # create a binary file for serialized obj
+        pkl_file_path = os.path.join(DIR_CURR,'..','resources','readDOE.pkl')
+        pickle_readDOE = open(pkl_file_path, 'wb')
+
+        # dump in ../resources
         # Pickle objects, protocol 1 b/c binary file
         cPickle.dump(refDOE, pickle_readDOE,1)
         cPickle.dump(refBEM, pickle_readDOE,1)
@@ -374,23 +362,16 @@ def readDOE(serialize_output=True):
 
         pickle_readDOE.close()
 
-    else:
-        return refDOE, refBEM, Schedule
+    return refDOE, refBEM, Schedule
 
 if __name__ == "__main__":
-    bld, bem, sched = readDOE(False)
 
-    indexdocstr = ""
-
-    padding = lambda x: "----" if x==0 else "-"*abs(int(log10(x))-4)
-    indexdocstr += "BLDTYPE\n"
-    for i in xrange(16): indexdocstr += "{0}{1}{2}".format(i, padding(i) , BLDTYPE[i]+"\n")
-    indexdocstr += "BUILTERA\n"
-    for i in xrange(3): indexdocstr += "{0}{1}{2}".format(i, padding(i) , BUILTERA[i]+"\n")
-    indexdocstr += "ZONETYPE\n"
-    for i in xrange(16): indexdocstr += "{0}{1}{2}".format(i, padding(i) , ZONETYPE[i]+"\n")
-
-    print "Created bld, bem, sched => 3d matrices of building, BEMdef, and Schedule objects.\nindexdocstr => Matrix index table."
+    # Set to True only if you want create new .pkls of DOE refs
+    # Use --serialize switch to serialize the readDOE data
+    if len(sys.argv)> 1 and sys.argv[1]=="--serialize":
+        refDOE, refBEM, Schedule = readDOE(True)
+    else:
+        refDOE, refBEM, Schedule = readDOE(False)
 
 
 # Material ref from E+

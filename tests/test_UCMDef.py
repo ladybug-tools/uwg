@@ -4,36 +4,11 @@ import os
 import math
 import pprint
 import decimal
+from test_base import TestBase
 
-dd = lambda x: decimal.Decimal.from_float(x)
+dd = decimal.Decimal.from_float
 
-class TestUCMDef(object):
-
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_ucm")
-    CALCULATE_TOLERANCE = lambda s,x,p: 1*10**-(p - 1 - int(math.log10(x))) if abs(float(x)) > 1e-15 else 1e-15
-
-    def setup_uwg_integration(self):
-        """ set up uwg object from initialize.uwg """
-
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
-
-    def setup_open_matlab_ref(self,matlab_ref_file_path):
-        """ open the matlab reference file """
-
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,matlab_ref_file_path)
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val_ = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
-        return uwg_matlab_val_
+class TestUCMDef(TestBase):
 
     def test_ucm_init(self):
         """ test ucm constructor """
@@ -76,7 +51,7 @@ class TestUCMDef(object):
             self.uwg.UCM.sensHeat       # urban sensible heat [W m-2]
         ]
 
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_ucm_init.txt")
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ucm","matlab_ref_ucm_init.txt")
 
 
         # matlab ref checking
@@ -139,7 +114,7 @@ class TestUCMDef(object):
         ]
 
         # Get uwg_matlab values
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ref_ucm_ucmodel.txt")
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ucm","matlab_ref_ucm_ucmodel.txt")
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)

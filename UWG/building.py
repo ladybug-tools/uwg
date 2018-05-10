@@ -1,12 +1,6 @@
 
 from psychrometrics import psychrometrics, moist_air_density
-
 import logging
-
-"""
-Translated from: https://github.com/hansukyang/UWG_Matlab/blob/master/readDOE.m
-Translated to Python by Chris Mackey (chris@mackeyarchitecture.com) and Saeran Vasanthakumar (saeranv@gmail.com) - August 2017
-"""
 
 class Building(object):
     """
@@ -76,7 +70,9 @@ class Building(object):
         Qhvac;              % total heat removed (sensible + latent)
         Qheat;              % total heat added (sensible only)
     """
+
     TEMPERATURE_COEFFICIENT_CONFLICT_MSG = "FATAL ERROR!"
+
     def __init__(self,floorHeight,intHeatNight,intHeatDay,intHeatFRad,\
             intHeatFLat,infil,vent,glazingRatio,uValue,shgc,\
             condType,cop,coolSetpointDay,coolSetpointNight,\
@@ -112,6 +108,9 @@ class Building(object):
             self.Era = "null"                           # pre80, pst80, new
             self.Zone = "null"                          # Climate zone number
 
+            # Logger will be disabled by default unless explicitly called in tests
+            self.logger = logging.getLogger(__name__)
+
     def __repr__(self):
         return "BuildingType: {a}, Era: {b}, Zone: {c}".format(
             a=self.Type,
@@ -124,7 +123,7 @@ class Building(object):
 
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
 
-        logging.debug("{0} {1}".format(__name__, self.__repr__()))
+        self.logger.debug("Logging at {} {}".format(__name__, self.__repr__()))
 
         # Building Energy Model
         self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
@@ -158,13 +157,13 @@ class Building(object):
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
         isEqualNightStart = self.is_near_zero((simTime.secDay/3600.) - parameter.nightSetStart)
         if simTime.secDay/3600. < parameter.nightSetEnd or (simTime.secDay/3600. > parameter.nightSetStart or isEqualNightStart):
-            logging.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
+            self.logger.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
-            logging.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
+            self.logger.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
@@ -173,10 +172,10 @@ class Building(object):
         # Indoor convection heat transfer coefficients
         zac_in_wall = 3.076                             # wall heat convection coefficeint
         zac_in_mass = 3.076                             # mass heat convection coefficeint
-        #Note: may have to change to try/catch loop
 
+        #N.B may have to change to try/catch loop
         if T_ceil > T_indoor:                           # set higher ceiling heat convection coefficient
-            zac_in_ceil  = 0.948                        #  -  based on heat is higher on ceiling
+            zac_in_ceil  = 0.948                        # - based on heat is higher on ceiling
         elif (T_ceil < T_indoor) or self.is_near_zero(T_ceil-T_indoor):
             zac_in_ceil  = 4.040
         else:
@@ -213,15 +212,15 @@ class Building(object):
             volVent*dens*parameter.cp*(T_can-T_cool) +          # ventilation load (volVent = m3 s-1)
             winTrans,                                           # solar load through window
             0.)
-            
+
         self.sensHeatDemand = max(
             -(wallArea*zac_in_wall*(T_wall-T_heat) +            # wall load
             massArea*zac_in_mass*(T_mass-T_heat) +              # mass load
             winArea*self.uValue*(T_can-T_heat) +                # window load due to temp delta
             zac_in_ceil*(T_ceil-T_heat) +                       # ceiling load
             self.intHeat +                                      # internal load
-            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load
-            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load
+            volInfil*dens*parameter.cp*(T_can-T_heat) +         # infiltration load (volInfil = m3 s-1)
+            volVent*dens*parameter.cp*(T_can-T_heat) +          # ventilation load (volVent = m3 s-1)
             winTrans),                                          # solar load through window
             0.)
 

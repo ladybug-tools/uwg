@@ -3,12 +3,9 @@ import UWG
 import os
 import math
 import pprint
+from test_base import TestBase
 
-class TestSimParam(object):
-
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-    DIR_MATLAB_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "matlab_ref","matlab_simparam")
+class TestSimParam(TestBase):
 
     def test_uwg_simparam_matlab_init(self):
         """ Matlab value comparison for simparam initialization in main uwg """
@@ -22,23 +19,14 @@ class TestSimParam(object):
         # dtSim,300,      # simulation time step (s)
         # dtWeather,3600, # weather time step (s)
 
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
+        self.setup_uwg_integration(uwg_param_file="initialize_singapore.uwg")
 
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
 
-        # Open matlab ref file
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_simparam_init.txt")
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
+        # open matlab ref file
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_simparam","matlab_ref_simparam_init.txt")
 
         uwg_python_val = [
         self.uwg.simTime.dt,            # uwg time simulation time step
@@ -76,25 +64,16 @@ class TestSimParam(object):
         # dtSim,300,      # simulation time step (s)
         # dtWeather,3600, # weather time step (s)
 
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = self.DIR_MATLAB_PATH
-        uwg_param_file_name = "initialize_simparam.uwg"
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
+        self.setup_uwg_integration(uwg_param_file="initialize_simparam.uwg")
+        
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
         self.uwg.hvac_autosize()
-        self.uwg.uwg_main()
+        self.uwg.simulate()
 
         # open matlab ref file
-        matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_simparam_update_date.txt")
-        if not os.path.exists(matlab_path):
-            raise Exception("Failed to open {}!".format(matlab_path))
-        matlab_file = open(matlab_path,'r')
-        uwg_matlab_val = [float(x) for x in matlab_file.readlines()]
-        matlab_file.close()
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_simparam","matlab_ref_simparam_update_date.txt")
 
         uwg_python_val = [
         self.uwg.simTime.secDay,

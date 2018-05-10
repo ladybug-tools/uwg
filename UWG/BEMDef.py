@@ -1,8 +1,5 @@
 
-
-
 class BEMDef(object):
-
     """
     Building Energy Model (BEM) class definition
 
@@ -33,7 +30,6 @@ class BEMDef(object):
         Q_roofex;
         Q_roofin;
     """
-
 
     def __init__(self,building,mass,wall,roof,frac):
         self.building = building    # building class type

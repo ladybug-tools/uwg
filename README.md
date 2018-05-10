@@ -1,6 +1,6 @@
 # Urban Weather Generator
 
-[![Build Status](https://travis-ci.org/saeranv/UWG_Python.svg?branch=master)](https://travis-ci.org/saeranv/UWG_Python)
+[![Build Status](https://travis-ci.org/saeranv/urbanWeatherGen.svg?branch=master)](https://travis-ci.org/saeranv/urbanWeatherGen)
 
 The Urban Weather Generator (urbanWeatherGen) is a Python application for modeling the [urban heat island effect](https://en.wikipedia.org/wiki/Urban_heat_island).  Specifically, it morphs rural [EnergyPlus weather (.epw) files](http://www.ladybug.tools/epwmap/) to reflect average conditions within the urban canyon using a range of properties including:
 
@@ -21,21 +21,15 @@ This repository is a Python translation of the original [MATLAB Urban Weather Ge
 Here is a Python example that shows how to create and run an Urban Weather Generator object. The quickstart example file is available [at resources/quickstart.py](https://github.com/ladybug-tools/urbanWeatherGen/blob/master/resources/quickstart.py). Run it through your command prompt in the main urbanWeatherGen directory with the following: ```python -m resources.quickstart```
 
 ```python
-import UWG
-import os
+from UWG import UWG
 
-# Gets path of current directory
-CURR_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
-
-# To run UWG provide the following inputs
-epw_directory = os.path.join(CURR_DIRECTORY,"epw")  # EPW file directory
+# Define the .epw, .uwg filenames to create an UWG object.
+# UWG will look for the .epw file int the UWG/resources/epw folder,
+# and the .uwg file in the UWG/resources/parameters folder.
 epw_filename = "SGP_Singapore.486980_IWEC.epw"      # EPW file name
-uwg_param_directory = CURR_DIRECTORY                # .uwg file directory
-uwg_param_filename = "initialize.uwg"               # .uwg file name
+param_filename = "initialize_singapore.uwg"         # .uwg file name
 
-# Initialize the UWG object
-uwg = UWG.UWG(epw_directory, epw_filename, uwg_param_directory, uwg_param_filename)
-
-# Run the simulation
+# Initialize the UWG object and run the simulation
+uwg = UWG(epw_filename, param_filename)
 uwg.run()
 ```

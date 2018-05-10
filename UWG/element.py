@@ -1,6 +1,4 @@
 import math
-import pprint
-pp = lambda x: pprint.pprint(x)
 
 class Element(object):
     """
@@ -48,7 +46,7 @@ class Element(object):
             self.layerThermalCond = map(lambda z: 0, materialLst)   # vector of layer thermal conductivity (W m-1 K-1)
             self.layerVolHeat = map(lambda z: 0, materialLst)       # vector of layer volumetric heat (J m-3 K-1)
 
-            #create list of layer k and (Cp*density) from materialLst properties
+            # Create list of layer k and (Cp*density) from materialLst properties
             for i in xrange(len(materialLst)):
               self.layerThermalCond[i] = materialLst[i].thermalCond
               self.layerVolHeat[i] = materialLst[i].volHeat
@@ -70,7 +68,7 @@ class Element(object):
             self.flux = None                                         # external surface heat flux
 
     def __repr__(self):
-        #returns some representative wall properties
+        # Returns some representative wall properties
         s1 = "Element: {a}\n\tlayerNum={b}, totaldepth={c}\n\t".format(
             a=self._name,
             b=len(self.layerThickness),
@@ -181,8 +179,6 @@ class Element(object):
         self.T_ext = self.layerTemp[0]
         self.T_int = self.layerTemp[-1]
 
-        print '00', self.layerTemp[0]
-
     def Conduction(self, dt, flx1, bc, temp2, flx2):
         """
         Solve the conductance of heat based on of the element layers.
@@ -227,29 +223,29 @@ class Element(object):
 
         #--------------------------------------------------------------------------
         # Define the column vectors for heat capactiy and conductivity
-        hcp[0] = hc[0] * d[0]       # (J/m2K) = First row, define thermal capacity (J/m3K) * thickness (m)
-        for j in xrange(1,num):     # From second row, define thermal conductivity and thermal capacity
-            tcp[j] = 2. / (d[j-1] / tc[j-1] + d[j] / tc[j]) # (W/m2K) Mean of conductance (W/m2K) for layer j and j-1
-            hcp[j] = hc[j] * d[j]   # (J/m2K)
+        hcp[0] = hc[0] * d[0]
+        for j in xrange(1,num):
+            tcp[j] = 2. / (d[j-1] / tc[j-1] + d[j] / tc[j])
+            hcp[j] = hc[j] * d[j]
 
         #--------------------------------------------------------------------------
         # Define the first row of za matrix, and RHS column vector
         za[0][0] = 0.
-        za[0][1] = hcp[0]/dt + fimp*tcp[1]  # (J/m2K)/t + W/m2K
-        za[0][2] = -fimp*tcp[1]             # W/m2K
-        zy[0] = hcp[0]/dt*t[0] - fexp*tcp[1]*(t[0]-t[1]) + flx1 # W/m2 = K*(J/m2K)/t - K*W/m2K
+        za[0][1] = hcp[0]/dt + fimp*tcp[1]
+        za[0][2] = -fimp*tcp[1]
+        zy[0] = hcp[0]/dt*t[0] - fexp*tcp[1]*(t[0]-t[1]) + flx1
 
         #--------------------------------------------------------------------------
-        # ??? Define other rows
+        # Define other rows
         for j in xrange(1,num-1):
-          za[j][0] = fimp*(-tcp[j]) # W/m2K
-          za[j][1] = hcp[j]/dt + fimp*(tcp[j]+tcp[j+1]) # J/m2K/t + W/m2K + W/m2K
-          za[j][2] = fimp*(-tcp[j+1])   # W/m2K
+          za[j][0] = fimp*(-tcp[j])
+          za[j][1] = hcp[j]/dt + fimp*(tcp[j]+tcp[j+1])
+          za[j][2] = fimp*(-tcp[j+1])
           zy[j] = hcp[j]/dt * t[j] + fexp * \
-            (tcp[j]*t[j-1] - tcp[j]*t[j] - tcp[j+1]*t[j] + tcp[j+1]*t[j+1]) # W/m2 = K*J/m2K/t * K*W/m2K - K*W/m2K - K*W/m2K + K*W/m2K
+            (tcp[j]*t[j-1] - tcp[j]*t[j] - tcp[j+1]*t[j] + tcp[j+1]*t[j+1])
 
         #--------------------------------------------------------------------------
-        # ??? Boundary conditions
+        # Boundary conditions
         if self.is_near_zero(bc-1.): # heat flux
             za[num-1][0] = fimp * (-tcp[num-1])
             za[num-1][1] = hcp[num-1]/dt + fimp*tcp[num-1]
