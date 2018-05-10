@@ -3,6 +3,11 @@ import UWG
 import math
 from test_base import TestBase
 
+from pprint import pprint
+
+pp = pprint
+
+
 class TestRSMDef(TestBase):
     """Test for RSMDef.py - Rural Site & Vertical Diffusion Model (RSM & VDM)
 
@@ -152,12 +157,11 @@ class TestRSMDef(TestBase):
         """ test RSM VDM against matlab references
         """
 
-        self.setup_uwg_integration()
+        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw", uwg_param_file="initialize_toronto.uwg")
         self.uwg.read_epw()
         self.uwg.read_input()
 
-        # Test Jan 1 (winter, no vegetation coverage)
-        self.uwg.Month = 1
+        self.uwg.Month = 6
         self.uwg.Day = 1
         self.uwg.nDay = 1
 
@@ -170,31 +174,31 @@ class TestRSMDef(TestBase):
 
         # check date
         #print self.uwg.simTime
-        assert self.uwg.simTime.month == 1
+        assert self.uwg.simTime.month == 6
         assert self.uwg.simTime.day == 2
         assert self.uwg.simTime.secDay == pytest.approx(0.0,abs=1e-15)
 
-        # Matlab Checking for RSM.VDM
-        # 2d matrix = 7 x 16
+        # dld, dlu values after 1 day
         uwg_python_val = [
-            self.uwg.RSM.dld,
             self.uwg.RSM.dlu,
+            self.uwg.RSM.dld
         ]
 
         # Flatten 2d matrix into 1d vector
         uwg_python_val = reduce(lambda x,y: x+y, uwg_python_val)
 
-        """
+        #pp(uwg_python_val)
+        #print len(uwg_python_val)
         # Matlab checking
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_rsmdef","matlab_ref_rsmdef_dissipation_bougeault.txt")
-
+        uwg_matlab_val = self.setup_open_matlab_ref("matlab_rsmdef","matlab_rsmdef_dissipation_bougeault.txt")
+        """
         # Matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            #print uwg_python_val[i], uwg_matlab_val[i]
+            print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
         """
 
 

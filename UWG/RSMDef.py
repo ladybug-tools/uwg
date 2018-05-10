@@ -272,7 +272,18 @@ class RSMDef(object):
 
         # lenght scales (l_up, l_down, l_k, l_eps)
         self.dlu, self.dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
-        
+        """
+        ppr(nz)
+        ppr(z)
+        ppr(dz)
+        ppr(te)
+        ppr(th)
+        """
+        print self.dlu[0]
+        print '---'
+
+        assert 1==0
+
         self.dld,dls,dlk = self.LengthBougeault(nz,self.dld,self.dlu,z)
 
         # Boundary-layer diffusion coefficient
