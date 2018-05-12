@@ -4,8 +4,9 @@ import math
 from test_base import TestBase
 
 from pprint import pprint
-
+from decimal import Decimal
 pp = pprint
+dd = Decimal.from_float
 
 
 class TestRSMDef(TestBase):
@@ -163,7 +164,7 @@ class TestRSMDef(TestBase):
 
         self.uwg.Month = 6
         self.uwg.Day = 1
-        self.uwg.nDay = 1
+        self.uwg.nDay = 30
 
         # set_input
         self.uwg.set_input()
@@ -174,8 +175,8 @@ class TestRSMDef(TestBase):
 
         # check date
         #print self.uwg.simTime
-        assert self.uwg.simTime.month == 6
-        assert self.uwg.simTime.day == 2
+        assert self.uwg.simTime.month == 7
+        assert self.uwg.simTime.day == 1
         assert self.uwg.simTime.secDay == pytest.approx(0.0,abs=1e-15)
 
         # dld, dlu values after 1 day
@@ -187,19 +188,20 @@ class TestRSMDef(TestBase):
         # Flatten 2d matrix into 1d vector
         uwg_python_val = reduce(lambda x,y: x+y, uwg_python_val)
 
-        #pp(uwg_python_val)
-        #print len(uwg_python_val)
         # Matlab checking
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_rsmdef","matlab_rsmdef_dissipation_bougeault.txt")
-        """
+
         # Matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
         for i in xrange(len(uwg_matlab_val)):
-            print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
-            #assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
-        """
+            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],11.0)
+            #print dd(uwg_python_val[i])
+            #print dd(uwg_matlab_val[i])
+            #print 1.2345678901234
+            #print tol
+            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+
 
 
 if __name__ == "__main__":

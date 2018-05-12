@@ -207,24 +207,16 @@ class RSMDef(object):
 
         #--------------------------------------------------------------------------
         cddz[0] = daz[0]*cd[0]/dz[0]
-        #ppr(cd)
         for iz in xrange(1,nz):
-            #if iz==1:
-                #print daz[iz]
-                #print cd[iz]
-                #print (dz[iz]+dz[iz-1])
             cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
         cddz[nz] = daz[nz]*cd[nz]/dz[nz]
         #--------------------------------------------------------------------------
-        #print 'cd', cddz[1]
-
         a[0][0] = 0.
         a[0][1] = 1.
         a[0][2] = 0.
         c[0] = co[0]
 
         for iz in xrange(1,nz-1):
-            #print iz
             dzv = dz[iz]
             a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
             a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
@@ -237,8 +229,7 @@ class RSMDef(object):
         c[nz-1]=0.
 
         #--------------------------------------------------------------------------
-        co = self.invert(nz,a,c);
-        #print 'chk-', co[1]-273.15
+        co = self.invert(nz,a,c)
         return co
 
     def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
@@ -272,17 +263,6 @@ class RSMDef(object):
 
         # lenght scales (l_up, l_down, l_k, l_eps)
         self.dlu, self.dld = self.DissipationBougeault(parameter.g,nz,z,dz,te,th)
-        """
-        ppr(nz)
-        ppr(z)
-        ppr(dz)
-        ppr(te)
-        ppr(th)
-        """
-        print self.dlu[0]
-        print '---'
-
-        assert 1==0
 
         self.dld,dls,dlk = self.LengthBougeault(nz,self.dld,self.dlu,z)
 
@@ -309,8 +289,6 @@ class RSMDef(object):
             zup_inf=0.
             beta=g/pt[iz]
 
-            # N.B This is easy to break in python due to
-            # dependence on white-space to demarcate functions.
             for izz in xrange(iz,nz-1):
                 dzt=(dz[izz+1]+dz[izz])/2.
                 zup=zup-beta*pt[iz]*dzt
@@ -319,6 +297,7 @@ class RSMDef(object):
 
                 if (te[iz]<zup) and ((te[iz]>zup_inf) or self.is_near_zero(te[iz]-zup_inf)):
                     bbb=(pt[izz+1]-pt[izz])/dzt
+
                     if not self.is_near_zero(bbb-0.):
                         tl=(-beta*(pt[izz]-pt[iz])+ \
                         math.sqrt( max(0.,(beta*(pt[izz]-pt[iz]))**2.+ \
@@ -338,8 +317,10 @@ class RSMDef(object):
                 zdo=zdo+beta*pt[iz]*dzt
                 zdo=zdo-beta*(pt[izz-1]+pt[izz])*dzt/2.
                 zzz=zzz+dzt
+
                 if (te[iz]<zdo) and ((te[iz]>zdo_sup) or self.is_near_zero(te[iz]-zdo_sup)):
                     bbb=(pt[izz]-pt[izz-1])/dzt
+
                     if not self.is_near_zero(bbb-0.):
                         tl=(beta*(pt[izz]-pt[iz])+ \
                             math.sqrt( max(0.,(beta*(pt[izz]-pt[iz]))**2.+ \
