@@ -449,7 +449,7 @@ class UWG(object):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
 
         for i in xrange(len(self.BEM)):
-            if not self.is_near_zero(self.autosize):
+            if self.is_near_zero(self.autosize)==False:
                 self.BEM[i].building.coolCap = 9999.
                 self.BEM[i].building.heatCap = 9999.
 
