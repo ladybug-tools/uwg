@@ -42,10 +42,10 @@ from readDOE import readDOE
 from urbflux import urbflux
 
 # For debugging only
-#import pprint
-#import decimal
-#pp = pprint.pprint
-#dd = decimal.Decimal.from_float
+from pprint import pprint
+from decimal import Decimal
+pp = pprint
+dd = Decimal.from_float
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -688,15 +688,13 @@ def procMat(materials,max_thickness,min_thickness):
             if materials.layerThickness[j] > max_thickness:
                 nlayers = math.ceil(materials.layerThickness[j]/float(max_thickness))
                 for i in xrange(int(nlayers)):
-                    newmat.append(Material(k[j],Vhc[j]))
+                    newmat.append(Material(k[j],Vhc[j],name=materials._name))
                     newthickness.append(materials.layerThickness[j]/float(nlayers))
-            # Material that's less then min_thickness is added at min_thickness.
+            # Material that's less then min_thickness is not added.
             elif materials.layerThickness[j] < min_thickness:
-                newmat.append(Material(k[j],Vhc[j]))
-                newthickness.append(min_thickness)
-                print 'WARNING: Material layer found too thin (<{:.2f}cm), added at new minimum thickness'.format(min_thickness*100)
+                print "WARNING: Material '{}' layer found too thin (<{:.2f}cm), ignored.".format(materials._name, min_thickness*100)
             else:
-                newmat.append(Material(k[j],Vhc[j]))
+                newmat.append(Material(k[j],Vhc[j],name=materials._name))
                 newthickness.append(materials.layerThickness[j])
 
     else:
@@ -705,15 +703,15 @@ def procMat(materials,max_thickness,min_thickness):
         if materials.layerThickness[0] > max_thickness:
             nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
             for i in xrange(int(nlayers)):
-                newmat.append(Material(k[0],Vhc[0]))
+                newmat.append(Material(k[0],Vhc[0],name=materials._name))
                 newthickness.append(materials.layerThickness[0]/float(nlayers))
         # Material should be at least 1cm thick, so if we're here,
         # should give warning and stop. Only warning given for now.
         elif materials.layerThickness[0] < min_thickness*2:
             newthickness = [min_thickness/2., min_thickness/2.]
-            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
-            print 'WARNING: a thin (<2cm) single layer element found. May cause error'
+            newmat = [Material(k[0],Vhc[0],name=materials._name), Material(k[0],Vhc[0],name=materials._name)]
+            print "WARNING: a thin (<2cm) single material '{}' layer found. May cause error.".format(materials._name)
         else:
             newthickness = [materials.layerThickness[0]/2., materials.layerThickness[0]/2.]
-            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
+            newmat = [Material(k[0],Vhc[0],name=materials._name), Material(k[0],Vhc[0],name=materials._name)]
     return newmat, newthickness
