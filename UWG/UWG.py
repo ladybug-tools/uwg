@@ -22,6 +22,7 @@ import cPickle
 import copy
 import utilities
 import logging
+import progress_bar
 
 from simparam import SimParam
 from weather import  Weather
@@ -32,7 +33,6 @@ from BEMDef import BEMDef
 from schdef import SchDef
 from param import Param
 from UCMDef import UCMDef
-
 from forcing import Forcing
 from UBLDef import UBLDef
 from RSMDef import RSMDef
@@ -43,10 +43,10 @@ from readDOE import readDOE
 from urbflux import urbflux
 
 # For debugging only
-#import pprint
-#import decimal
-#pp = pprint.pprint
-#dd = decimal.Decimal.from_float
+#from pprint import pprint
+#from decimal import Decimal
+#pp = pprint
+#dd = Decimal.from_float
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
@@ -71,7 +71,7 @@ class UWG(object):
     maxThickness = 0.05    # Maximum layer thickness (m)
     soilTcond = 1          # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
     soilvolHeat = 2e6      # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf (average taken from Table 1)
-    soil = Material(soilTcond, soilvolHeat)  # Soil material used for soil-depth padding
+    soil = Material(soilTcond, soilvolHeat, name="soil")  # Soil material used for soil-depth padding
 
     # Physical constants
     g = 9.81               # gravity (m s-2)
@@ -98,8 +98,9 @@ class UWG(object):
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
     def __init__(self, epwFileName, uwgParamFileName, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+
         # User defined
-        self.epwFileName = epwFileName
+        self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + '.epw' # Revise epw file name if not end with epw
         self.uwgParamFileName = uwgParamFileName
 
         # If user does not overload
@@ -123,6 +124,7 @@ class UWG(object):
     def read_epw(self):
         """Section 2 - Read EPW file
         properties:
+            self.climateDataPath
             self.newPathName
             self._header    # header data
             self.epwinput   # timestep data for weather
@@ -134,16 +136,12 @@ class UWG(object):
             self.depth_soil # nSoil x 1 matrix for soil depth (m)
         """
 
-        # Revise epw file name if not end with epw
-        if not self.epwFileName.lower().endswith('.epw'):
-            self.epwFileName = self.epwFileName + '.epw'
-
         # Make dir path to epw file
-        climateDataPath = os.path.join(self.epwDir, self.epwFileName)
+        self.climateDataPath = os.path.join(self.epwDir, self.epwFileName)
 
         # Open epw file and feed csv data to climate_data
         try:
-            climate_data = utilities.read_csv(climateDataPath)
+            climate_data = utilities.read_csv(self.climateDataPath)
         except Exception as e:
             raise Exception("Failed to read epw file! {}".format(e.message))
 
@@ -187,7 +185,6 @@ class UWG(object):
             self.BEM                # list of BEMDef objects extracted from readDOE
             self.Sch                # list of Schedule objects extracted from readDOE
 
-            TODO: finish this list
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
@@ -391,7 +388,7 @@ class UWG(object):
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
-                    # BEM(k).Qocc = BEM(k).Qocc; #TODO What is this?
+                    # BEM(k).Qocc = BEM(k).Qocc; #TODO Check where Qocc is coming from and define
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
@@ -450,11 +447,11 @@ class UWG(object):
         """ Section 6 - HVAC Autosizing (unlimited cooling & heating) """
 
         for i in xrange(len(self.BEM)):
-            if not self.is_near_zero(self.autosize):
+            if self.is_near_zero(self.autosize)==False:
                 self.BEM[i].building.coolCap = 9999.
                 self.BEM[i].building.heatCap = 9999.
 
-    def simulate(self,sim_start_hour=0,sim_end_hour=24):
+    def simulate(self):
         """ Section 7 - UWG main section
 
             self.N                  # Total hours in simulation
@@ -484,20 +481,14 @@ class UWG(object):
         self.RSMData = [None for x in xrange(self.N)]
         self.USMData = [None for x in xrange(self.N)]
 
-        # Only for testing = Adjust hours if neccessary
-        #TODO: check this
-        sim_start_hour = 0
-        sim_end_hour = 0 #23
-        for si in xrange(int(3600./self.simTime.dt*sim_start_hour)):
-            self.simTime.UpdateDate()
-        _substep = (3600./self.simTime.dt*(sim_start_hour + (24-sim_end_hour)%24))
-        sim_step_halt = int(self.simTime.nt - _substep)
-
-        self.N -= int(_substep/(3600./self.simTime.dt))  # total number of hours in simulation
-
+        print '\nSimulating new temperature and humidity values for {} days from {}/{}.\n'.format(
+            int(self.nDay), int(self.Month), int(self.Day))
         self.logger.info("Start simulation")
-        #for it in range(1,self.simTime.nt,1):
-        for it in range(1,sim_step_halt,1):# for every simulation time-step (i.e 5 min) defined by uwg
+
+        # Start progress bar at zero
+        progress_bar.print_progress(0, 100.0, prefix = 'Simulation:', suffix = 'Complete', bar_length = 50)
+
+        for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))             # for BUBBLE/CAPITOUL/Singapore only
@@ -509,12 +500,9 @@ class UWG(object):
             # There's probably a better way to update the weather...
             self.simTime.UpdateDate()
 
-            #TODO: disable
             self.logger.info("\n{0} m={1}, d={2}, h={3}, s={4}".format(__name__, self.simTime.month, self.simTime.day, self.simTime.secDay/3600., self.simTime.secDay))
 
-            #TODO: add start hours to forcIP
-            _it = it + 3600/self.simTime.dt*sim_start_hour
-            self.ceil_time_step = int(math.ceil(_it * self.ph))-1  # simulation time increment raised to weather time step
+            self.ceil_time_step = int(math.ceil(it * self.ph))-1  # simulation time increment raised to weather time step
                                                                    # minus one to be consistent with forcIP list index
             # Updating forcing instance
             self.forc.infra = self.forcIP.infra[self.ceil_time_step]        # horizontal Infrared Radiation Intensity (W m-2)
@@ -610,7 +598,6 @@ class UWG(object):
 
             if self.is_near_zero(self.simTime.secDay % self.simTime.timePrint) and n < self.N:
 
-                #TODO: disable
                 self.logger.info("{0} ----sim time step = {1}----\n\n".format(__name__, n))
 
                 self.WeatherData[n] = copy.copy(self.forc)
@@ -624,12 +611,15 @@ class UWG(object):
                 self.logger.info("dpT = {}".format(self.UCMData[n].Tdp))
                 self.logger.info("RH  = {}".format(self.UCMData[n].canRHum))
 
+                # Print progress bar
+                sim_it = round((it/float(self.simTime.nt))*100.0,1)
+                progress_bar.print_progress(sim_it, 100.0, prefix = 'Simulation:', suffix = 'Complete.', bar_length = 50)
+
                 n += 1
 
     def write_epw(self):
         """ Section 8 - Writing new EPW file
         """
-        print 'Calculating new Temperature and humidity values from month: {} day: {} for {} days'.format(int(self.Month), int(self.Day), int(self.nDay))
         epw_prec = 16 # precision of epw file input
 
         for iJ in xrange(len(self.UCMData)):
@@ -639,8 +629,6 @@ class UWG(object):
             self.epwinput[iJ+self.simTime.timeInitial-8][7] = "{0:.{1}f}".format(self.UCMData[iJ].Tdp, epw_prec)              # dew point temperature [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
             self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)        # wind speed [m/s]
-
-        print 'Writing new EPW file'
 
         # Writing new EPW file
         epw_new_id = open(self.newPathName, "w")
@@ -659,7 +647,7 @@ class UWG(object):
 
         epw_new_id.close()
 
-        print 'New climate file generated: {0}'.format(self.newPathName)
+        print "\nNew climate file '{}' is generated at {}.".format(self.destinationFileName, self.destinationDir)
 
     def run(self):
 
@@ -689,15 +677,13 @@ def procMat(materials,max_thickness,min_thickness):
             if materials.layerThickness[j] > max_thickness:
                 nlayers = math.ceil(materials.layerThickness[j]/float(max_thickness))
                 for i in xrange(int(nlayers)):
-                    newmat.append(Material(k[j],Vhc[j]))
+                    newmat.append(Material(k[j],Vhc[j],name=materials._name))
                     newthickness.append(materials.layerThickness[j]/float(nlayers))
-            # Material that's less then min_thickness is added at min_thickness.
+            # Material that's less then min_thickness is not added.
             elif materials.layerThickness[j] < min_thickness:
-                newmat.append(Material(k[j],Vhc[j]))
-                newthickness.append(min_thickness)
-                print 'WARNING: Material layer found too thin (<{:.2f}cm), added at new minimum thickness'.format(min_thickness*100)
+                print "WARNING: Material '{}' layer found too thin (<{:.2f}cm), ignored.".format(materials._name, min_thickness*100)
             else:
-                newmat.append(Material(k[j],Vhc[j]))
+                newmat.append(Material(k[j],Vhc[j],name=materials._name))
                 newthickness.append(materials.layerThickness[j])
 
     else:
@@ -706,15 +692,15 @@ def procMat(materials,max_thickness,min_thickness):
         if materials.layerThickness[0] > max_thickness:
             nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
             for i in xrange(int(nlayers)):
-                newmat.append(Material(k[0],Vhc[0]))
+                newmat.append(Material(k[0],Vhc[0],name=materials._name))
                 newthickness.append(materials.layerThickness[0]/float(nlayers))
         # Material should be at least 1cm thick, so if we're here,
         # should give warning and stop. Only warning given for now.
         elif materials.layerThickness[0] < min_thickness*2:
             newthickness = [min_thickness/2., min_thickness/2.]
-            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
-            print 'WARNING: a thin (<2cm) single layer element found. May cause error'
+            newmat = [Material(k[0],Vhc[0],name=materials._name), Material(k[0],Vhc[0],name=materials._name)]
+            print "WARNING: a thin (<2cm) single material '{}' layer found. May cause error.".format(materials._name)
         else:
             newthickness = [materials.layerThickness[0]/2., materials.layerThickness[0]/2.]
-            newmat = [Material(k[0],Vhc[0]), Material(k[0],Vhc[0])]
+            newmat = [Material(k[0],Vhc[0],name=materials._name), Material(k[0],Vhc[0],name=materials._name)]
     return newmat, newthickness

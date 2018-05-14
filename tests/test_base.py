@@ -23,12 +23,17 @@ class TestBase(object):
             tol = 1e-15
         return tol
 
-    def setup_uwg_integration(self, epw_file="SGP_Singapore.486980_IWEC.epw", uwg_param_file="initialize_singapore.uwg", uwg_param_dir=None):
+    def setup_uwg_integration(self, epw_file="SGP_Singapore.486980_IWEC.epw", uwg_param_file="initialize_singapore.uwg",
+        log_file_name=None,log_level=None, uwg_param_dir=None):
+
         """ set up uwg object from initialize.uwg """
 
         epw_dir = self.DIR_EPW_PATH
         uwg_param_dir_ = self.DIR_UWGPARAM_PATH if uwg_param_dir == None else uwg_param_dir
         destination_dir = self.DIR_DESTINATION_PATH
+
+        if log_file_name and log_level:
+            self.setup_log_file(log_file_name, log_level)
 
         self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir)
 
@@ -43,12 +48,15 @@ class TestBase(object):
         matlab_path = os.path.join(self.DIR_MATLAB_PATH, matlab_class_dir, matlab_ref_file_path)
         if not os.path.exists(matlab_path):
             raise Exception("Failed to open {}!".format(matlab_path))
+
+        # Open matlab file, read lines and return values as python simple datatype
         matlab_file = open(matlab_path,'r')
         uwg_matlab_val_ = [convert_type(x) for x in matlab_file.readlines()]
         matlab_file.close()
         return uwg_matlab_val_
 
-    def set_log_file(self, log_file_name, log_level=None):
+
+    def setup_log_file(self, log_file_name, log_level=None):
         """
         https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 
@@ -64,7 +72,7 @@ class TestBase(object):
 
         if log_level==None:
             log_level = logging.DEBUG # Default is set to debug for everything
-
+            
         logging.basicConfig(level=log_level,
                             filename=log_file_path,
                             filemode="w")

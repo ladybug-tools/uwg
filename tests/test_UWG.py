@@ -3,25 +3,24 @@ import os
 import pytest
 import UWG
 import math
+from test_base import TestBase
 
-class TestUWG(object):
+from pprint import pprint
+from decimal import Decimal
+pp = pprint
+dd = Decimal.from_float
+
+class TestUWG(TestBase):
     """Test for UWG.py
-    Naming: Test prefixed test classes (without an __init__ method)
-    for test autodetection by pytest
     """
+
     DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
 
-    def setup_init_uwg(self):
-        epw_dir = self.DIR_EPW_PATH
-        epw_file_name = "SGP_Singapore.486980_IWEC.epw"
-        uwg_param_dir = os.path.join(self.DIR_UP_PATH,"resources")
-        uwg_param_file_name = "initialize.uwg"
-
-        self.uwg = UWG.UWG(epw_dir, epw_file_name, uwg_param_dir, uwg_param_file_name)
 
     def test_read_epw(self):
-        self.setup_init_uwg()
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
 
         # test header
@@ -45,7 +44,8 @@ class TestUWG(object):
         assert float(self.uwg.epwinput[3][6]) == pytest.approx(24.1,abs=1e-3)
 
     def test_read_input(self):
-        self.setup_init_uwg()
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -111,7 +111,7 @@ class TestUWG(object):
         thicknesses (to account for too deep elements with inaccurate heat transfer).
         """
 
-        self.setup_init_uwg()
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -122,26 +122,6 @@ class TestUWG(object):
         assert len(roadMat) == pytest.approx(11, abs=1e-6)
         assert len(newthickness) == pytest.approx(11, abs=1e-6)
         assert sum(newthickness) == pytest.approx(0.05*11, abs=1e-6)
-
-        #TODO: revise
-        # min=0.01, max=0.04, 0.05 cut into two = 0.025
-        #roadMat, newthickness = UWG.procMat(self.uwg.road, 0.04, 0.01)
-        #assert len(roadMat) == pytest.approx(20, abs=1e-6)
-        #assert len(newthickness) == pytest.approx(20, abs=1e-6)
-        #assert sum(newthickness) == pytest.approx(0.025*20, abs=1e-6)
-
-        # min=0.06, max=0.1, should make new material at 0.06 thickness
-        roadMat, newthickness = UWG.procMat(self.uwg.road, 0.1, 0.06)
-        assert len(roadMat) == pytest.approx(11, abs=1e-6)
-        assert len(newthickness) == pytest.approx(11, abs=1e-6)
-        assert sum(newthickness) == pytest.approx(0.06*11, abs=1e-6)
-
-        #TODO: revise
-        # min=0.0001, max=0.1, should stay the same
-        #roadMat, newthickness = UWG.procMat(self.uwg.road,0.1,0.0001)
-        #assert len(roadMat) == pytest.approx(11, abs=1e-6)
-        #assert len(newthickness) == pytest.approx(11, abs=1e-6)
-        #assert sum(newthickness) == pytest.approx(0.5, abs=1e-6)
 
         # modify to one layer for tests
         self.uwg.road.layerThickness = [0.05]
@@ -168,22 +148,47 @@ class TestUWG(object):
         assert len(newthickness) == pytest.approx(3, abs=1e-6)
         assert sum(newthickness) == pytest.approx(0.04*3, abs=1e-6)
 
+        # Old Tests
+        # min=0.01, max=0.04, 0.05 cut into two = 0.025
+        #roadMat, newthickness = UWG.procMat(self.uwg.road, 0.04, 0.01)
+        #assert len(roadMat) == pytest.approx(20, abs=1e-6)
+        #assert len(newthickness) == pytest.approx(20, abs=1e-6)
+        #assert sum(newthickness) == pytest.approx(0.025*20, abs=1e-6)
+
+        # min=0.0001, max=0.1, should stay the same
+        #roadMat, newthickness = UWG.procMat(self.uwg.road,0.1,0.0001)
+        #assert len(roadMat) == pytest.approx(11, abs=1e-6)
+        #assert len(newthickness) == pytest.approx(11, abs=1e-6)
+        #assert sum(newthickness) == pytest.approx(0.5, abs=1e-6)
+
+        # min=0.06, max=0.1, should make new material at 0.06 thickness
+        #roadMat, newthickness = UWG.procMat(self.uwg.road, 0.1, 0.06)
+        #assert len(roadMat) == pytest.approx(11, abs=1e-6)
+        #assert len(newthickness) == pytest.approx(11, abs=1e-6)
+        #assert sum(newthickness) == pytest.approx(0.06*11, abs=1e-6)
+
+
     def test_hvac_autosize(self):
 
-        self.setup_init_uwg()
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
         self.uwg.hvac_autosize()
 
-        assert self.uwg.BEM[0].building.coolCap == pytest.approx(9999., abs=1e-6)
-        assert self.uwg.BEM[0].building.heatCap == pytest.approx(9999., abs=1e-6)
-        assert self.uwg.BEM[1].building.coolCap == pytest.approx(9999., abs=1e-6)
-        assert self.uwg.BEM[1].building.heatCap == pytest.approx(9999., abs=1e-6)
+        assert self.uwg.autosize == pytest.approx(0.0, abs=1e-3)
         assert len(self.uwg.BEM) == pytest.approx(2, abs=1e-6)
 
+        # coolCap and heatCap don't retain high accuracy when extracted from the
+        # DOE reference csv, so we will reduce the tolerance here
+        assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
+        assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
+
     def test_simulate(self):
-        self.setup_init_uwg()
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.read_input()
         self.uwg.set_input()
@@ -217,5 +222,3 @@ if __name__ == "__main__":
     #test.test_read_input()
     #test.test_procMat()
     #test.test_hvac_autosize()
-    #test.test_simulate()
-    test.test_uwg_output()
