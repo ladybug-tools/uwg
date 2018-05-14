@@ -199,7 +199,7 @@ class SolarCalcs(object):
                 self.tanzen = math.tan(0.5*math.pi+1e-6);
 
         elif (abs(self.zenith) <  1e-6):
-            #TODO: figure out how to translate this
+            #TODO: Need to translate sign(1.,zenith) from matlab
             raise Exception("Error at zenith calc.")
             #tanzen = sign(1.,zenith)*math.tan(1e-6);
         else:

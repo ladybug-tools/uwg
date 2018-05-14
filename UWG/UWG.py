@@ -71,7 +71,7 @@ class UWG(object):
     maxThickness = 0.05    # Maximum layer thickness (m)
     soilTcond = 1          # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
     soilvolHeat = 2e6      # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf (average taken from Table 1)
-    soil = Material(soilTcond, soilvolHeat)  # Soil material used for soil-depth padding
+    soil = Material(soilTcond, soilvolHeat, name="soil")  # Soil material used for soil-depth padding
 
     # Physical constants
     g = 9.81               # gravity (m s-2)
@@ -98,10 +98,9 @@ class UWG(object):
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
 
     def __init__(self, epwFileName, uwgParamFileName, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
-        # User defined
 
-        # Revise epw file name if not end with epw
-        self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + '.epw'
+        # User defined
+        self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + '.epw' # Revise epw file name if not end with epw
         self.uwgParamFileName = uwgParamFileName
 
         # If user does not overload
@@ -186,7 +185,6 @@ class UWG(object):
             self.BEM                # list of BEMDef objects extracted from readDOE
             self.Sch                # list of Schedule objects extracted from readDOE
 
-            TODO: finish this list
         """
 
         uwg_param_file_path = os.path.join(self.uwgParamDir,self.uwgParamFileName)
@@ -390,7 +388,7 @@ class UWG(object):
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
-                    # BEM(k).Qocc = BEM(k).Qocc; #TODO What is this?
+                    # BEM(k).Qocc = BEM(k).Qocc; #TODO Check where Qocc is coming from and define
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
@@ -592,7 +590,7 @@ class UWG(object):
             Uforc.temp = copy.copy(self.UCM.canTemp)
             self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
             """
-            
+
             self.logger.info("dbT = {}".format(self.UCM.canTemp-273.15))
             if n > 0:
                 logging.info("dpT = {}".format(self.UCM.Tdp))
