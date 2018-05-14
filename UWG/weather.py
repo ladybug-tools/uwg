@@ -23,7 +23,6 @@ class Weather(object):
         staHum    % specific humidty (kg kg-1)
     """
 
-    #TODO: change to xrange
     def __init__(self,climate_file,HI,HF):
         #HI: Julian start date
         #HF: Julian final date
@@ -36,17 +35,18 @@ class Weather(object):
             raise Exception("Failed to read .epw file! {}".format(e.message))
 
         self.location = self.climate_data[0][1]
-        self.staTemp = str2fl([r[6] for r in self.climate_data[HI:HF+1]])           # drybulb [C]
-        self.staTdp = str2fl([r[7] for r in self.climate_data[HI:HF+1]])            # dewpoint [C]
-        self.staRhum = str2fl([r[8] for r in self.climate_data[HI:HF+1]])           # air relative humidity (%)
-        self.staPres = str2fl([r[9] for r in self.climate_data[HI:HF+1]])           # air pressure (Pa)
-        self.staInfra = str2fl([r[12] for r in self.climate_data[HI:HF+1]])         # horizontal Infrared Radiation Intensity (W m-2)
-        self.staHor = str2fl([r[13] for r in self.climate_data[HI:HF+1]])           # horizontal radiation [W m-2]
-        self.staDir = str2fl([r[14] for r in self.climate_data[HI:HF+1]])           # normal solar direct radiation (W m-2)
-        self.staDif = str2fl([r[15] for r in self.climate_data[HI:HF+1]])           # horizontal solar diffuse radiation (W m-2)
-        self.staUdir = str2fl([r[20] for r in self.climate_data[HI:HF+1]])          # wind direction ()
-        self.staUmod = str2fl([r[21] for r in self.climate_data[HI:HF+1]])          # wind speed (m s-1)
-        self.staRobs = str2fl([r[33] for r in self.climate_data[HI:HF+1]])          # Precipitation (mm h-1)
+        cd = self.climate_data[HI:HF+1]
+        self.staTemp = str2fl([cd[i][6] for i in xrange(len(cd))])           # drybulb [C]
+        self.staTdp = str2fl([cd[i][7] for i in xrange(len(cd))])            # dewpoint [C]
+        self.staRhum = str2fl([cd[i][8] for i in xrange(len(cd))])           # air relative humidity (%)
+        self.staPres = str2fl([cd[i][9] for i in xrange(len(cd))])           # air pressure (Pa)
+        self.staInfra = str2fl([cd[i][12] for i in xrange(len(cd))])         # horizontal Infrared Radiation Intensity (W m-2)
+        self.staHor = str2fl([cd[i][13] for i in xrange(len(cd))])           # horizontal radiation [W m-2]
+        self.staDir = str2fl([cd[i][14] for i in xrange(len(cd))])           # normal solar direct radiation (W m-2)
+        self.staDif = str2fl([cd[i][15] for i in xrange(len(cd))])           # horizontal solar diffuse radiation (W m-2)
+        self.staUdir = str2fl([cd[i][20] for i in xrange(len(cd))])          # wind direction ()
+        self.staUmod = str2fl([cd[i][21] for i in xrange(len(cd))])          # wind speed (m s-1)
+        self.staRobs = str2fl([cd[i][33] for i in xrange(len(cd))])          # Precipitation (mm h-1)
         self.staHum = [0.0] * len(self.staTemp)                                     # specific humidty (kgH20 kgN202-1)
         for i in xrange(len(self.staTemp)):
             self.staHum[i] = HumFromRHumTemp(self.staRhum[i], self.staTemp[i], self.staPres[i])
