@@ -79,14 +79,16 @@ bld,
 # =================================================
 # OPTIONAL URBAN PARAMETERS
 # =================================================
+
 albRoof,0.5,  # roof albedo (0 - 1)
 vegRoof,0.1,  # Fraction of the roofs covered in grass/shrubs (0-1)
 glzR,0.5,     # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
 hvac,0,       # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
-# =================================================,
+# =================================================
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
-# =================================================,
+# =================================================
+
 # Simulation parameters,
 Month,1,        # starting month (1-12)
 Day,1,          # starting day (1-31)

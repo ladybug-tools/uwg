@@ -4,6 +4,7 @@ import pytest
 import UWG
 import math
 from test_base import TestBase
+
 from pprint import pprint
 from decimal import Decimal
 pp = pprint
@@ -219,7 +220,7 @@ class TestUWG(TestBase):
 
 if __name__ == "__main__":
     test = TestUWG()
-    test.test_read_epw()
-    test.test_read_input()
-    test.test_procMat()
-    test.test_hvac_autosize()
+    #test.test_read_epw()
+    #test.test_read_input()
+    #test.test_procMat()
+    #test.test_hvac_autosize()

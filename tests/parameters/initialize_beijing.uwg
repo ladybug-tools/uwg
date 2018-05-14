@@ -8,7 +8,7 @@
 # =================================================
 
 # Urban characteristics
-bldHeight,20,     # average building height (m)
+bldHeight,51,     # average building height (m)
 bldDensity,0.7,   # urban area building plan density (0-1)
 verToHor,0.8,     # urban area vertical to horizontal ratio
 h_mix,1,           # fraction of building HVAC waste heat set to the street canyon [as opposed to the roof]
@@ -88,9 +88,9 @@ hvac,0,       # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natur
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
 # =================================================,
 # Simulation parameters,
-Month,8,        # starting month (1-12)
-Day,7,          # starting day (1-31)
-nDay,14,        # number of days to run simultion
+Month,1,        # starting month (1-12)
+Day,1,          # starting day (1-31)
+nDay,365,        # number of days to run simultion
 dtSim,300,      # simulation time step (s)
 dtWeather,3600, # weather time step (s)
 
