@@ -107,8 +107,7 @@ class TestOutput(TestBase):
         """
         # set up the logger
 
-        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw",
-            log_file_name="test_uwg_output_cooldemand_6_1_1300.log",log_level=logging.INFO)
+        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")#,log_file_name="test_uwg_output_cooldemand_6_1_1300.log",log_level=logging.INFO)
 
         #self.uwg.logger.critical("Cool demand output")
 

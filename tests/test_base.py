@@ -31,7 +31,7 @@ class TestBase(object):
         epw_dir = self.DIR_EPW_PATH
         uwg_param_dir_ = self.DIR_UWGPARAM_PATH if uwg_param_dir == None else uwg_param_dir
         destination_dir = self.DIR_DESTINATION_PATH
-        
+
         if log_file_name and log_level:
             self.setup_log_file(log_file_name, log_level)
 
@@ -72,7 +72,7 @@ class TestBase(object):
 
         if log_level==None:
             log_level = logging.DEBUG # Default is set to debug for everything
-
+            
         logging.basicConfig(level=log_level,
                             filename=log_file_path,
                             filemode="w")
