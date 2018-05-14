@@ -10,7 +10,11 @@ class Weather(object):
     properties
         location  # location name
         staTemp   % air temperature (C)
+<<<<<<< HEAD
+        staTdp    % dry bulb
+=======
         staTdp    % dewpoint temperature (C)
+>>>>>>> a923c1cef10d46cd50002b5a3994904ab34f528a
         staRhum   % air relative humidity (%)
         staPres   % air pressure (Pa)
         staInfra  % horizontal Infrared Radiation Intensity (W m-2)
