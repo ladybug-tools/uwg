@@ -18,7 +18,7 @@ class TestUWG(TestBase):
     DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
 
 
-    def txest_read_epw(self):
+    def test_read_epw(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
@@ -43,7 +43,7 @@ class TestUWG(TestBase):
         assert self.uwg.epwinput[0][0] == "1989"
         assert float(self.uwg.epwinput[3][6]) == pytest.approx(24.1,abs=1e-3)
 
-    def txest_read_input(self):
+    def test_read_input(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
@@ -168,7 +168,7 @@ class TestUWG(TestBase):
         #assert sum(newthickness) == pytest.approx(0.06*11, abs=1e-6)
 
 
-    def txest_hvac_autosize(self):
+    def test_hvac_autosize(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
@@ -186,7 +186,7 @@ class TestUWG(TestBase):
         assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
         assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
 
-    def txest_simulate(self):
+    def test_simulate(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
