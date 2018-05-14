@@ -5,5 +5,5 @@
 import sys
 
 collect_ignore = [
-    "tests/test_output.py"
+    #"tests/name_test_here.py"
     ]
