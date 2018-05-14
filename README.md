@@ -1,6 +1,6 @@
 # Urban Weather Generator
 
-[![Build Status](https://travis-ci.org/saeranv/urbanWeatherGen.svg?branch=master)](https://travis-ci.org/saeranv/urbanWeatherGen)
+[![Build Status](https://travis-ci.org/ladybug-tools/urbanWeatherGen.svg?branch=master)](https://travis-ci.org/ladybug-tools/urbanWeatherGen)
 
 The Urban Weather Generator (urbanWeatherGen) is a Python application for modeling the [urban heat island effect](https://en.wikipedia.org/wiki/Urban_heat_island). Specifically, it morphs rural [EnergyPlus weather (.epw) files](http://www.ladybug.tools/epwmap/) to reflect average conditions within the urban canyon using a range of properties including:
 
