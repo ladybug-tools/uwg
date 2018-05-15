@@ -228,6 +228,9 @@ class UCMDef(object):
             self.GasTotal = self.GasTotal + BEM[j].fl_area*BEM[j].building.GasTotal/1.e6
 
         # Sensible Heat
+        # N.B In the current UWG code, latent heat from evapotranspiration, stagnant water,
+        # or anthropogenic sources is not modelled due to the difficulty of validation, and
+        # lack of reliability of precipitation data from EPW files. 
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
 
         # Error checking

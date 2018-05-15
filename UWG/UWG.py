@@ -388,7 +388,6 @@ class UWG(object):
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
                     alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
-                    # BEM(k).Qocc = BEM(k).Qocc; #TODO Check where Qocc is coming from and define
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
