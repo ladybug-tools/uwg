@@ -96,7 +96,11 @@ class Element(object):
 
         if (self.horizontal):     # For roof, mass, road
             # Evaporation (m s-1), Film water & soil latent heat
-            if self.waterStorage > 0.:
+            if not self.is_near_zero(self.waterStorage) and self.waterStorage > 0.0:
+                # N.B In the current UWG code, latent heat from evapotranspiration, stagnant water,
+                # or anthropogenic sources is not modelled due to the difficulty of validation, and
+                # lack of reliability of precipitation data from EPW files.Therefore this condition
+                # is never run because all elements have had their waterStorage hardcoded to 0.
                 qtsat = self.qsat([self.layerTemp[0]],[forc.pres],parameter)[0]
                 eg = self.aeroCond*parameter.colburn*dens*(qtsat-humRef)/parameter.waterDens/parameter.cp
                 self.waterStorage = min(self.waterStorage + simTime.dt*(forc.prec-eg),parameter.wgmax)
