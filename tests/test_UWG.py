@@ -14,10 +14,6 @@ class TestUWG(TestBase):
     """Test for UWG.py
     """
 
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-
-
     def test_read_epw(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
@@ -42,6 +38,16 @@ class TestUWG(TestBase):
         # test time step in weather file
         assert self.uwg.epwinput[0][0] == "1989"
         assert float(self.uwg.epwinput[3][6]) == pytest.approx(24.1,abs=1e-3)
+
+    def test_program_input(self):
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", None)
+
+        # Check some random variables
+        assert self.uwg.vegCover == None
+        assert self.uwg.treeCoverage == None
+        assert self.uwg.vegStart == None
+
+        #Assign everything manually
 
     def test_read_input(self):
 
