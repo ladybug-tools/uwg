@@ -102,10 +102,10 @@ class TestBase(object):
         self.uwg.albRoof = .5
         self.uwg.vegRoof = .1
         self.uwg.glzR = .5
-        self.uwg.hvac = 0
+        self.uwg.hvac = 0.0
 
         # climate Zone
-        self.uwg.zone = 1
+        self.uwg.zone = 1.0
 
         # Vegetation parameters
         self.uwg.vegCover = 0.2

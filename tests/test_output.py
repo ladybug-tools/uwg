@@ -140,7 +140,7 @@ class TestOutput(TestBase):
         self.uwg.write_epw()
 
         # Check some of the inputs
-        
+
         # Check building parameters
         assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
         assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)

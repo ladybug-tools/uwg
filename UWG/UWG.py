@@ -359,6 +359,41 @@ class UWG(object):
         if self.glzR is None: self.glzR = ipd['glzR']
         if self.hvac is None: self.hvac = ipd['hvac']
 
+    def check_inputs(self):
+        """Check if required inputs are set"""
+
+        # Required parameters
+        is_defined = (type(self.Month) == float or type(self.Month) == int) and \
+        (type(self.Day) == float or type(self.Day) == int) and \
+        (type(self.nDay) == float or type(self.nDay) == int) and \
+        type(self.dtSim) == float and type(self.dtWeather) == float and \
+        (type(self.autosize) == float or type(self.autosize) == int) and \
+        type(self.sensOcc) == float and type(self.LatFOcc) == float and \
+        type(self.RadFOcc) == float and type(self.RadFEquip) == float and \
+        type(self.RadFLight) == float and type(self.h_ubl1) == float and \
+        type(self.h_ubl2) == float and type(self.h_ref) == float and \
+        type(self.h_temp) == float and type(self.h_wind) == float and \
+        type(self.c_circ) == float and type(self.c_exch) == float and \
+        type(self.maxDay) == float and type(self.maxNight) == float and \
+        type(self.windMin) == float and type(self.h_obs) == float and \
+        type(self.bldHeight) == float and type(self.h_mix) == float and \
+        type(self.bldDensity) == float and type(self.verToHor) == float and \
+        type(self.charLength) == float and type(self.alb_road) == float and \
+        type(self.d_road) == float and type(self.sensAnth) == float and \
+        type(self.latAnth) == float and type(self.bld) == type([]) and \
+        self.is_near_zero(len(self.bld)-16.0) and \
+        (type(self.zone) == float or type(self.zone) == int) and \
+        (type(self.vegStart) == float or type(self.vegStart) == int) and \
+        (type(self.vegEnd) == float or type(self.vegEnd) == int) and \
+        type(self.vegCover) == float and type(self.treeCoverage) == float and \
+        type(self.albVeg) == float and type(self.latGrss) == float and \
+        type(self.latTree) == float and type(self.rurVegCover) == float and \
+        type(self.kRoad) == float and type(self.cRoad) == float and \
+        type(self.SchTraffic) == type([]) and self.is_near_zero(len(self.SchTraffic)-3.0)
+
+        if not is_defined:
+            raise Exception("The required parameters have not been defined correctly. Check input parameters and try again.")
+
     def set_input(self):
         """Section 4 - Create UWG objects from input parameters
 
@@ -385,10 +420,12 @@ class UWG(object):
         # If a uwgParamFileName is set, then read inputs from .uwg file.
         # User-defined class properties will override the inputs from the .uwg file.
         if self.uwgParamFileName is not None:
-            print "Reading uwg file input."
+            print "\nReading uwg file input."
             self.read_input()
         else:
-            print "No .uwg file input, checking if required parameters exist."
+            print "\nNo .uwg file input."
+
+        self.check_inputs()
 
         # Modify zone to be used as python index
         self.zone = int(self.zone)-1
@@ -414,7 +451,6 @@ class UWG(object):
         self.UBL = UBLDef('C',self.charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
 
         # Defining road
-
         emis = 0.93
         asphalt = Material(self.kRoad,self.cRoad,'asphalt')
         road_T_init = 293.
@@ -564,7 +600,7 @@ class UWG(object):
         self.logger.info("Start simulation")
 
         # Start progress bar at zero
-        progress_bar.print_progress(0, 100.0, prefix = 'Simulation:', suffix = 'Complete', bar_length = 50)
+        progress_bar.print_progress(0, 100.0, prefix = "Progress:", bar_length = 25)
 
         for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
@@ -691,7 +727,7 @@ class UWG(object):
 
                 # Print progress bar
                 sim_it = round((it/float(self.simTime.nt))*100.0,1)
-                progress_bar.print_progress(sim_it, 100.0, prefix = 'Simulation:', suffix = 'Complete.', bar_length = 50)
+                progress_bar.print_progress(sim_it, 100.0, prefix = "Progress:", bar_length = 25)
 
                 n += 1
 
