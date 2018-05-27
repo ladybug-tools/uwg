@@ -96,6 +96,7 @@ class UWG(object):
 
     # File path parameter
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
+    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
     def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
 
@@ -111,6 +112,9 @@ class UWG(object):
         self.epwDir = epwDir if epwDir else os.path.join(self.RESOURCE_PATH, "epw")
         self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(self.RESOURCE_PATH,"parameters")
         self.destinationDir = destinationDir if destinationDir else os.path.join(self.RESOURCE_PATH,"epw_uwg")
+
+        # Serialized DOE reference data
+        self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
 
         # init UWG variables
         self._init_param_dict = None
@@ -329,7 +333,7 @@ class UWG(object):
         if self.latAnth is None: self.latAnth = ipd['latAnth']
 
         # climate Zone
-        if self.zone is None: self.zone = int(ipd['zone'])-1
+        if self.zone is None: self.zone = ipd['zone']
 
         # Vegetation parameters
         if self.vegCover is None: self.vegCover = ipd['vegCover']
@@ -381,7 +385,13 @@ class UWG(object):
         # If a uwgParamFileName is set, then read inputs from .uwg file.
         # User-defined class properties will override the inputs from the .uwg file.
         if self.uwgParamFileName is not None:
+            print "Reading uwg file input."
             self.read_input()
+        else:
+            print "No .uwg file input, checking if required parameters exist."
+
+        # Modify zone to be used as python index
+        self.zone = int(self.zone)-1
 
         climate_file_path = os.path.join(self.epwDir, self.epwFileName)
 
@@ -424,11 +434,10 @@ class UWG(object):
         self.rural._name = "rural_road"
 
         # Define BEM for each DOE type (read the fraction)
-        readDOE_file_path = os.path.join(self.RESOURCE_PATH,"readDOE.pkl")
-        if not os.path.exists(readDOE_file_path):
+        if not os.path.exists(self.readDOE_file_path):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
-        readDOE_file = open(readDOE_file_path, 'rb') # open pickle file in binary form
+        readDOE_file = open(self.readDOE_file_path, 'rb') # open pickle file in binary form
         refDOE = cPickle.load(readDOE_file)
         refBEM = cPickle.load(readDOE_file)
         refSchedule = cPickle.load(readDOE_file)
