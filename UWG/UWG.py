@@ -98,7 +98,7 @@ class UWG(object):
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
-    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None, epw_precision = 1):
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
@@ -115,6 +115,9 @@ class UWG(object):
 
         # Serialized DOE reference data
         self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
+
+        # EPW precision
+        self.epw_precision = epw_precision
 
         # init UWG variables
         self._init_param_dict = None
@@ -763,7 +766,7 @@ class UWG(object):
     def write_epw(self):
         """ Section 8 - Writing new EPW file
         """
-        epw_prec = 16 # precision of epw file input
+        epw_prec = self.epw_precision # precision of epw file input
 
         for iJ in xrange(len(self.UCMData)):
             # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw
