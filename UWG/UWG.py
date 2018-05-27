@@ -96,6 +96,7 @@ class UWG(object):
 
     # File path parameter
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
+    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
     def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
 
@@ -111,6 +112,9 @@ class UWG(object):
         self.epwDir = epwDir if epwDir else os.path.join(self.RESOURCE_PATH, "epw")
         self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(self.RESOURCE_PATH,"parameters")
         self.destinationDir = destinationDir if destinationDir else os.path.join(self.RESOURCE_PATH,"epw_uwg")
+
+        # Serialized DOE reference data
+        self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
 
         # init UWG variables
         self._init_param_dict = None
@@ -154,12 +158,8 @@ class UWG(object):
         self.sensAnth = None     # non-building sensible heat (W/m^2)
         self.latAnth = None      # non-building latent heat heat (W/m^2)
 
-        # Define optional Building characteristics
+        # Fraction of building typology stock
         self.bld = None         # 16x3 matrix of fraction of building type by era
-        self.albRoof = None     # roof albedo (0 - 1)
-        self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
-        self.glzR = None        # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
-        self.hvac = None        # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
         # climate Zone
         self.zone = None
@@ -180,6 +180,13 @@ class UWG(object):
         # Define Road (Assume 0.5m of asphalt)
         self.kRoad = None       # road pavement conductivity (W/m K)
         self.cRoad = None       # road volumetric heat capacity (J/m^3 K)
+
+        # Define optional Building characteristics
+        self.albRoof = None     # roof albedo (0 - 1)
+        self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
+        self.glzR = None        # Glazing Ratio
+        self.hvac = None        # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+
 
     def __repr__(self):
         return "UWG: {} ".format(self.epwFileName)
@@ -270,6 +277,19 @@ class UWG(object):
         count = 0
         while  count < len(uwg_param_data):
             row = uwg_param_data[count]
+            row = [row[i].replace(" ", "") for i in xrange(len(row))] # strip white spaces
+
+            # Optional parameters might be empty so handle separately
+            is_optional_parameter = (
+                row != [] and \
+                    (
+                    row[0] == "albRoof" or \
+                    row[0] == "vegRoof" or \
+                    row[0] == "glzR" or \
+                    row[0] == "hvac"
+                    )
+                )
+
             if row == [] or "#" in row[0]:
                 count += 1
                 continue
@@ -283,9 +303,12 @@ class UWG(object):
                 bldrows = uwg_param_data[count+1:count+17]
                 self._init_param_dict[row[0]] = map(lambda r: utilities.str2fl(r[:3]),bldrows)
                 count += 17
-            else:
+            elif is_optional_parameter:
+                self._init_param_dict[row[0]] = float(row[1]) if row[1] != "" else None
                 count += 1
+            else:
                 self._init_param_dict[row[0]] = float(row[1])
+                count += 1
 
         ipd = self._init_param_dict
 
@@ -329,7 +352,7 @@ class UWG(object):
         if self.latAnth is None: self.latAnth = ipd['latAnth']
 
         # climate Zone
-        if self.zone is None: self.zone = int(ipd['zone'])-1
+        if self.zone is None: self.zone = ipd['zone']
 
         # Vegetation parameters
         if self.vegCover is None: self.vegCover = ipd['vegCover']
@@ -348,12 +371,49 @@ class UWG(object):
         if self.kRoad is None: self.kRoad = ipd['kRoad']
         if self.cRoad is None: self.cRoad = ipd['cRoad']
 
-        #TODO: Include optional parameters from intialize.uwg here after testing
+        # Building stock fraction
         if self.bld is None: self.bld = ipd['bld']
+
+        # Optional parameters
         if self.albRoof is None: self.albRoof = ipd['albRoof']
         if self.vegRoof is None: self.vegRoof = ipd['vegRoof']
         if self.glzR is None: self.glzR = ipd['glzR']
         if self.hvac is None: self.hvac = ipd['hvac']
+
+    def check_inputs(self):
+        """Check if required inputs are set"""
+
+        # Required parameters
+        is_defined = (type(self.Month) == float or type(self.Month) == int) and \
+            (type(self.Day) == float or type(self.Day) == int) and \
+            (type(self.nDay) == float or type(self.nDay) == int) and \
+            type(self.dtSim) == float and type(self.dtWeather) == float and \
+            (type(self.autosize) == float or type(self.autosize) == int) and \
+            type(self.sensOcc) == float and type(self.LatFOcc) == float and \
+            type(self.RadFOcc) == float and type(self.RadFEquip) == float and \
+            type(self.RadFLight) == float and type(self.h_ubl1) == float and \
+            type(self.h_ubl2) == float and type(self.h_ref) == float and \
+            type(self.h_temp) == float and type(self.h_wind) == float and \
+            type(self.c_circ) == float and type(self.c_exch) == float and \
+            type(self.maxDay) == float and type(self.maxNight) == float and \
+            type(self.windMin) == float and type(self.h_obs) == float and \
+            type(self.bldHeight) == float and type(self.h_mix) == float and \
+            type(self.bldDensity) == float and type(self.verToHor) == float and \
+            type(self.charLength) == float and type(self.alb_road) == float and \
+            type(self.d_road) == float and type(self.sensAnth) == float and \
+            type(self.latAnth) == float and type(self.bld) == type([]) and \
+            self.is_near_zero(len(self.bld)-16.0) and \
+            (type(self.zone) == float or type(self.zone) == int) and \
+            (type(self.vegStart) == float or type(self.vegStart) == int) and \
+            (type(self.vegEnd) == float or type(self.vegEnd) == int) and \
+            type(self.vegCover) == float and type(self.treeCoverage) == float and \
+            type(self.albVeg) == float and type(self.latGrss) == float and \
+            type(self.latTree) == float and type(self.rurVegCover) == float and \
+            type(self.kRoad) == float and type(self.cRoad) == float and \
+            type(self.SchTraffic) == type([]) and self.is_near_zero(len(self.SchTraffic)-3.0)
+
+        if not is_defined:
+            raise Exception("The required parameters have not been defined correctly. Check input parameters and try again.")
 
     def set_input(self):
         """Section 4 - Create UWG objects from input parameters
@@ -381,7 +441,15 @@ class UWG(object):
         # If a uwgParamFileName is set, then read inputs from .uwg file.
         # User-defined class properties will override the inputs from the .uwg file.
         if self.uwgParamFileName is not None:
+            print "\nReading uwg file input."
             self.read_input()
+        else:
+            print "\nNo .uwg file input."
+
+        self.check_inputs()
+
+        # Modify zone to be used as python index
+        self.zone = int(self.zone)-1
 
         climate_file_path = os.path.join(self.epwDir, self.epwFileName)
 
@@ -404,7 +472,6 @@ class UWG(object):
         self.UBL = UBLDef('C',self.charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
 
         # Defining road
-
         emis = 0.93
         asphalt = Material(self.kRoad,self.cRoad,'asphalt')
         road_T_init = 293.
@@ -424,11 +491,10 @@ class UWG(object):
         self.rural._name = "rural_road"
 
         # Define BEM for each DOE type (read the fraction)
-        readDOE_file_path = os.path.join(self.RESOURCE_PATH,"readDOE.pkl")
-        if not os.path.exists(readDOE_file_path):
+        if not os.path.exists(self.readDOE_file_path):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
-        readDOE_file = open(readDOE_file_path, 'rb') # open pickle file in binary form
+        readDOE_file = open(self.readDOE_file_path, 'rb') # open pickle file in binary form
         refDOE = cPickle.load(readDOE_file)
         refBEM = cPickle.load(readDOE_file)
         refSchedule = cPickle.load(readDOE_file)
@@ -455,10 +521,18 @@ class UWG(object):
                     self.BEM[k].frac = self.bld[i][j]
                     self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
 
+                    # Overwrite with optional parameters if provided
+                    if self.glzR:
+                        self.BEM[k].building.glazingRatio = self.glzR
+                    if self.albRoof:
+                        self.BEM[k].roof.albedo = self.albRoof
+                    if self.vegRoof:
+                        self.BEM[k].roof.vegCoverage = self.vegRoof
+
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
-                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
+                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio ##
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
-                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
+                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
@@ -555,7 +629,7 @@ class UWG(object):
         self.logger.info("Start simulation")
 
         # Start progress bar at zero
-        progress_bar.print_progress(0, 100.0, prefix = 'Simulation:', suffix = 'Complete', bar_length = 50)
+        progress_bar.print_progress(0, 100.0, prefix = "Progress:", bar_length = 25)
 
         for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
@@ -682,7 +756,7 @@ class UWG(object):
 
                 # Print progress bar
                 sim_it = round((it/float(self.simTime.nt))*100.0,1)
-                progress_bar.print_progress(sim_it, 100.0, prefix = 'Simulation:', suffix = 'Complete.', bar_length = 50)
+                progress_bar.print_progress(sim_it, 100.0, prefix = "Progress:", bar_length = 25)
 
                 n += 1
 

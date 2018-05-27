@@ -19,11 +19,6 @@ class TestOutput(TestBase):
     """
     def compare_epw(self,matlab_fname,precision = 10.0):
 
-        self.uwg.set_input()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
         # shorten some variable names
         ti = self.uwg.simTime.timeInitial
         tf = self.uwg.simTime.timeFinal
@@ -56,7 +51,7 @@ class TestOutput(TestBase):
             tol = self.CALCULATE_TOLERANCE(pywtr.staUmod[i],precision)
             assert pywtr.staUmod[i] == pytest.approx(matwtr.staUmod[i], abs=tol), "error at index={}".format(i)
 
-    def test_uwg_output_heatdemand_1_1_0000(self):
+    def tXest_uwg_output_heatdemand_1_1_0000(self):
         """
         Initial conditions:
             - night time
@@ -66,16 +61,99 @@ class TestOutput(TestBase):
 
         self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
         self.uwg.nDay = 365
 
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
+
         self.compare_epw("CAN_ON_Toronto.716240_CWEC_heatdemand_UWG_Matlab.epw")#,precision=3.0)
 
-    def test_uwg_output_beijing(self):
+    def test_program_input(self):
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", None)
+
+        # Check some random variables
+        assert self.uwg.vegCover == None
+        assert self.uwg.treeCoverage == None
+        assert self.uwg.vegStart == None
+
+        # Assign manually
+        self.set_input_manually()
+
+        # main
+        self.uwg.read_epw()
+        self.uwg.set_input()
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
+
+        # Check some of the inputs
+
+        # Check building parameters
+        assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
+        assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
+
+        # Check that final day of timestep is at correct dayType
+        assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
+        assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
+
+        self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
+
+
+    def test_program_hybrid_input(self):
+        """ Testing inputting with api and with .uwg file"""
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
+
+        # Check some random variables
+        assert self.uwg.vegCover == None
+        assert self.uwg.treeCoverage == None
+        assert self.uwg.vegStart == None
+
+        # Assign manually
+        self.set_input_manually()
+
+        # Empty some parameters so that it can be defined by uwg file
+        # Urban characteristics
+        self.uwg.bldHeight = None
+        self.uwg.h_mix = None
+        self.uwg.bldDensity = None
+        self.uwg.verToHor = None
+        self.uwg.charLength = None
+        self.uwg.alb_road = None
+        self.uwg.d_road = None
+        self.uwg.sensAnth = None
+        self.uwg.latAnth = None
+
+        # main
+        self.uwg.read_epw()
+        self.uwg.set_input()
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
+
+        # Check some of the inputs
+
+        # Check building parameters
+        assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)
+        assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
+        assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
+
+        # Check that final day of timestep is at correct dayType
+        assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
+        assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
+
+        self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
+
+    def tXest_uwg_output_beijing(self):
         """
         Initial conditions:
             - day time
@@ -89,16 +167,21 @@ class TestOutput(TestBase):
             )
 
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
         self.uwg.nDay = 365
 
+        # main
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
+
         self.compare_epw("CHN_Beijing.Beijing.545110_IWEC_UWG_Matlab.epw")
 
-    def test_uwg_output_cooldemand_6_1_0000(self):
+    def tXest_uwg_output_cooldemand_6_1_0000(self):
         """
         Initial conditions:
             - day time
@@ -112,16 +195,21 @@ class TestOutput(TestBase):
         #self.uwg.logger.critical("Cool demand output")
 
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test 30 days in summer
         self.uwg.Month = 6
         self.uwg.Day = 1
         self.uwg.nDay = 30
 
+        # main
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
+
         self.compare_epw("CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw")
 
-    def test_uwg_output_cooldemand_1_1_0000(self):
+    def tXest_uwg_output_cooldemand_1_1_0000(self):
         """
         Initial conditions:
             - night time
@@ -130,12 +218,17 @@ class TestOutput(TestBase):
         """
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test all year
         self.uwg.Month = 1
         self.uwg.Day = 1
         self.uwg.nDay = 365
+
+        # main
+        self.uwg.hvac_autosize()
+        self.uwg.simulate()
+        self.uwg.write_epw()
 
         self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
 
