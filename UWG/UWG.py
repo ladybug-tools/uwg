@@ -98,7 +98,7 @@ class UWG(object):
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
-    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None, epw_precision = 1):
+    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
@@ -117,7 +117,7 @@ class UWG(object):
         self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
 
         # EPW precision
-        self.epw_precision = epw_precision
+        self.epw_precision = 1.
 
         # init UWG variables
         self._init_param_dict = None
