@@ -99,10 +99,6 @@ class TestBase(object):
             [0,0,0],    # SuperMarket
             [0,0,0]     # Warehouse
         ]
-        self.uwg.albRoof = .5
-        self.uwg.vegRoof = .1
-        self.uwg.glzR = .5
-        self.uwg.hvac = 0.0
 
         # climate Zone
         self.uwg.zone = 1.0
@@ -127,6 +123,9 @@ class TestBase(object):
         # Define Road (Assume 0.5m of asphalt)
         self.uwg.kRoad = 1.
         self.uwg.cRoad = 1600000.
+
+        # Optional parameters are not defined as they are already
+        # initialized as None
 
     def setup_open_matlab_ref(self, matlab_class_dir, matlab_ref_file_path):
         """ open the matlab reference file """

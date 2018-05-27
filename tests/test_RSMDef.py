@@ -105,9 +105,9 @@ class TestRSMDef(TestBase):
         self.uwg.read_input()
 
         # Test Jan 1 (winter, no vegetation coverage)
-        self.uwg.Month = 1.
-        self.uwg.Day = 1.
-        self.uwg.nDay = 1.
+        self.uwg.Month = 1
+        self.uwg.Day = 1
+        self.uwg.nDay = 1
 
         # set_input
         self.uwg.set_input()
