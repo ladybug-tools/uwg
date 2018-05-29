@@ -37,6 +37,9 @@ class TestBase(object):
 
         self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir, epw_precision = 16)
 
+        # Increase precision for testing
+        self.uwg.epw_precision = 16
+
     def set_input_manually(self):
 
         """Assign everything manually from ../resources/initialize_singapore.uwg"""

@@ -12,8 +12,9 @@ class TestSolarCalcs(TestBase):
 
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
+
 
         solar = UWG.SolarCalcs(self.uwg.UCM, self.uwg.BEM, self.uwg.simTime, self.uwg.RSM, \
             self.uwg.forc, self.uwg.geoParam, self.uwg.rural)
@@ -63,8 +64,8 @@ class TestSolarCalcs(TestBase):
 
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         # We subtract 11 hours from total timestep so
         # we can stop simulation while we still have sun!

@@ -15,9 +15,8 @@ class TestElement(TestBase):
         """
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
-
+        self.uwg.instantiate_input()
         # We subtract 30 days and 11 hours
         # New time: Jan 1, 1:00
         self.uwg.simTime.nt -= (30*24*12 + 23*12 + 11)
@@ -46,9 +45,8 @@ class TestElement(TestBase):
         """
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
-
+        self.uwg.instantiate_input()
         # We subtract 30 days and 11 hours
         # New time: Jan 1, 1:00
         self.uwg.simTime.nt -= (30*24*12 + 11*12)
@@ -79,9 +77,8 @@ class TestElement(TestBase):
         self.setup_uwg_integration()
 
         self.uwg.read_epw()
-        self.uwg.read_input()
-        #
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         # We subtract 23 hours and 55 minutes so we can test
         # initial timestep (1, 1, 300). New time: Jan 1, 5min
@@ -129,15 +126,13 @@ class TestElement(TestBase):
         self.setup_uwg_integration()
 
         self.uwg.read_epw()
-        self.uwg.read_input()
-
+        self.uwg.set_input()
         # Change time and vegCoverage parameters so we can get
         # effect of vegetation on surface heat flux
         self.uwg.vegStart = 2   # February
         self.uwg.nDay = 31 + 15 # February, 15
 
-        # run simulation
-        self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         # We subtract 11 hours from total timestep so still have sun. New time: 1300
         self.uwg.simTime.nt -= 12*11

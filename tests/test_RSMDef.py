@@ -37,8 +37,8 @@ class TestRSMDef(TestBase):
         """
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         # check date
         assert self.uwg.simTime.month == 1
@@ -102,16 +102,14 @@ class TestRSMDef(TestBase):
 
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test Jan 1 (winter, no vegetation coverage)
         self.uwg.Month = 1
         self.uwg.Day = 1
         self.uwg.nDay = 1
 
-        # set_input
-        self.uwg.set_input()
-
+        self.uwg.instantiate_input()
 
         # In order to avoid integration effects. Test only first time step
         # Subtract timestep to stop at 300 sec
@@ -160,16 +158,14 @@ class TestRSMDef(TestBase):
 
         self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw", uwg_param_file="initialize_toronto.uwg")
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         self.uwg.Month = 6
         self.uwg.Day = 1
         self.uwg.nDay = 30
 
-        # set_input
-        self.uwg.set_input()
-
         # Run simulation
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
 
