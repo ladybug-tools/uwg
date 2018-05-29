@@ -22,9 +22,8 @@ class TestSimParam(TestBase):
         self.setup_uwg_integration(uwg_param_file="initialize_singapore.uwg")
 
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
-
+        self.uwg.instantiate_input()
         # open matlab ref file
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_simparam","matlab_ref_simparam_init.txt")
 
@@ -65,10 +64,10 @@ class TestSimParam(TestBase):
         # dtWeather,3600, # weather time step (s)
 
         self.setup_uwg_integration(uwg_param_file="initialize_simparam.uwg")
-        
+
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
 

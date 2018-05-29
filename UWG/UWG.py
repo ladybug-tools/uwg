@@ -383,8 +383,18 @@ class UWG(object):
         if self.glzR is None: self.glzR = ipd['glzR']
         if self.hvac is None: self.hvac = ipd['hvac']
 
-    def check_inputs(self):
-        """Check if required inputs are set"""
+    def set_input(self):
+        """ Set inputs from .uwg input file if not already defined, the check if all
+        the required input parameters are there.
+        """
+
+        # If a uwgParamFileName is set, then read inputs from .uwg file.
+        # User-defined class properties will override the inputs from the .uwg file.
+        if self.uwgParamFileName is not None:
+            print "\nReading uwg file input."
+            self.read_input()
+        else:
+            print "\nNo .uwg file input."
 
         # Required parameters
         is_defined = (type(self.Month) == float or type(self.Month) == int) and \
@@ -418,7 +428,10 @@ class UWG(object):
         if not is_defined:
             raise Exception("The required parameters have not been defined correctly. Check input parameters and try again.")
 
-    def set_input(self):
+        # Modify zone to be used as python index
+        self.zone = int(self.zone)-1
+
+    def instantiate_input(self):
         """Section 4 - Create UWG objects from input parameters
 
             self.simTime            # simulation time parameter obj
@@ -440,19 +453,6 @@ class UWG(object):
             self.BEM                # list of BEMDef objects
             self.Sch                # list of Schedule objects
         """
-
-        # If a uwgParamFileName is set, then read inputs from .uwg file.
-        # User-defined class properties will override the inputs from the .uwg file.
-        if self.uwgParamFileName is not None:
-            print "\nReading uwg file input."
-            self.read_input()
-        else:
-            print "\nNo .uwg file input."
-
-        self.check_inputs()
-
-        # Modify zone to be used as python index
-        self.zone = int(self.zone)-1
 
         climate_file_path = os.path.join(self.epwDir, self.epwFileName)
 
@@ -800,6 +800,7 @@ class UWG(object):
         # run main class methods
         self.read_epw()
         self.set_input()
+        self.instantiate_input()
         self.hvac_autosize()
         self.simulate()
         self.write_epw()

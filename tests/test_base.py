@@ -38,7 +38,7 @@ class TestBase(object):
         self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir)
 
         # Increase precision for testing
-        self.uwg.epw_precision = 16.
+        self.uwg.epw_precision = 16
 
     def set_input_manually(self):
 

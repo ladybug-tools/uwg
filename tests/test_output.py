@@ -51,7 +51,7 @@ class TestOutput(TestBase):
             tol = self.CALCULATE_TOLERANCE(pywtr.staUmod[i],precision)
             assert pywtr.staUmod[i] == pytest.approx(matwtr.staUmod[i], abs=tol), "error at index={}".format(i)
 
-    def tXest_uwg_output_heatdemand_1_1_0000(self):
+    def test_uwg_output_heatdemand_1_1_0000(self):
         """
         Initial conditions:
             - night time
@@ -68,6 +68,7 @@ class TestOutput(TestBase):
         self.uwg.Day = 1
         self.uwg.nDay = 365
 
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()
@@ -88,6 +89,7 @@ class TestOutput(TestBase):
         # main
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()
@@ -135,6 +137,7 @@ class TestOutput(TestBase):
         # main
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()
@@ -153,7 +156,7 @@ class TestOutput(TestBase):
 
         self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
 
-    def tXest_uwg_output_beijing(self):
+    def test_uwg_output_beijing(self):
         """
         Initial conditions:
             - day time
@@ -175,13 +178,14 @@ class TestOutput(TestBase):
         self.uwg.nDay = 365
 
         # main
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()
 
         self.compare_epw("CHN_Beijing.Beijing.545110_IWEC_UWG_Matlab.epw")
 
-    def tXest_uwg_output_cooldemand_6_1_0000(self):
+    def test_uwg_output_cooldemand_6_1_0000(self):
         """
         Initial conditions:
             - day time
@@ -203,13 +207,14 @@ class TestOutput(TestBase):
         self.uwg.nDay = 30
 
         # main
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()
 
         self.compare_epw("CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw")
 
-    def tXest_uwg_output_cooldemand_1_1_0000(self):
+    def test_uwg_output_cooldemand_1_1_0000(self):
         """
         Initial conditions:
             - night time
@@ -226,6 +231,7 @@ class TestOutput(TestBase):
         self.uwg.nDay = 365
 
         # main
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
         self.uwg.write_epw()

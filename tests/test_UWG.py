@@ -44,6 +44,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         #test uwg param dictionary first and last
         assert self.uwg._init_param_dict.has_key('bldHeight') == True
@@ -107,6 +108,7 @@ class TestUWG(TestBase):
         # From blank inputs will be from DOE
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.38, abs=1e-15)
         assert self.uwg.BEM[0].roof.albedo == pytest.approx(0.2, abs=1e-15)
@@ -127,6 +129,7 @@ class TestUWG(TestBase):
         # From blank inputs will be from DOE
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
         assert self.uwg.BEM[0].roof.albedo == pytest.approx(0.5, abs=1e-15)
@@ -144,6 +147,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         #test a 0.5m road split into 10 slices of 0.05m
         # base case; min=0.01, max=0.05, stays the same
@@ -202,6 +206,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
 
         assert self.uwg.autosize == pytest.approx(0.0, abs=1e-3)
@@ -219,6 +224,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
 
