@@ -35,7 +35,7 @@ class TestBase(object):
         if log_file_name and log_level:
             self.setup_log_file(log_file_name, log_level)
 
-        self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir, epw_precision = 16)
+        self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir)
 
         # Increase precision for testing
         self.uwg.epw_precision = 16
