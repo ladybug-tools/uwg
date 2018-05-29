@@ -119,6 +119,7 @@ class UWG(object):
         # EPW precision
         self.epw_precision = 1
 
+
         # init UWG variables
         self._init_param_dict = None
 
