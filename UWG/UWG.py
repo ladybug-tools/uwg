@@ -117,7 +117,7 @@ class UWG(object):
         self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
 
         # EPW precision
-        self.epw_precision = 1.
+        self.epw_precision = 1
 
         # init UWG variables
         self._init_param_dict = None
