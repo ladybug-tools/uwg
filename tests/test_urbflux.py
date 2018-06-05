@@ -14,7 +14,7 @@ class TestUrbFlux(TestBase):
 
         self.setup_uwg_integration()
         self.uwg.read_epw()
-        self.uwg.read_input()
+        self.uwg.set_input()
 
         # Test Jan 1 (winter, no vegetation coverage)
         self.uwg.Month = 1
@@ -22,7 +22,7 @@ class TestUrbFlux(TestBase):
         self.uwg.nDay = 1
 
         # set_input
-        self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         # In order to avoid integration effects. Test only first time step
         # Subtract timestep to stop at 300 sec

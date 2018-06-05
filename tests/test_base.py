@@ -37,6 +37,99 @@ class TestBase(object):
 
         self.uwg = UWG.UWG(epw_file, uwg_param_file, epwDir=epw_dir, uwgParamDir=uwg_param_dir_, destinationDir=destination_dir)
 
+        # Increase precision for testing
+        self.uwg.epw_precision = 16
+
+    def set_input_manually(self):
+
+        """Assign everything manually from ../resources/initialize_singapore.uwg"""
+
+        # Define Simulation and Weather parameters
+        self.uwg.Month = 1.
+        self.uwg.Day = 1.
+        self.uwg.nDay = 31.
+        self.uwg.dtSim = 300.
+        self.uwg.dtWeather = 3600.
+
+        # HVAC system and internal laod
+        self.uwg.autosize = 0.
+        self.uwg.sensOcc = 100.
+        self.uwg.LatFOcc = 0.3
+        self.uwg.RadFOcc = 0.2
+        self.uwg.RadFEquip = 0.5
+        self.uwg.RadFLight = 0.7
+
+        # Define Urban microclimate parameters
+        self.uwg.h_ubl1 = 1000.
+        self.uwg.h_ubl2 = 80.
+        self.uwg.h_ref = 150.
+        self.uwg.h_temp = 2.
+        self.uwg.h_wind = 10.
+        self.uwg.c_circ = 1.2
+        self.uwg.c_exch = 1.
+        self.uwg.maxDay = 150.
+        self.uwg.maxNight = 20.
+        self.uwg.windMin = 1.
+        self.uwg.h_obs = 0.1
+
+        # Urban characteristics
+        self.uwg.bldHeight = 10.
+        self.uwg.h_mix = 1.
+        self.uwg.bldDensity = 0.5
+        self.uwg.verToHor = 0.8
+        self.uwg.charLength = 1000.
+        self.uwg.alb_road = 0.1
+        self.uwg.d_road = 0.5
+        self.uwg.sensAnth = 20.
+        self.uwg.latAnth = 2.
+
+        # Define optional Building characteristics
+        self.uwg.bld = [
+            [0,0,0],    # FullServiceRestaurant
+            [0,0,0],    # Hospital
+            [0,0,0],    # LargeHotel
+            [0,.4,0],   # LargeOffice
+            [0,0,0],    # MediumOffice
+            [0,.6,0],   # MidRiseApartment
+            [0,0,0],    # OutPatient
+            [0,0,0],    # PrimarySchool
+            [0,0,0],    # QuickServiceRestaurant
+            [0,0,0],    # SecondarySchool
+            [0,0,0],    # SmallHotel
+            [0,0,0],    # SmallOffice
+            [0,0,0],    # Stand-aloneRetail
+            [0,0,0],    # StripMall
+            [0,0,0],    # SuperMarket
+            [0,0,0]     # Warehouse
+        ]
+
+        # climate Zone
+        self.uwg.zone = 1.0
+
+        # Vegetation parameters
+        self.uwg.vegCover = 0.2
+        self.uwg.vegStart = 4.0
+        self.uwg.treeCoverage = 0.1
+        self.uwg.vegEnd = 10.0
+        self.uwg.albVeg = 0.25
+        self.uwg.latGrss = 0.4
+        self.uwg.latTree = 0.6
+        self.uwg.rurVegCover = 0.9
+
+        # Define Traffic schedule
+        self.uwg.SchTraffic = [
+            [0.2,0.2,0.2,0.2,0.2,0.4,0.7,0.9,0.9,0.6,0.6,0.6,0.6,0.6,0.7,0.8,0.9,0.9,0.8,0.8,0.7,0.3,0.2,0.2], # Weekday
+            [0.2,0.2,0.2,0.2,0.2,0.3,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.7,0.7,0.7,0.7,0.5,0.4,0.3,0.2,0.2], # Saturday
+            [0.2,0.2,0.2,0.2,0.2,0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.3,0.3,0.2,0.2]  # Sunday
+        ]
+
+        # Define Road (Assume 0.5m of asphalt)
+        self.uwg.kRoad = 1.
+        self.uwg.cRoad = 1600000.
+
+        # Optional parameters are not defined as they are already
+        # initialized as None
+
     def setup_open_matlab_ref(self, matlab_class_dir, matlab_ref_file_path):
         """ open the matlab reference file """
         def convert_type(x):
@@ -72,7 +165,7 @@ class TestBase(object):
 
         if log_level==None:
             log_level = logging.DEBUG # Default is set to debug for everything
-            
+
         logging.basicConfig(level=log_level,
                             filename=log_file_path,
                             filemode="w")

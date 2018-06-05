@@ -67,41 +67,45 @@ class UWG(object):
     """
 
     """ Section 1 - Definitions for constants / other parameters """
-    minThickness = 0.01    # Minimum layer thickness (to prevent crashing) (m)
-    maxThickness = 0.05    # Maximum layer thickness (m)
-    soilTcond = 1          # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
-    soilvolHeat = 2e6      # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf (average taken from Table 1)
-    soil = Material(soilTcond, soilvolHeat, name="soil")  # Soil material used for soil-depth padding
+    MINTHICKNESS = 0.01    # Minimum layer thickness (to prevent crashing) (m)
+    MAXTHICKNESS = 0.05    # Maximum layer thickness (m)
+    SOILTCOND = 1          # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
+    SOILVOLHEAT = 2e6      # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf (average taken from Table 1)
+    SOIL = Material(SOILTCOND, SOILVOLHEAT, name="soil")  # Soil material used for soil-depth padding
 
     # Physical constants
-    g = 9.81               # gravity (m s-2)
-    cp = 1004.             # heat capacity for air (J/kg K)
-    vk = 0.40              # von karman constant (dimensionless)
-    r = 287.               # gas constant dry air (J/kg K)
-    rv = 461.5             # gas constant water vapor (J/kg K)
-    lv = 2.26e6            # latent heat of evaporation (J/kg)
-    sigma = 5.67e-08       # Stefan Boltzmann constant (W m-2 K-4)
-    waterDens = 1000.      # water density (kg m-3)
-    lvtt = 2.5008e6        #
-    tt = 273.16            #
-    estt = 611.14          #
-    cl = 4.218e3           #
-    cpv = 1846.1           #
-    b = 9.4                # Coefficients derived by Louis (1979)
-    cm = 7.4               #
-    colburn = math.pow((0.713/0.621), (2/3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
+    G = 9.81               # gravity (m s-2)
+    CP = 1004.             # heat capacity for air (J/kg K)
+    VK = 0.40              # von karman constant (dimensionless)
+    R = 287.               # gas constant dry air (J/kg K)
+    RV = 461.5             # gas constant water vapor (J/kg K)
+    LV = 2.26e6            # latent heat of evaporation (J/kg)
+    SIGMA = 5.67e-08       # Stefan Boltzmann constant (W m-2 K-4)
+    WATERDENS = 1000.      # water density (kg m-3)
+    LVTT = 2.5008e6        #
+    TT = 273.16            #
+    ESTT = 611.14          #
+    CL = 4.218e3           #
+    CPV = 1846.1           #
+    B = 9.4                # Coefficients derived by Louis (1979)
+    CM = 7.4               #
+    COLBURN = math.pow((0.713/0.621), (2/3.)) # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
 
     # Site-specific parameters
-    wgmax = 0.005 # maximum film water depth on horizontal surfaces (m)
+    WGMAX = 0.005 # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
     RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
+    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
-    def __init__(self, epwFileName, uwgParamFileName, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+
+        # Logger will be disabled by default unless explicitly called in tests
+        self.logger = logging.getLogger(__name__)
 
         # User defined
         self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + '.epw' # Revise epw file name if not end with epw
-        self.uwgParamFileName = uwgParamFileName
+        self.uwgParamFileName = uwgParamFileName  # If file name is entered then will UWG will set input from .uwg file
 
         # If user does not overload
         self.destinationFileName = destinationFileName if destinationFileName else self.epwFileName.strip('.epw') + '_UWG.epw'
@@ -109,11 +113,84 @@ class UWG(object):
         self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(self.RESOURCE_PATH,"parameters")
         self.destinationDir = destinationDir if destinationDir else os.path.join(self.RESOURCE_PATH,"epw_uwg")
 
+        # Serialized DOE reference data
+        self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
+
+        # EPW precision
+        self.epw_precision = 1
+
+
         # init UWG variables
         self._init_param_dict = None
 
-        # Logger will be disabled by default unless explicitly called in tests
-        self.logger = logging.getLogger(__name__)
+        # Define Simulation and Weather parameters
+        self.Month = None        # starting month (1-12)
+        self.Day = None          # starting day (1-31)
+        self.nDay = None         # number of days
+        self.dtSim = None        # simulation time step (s)
+        self.dtWeather = None    # seconds (s)
+
+        # HVAC system and internal laod
+        self.autosize = None     # autosize HVAC (1 or 0)
+        self.sensOcc = None      # Sensible heat from occupant
+        self.LatFOcc = None      # Latent heat fraction from occupant (normally 0.3)
+        self.RadFOcc = None      # Radiant heat fraction from occupant (normally 0.2)
+        self.RadFEquip = None    # Radiant heat fraction from equipment (normally 0.5)
+        self.RadFLight = None    # Radiant heat fraction from light (normally 0.7)
+
+        # Define Urban microclimate parameters
+        self.h_ubl1 = None       # ubl height - day (m)
+        self.h_ubl2 = None       # ubl height - night (m)
+        self.h_ref = None        # inversion height
+        self.h_temp = None       # temperature height
+        self.h_wind = None       # wind height
+        self.c_circ = None       # circulation coefficient
+        self.c_exch = None       # exchange coefficient
+        self.maxDay = None       # max day threshhold
+        self.maxNight = None     # max night threshhold
+        self.windMin = None      # min wind speed (m/s)
+        self.h_obs = None        # rural average obstacle height
+
+        # Urban characteristics
+        self.bldHeight = None    # average building height (m)
+        self.h_mix = None        # mixing height (m)
+        self.bldDensity = None   # building density (0-1)
+        self.verToHor = None     # building aspect ratio
+        self.charLength = None   # radius defining the urban area of study [aka. characteristic length] (m)
+        self.alb_road = None     # road albedo
+        self.d_road = None       # road pavement thickness
+        self.sensAnth = None     # non-building sensible heat (W/m^2)
+        self.latAnth = None      # non-building latent heat heat (W/m^2)
+
+        # Fraction of building typology stock
+        self.bld = None         # 16x3 matrix of fraction of building type by era
+
+        # climate Zone
+        self.zone = None
+
+        # Vegetation parameters
+        self.vegCover = None     # urban area veg coverage ratio
+        self.treeCoverage = None # urban area tree coverage ratio
+        self.vegStart = None     # vegetation start month
+        self.vegEnd = None       # vegetation end month
+        self.albVeg = None       # Vegetation albedo
+        self.latGrss = None      # latent fraction of grass
+        self.latTree = None      # latent fraction of tree
+        self.rurVegCover = None  # rural vegetation cover
+
+        # Define Traffic schedule
+        self.SchTraffic = None
+
+        # Define Road (Assume 0.5m of asphalt)
+        self.kRoad = None       # road pavement conductivity (W/m K)
+        self.cRoad = None       # road volumetric heat capacity (J/m^3 K)
+
+        # Define optional Building characteristics
+        self.albRoof = None     # roof albedo (0 - 1)
+        self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
+        self.glzR = None        # Glazing Ratio
+        self.hvac = None        # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+
 
     def __repr__(self):
         return "UWG: {} ".format(self.epwFileName)
@@ -204,6 +281,19 @@ class UWG(object):
         count = 0
         while  count < len(uwg_param_data):
             row = uwg_param_data[count]
+            row = [row[i].replace(" ", "") for i in xrange(len(row))] # strip white spaces
+
+            # Optional parameters might be empty so handle separately
+            is_optional_parameter = (
+                row != [] and \
+                    (
+                    row[0] == "albRoof" or \
+                    row[0] == "vegRoof" or \
+                    row[0] == "glzR" or \
+                    row[0] == "hvac"
+                    )
+                )
+
             if row == [] or "#" in row[0]:
                 count += 1
                 continue
@@ -217,79 +307,132 @@ class UWG(object):
                 bldrows = uwg_param_data[count+1:count+17]
                 self._init_param_dict[row[0]] = map(lambda r: utilities.str2fl(r[:3]),bldrows)
                 count += 17
-            else:
+            elif is_optional_parameter:
+                self._init_param_dict[row[0]] = float(row[1]) if row[1] != "" else None
                 count += 1
+            else:
                 self._init_param_dict[row[0]] = float(row[1])
+                count += 1
 
         ipd = self._init_param_dict
 
         # Define Simulation and Weather parameters
-        self.Month = ipd['Month']                # starting month (1-12)
-        self.Day = ipd['Day']                    # starting day (1-31)
-        self.nDay = ipd['nDay']                  # number of days
-        self.dtSim = ipd['dtSim']                # simulation time step (s)
-        self.dtWeather = ipd['dtWeather']        # seconds (s)
+        if self.Month is None: self.Month = ipd['Month']
+        if self.Day is None: self.Day = ipd['Day']
+        if self.nDay is None: self.nDay = ipd['nDay']
+        if self.dtSim is None: self.dtSim = ipd['dtSim']
+        if self.dtWeather is None: self.dtWeather = ipd['dtWeather']
 
         # HVAC system and internal laod
-        self.autosize = ipd['autosize']          # autosize HVAC (1 or 0)
-        self.sensOcc = ipd['sensOcc']            # Sensible heat from occupant
-        self.LatFOcc = ipd['LatFOcc']            # Latent heat fraction from occupant (normally 0.3)
-        self.RadFOcc = ipd['RadFOcc']            # Radiant heat fraction from occupant (normally 0.2)
-        self.RadFEquip = ipd['RadFEquip']        # Radiant heat fraction from equipment (normally 0.5)
-        self.RadFLight = ipd['RadFLight']        # Radiant heat fraction from light (normally 0.7)
+        if self.autosize is None: self.autosize = ipd['autosize']
+        if self.sensOcc is None: self.sensOcc = ipd['sensOcc']
+        if self.LatFOcc is None: self.LatFOcc = ipd['LatFOcc']
+        if self.RadFOcc is None: self.RadFOcc = ipd['RadFOcc']
+        if self.RadFEquip is None: self.RadFEquip = ipd['RadFEquip']
+        if self.RadFLight is None: self.RadFLight = ipd['RadFLight']
 
         # Define Urban microclimate parameters
-        self.h_ubl1 = ipd['h_ubl1']              # ubl height - day (m)
-        self.h_ubl2 = ipd['h_ubl2']              # ubl height - night (m)
-        self.h_ref = ipd['h_ref']                # inversion height
-        self.h_temp = ipd['h_temp']              # temperature height
-        self.h_wind = ipd['h_wind']              # wind height
-        self.c_circ = ipd['c_circ']              # circulation coefficient
-        self.c_exch = ipd['c_exch']              # exchange coefficient
-        self.maxDay = ipd['maxDay']              # max day threshhold
-        self.maxNight = ipd['maxNight']          # max night threshhold
-        self.windMin = ipd['windMin']            # min wind speed (m/s)
-        self.h_obs = ipd['h_obs']                # rural average obstacle height
+        if self.h_ubl1 is None: self.h_ubl1 = ipd['h_ubl1']
+        if self.h_ubl2 is None: self.h_ubl2 = ipd['h_ubl2']
+        if self.h_ref is None: self.h_ref = ipd['h_ref']
+        if self.h_temp is None: self.h_temp = ipd['h_temp']
+        if self.h_wind is None: self.h_wind = ipd['h_wind']
+        if self.c_circ is None: self.c_circ = ipd['c_circ']
+        if self.c_exch is None: self.c_exch = ipd['c_exch']
+        if self.maxDay is None: self.maxDay = ipd['maxDay']
+        if self.maxNight is None: self.maxNight = ipd['maxNight']
+        if self.windMin is None: self.windMin = ipd['windMin']
+        if self.h_obs is None: self.h_obs = ipd['h_obs']
 
         # Urban characteristics
-        self.bldHeight = ipd['bldHeight']        # average building height (m)
-        self.h_mix = ipd['h_mix']                # mixing height (m)
-        self.bldDensity = ipd['bldDensity']      # building density (0-1)
-        self.verToHor = ipd['verToHor']          # building aspect ratio
-        self.charLength = ipd['charLength']      # radius defining the urban area of study [aka. characteristic length] (m)
-        self.alb_road = ipd['albRoad']           # road albedo
-        self.d_road = ipd['dRoad']               # road pavement thickness
-        self.sensAnth = ipd['sensAnth']          # non-building sensible heat (W/m^2)
-        self.latAnth = ipd['latAnth']            # non-building latent heat heat (W/m^2)
+        if self.bldHeight is None: self.bldHeight = ipd['bldHeight']
+        if self.h_mix is None: self.h_mix = ipd['h_mix']
+        if self.bldDensity is None: self.bldDensity = ipd['bldDensity']
+        if self.verToHor is None: self.verToHor = ipd['verToHor']
+        if self.charLength is None: self.charLength = ipd['charLength']
+        if self.alb_road is None: self.alb_road = ipd['albRoad']
+        if self.d_road is None: self.d_road = ipd['dRoad']
+        if self.sensAnth is None: self.sensAnth = ipd['sensAnth']
+        if self.latAnth is None: self.latAnth = ipd['latAnth']
 
         # climate Zone
-        self.zone = int(ipd['zone'])-1
+        if self.zone is None: self.zone = ipd['zone']
 
         # Vegetation parameters
-        self.vegCover = ipd['vegCover']          # urban area veg coverage ratio
-        self.treeCoverage = ipd['treeCoverage']  # urban area tree coverage ratio
-        self.vegStart = ipd['vegStart']          # vegetation start month
-        self.vegEnd = ipd['vegEnd']              # vegetation end month
-        self.albVeg = ipd['albVeg']              # Vegetation albedo
-        self.latGrss = ipd['latGrss']            # latent fraction of grass
-        self.latTree = ipd['latTree']            # latent fraction of tree
-        self.rurVegCover = ipd['rurVegCover']    # rural vegetation cover
+        if self.vegCover is None: self.vegCover = ipd['vegCover']
+        if self.treeCoverage is None: self.treeCoverage = ipd['treeCoverage']
+        if self.vegStart is None: self.vegStart = ipd['vegStart']
+        if self.vegEnd is None: self.vegEnd = ipd['vegEnd']
+        if self.albVeg is None: self.albVeg = ipd['albVeg']
+        if self.latGrss is None: self.latGrss = ipd['latGrss']
+        if self.latTree is None: self.latTree = ipd['latTree']
+        if self.rurVegCover is None: self.rurVegCover = ipd['rurVegCover']
 
         # Define Traffic schedule
-        self.SchTraffic = ipd['SchTraffic']
+        if self.SchTraffic is None: self.SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
-        self.kRoad = ipd['kRoad']                # road pavement conductivity (W/m K)
-        self.cRoad = ipd['cRoad']                # road volumetric heat capacity (J/m^3 K)
+        if self.kRoad is None: self.kRoad = ipd['kRoad']
+        if self.cRoad is None: self.cRoad = ipd['cRoad']
 
-        #TODO: Include optional parameters from intialize.uwg here after testing
-        self.bld = ipd['bld']                    # 16x3 matrix of fraction of building type by era
-        self.albRoof = ipd['albRoof']            # roof albedo (0 - 1)
-        self.vegRoof = ipd['vegRoof']            # Fraction of the roofs covered in grass/shrubs (0-1)
-        self.glzR = ipd['glzR']                  # Glazing Ratio. If not provided, all buildings are assumed to have 40% glazing ratio
-        self.hvac = ipd['hvac']                  # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+        # Building stock fraction
+        if self.bld is None: self.bld = ipd['bld']
+
+        # Optional parameters
+        if self.albRoof is None: self.albRoof = ipd['albRoof']
+        if self.vegRoof is None: self.vegRoof = ipd['vegRoof']
+        if self.glzR is None: self.glzR = ipd['glzR']
+        if self.hvac is None: self.hvac = ipd['hvac']
 
     def set_input(self):
+        """ Set inputs from .uwg input file if not already defined, the check if all
+        the required input parameters are there.
+        """
+
+        # If a uwgParamFileName is set, then read inputs from .uwg file.
+        # User-defined class properties will override the inputs from the .uwg file.
+        if self.uwgParamFileName is not None:
+            print "\nReading uwg file input."
+            self.read_input()
+        else:
+            print "\nNo .uwg file input."
+
+        # Required parameters
+        is_defined = (type(self.Month) == float or type(self.Month) == int) and \
+            (type(self.Day) == float or type(self.Day) == int) and \
+            (type(self.nDay) == float or type(self.nDay) == int) and \
+            type(self.dtSim) == float and type(self.dtWeather) == float and \
+            (type(self.autosize) == float or type(self.autosize) == int) and \
+            type(self.sensOcc) == float and type(self.LatFOcc) == float and \
+            type(self.RadFOcc) == float and type(self.RadFEquip) == float and \
+            type(self.RadFLight) == float and type(self.h_ubl1) == float and \
+            type(self.h_ubl2) == float and type(self.h_ref) == float and \
+            type(self.h_temp) == float and type(self.h_wind) == float and \
+            type(self.c_circ) == float and type(self.c_exch) == float and \
+            type(self.maxDay) == float and type(self.maxNight) == float and \
+            type(self.windMin) == float and type(self.h_obs) == float and \
+            type(self.bldHeight) == float and type(self.h_mix) == float and \
+            type(self.bldDensity) == float and type(self.verToHor) == float and \
+            type(self.charLength) == float and type(self.alb_road) == float and \
+            type(self.d_road) == float and type(self.sensAnth) == float and \
+            type(self.latAnth) == float and type(self.bld) == type([]) and \
+            self.is_near_zero(len(self.bld)-16.0) and \
+            (type(self.zone) == float or type(self.zone) == int) and \
+            (type(self.vegStart) == float or type(self.vegStart) == int) and \
+            (type(self.vegEnd) == float or type(self.vegEnd) == int) and \
+            type(self.vegCover) == float and type(self.treeCoverage) == float and \
+            type(self.albVeg) == float and type(self.latGrss) == float and \
+            type(self.latTree) == float and type(self.rurVegCover) == float and \
+            type(self.kRoad) == float and type(self.cRoad) == float and \
+            type(self.SchTraffic) == type([]) and self.is_near_zero(len(self.SchTraffic)-3.0)
+
+        if not is_defined:
+            raise Exception("The required parameters have not been defined correctly. Check input parameters and try again.")
+
+        # Modify zone to be used as python index
+        self.zone = int(self.zone)-1
+
+    def instantiate_input(self):
         """Section 4 - Create UWG objects from input parameters
 
             self.simTime            # simulation time parameter obj
@@ -326,14 +469,13 @@ class UWG(object):
 
         self.geoParam = Param(self.h_ubl1,self.h_ubl2,self.h_ref,self.h_temp,self.h_wind,self.c_circ,\
             self.maxDay,self.maxNight,self.latTree,self.latGrss,self.albVeg,self.vegStart,self.vegEnd,\
-            nightStart,nightEnd,self.windMin,self.wgmax,self.c_exch,maxdx,self.g,self.cp,self.vk,self.r,\
-            self.rv,self.lv,math.pi,self.sigma,self.waterDens,self.lvtt,self.tt,self.estt,self.cl,\
-            self.cpv,self.b, self.cm,self.colburn)
+            nightStart,nightEnd,self.windMin,self.WGMAX,self.c_exch,maxdx,self.G,self.CP,self.VK,self.R,\
+            self.RV,self.LV,math.pi,self.SIGMA,self.WATERDENS,self.LVTT,self.TT,self.ESTT,self.CL,\
+            self.CPV,self.B, self.CM, self.COLBURN)
 
         self.UBL = UBLDef('C',self.charLength, self.weather.staTemp[0], maxdx, self.geoParam.dayBLHeight, self.geoParam.nightBLHeight)
 
         # Defining road
-
         emis = 0.93
         asphalt = Material(self.kRoad,self.cRoad,'asphalt')
         road_T_init = 293.
@@ -353,11 +495,10 @@ class UWG(object):
         self.rural._name = "rural_road"
 
         # Define BEM for each DOE type (read the fraction)
-        readDOE_file_path = os.path.join(self.RESOURCE_PATH,"readDOE.pkl")
-        if not os.path.exists(readDOE_file_path):
+        if not os.path.exists(self.readDOE_file_path):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
-        readDOE_file = open(readDOE_file_path, 'rb') # open pickle file in binary form
+        readDOE_file = open(self.readDOE_file_path, 'rb') # open pickle file in binary form
         refDOE = cPickle.load(readDOE_file)
         refBEM = cPickle.load(readDOE_file)
         refSchedule = cPickle.load(readDOE_file)
@@ -384,10 +525,18 @@ class UWG(object):
                     self.BEM[k].frac = self.bld[i][j]
                     self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
 
+                    # Overwrite with optional parameters if provided
+                    if self.glzR:
+                        self.BEM[k].building.glazingRatio = self.glzR
+                    if self.albRoof:
+                        self.BEM[k].roof.albedo = self.albRoof
+                    if self.vegRoof:
+                        self.BEM[k].roof.vegCoverage = self.vegRoof
+
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
-                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
+                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio ##
                     SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
-                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo;
+                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo
                     # Add to schedule list
                     self.Sch.append(refSchedule[i][j][self.zone])
                     k += 1
@@ -404,7 +553,7 @@ class UWG(object):
         self.UCM.h_mix = self.h_mix
 
         # Define Road Element & buffer to match ground temperature depth
-        roadMat, newthickness = procMat(self.road,self.maxThickness,self.minThickness)
+        roadMat, newthickness = procMat(self.road,self.MAXTHICKNESS,self.MINTHICKNESS)
 
         for i in xrange(self.nSoil):
             # if soil depth is greater then the thickness of the road
@@ -414,8 +563,8 @@ class UWG(object):
 
             if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
-                    newthickness.append(self.maxThickness)
-                    roadMat.append(self.soil)
+                    newthickness.append(self.MAXTHICKNESS)
+                    roadMat.append(self.SOIL)
                 self.soilindex1 = i
                 break
 
@@ -423,7 +572,7 @@ class UWG(object):
             self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal, self.road._name)
 
         # Define Rural Element
-        ruralMat, newthickness = procMat(self.rural,self.maxThickness,self.minThickness)
+        ruralMat, newthickness = procMat(self.rural,self.MAXTHICKNESS,self.MINTHICKNESS)
 
         for i in xrange(self.nSoil):
             # if soil depth is greater then the thickness of the road
@@ -433,8 +582,8 @@ class UWG(object):
 
             if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
-                    newthickness.append(self.maxThickness)
-                    ruralMat.append(self.soil)
+                    newthickness.append(self.MAXTHICKNESS)
+                    ruralMat.append(self.SOIL)
 
                 self.soilindex2 = i
                 break
@@ -464,7 +613,6 @@ class UWG(object):
             self.UBLData            # Nx1 vector of UBL instance
             self.RSMData            # Nx1 vector of RSM instance
             self.USMData            # Nx1 vector of USM instance
-
         """
 
         self.N = int(self.simTime.days * 24)       # total number of hours in simulation
@@ -485,7 +633,7 @@ class UWG(object):
         self.logger.info("Start simulation")
 
         # Start progress bar at zero
-        progress_bar.print_progress(0, 100.0, prefix = 'Simulation:', suffix = 'Complete', bar_length = 50)
+        progress_bar.print_progress(0, 100.0, prefix = "Progress:", bar_length = 25)
 
         for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
@@ -566,7 +714,7 @@ class UWG(object):
                 self.BEM[i].T_roofin = self.BEM[i].roof.layerTemp[-1]
 
             # Update rural heat fluxes & update vertical diffusion model (VDM)
-            self.rural.infra = self.forc.infra - self.rural.emissivity * self.sigma * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
+            self.rural.infra = self.forc.infra - self.rural.emissivity * self.SIGMA * self.rural.layerTemp[0]**4.    # Infrared radiation from rural road
 
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime, self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
             self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
@@ -612,14 +760,14 @@ class UWG(object):
 
                 # Print progress bar
                 sim_it = round((it/float(self.simTime.nt))*100.0,1)
-                progress_bar.print_progress(sim_it, 100.0, prefix = 'Simulation:', suffix = 'Complete.', bar_length = 50)
+                progress_bar.print_progress(sim_it, 100.0, prefix = "Progress:", bar_length = 25)
 
                 n += 1
 
     def write_epw(self):
         """ Section 8 - Writing new EPW file
         """
-        epw_prec = 16 # precision of epw file input
+        epw_prec = self.epw_precision # precision of epw file input
 
         for iJ in xrange(len(self.UCMData)):
             # [iJ+self.simTime.timeInitial-8] = increments along every weather timestep in epw
@@ -652,8 +800,8 @@ class UWG(object):
 
         # run main class methods
         self.read_epw()
-        self.read_input()
         self.set_input()
+        self.instantiate_input()
         self.hvac_autosize()
         self.simulate()
         self.write_epw()

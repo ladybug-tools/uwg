@@ -14,10 +14,6 @@ class TestUWG(TestBase):
     """Test for UWG.py
     """
 
-    DIR_UP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    DIR_EPW_PATH = os.path.join(DIR_UP_PATH,"resources/epw")
-
-
     def test_read_epw(self):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
@@ -47,16 +43,16 @@ class TestUWG(TestBase):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         #test uwg param dictionary first and last
         assert self.uwg._init_param_dict.has_key('bldHeight') == True
         assert self.uwg._init_param_dict.has_key('h_obs') == True
-        #test values
+
         assert self.uwg._init_param_dict['bldHeight'] == pytest.approx(10., abs=1e-6)
         assert self.uwg._init_param_dict['vegEnd'] == pytest.approx(10, abs=1e-6)
-        assert self.uwg._init_param_dict['albRoof'] == pytest.approx(0.5, abs=1e-6)
+        assert self.uwg._init_param_dict['albRoof'] == None
         assert self.uwg._init_param_dict['h_ubl1'] == pytest.approx(1000., abs=1e-6)
         assert self.uwg._init_param_dict['h_ref'] == pytest.approx(150., abs=1e-6)
 
@@ -105,6 +101,43 @@ class TestUWG(TestBase):
         assert len(self.uwg.rural.layerThickness) == pytest.approx(11., abs=1e-15)
         assert self.uwg.rural.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
 
+    def test_optional_blank_parameters(self):
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
+
+        # From blank inputs will be from DOE
+        self.uwg.read_epw()
+        self.uwg.set_input()
+        self.uwg.instantiate_input()
+
+        assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.38, abs=1e-15)
+        assert self.uwg.BEM[0].roof.albedo == pytest.approx(0.2, abs=1e-15)
+        assert self.uwg.BEM[0].roof.vegCoverage == pytest.approx(0.0, abs=1e-15)
+        assert self.uwg.BEM[1].roof.albedo == pytest.approx(0.2, abs=1e-15)
+        assert self.uwg.BEM[1].building.glazingRatio == pytest.approx(0.1499, abs=1e-15)
+        assert self.uwg.BEM[1].roof.vegCoverage == pytest.approx(0.0, abs=1e-15)
+
+    def test_optional_inputted_parameters(self):
+
+        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", None)
+        self.set_input_manually()
+
+        self.uwg.albRoof = .5
+        self.uwg.vegRoof = .1
+        self.uwg.glzR = .5
+
+        # From blank inputs will be from DOE
+        self.uwg.read_epw()
+        self.uwg.set_input()
+        self.uwg.instantiate_input()
+
+        assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
+        assert self.uwg.BEM[0].roof.albedo == pytest.approx(0.5, abs=1e-15)
+        assert self.uwg.BEM[0].roof.vegCoverage == pytest.approx(0.1, abs=1e-15)
+        assert self.uwg.BEM[1].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
+        assert self.uwg.BEM[1].roof.albedo == pytest.approx(0.5, abs=1e-15)
+        assert self.uwg.BEM[1].roof.vegCoverage == pytest.approx(0.1, abs=1e-15)
+
     def test_procMat(self):
         """
         Test different max/min layer depths that generate different diffrent road layer
@@ -113,8 +146,8 @@ class TestUWG(TestBase):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
 
         #test a 0.5m road split into 10 slices of 0.05m
         # base case; min=0.01, max=0.05, stays the same
@@ -172,8 +205,8 @@ class TestUWG(TestBase):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
 
         assert self.uwg.autosize == pytest.approx(0.0, abs=1e-3)
@@ -190,8 +223,8 @@ class TestUWG(TestBase):
 
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
-        self.uwg.read_input()
         self.uwg.set_input()
+        self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
 
