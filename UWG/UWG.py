@@ -775,7 +775,7 @@ class UWG(object):
             self.epwinput[iJ+self.simTime.timeInitial-8][6] = "{0:.{1}f}".format(self.UCMData[iJ].canTemp - 273.15, epw_prec) # dry bulb temperature  [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][7] = "{0:.{1}f}".format(self.UCMData[iJ].Tdp, epw_prec)              # dew point temperature [?C]
             self.epwinput[iJ+self.simTime.timeInitial-8][8] = "{0:.{1}f}".format(self.UCMData[iJ].canRHum, epw_prec)          # relative humidity     [%]
-            self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(self.WeatherData[iJ].wind, epw_prec)        # wind speed [m/s]
+            self.epwinput[iJ+self.simTime.timeInitial-8][21] = "{0:.{1}f}".format(float(self.WeatherData[iJ].wind), epw_prec)        # wind speed [m/s]
 
         # Writing new EPW file
         epw_new_id = open(self.newPathName, "w")
