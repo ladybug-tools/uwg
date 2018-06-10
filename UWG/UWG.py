@@ -94,7 +94,7 @@ class UWG(object):
     WGMAX = 0.005 # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
-    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', "resources"))
+    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "resources"))
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
     def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
@@ -112,8 +112,9 @@ class UWG(object):
         self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(self.RESOURCE_PATH,"parameters")
         self.destinationDir = destinationDir if destinationDir else os.path.join(self.RESOURCE_PATH,"epw_uwg")
 
-        # Serialized DOE reference data
-        self.readDOE_file_path = os.path.join(self.CURRENT_PATH,"readDOE.pkl")
+        # refdata: Serialized DOE reference data, z_meso height data
+        self.readDOE_file_path = os.path.join(self.CURRENT_PATH, "refdata", "readDOE.pkl")
+        self.z_meso_dir_path = os.path.join(self.CURRENT_PATH, "refdata")
 
         # EPW precision
         self.epw_precision = 1
@@ -435,7 +436,7 @@ class UWG(object):
         # Modify zone to be used as python index
         self.zone = int(self.zone)-1
 
-    def instantiate_input(self):
+    def init_input_obj(self):
         """Section 4 - Create UWG objects from input parameters
 
             self.simTime            # simulation time parameter obj
@@ -539,7 +540,6 @@ class UWG(object):
                         self.BEM[k].building.shgc = self.SHGC
                     if self.albWall:
                         self.BEM[k].wall.albedo = self.albWall
-                    
 
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio ##
@@ -550,8 +550,8 @@ class UWG(object):
                     k += 1
 
         # Reference site class (also include VDM)
-        self.RSM = RSMDef(self.lat,self.lon,self.GMT,self.h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.RESOURCE_PATH)
-        self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.RESOURCE_PATH)
+        self.RSM = RSMDef(self.lat,self.lon,self.GMT,self.h_obs,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam,self.z_meso_dir_path)
+        self.USM = RSMDef(self.lat,self.lon,self.GMT,self.bldHeight/10.,self.weather.staTemp[0],self.weather.staPres[0],self.geoParam, self.z_meso_dir_path)
 
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
@@ -796,14 +796,14 @@ class UWG(object):
 
         epw_new_id.close()
 
-        print "\nNew climate file '{}' is generated at {}.".format(self.destinationFileName, self.destinationDir)
+        print "New climate file '{}' is generated at {}.".format(self.destinationFileName, self.destinationDir)
 
     def run(self):
 
         # run main class methods
         self.read_epw()
         self.set_input()
-        self.instantiate_input()
+        self.init_input_obj()
         self.hvac_autosize()
         self.simulate()
         self.write_epw()

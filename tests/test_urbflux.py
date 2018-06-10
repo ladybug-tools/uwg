@@ -22,7 +22,7 @@ class TestUrbFlux(TestBase):
         self.uwg.nDay = 1
 
         # set_input
-        self.uwg.instantiate_input()
+        self.uwg.init_input_obj()
 
         # In order to avoid integration effects. Test only first time step
         # Subtract timestep to stop at 300 sec
