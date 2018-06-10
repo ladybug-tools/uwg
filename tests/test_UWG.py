@@ -125,6 +125,8 @@ class TestUWG(TestBase):
         self.uwg.albRoof = .5
         self.uwg.vegRoof = .1
         self.uwg.glzR = .5
+        self.uwg.albWall = 0.91
+        self.uwg.SHGC = 0.65
 
         # From blank inputs will be from DOE
         self.uwg.read_epw()
@@ -137,6 +139,10 @@ class TestUWG(TestBase):
         assert self.uwg.BEM[1].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
         assert self.uwg.BEM[1].roof.albedo == pytest.approx(0.5, abs=1e-15)
         assert self.uwg.BEM[1].roof.vegCoverage == pytest.approx(0.1, abs=1e-15)
+        assert self.uwg.BEM[0].wall.albedo == pytest.approx(0.91, abs=1e-15)
+        assert self.uwg.BEM[0].wall.albedo == pytest.approx(0.91, abs=1e-15)
+        assert self.uwg.BEM[1].building.shgc == pytest.approx(0.65, abs=1e-15)
+        assert self.uwg.BEM[1].building.shgc == pytest.approx(0.65, abs=1e-15)
 
     def test_procMat(self):
         """

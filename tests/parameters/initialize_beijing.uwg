@@ -83,7 +83,8 @@ bld,
 albRoof,,  # roof albedo (0 - 1)
 vegRoof,,  # Fraction of the roofs covered in grass/shrubs (0 - 1)
 glzR,,     # Glazing Ratio (0 - 1)
-hvac,,     # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+SHGC,,     # Solar Heat Gain Coefficient (0 - 1)
+albWall,,  # wall albedo (0 - 1)
 
 # =================================================,
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,

@@ -112,9 +112,9 @@ class TestBase(object):
         self.uwg.treeCoverage = 0.1
         self.uwg.vegEnd = 10.0
         self.uwg.albVeg = 0.25
+        self.uwg.rurVegCover = 0.9
         self.uwg.latGrss = 0.4
         self.uwg.latTree = 0.6
-        self.uwg.rurVegCover = 0.9
 
         # Define Traffic schedule
         self.uwg.SchTraffic = [

@@ -41,12 +41,15 @@ latAnth,2,        # non-building latent heat (W/m^2) (currently not used)
 zone,1,
 
 # Vegetation parameters
+# Vegetation parameters
 vegCover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
 treeCoverage,0.1, # Fraction of the urban ground covered in trees (0-1)
 vegStart,4,       # The month in which vegetation starts to evapotranspire (leaves are out)
 vegEnd,10,        # The month in which vegetation stops evapotranspiring (leaves fall)
 albVeg,0.25,      # Vegetation albedo
 rurVegCover,0.9,  # Fraction of the rural ground covered by vegetation
+latGrss,0.4,      # Fraction of the heat absorbed by grass that is latent. Used in UWG only to calculate sensible heat fraction.
+latTree,0.6,      # Fraction of the heat absorbed by trees that is latent. Used in UWG only to calculate sensible heat fraction.
 
 # Traffic schedule [1 to 24 hour],
 SchTraffic,
@@ -81,6 +84,8 @@ bld,
 albRoof,,  # roof albedo (0 - 1)
 vegRoof,,  # Fraction of the roofs covered in grass/shrubs (0 - 1)
 glzR,,     # Glazing Ratio (0 - 1)
+SHGC,,     # Solar Heat Gain Coefficient (0 - 1)
+albWall,,  # wall albedo (0 - 1)
 
 # =================================================
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
