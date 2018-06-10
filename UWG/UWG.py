@@ -22,7 +22,6 @@ import cPickle
 import copy
 import utilities
 import logging
-import progress_bar
 
 from simparam import SimParam
 from weather import  Weather
@@ -174,9 +173,13 @@ class UWG(object):
         self.vegStart = None     # vegetation start month
         self.vegEnd = None       # vegetation end month
         self.albVeg = None       # Vegetation albedo
-        self.latGrss = None      # latent fraction of grass
-        self.latTree = None      # latent fraction of tree
         self.rurVegCover = None  # rural vegetation cover
+
+        # N.B latGrss and latTree parameters being removed from the .uwg file since
+        # JH removed the latent heat contibution of vegetation from the UWG engine.
+        # Proxy values are hard-coded, but will not effect resulting EPW.
+        self.latGrss = .4        # latent fraction of grass
+        self.latTree = .6        # latent fraction of tree
 
         # Define Traffic schedule
         self.SchTraffic = None
@@ -189,7 +192,12 @@ class UWG(object):
         self.albRoof = None     # roof albedo (0 - 1)
         self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
         self.glzR = None        # Glazing Ratio
-        self.hvac = None        # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
+        #self.SHGC = None        # Solar Heat Gain Coefficient
+        #self.albWall = None     # Wall albedo
+
+        # N.B hvac parameter is removed from the .uwg file as it has yet to be implemented.
+        # Proxy value of 0. is hard-coded, but will not effect resulting EPW.
+        self.hvac = 0.          # HVAC TYPE; 0 = Fully Conditioned (21C-24C); 1 = Mixed Mode Natural Ventilation (19C-29C + windows open >22C); 2 = Unconditioned (windows open >22C)
 
 
     def __repr__(self):
@@ -632,9 +640,6 @@ class UWG(object):
             int(self.nDay), int(self.Month), int(self.Day))
         self.logger.info("Start simulation")
 
-        # Start progress bar at zero
-        progress_bar.print_progress(0, 100.0, prefix = "Progress:", bar_length = 25)
-
         for it in range(1,self.simTime.nt,1):# for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
             if self.is_near_zero(self.nSoil):
@@ -758,9 +763,6 @@ class UWG(object):
                 self.logger.info("dpT = {}".format(self.UCMData[n].Tdp))
                 self.logger.info("RH  = {}".format(self.UCMData[n].canRHum))
 
-                # Print progress bar
-                sim_it = round((it/float(self.simTime.nt))*100.0,1)
-                progress_bar.print_progress(sim_it, 100.0, prefix = "Progress:", bar_length = 25)
 
                 n += 1
 
