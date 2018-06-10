@@ -75,11 +75,11 @@ class Element(object):
             b=len(self.layerThickness),
             c=sum(self.layerThickness)
             )
-        s2 = "e={d}, a={e}\n\tk_avg={f}, Cp*dens_avg={g}\n\tlayerTemp: {h}".format(
+        s2 = "e={d}, a={e}\n\tr_val={f}, Cp*dens_avg={g}\n\tlayerTemp: {h}".format(
             d=self.emissivity,
             e=self.albedo,
-            f=round(sum(self.layerThermalCond),2),
-            g=round(sum(self.layerVolHeat),2),
+            f=round(sum(self.layerThermalCond)/2.,2),
+            g=round(sum(self.layerVolHeat)/2.,2),
             h=self.layerTemp
             )
         return s1 + s2

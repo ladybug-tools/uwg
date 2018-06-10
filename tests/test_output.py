@@ -177,6 +177,7 @@ class TestOutput(TestBase):
         self.uwg.Day = 1
         self.uwg.nDay = 365
 
+
         # main
         self.uwg.instantiate_input()
         self.uwg.hvac_autosize()
