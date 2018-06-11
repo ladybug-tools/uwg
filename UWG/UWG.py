@@ -186,7 +186,7 @@ class UWG(object):
         self.cRoad = None       # road volumetric heat capacity (J/m^3 K)
 
         # Define optional Building characteristics
-		self.flr_h = None       # floor-to-floor height
+        self.flr_h = None       # floor-to-floor height
         self.albRoof = None     # roof albedo (0 - 1)
         self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
         self.glzR = None        # Glazing Ratio
