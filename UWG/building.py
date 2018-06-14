@@ -1,6 +1,9 @@
 
 from psychrometrics import psychrometrics, moist_air_density
 import logging
+from math import isnan
+import sys
+
 
 class Building(object):
     """
@@ -173,15 +176,27 @@ class Building(object):
         zac_in_wall = 3.076                             # wall heat convection coefficeint
         zac_in_mass = 3.076                             # mass heat convection coefficeint
 
-        #N.B may have to change to try/catch loop
-        if T_ceil > T_indoor:                           # set higher ceiling heat convection coefficient
-            zac_in_ceil  = 0.948                        # - based on heat is higher on ceiling
-        elif (T_ceil < T_indoor) or self.is_near_zero(T_ceil-T_indoor):
-            zac_in_ceil  = 4.040
-        else:
-            print T_ceil, T_indoor
+        # Check that T_ceil and T_indoor within reasonable bounds
+        converge_hi = 100.0 + 273.15
+        converge_lo = -50.0 + 273.15
+
+        try:
+            chk_tin = converge_lo <= T_indoor <= converge_hi
+            chk_tce = converge_lo <= T_ceil   <= converge_hi
+
+            if not chk_tin and chk_tce:
+                raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
+                sys.exit("Exiting UWG due to fatal error.")
+
+        except ValueError:
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
-            return
+            sys.exit("Exiting UWG due to fatal error.")
+
+        # If temperature is reasonable assign coefficients
+        if T_ceil > T_indoor:                             # set higher ceiling heat convection coefficient
+            zac_in_ceil  = 0.948                            # - based on heat is higher on ceiling
+        else:
+            zac_in_ceil  = 4.040
 
         # -------------------------------------------------------------
         # Heat fluxes (per m^2 of bld footprint)
