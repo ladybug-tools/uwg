@@ -541,6 +541,8 @@ class UWG(object):
                         self.BEM[k].building.shgc = self.SHGC
                     if self.albWall:
                         self.BEM[k].wall.albedo = self.albWall
+                    if self.flr_h:
+                        self.BEM[k].building.floorHeight = self.flr_h
 
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
                     r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio ##
