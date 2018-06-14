@@ -186,6 +186,7 @@ class UWG(object):
         self.cRoad = None       # road volumetric heat capacity (J/m^3 K)
 
         # Define optional Building characteristics
+        self.flr_h = None       # floor-to-floor height
         self.albRoof = None     # roof albedo (0 - 1)
         self.vegRoof = None     # Fraction of the roofs covered in grass/shrubs (0-1)
         self.glzR = None        # Glazing Ratio
@@ -513,7 +514,7 @@ class UWG(object):
         r_glaze = 0             # Glazing ratio for total building stock
         SHGC = 0                # SHGC addition for total building stock
         alb_wall = 0            # albedo wall addition for total building stock
-        h_floor = 3.05          # average floor height
+        h_floor = self.flr_h or 3.05 # average floor height
 
         total_urban_bld_area = math.pow(self.charLength,2)*self.bldDensity*self.bldHeight/h_floor  # total building floor area
         area_matrix = utilities.zeros(16,3)
