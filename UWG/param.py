@@ -46,7 +46,8 @@ class Param(object):
 
     def __repr__(self):
         b=self.treeFLat
-        return "Param w/ dayBLht {a}, treeFlat {b} ".format(
-            a=self.dayBLHeight,
-            b=self.treeFLat
+        return "geoParameter: dayBLht = {}m, nightBLht = {}m, station ht = {}m".format(
+            self.dayBLHeight,
+            self.nightBLHeight,
+            self.tempHeight
             )

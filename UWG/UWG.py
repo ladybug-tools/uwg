@@ -193,8 +193,33 @@ class UWG(object):
         self.SHGC = None       # Solar Heat Gain Coefficient
         self.albWall = None    # Wall albedo
 
+
+    def ToString(self):
+        """Overwrite .NET ToString method."""
+        return self.__repr__()
+
     def __repr__(self):
-        return "UWG: {} ".format(self.epwFileName)
+        def _print_tab(s):
+            s = s.split(":")
+            return s[0] + ":\n  " + s[1].replace(",","\n  ")
+        def _print_list(b):
+            return reduce(lambda a,b: a+"\n"+b, [_print_tab(_b.__repr__()) for _b in b])
+
+        return "UWG for {}:\n\n{}\n{}\n{}\n{}\nRural {}\nUrban {}\n{}\n{}".format(
+            self.epwFileName,
+            _print_tab(self.simTime.__repr__()),
+            _print_tab(self.weather.__repr__()),
+            _print_tab(self.geoParam.__repr__()),
+            _print_tab(self.UBL.__repr__()),
+            _print_tab(self.RSM.__repr__()),
+            _print_tab(self.USM.__repr__()),
+            _print_tab(self.UCM.__repr__()),
+            _print_list(self.BEM)
+            )
+            #pp self.BEM
+
+
+
 
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps

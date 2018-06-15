@@ -54,8 +54,8 @@ class Weather(object):
         self.staTemp = [s+273.15 for s in self.staTemp]                             # air temperature (K)
 
     def __repr__(self):
-        return "Weather: {a}, HI Tdb:{b}, HF Tdb:{c}".format(
-            a=self.location,
-            b=self.staTemp[0]-273.15,
-            c=self.staTemp[-1]-273.15
+        return "Weather: City = {}, Max Tdb = {}C, Min Tdb = {}C".format(
+            self.location,
+            max(self.staTemp)-273.15,
+            min(self.staTemp)-273.15
             )
