@@ -40,6 +40,12 @@ class UBLDef(object):
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
 
+    def __repr__(self):
+        return "UBL: urbArea {}m2, charLength {}m".format(
+            self.urbArea,
+            self.charLength
+            )
+
     def is_near_zero(self, num, eps=1e-14):
         return abs(float(num)) < eps
 

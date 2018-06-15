@@ -130,12 +130,14 @@ class UCMDef(object):
         self.Tdp = None
 
     def __repr__(self):
-        return "UCMDef: ver2Hor={b}, bldDens={c}, canyon H/W={a}/{d}={e}".format(
-            b=self.verToHor,
-            c=self.bldDensity,
-            a=int(self.bldHeight),
-            d=int(self.canWidth),
-            e=round(self.canAspect,1)
+        return "UCMDef: ver2Hor = {}, bldDens = {}, canyon H/W = {}/{}, canyon aspect ratio = {}, bld width = {}, roof Area = {}".format(
+            self.verToHor,
+            self.bldDensity,
+            int(self.bldHeight),
+            int(self.canWidth),
+            round(self.canAspect,1),
+            self.facArea,
+            self.roofArea
             )
 
     def UCModel(self,BEM,T_ubl,forc,parameter):
@@ -230,7 +232,7 @@ class UCMDef(object):
         # Sensible Heat
         # N.B In the current UWG code, latent heat from evapotranspiration, stagnant water,
         # or anthropogenic sources is not modelled due to the difficulty of validation, and
-        # lack of reliability of precipitation data from EPW files. 
+        # lack of reliability of precipitation data from EPW files.
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof
 
         # Error checking

@@ -39,7 +39,7 @@ class RSMDef(object):
     def __init__(self,lat,lon,GMT,height,T_init,P_init,parameter,z_meso_path):
 
         # defines self.z_meso property
-        self.load_z_meso(z_meso_path)   # TODO:look up in thesis and define z_meso
+        self.load_z_meso(z_meso_path)
 
         self.lat = lat                  # latitude (deg)
         self.lon = lon                  # longitude (deg)
@@ -120,8 +120,10 @@ class RSMDef(object):
         self.windProf = [1 for x in range(self.nzref)]
 
     def __repr__(self):
-        return "RSM: obstacle ht={a}".format(
-            a=self.height
+        return "RSM: obstacle ht = {}m, surface roughness length = {}m, displacement length = {}m".format(
+            self.height,
+            self.z0r,         # rural roughness length (m)
+            self.disp         # rural displacement lenght (m)
             )
 
     def is_near_zero(self,num,eps=1e-16):

@@ -39,9 +39,9 @@ class BEMDef(object):
         self.frac = frac            # fraction of the urban floor space of this typology (~ bld_footprint/urba_footprint ?)
 
     def __repr__(self):
-        return "BEMDef: {a}, {b}, {c}, wall={d}".format(
-            a=self.building.Type,
-            b=self.building.Zone,
-            c=self.building.Era,
-            d=self.wall._name
+        return "BEMDef: Type = {}, Zone = {}, Era = {}, Construction = {}".format(
+            self.building.Type,
+            self.building.Zone,
+            self.building.Era,
+            self.wall._name
             )
