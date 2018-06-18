@@ -119,7 +119,6 @@ class UWG(object):
         # EPW precision
         self.epw_precision = 1
 
-
         # init UWG variables
         self._init_param_dict = None
 
@@ -199,27 +198,24 @@ class UWG(object):
         return self.__repr__()
 
     def __repr__(self):
-        def _print_tab(s):
-            s = s.split(":")
+        def _split_string(s):
             return s[0] + ":\n  " + s[1].replace(",","\n  ")
-        def _print_list(b):
-            return reduce(lambda a,b: a+"\n"+b, [_print_tab(_b.__repr__()) for _b in b])
+        def _tabbed(s):
+            return _split_string(s.__repr__().split(":"))
+        def _list_2_tabbed(b):
+            return reduce(lambda a,b: a+"\n"+b, [_tabbed(_b) for _b in b])
 
-        return "UWG for {}:\n\n{}\n{}\n{}\n{}\nRural {}\nUrban {}\n{}\n{}".format(
+        return "UWG for {}:\n\n{}{}{}{}{}{}{}{}".format(
             self.epwFileName,
-            _print_tab(self.simTime.__repr__()),
-            _print_tab(self.weather.__repr__()),
-            _print_tab(self.geoParam.__repr__()),
-            _print_tab(self.UBL.__repr__()),
-            _print_tab(self.RSM.__repr__()),
-            _print_tab(self.USM.__repr__()),
-            _print_tab(self.UCM.__repr__()),
-            _print_list(self.BEM)
+            _tabbed(self.simTime)+"\n" if hasattr(self,"simTime") else "No simTime attr.\n",
+            _tabbed(self.weather)+"\n" if hasattr(self,"weather") else "No weather attr.\n",
+            _tabbed(self.geoParam)+"\n" if hasattr(self,"geoParam") else "No geoParam attr.\n",
+            _tabbed(self.UBL)+"\n" if hasattr(self,"UBL") else "No UBL attr.\n",
+            "Rural "+_tabbed(self.RSM)+"\n" if hasattr(self,"RSM") else "No Rural RSM attr.\n",
+            "Urban "+_tabbed(self.USM)+"\n" if hasattr(self,"USM") else "No Urban RSM attr.\n",
+            _tabbed(self.UCM)+"\n" if hasattr(self,"UCM") else "No UCM attr.\n",
+            _list_2_tabbed(self.BEM) if hasattr(self,"BEM") else "No BEM attr."
             )
-            #pp self.BEM
-
-
-
 
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
