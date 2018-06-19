@@ -103,13 +103,12 @@ def readDOE(serialize_output=True):
     """
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
-    refDOE = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refDOE(16,3,16) = Building;
-    Schedule = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)   #Schedule (16,3,16) = SchDef;
-    refBEM = map(lambda j_: map (lambda k_: [None]*16,[None]*3), [None]*16)     #refBEM (16,3,16) = BEMDef;
-
+    refDOE   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refDOE(16,3,16) = Building
+    Schedule = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #Schedule (16,3,16) = SchDef
+    refBEM   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refBEM (16,3,16) = BEMDef
+    
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
-
     for i in xrange(16):
 
         #i = 16 types of buildings
