@@ -13,8 +13,3 @@ __pycache__/
 
 #logs
 *.log
-
-#epw
-resources/epw
-resources/epw_uwg
-resources/parameters
