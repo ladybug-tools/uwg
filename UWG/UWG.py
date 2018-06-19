@@ -207,14 +207,14 @@ class UWG(object):
 
         return "UWG for {}:\n\n{}{}{}{}{}{}{}{}".format(
             self.epwFileName,
-            _tabbed(self.simTime)+"\n" if hasattr(self,"simTime") else "No simTime attr.\n",
-            _tabbed(self.weather)+"\n" if hasattr(self,"weather") else "No weather attr.\n",
-            _tabbed(self.geoParam)+"\n" if hasattr(self,"geoParam") else "No geoParam attr.\n",
-            _tabbed(self.UBL)+"\n" if hasattr(self,"UBL") else "No UBL attr.\n",
-            "Rural "+_tabbed(self.RSM)+"\n" if hasattr(self,"RSM") else "No Rural RSM attr.\n",
-            "Urban "+_tabbed(self.USM)+"\n" if hasattr(self,"USM") else "No Urban RSM attr.\n",
-            _tabbed(self.UCM)+"\n" if hasattr(self,"UCM") else "No UCM attr.\n",
-            _list_2_tabbed(self.BEM) if hasattr(self,"BEM") else "No BEM attr."
+            _tabbed(self.simTime)+"\n" if hasattr(self, "simTime") else "No simTime attr.\n",
+            _tabbed(self.weather)+"\n" if hasattr(self, "weather") else "No weather attr.\n",
+            _tabbed(self.geoParam)+"\n" if hasattr(self, "geoParam") else "No geoParam attr.\n",
+            _tabbed(self.UBL)+"\n" if hasattr(self, "UBL") else "No UBL attr.\n",
+            "Rural "+_tabbed(self.RSM)+"\n" if hasattr(self, "RSM") else "No Rural RSM attr.\n",
+            "Urban "+_tabbed(self.USM)+"\n" if hasattr(self, "USM") else "No Urban RSM attr.\n",
+            _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
+            _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr."
             )
 
     def is_near_zero(self,num,eps=1e-10):
@@ -520,6 +520,8 @@ class UWG(object):
         self.rural.vegCoverage = self.rurVegCover
         self.rural._name = "rural_road"
 
+        ### Move this class seperate
+
         # Define BEM for each DOE type (read the fraction)
         if not os.path.exists(self.readDOE_file_path):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
@@ -529,7 +531,7 @@ class UWG(object):
         refBEM = cPickle.load(readDOE_file)
         refSchedule = cPickle.load(readDOE_file)
         readDOE_file.close()
-
+        
         # Define building energy models
         k = 0
         r_glaze = 0             # Glazing ratio for total building stock

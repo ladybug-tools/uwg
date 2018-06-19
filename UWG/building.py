@@ -193,7 +193,7 @@ class Building(object):
             sys.exit("Exiting UWG due to fatal error.")
 
         # If temperature is reasonable assign coefficients
-        if T_ceil > T_indoor:                             # set higher ceiling heat convection coefficient
+        if T_ceil > T_indoor:                               # set higher ceiling heat convection coefficient
             zac_in_ceil  = 0.948                            # - based on heat is higher on ceiling
         else:
             zac_in_ceil  = 4.040
