@@ -227,7 +227,8 @@ class UWG(object):
             "Urban "+_tabbed(self.USM)+"\n" if hasattr(self, "USM") else "No Urban RSM attr.\n",
             _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
             _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr."
-
+            )
+            
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
