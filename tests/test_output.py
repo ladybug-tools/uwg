@@ -68,6 +68,7 @@ class TestOutput(TestBase):
         self.uwg.Day = 1
         self.uwg.nDay = 365
 
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
@@ -89,6 +90,7 @@ class TestOutput(TestBase):
         # main
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
@@ -137,6 +139,7 @@ class TestOutput(TestBase):
         # main
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
@@ -179,6 +182,7 @@ class TestOutput(TestBase):
 
 
         # main
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
@@ -208,6 +212,7 @@ class TestOutput(TestBase):
         self.uwg.nDay = 30
 
         # main
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
@@ -232,6 +237,7 @@ class TestOutput(TestBase):
         self.uwg.nDay = 365
 
         # main
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()

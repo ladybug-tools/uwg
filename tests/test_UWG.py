@@ -44,6 +44,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         #test uwg param dictionary first and last
@@ -108,6 +109,7 @@ class TestUWG(TestBase):
         # From blank inputs will be from DOE
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.38, abs=1e-15)
@@ -132,6 +134,7 @@ class TestUWG(TestBase):
         # From blank inputs will be from DOE
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         assert self.uwg.BEM[0].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
@@ -153,6 +156,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         #test a 0.5m road split into 10 slices of 0.05m
@@ -212,6 +216,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
 
@@ -230,6 +235,7 @@ class TestUWG(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()

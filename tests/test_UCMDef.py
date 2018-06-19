@@ -16,6 +16,7 @@ class TestUCMDef(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # Get uwg_python values
@@ -74,6 +75,7 @@ class TestUCMDef(TestBase):
         self.uwg.nDay = 1
 
         # set_input
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
 

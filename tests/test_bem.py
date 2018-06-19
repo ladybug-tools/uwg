@@ -15,6 +15,7 @@ class TestBEM(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         uwg_python_val = [
@@ -77,6 +78,7 @@ class TestBEM(TestBase):
         self.uwg.nDay = 1
 
         # set_input
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # In order to avoid integration effects. Test only first time step

@@ -38,6 +38,7 @@ class TestRSMDef(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # check date
@@ -109,6 +110,7 @@ class TestRSMDef(TestBase):
         self.uwg.Day = 1
         self.uwg.nDay = 1
 
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # In order to avoid integration effects. Test only first time step
@@ -165,6 +167,7 @@ class TestRSMDef(TestBase):
         self.uwg.nDay = 30
 
         # Run simulation
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()

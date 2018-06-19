@@ -16,6 +16,7 @@ class TestElement(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         # We subtract 30 days and 11 hours
         # New time: Jan 1, 1:00
@@ -46,6 +47,7 @@ class TestElement(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         # We subtract 30 days and 11 hours
         # New time: Jan 1, 1:00
@@ -78,6 +80,7 @@ class TestElement(TestBase):
 
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # We subtract 23 hours and 55 minutes so we can test
@@ -132,6 +135,7 @@ class TestElement(TestBase):
         self.uwg.vegStart = 2   # February
         self.uwg.nDay = 31 + 15 # February, 15
 
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # We subtract 11 hours from total timestep so still have sun. New time: 1300

@@ -13,6 +13,7 @@ class TestSolarCalcs(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
 
@@ -65,6 +66,7 @@ class TestSolarCalcs(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # We subtract 11 hours from total timestep so

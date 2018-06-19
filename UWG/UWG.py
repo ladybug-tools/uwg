@@ -228,7 +228,7 @@ class UWG(object):
             _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
             _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr."
             )
-            
+
     def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
@@ -354,122 +354,73 @@ class UWG(object):
         ipd = self._init_param_dict
 
         # Define Simulation and Weather parameters
-        if self.Month is None:
-            self.Month = ipd['Month']
-        if self.Day is None:
-            self.Day = ipd['Day']
-        if self.nDay is None:
-            self.nDay = ipd['nDay']
-        if self.dtSim is None:
-            self.dtSim = ipd['dtSim']
-        if self.dtWeather is None:
-            self.dtWeather = ipd['dtWeather']
+        if self.Month is None: self.Month = ipd['Month']
+        if self.Day is None: self.Day = ipd['Day']
+        if self.nDay is None: self.nDay = ipd['nDay']
+        if self.dtSim is None: self.dtSim = ipd['dtSim']
+        if self.dtWeather is None: self.dtWeather = ipd['dtWeather']
 
         # HVAC system and internal laod
-        if self.autosize is None:
-            self.autosize = ipd['autosize']
-        if self.sensOcc is None:
-            self.sensOcc = ipd['sensOcc']
-        if self.LatFOcc is None:
-            self.LatFOcc = ipd['LatFOcc']
-        if self.RadFOcc is None:
-            self.RadFOcc = ipd['RadFOcc']
-        if self.RadFEquip is None:
-            self.RadFEquip = ipd['RadFEquip']
-        if self.RadFLight is None:
-            self.RadFLight = ipd['RadFLight']
+        if self.autosize is None: self.autosize = ipd['autosize']
+        if self.sensOcc is None: self.sensOcc = ipd['sensOcc']
+        if self.LatFOcc is None: self.LatFOcc = ipd['LatFOcc']
+        if self.RadFOcc is None: self.RadFOcc = ipd['RadFOcc']
+        if self.RadFEquip is None: self.RadFEquip = ipd['RadFEquip']
+        if self.RadFLight is None: self.RadFLight = ipd['RadFLight']
 
         # Define Urban microclimate parameters
-        if self.h_ubl1 is None:
-            self.h_ubl1 = ipd['h_ubl1']
-        if self.h_ubl2 is None:
-            self.h_ubl2 = ipd['h_ubl2']
-        if self.h_ref is None:
-            self.h_ref = ipd['h_ref']
-        if self.h_temp is None:
-            self.h_temp = ipd['h_temp']
-        if self.h_wind is None:
-            self.h_wind = ipd['h_wind']
-        if self.c_circ is None:
-            self.c_circ = ipd['c_circ']
-        if self.c_exch is None:
-            self.c_exch = ipd['c_exch']
-        if self.maxDay is None:
-            self.maxDay = ipd['maxDay']
-        if self.maxNight is None:
-            self.maxNight = ipd['maxNight']
-        if self.windMin is None:
-            self.windMin = ipd['windMin']
-        if self.h_obs is None:
-            self.h_obs = ipd['h_obs']
+        if self.h_ubl1 is None: self.h_ubl1 = ipd['h_ubl1']
+        if self.h_ubl2 is None: self.h_ubl2 = ipd['h_ubl2']
+        if self.h_ref is None: self.h_ref = ipd['h_ref']
+        if self.h_temp is None: self.h_temp = ipd['h_temp']
+        if self.h_wind is None: self.h_wind = ipd['h_wind']
+        if self.c_circ is None: self.c_circ = ipd['c_circ']
+        if self.c_exch is None: self.c_exch = ipd['c_exch']
+        if self.maxDay is None: self.maxDay = ipd['maxDay']
+        if self.maxNight is None: self.maxNight = ipd['maxNight']
+        if self.windMin is None: self.windMin = ipd['windMin']
+        if self.h_obs is None: self.h_obs = ipd['h_obs']
 
         # Urban characteristics
-        if self.bldHeight is None:
-            self.bldHeight = ipd['bldHeight']
-        if self.h_mix is None:
-            self.h_mix = ipd['h_mix']
-        if self.bldDensity is None:
-            self.bldDensity = ipd['bldDensity']
-        if self.verToHor is None:
-            self.verToHor = ipd['verToHor']
-        if self.charLength is None:
-            self.charLength = ipd['charLength']
-        if self.alb_road is None:
-            self.alb_road = ipd['albRoad']
-        if self.d_road is None:
-            self.d_road = ipd['dRoad']
-        if self.sensAnth is None:
-            self.sensAnth = ipd['sensAnth']
-        if self.latAnth is None:
-            self.latAnth = ipd['latAnth']
+        if self.bldHeight is None: self.bldHeight = ipd['bldHeight']
+        if self.h_mix is None: self.h_mix = ipd['h_mix']
+        if self.bldDensity is None: self.bldDensity = ipd['bldDensity']
+        if self.verToHor is None: self.verToHor = ipd['verToHor']
+        if self.charLength is None: self.charLength = ipd['charLength']
+        if self.alb_road is None: self.alb_road = ipd['albRoad']
+        if self.d_road is None: self.d_road = ipd['dRoad']
+        if self.sensAnth is None: self.sensAnth = ipd['sensAnth']
+        if self.latAnth is None: self.latAnth = ipd['latAnth']
 
         # climate Zone
-        if self.zone is None:
-            self.zone = ipd['zone']
+        if self.zone is None: self.zone = ipd['zone']
 
         # Vegetation parameters
-        if self.vegCover is None:
-            self.vegCover = ipd['vegCover']
-        if self.treeCoverage is None:
-            self.treeCoverage = ipd['treeCoverage']
-        if self.vegStart is None:
-            self.vegStart = ipd['vegStart']
-        if self.vegEnd is None:
-            self.vegEnd = ipd['vegEnd']
-        if self.albVeg is None:
-            self.albVeg = ipd['albVeg']
-        if self.rurVegCover is None:
-            self.rurVegCover = ipd['rurVegCover']
-        if self.latGrss is None:
-            self.latGrss = ipd['latGrss']
-        if self.latTree is None:
-            self.latTree = ipd['latTree']
+        if self.vegCover is None: self.vegCover = ipd['vegCover']
+        if self.treeCoverage is None: self.treeCoverage = ipd['treeCoverage']
+        if self.vegStart is None: self.vegStart = ipd['vegStart']
+        if self.vegEnd is None: self.vegEnd = ipd['vegEnd']
+        if self.albVeg is None: self.albVeg = ipd['albVeg']
+        if self.rurVegCover is None: self.rurVegCover = ipd['rurVegCover']
+        if self.latGrss is None: self.latGrss = ipd['latGrss']
+        if self.latTree is None: self.latTree = ipd['latTree']
 
         # Define Traffic schedule
-        if self.SchTraffic is None:
-            self.SchTraffic = ipd['SchTraffic']
+        if self.SchTraffic is None: self.SchTraffic = ipd['SchTraffic']
 
         # Define Road (Assume 0.5m of asphalt)
-        if self.kRoad is None:
-            self.kRoad = ipd['kRoad']
-        if self.cRoad is None:
-            self.cRoad = ipd['cRoad']
+        if self.kRoad is None: self.kRoad = ipd['kRoad']
+        if self.cRoad is None: self.cRoad = ipd['cRoad']
 
         # Building stock fraction
-        if self.bld is None:
-            self.bld = ipd['bld']
+        if self.bld is None: self.bld = ipd['bld']
 
         # Optional parameters
-        if self.albRoof is None:
-            self.albRoof = ipd['albRoof']
-        if self.vegRoof is None:
-            self.vegRoof = ipd['vegRoof']
-        if self.glzR is None:
-            self.glzR = ipd['glzR']
-        if self.albWall is None:
-            self.albWall = ipd['albWall']
-        if self.SHGC is None:
-            self.SHGC = ipd['SHGC']
+        if self.albRoof is None: self.albRoof = ipd['albRoof']
+        if self.vegRoof is None: self.vegRoof = ipd['vegRoof']
+        if self.glzR is None: self.glzR = ipd['glzR']
+        if self.albWall is None: self.albWall = ipd['albWall']
+        if self.SHGC is None: self.SHGC = ipd['SHGC']
 
     def set_input(self):
         """ Set inputs from .uwg input file if not already defined, the check if all
@@ -520,6 +471,68 @@ class UWG(object):
         # Modify zone to be used as python index
         self.zone = int(self.zone)-1
 
+    def init_BEM_obj(self):
+        """
+        Define BEM for each DOE type (read the fraction)
+        self.BEM                # list of BEMDef objects
+        self.r_glaze            # Glazing ratio for total building stock
+        self.SHGC               # SHGC addition for total building stock
+        self.alb_wall           # albedo wall addition for total building stock
+        """
+
+        if not os.path.exists(self.readDOE_file_path):
+            raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
+
+        readDOE_file = open(self.readDOE_file_path, 'rb')  # open pickle file in binary form
+        refDOE = cPickle.load(readDOE_file)
+        refBEM = cPickle.load(readDOE_file)
+        refSchedule = cPickle.load(readDOE_file)
+        readDOE_file.close()
+
+        # Define building energy models
+        k = 0
+        self.r_glaze_total = 0.             # Glazing ratio for total building stock
+        self.SHGC_total = 0.                # SHGC addition for total building stock
+        self.alb_wall_total = 0.            # albedo wall addition for total building stock
+        h_floor = self.flr_h or 3.05  # average floor height
+
+        total_urban_bld_area = math.pow(self.charLength, 2)*self.bldDensity * \
+            self.bldHeight/h_floor  # total building floor area
+        area_matrix = utilities.zeros(16, 3)
+
+        self.BEM = []           # list of BEMDef objects
+        self.Sch = []           # list of Schedule objects
+
+        for i in xrange(16):    # 16 building types
+            for j in xrange(3):  # 3 built eras
+                if self.bld[i][j] > 0.:
+                    # Add to BEM list
+                    self.BEM.append(refBEM[i][j][self.zone])
+                    self.BEM[k].frac = self.bld[i][j]
+                    self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
+
+                    # Overwrite with optional parameters if provided
+                    if self.glzR:
+                        self.BEM[k].building.glazingRatio = self.glzR
+                    if self.albRoof:
+                        self.BEM[k].roof.albedo = self.albRoof
+                    if self.vegRoof:
+                        self.BEM[k].roof.vegCoverage = self.vegRoof
+                    if self.SHGC:
+                        self.BEM[k].building.shgc = self.SHGC
+                    if self.albWall:
+                        self.BEM[k].wall.albedo = self.albWall
+                    if self.flr_h:
+                        self.BEM[k].building.floorHeight = self.flr_h
+
+                    # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
+                    self.r_glaze_total += self.BEM[k].frac * self.BEM[k].building.glazingRatio
+                    self.SHGC_total += self.BEM[k].frac * self.BEM[k].building.shgc
+                    self.alb_wall_total += self.BEM[k].frac * self.BEM[k].wall.albedo
+                    # Add to schedule list
+                    self.Sch.append(refSchedule[i][j][self.zone])
+                    k += 1
+
     def init_input_obj(self):
         """Section 4 - Create UWG objects from input parameters
 
@@ -538,8 +551,6 @@ class UWG(object):
 
             self.soilindex1         # soil index for urban rsoad depth
             self.soilindex2         # soil index for rural road depth
-
-            self.BEM                # list of BEMDef objects
             self.Sch                # list of Schedule objects
         """
 
@@ -587,62 +598,6 @@ class UWG(object):
         self.rural.vegCoverage = self.rurVegCover
         self.rural._name = "rural_road"
 
-        ### Move this class seperate
-
-        # Define BEM for each DOE type (read the fraction)
-        if not os.path.exists(self.readDOE_file_path):
-            raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
-
-        readDOE_file = open(self.readDOE_file_path, 'rb')  # open pickle file in binary form
-        refDOE = cPickle.load(readDOE_file)
-        refBEM = cPickle.load(readDOE_file)
-        refSchedule = cPickle.load(readDOE_file)
-        readDOE_file.close()
-
-        # Define building energy models
-        k = 0
-        r_glaze = 0             # Glazing ratio for total building stock
-        SHGC = 0                # SHGC addition for total building stock
-        alb_wall = 0            # albedo wall addition for total building stock
-        h_floor = self.flr_h or 3.05  # average floor height
-
-        total_urban_bld_area = math.pow(self.charLength, 2)*self.bldDensity * \
-            self.bldHeight/h_floor  # total building floor area
-        area_matrix = utilities.zeros(16, 3)
-
-        self.BEM = []           # list of BEMDef objects
-        self.Sch = []           # list of Schedule objects
-
-        for i in xrange(16):    # 16 building types
-            for j in xrange(3):  # 3 built eras
-                if self.bld[i][j] > 0.:
-                    # Add to BEM list
-                    self.BEM.append(refBEM[i][j][self.zone])
-                    self.BEM[k].frac = self.bld[i][j]
-                    self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
-
-                    # Overwrite with optional parameters if provided
-                    if self.glzR:
-                        self.BEM[k].building.glazingRatio = self.glzR
-                    if self.albRoof:
-                        self.BEM[k].roof.albedo = self.albRoof
-                    if self.vegRoof:
-                        self.BEM[k].roof.vegCoverage = self.vegRoof
-                    if self.SHGC:
-                        self.BEM[k].building.shgc = self.SHGC
-                    if self.albWall:
-                        self.BEM[k].wall.albedo = self.albWall
-                    if self.flr_h:
-                        self.BEM[k].building.floorHeight = self.flr_h
-
-                    # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
-                    r_glaze = r_glaze + self.BEM[k].frac * self.BEM[k].building.glazingRatio
-                    SHGC = SHGC + self.BEM[k].frac * self.BEM[k].building.shgc
-                    alb_wall = alb_wall + self.BEM[k].frac * self.BEM[k].wall.albedo
-                    # Add to schedule list
-                    self.Sch.append(refSchedule[i][j][self.zone])
-                    k += 1
-
         # Reference site class (also include VDM)
         self.RSM = RSMDef(self.lat, self.lon, self.GMT, self.h_obs,
                           self.weather.staTemp[0], self.weather.staPres[0], self.geoParam, self.z_meso_dir_path)
@@ -653,7 +608,7 @@ class UWG(object):
         H_init = self.weather.staHum[0]
 
         self.UCM = UCMDef(self.bldHeight, self.bldDensity, self.verToHor, self.treeCoverage, self.sensAnth, self.latAnth, T_init, H_init,
-                          self.weather.staUmod[0], self.geoParam, r_glaze, SHGC, alb_wall, self.road)
+                          self.weather.staUmod[0], self.geoParam, self.r_glaze_total, self.SHGC_total, self.alb_wall_total, self.road)
         self.UCM.h_mix = self.h_mix
 
         # Define Road Element & buffer to match ground temperature depth
@@ -937,6 +892,7 @@ class UWG(object):
         # run main class methods
         self.read_epw()
         self.set_input()
+        self.init_BEM_obj()
         self.init_input_obj()
         self.hvac_autosize()
         self.simulate()
