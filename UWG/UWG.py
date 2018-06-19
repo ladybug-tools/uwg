@@ -227,9 +227,8 @@ class UWG(object):
             "Urban "+_tabbed(self.USM)+"\n" if hasattr(self, "USM") else "No Urban RSM attr.\n",
             _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
             _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr."
-        )
 
-    def is_near_zero(self, num, eps=1e-10):
+    def is_near_zero(self,num,eps=1e-10):
         return abs(float(num)) < eps
 
     def read_epw(self):
@@ -579,13 +578,15 @@ class UWG(object):
         # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         thickness_vector = [0.05 for r in xrange(road_layer_num)]
         material_vector = [asphalt for r in xrange(road_layer_num)]
-        
+
         self.road = Element(self.alb_road, emis, thickness_vector, material_vector, road_veg_coverage,
                             road_T_init, road_horizontal, name="urban_road")
 
         self.rural = copy.deepcopy(self.road)
         self.rural.vegCoverage = self.rurVegCover
         self.rural._name = "rural_road"
+
+        ### Move this class seperate
 
         # Define BEM for each DOE type (read the fraction)
         if not os.path.exists(self.readDOE_file_path):
