@@ -44,9 +44,9 @@ class Element(object):
             self.albedo = alb                                       # outer surface albedo
             self.emissivity = emis                                  # outer surface emissivity
             self.layerThickness = thicknessLst                      # vector of layer thicnesses (m)
-            self.layerThermalCond = map(lambda z: 0, materialLst)   # vector of layer thermal conductivity (W m-1 K-1)
-            self.layerVolHeat = map(lambda z: 0, materialLst)       # vector of layer volumetric heat (J m-3 K-1)
-
+            self.layerThermalCond = [0. for i in materialLst]       # vector of layer thermal conductivity (W m-1 K-1)
+            self.layerVolHeat = [0. for i in materialLst]           # vector of layer volumetric heat (J m-3 K-1)
+            
             # Create list of layer k and (Cp*density) from materialLst properties
             for i in xrange(len(materialLst)):
               self.layerThermalCond[i] = materialLst[i].thermalCond

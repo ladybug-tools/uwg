@@ -1,5 +1,6 @@
 import math
 import logging
+from utilities import sign
 
 class SolarCalcs(object):
     """
@@ -199,9 +200,9 @@ class SolarCalcs(object):
                 self.tanzen = math.tan(0.5*math.pi+1e-6);
 
         elif (abs(self.zenith) <  1e-6):
-            #TODO: Need to translate sign(1.,zenith) from matlab
-            raise Exception("Error at zenith calc.")
-            #tanzen = sign(1.,zenith)*math.tan(1e-6);
+            raise Exception("Error at sign calculation.")
+            #self.tanzen = sign(1., zenith)*math.tan(1e-6)
+
         else:
             self.tanzen = math.tan(self.zenith)
 

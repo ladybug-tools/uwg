@@ -16,12 +16,26 @@ def read_csv(file_name_):
     if os.path.exists(file_name_):
         file_ = open(file_name_,"r")
         gen_ = csv_reader(file_, delimiter=",")
-        L = map(lambda r: r,gen_)
+        L = [r for r in gen_]
         file_.close()
         return L
     else:
         raise Exception("File name: '{}' does not exist.".format(file_name_))
 
+def is_near_zero(num, eps=1e-10):
+    return abs(num) < eps
+
+def sign(x):
+    """ https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.sign.html """
+    # TODO: unfinished numpy sign
+    if is_near_zero(x):
+        return 0.0
+    elif x < 0.0:
+        return -1.0
+    elif x > 0:
+        return 1.0
+    else:
+        raise Exception("Error at sign calculation.")
 
 def str2fl(x):
     """Recurses through lists and converts lists of string to float
