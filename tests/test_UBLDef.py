@@ -16,6 +16,7 @@ class TestUBLDef(TestBase):
         self.setup_uwg_integration()
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # Get uwg_python values
@@ -54,6 +55,7 @@ class TestUBLDef(TestBase):
         self.uwg.nDay = 1
 
         # set_input
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
         # In order to avoid integration effects. Test only first time step

@@ -23,6 +23,7 @@ class TestSimParam(TestBase):
 
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         # open matlab ref file
         uwg_matlab_val = self.setup_open_matlab_ref("matlab_simparam","matlab_ref_simparam_init.txt")
@@ -67,6 +68,7 @@ class TestSimParam(TestBase):
 
         self.uwg.read_epw()
         self.uwg.set_input()
+        self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
         self.uwg.hvac_autosize()
         self.uwg.simulate()
