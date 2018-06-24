@@ -1,6 +1,5 @@
 import math
 import logging
-from utilities import sign
 
 class SolarCalcs(object):
     """
