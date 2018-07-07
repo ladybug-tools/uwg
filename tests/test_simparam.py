@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 import math
 import pprint
@@ -10,7 +10,7 @@ class TestSimParam(TestBase):
     def test_uwg_simparam_matlab_init(self):
         """ Matlab value comparison for simparam initialization in main uwg """
 
-        # Initialize UWG from default initialize.uwg for 31 days simulation
+        # Initialize uwg from default initialize.uwg for 31 days simulation
         # Jan 1 00:00 - Feb 1 00:00
 
         # Month,1,        # starting month (1-12)
@@ -55,7 +55,7 @@ class TestSimParam(TestBase):
     def test_uwg_simparam_matlab_update_date(self):
         """ Matlab value comparison for simparam UpdateDate function in main uwg """
 
-        # Initialize UWG from initialize_simparam.uwg for 150 day simulation
+        # Initialize uwg from initialize_simparam.uwg for 150 day simulation
         # Mar 15 00:00 - Aug 12th, 00:00
 
         # Month,3,        # starting month (1-12)
@@ -102,7 +102,7 @@ class TestSimParam(TestBase):
         DAY = 30                # Begin day of the month
         NUM_DAYS = 7            # Number of days of simulation
 
-        simTime = UWG.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+        simTime = uwg.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
 
         # Simulation Parameters tests
         assert simTime.timeSim == pytest.approx(168, abs=1e-6)

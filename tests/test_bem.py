@@ -1,7 +1,7 @@
 import pytest
 import os
 import math
-import UWG
+import uwg
 from test_base import TestBase
 import pprint
 

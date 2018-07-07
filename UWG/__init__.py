@@ -18,12 +18,12 @@ from readDOE import readDOE
 from infracalcs import infracalcs
 from urbflux import urbflux
 
-from UWG import UWG #from UWG.py import class UWG
-from UWG import procMat
+from uwg import uwg
+from uwg import procMat
 
 
 __all__ = [
-    "UWG",
+    "uwg",
     "utilities",
     "material",
     "element",

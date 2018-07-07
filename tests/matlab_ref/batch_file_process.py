@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
 """
 ARCHIVE_RSM_VDM:
-self.uwg.rural.aeroCond        # Convection coef (refL UWG, eq.12)
+self.uwg.rural.aeroCond        # Convection coef (refL uwg, eq.12)
 self.uwg.rural.waterStorage    # thickness of water film (m) (only for horizontal surfaces)
 self.uwg.rural.solAbs          # solar radiation absorbed (W m-2)
 self.uwg.rural.lat             # surface latent heat flux (W m-2)

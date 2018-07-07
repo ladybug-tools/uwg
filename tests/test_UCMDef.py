@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 import math
 import pprint
@@ -93,7 +93,7 @@ class TestUCMDef(TestBase):
         assert self.uwg.simTime.day == 1
         assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
-        # Get UWG values
+        # Get uwg values
         uwg_python_val = [
             # heat load building
             self.uwg.UCM.Q_wall,        # convective sensible heat flux from building roof

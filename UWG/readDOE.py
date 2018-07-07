@@ -106,7 +106,7 @@ def readDOE(serialize_output=True):
     refDOE   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refDOE(16,3,16) = Building
     Schedule = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #Schedule (16,3,16) = SchDef
     refBEM   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refBEM (16,3,16) = BEMDef
-    
+
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
     for i in xrange(16):
@@ -350,7 +350,7 @@ def readDOE(serialize_output=True):
     if serialize_output:
 
         # create a binary file for serialized obj
-        pkl_file_path = os.path.join(DIR_CURR,'..','resources','readDOE.pkl')
+        pkl_file_path = os.path.join(DIR_CURR,'refdata','readDOE.pkl')
         pickle_readDOE = open(pkl_file_path, 'wb')
 
         # dump in ../resources

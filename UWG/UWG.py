@@ -1,6 +1,6 @@
 """
 =========================================================================
- THE URBAN WEATHER GENERATOR (UWG)
+ THE URBAN WEATHER GENERATOR (uwg)
 =========================================================================
 Version 4.2
 
@@ -9,7 +9,7 @@ Edited by A. Nakano & Lingfu Zhang
 Modified by Joseph Yang (joeyang@mit.edu) - May, 2016
 Translated to Python by Saeran Vasanthakumar - February, 2018
 
-Original Pulbication on the UWG's Methods:
+Original Pulbication on the uwg's Methods:
 Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2013).
 The urban weather generator, Journal of Building Performance Simulation. 6:4,269-281.
 doi: 10.1080/19401493.2012.718797
@@ -48,14 +48,14 @@ from urbflux import urbflux
 #dd = Decimal.from_float
 
 
-class UWG(object):
+class uwg(object):
     """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
 
     args:
         epwDir: The directory in which the rural EPW file sits.
         epwFileName: The name of the rural epw file that will be morphed.
-        uwgParamDir: The directory in which the UWG Parameter File (.uwg) sits.
-        uwgParamFileName: The name of the UWG Parameter File (.uwg).
+        uwgParamDir: The directory in which the uwg Parameter File (.uwg) sits.
+        uwgParamFileName: The name of the uwg Parameter File (.uwg).
         destinationDir: Optional destination directory for the morphed EPW file.
             If left blank, the morphed file will be written into the same directory
             as the rural EPW file (the epwDir).
@@ -110,7 +110,7 @@ class UWG(object):
         # User defined
         self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + \
             '.epw'  # Revise epw file name if not end with epw
-        # If file name is entered then will UWG will set input from .uwg file
+        # If file name is entered then will uwg will set input from .uwg file
         self.uwgParamFileName = uwgParamFileName
 
         # If user does not overload
@@ -129,7 +129,7 @@ class UWG(object):
         # EPW precision
         self.epw_precision = 1
 
-        # init UWG variables
+        # init uwg variables
         self._init_param_dict = None
 
         # Define Simulation and Weather parameters
@@ -217,7 +217,7 @@ class UWG(object):
         def _list_2_tabbed(b):
             return reduce(lambda a, b: a+"\n"+b, [_tabbed(_b) for _b in b])
 
-        return "UWG for {}:\n\n{}{}{}{}{}{}{}{}".format(
+        return "uwg for {}:\n\n{}{}{}{}{}{}{}{}".format(
             self.epwFileName,
             _tabbed(self.simTime)+"\n" if hasattr(self, "simTime") else "No simTime attr.\n",
             _tabbed(self.weather)+"\n" if hasattr(self, "weather") else "No weather attr.\n",
@@ -534,7 +534,7 @@ class UWG(object):
                     k += 1
 
     def init_input_obj(self):
-        """Section 4 - Create UWG objects from input parameters
+        """Section 4 - Create uwg objects from input parameters
 
             self.simTime            # simulation time parameter obj
             self.weather            # weather obj for simulation time period
@@ -659,7 +659,7 @@ class UWG(object):
                 self.BEM[i].building.heatCap = 9999.
 
     def simulate(self):
-        """ Section 7 - UWG main section
+        """ Section 7 - uwg main section
 
             self.N                  # Total hours in simulation
             self.ph                 # per hour
@@ -813,7 +813,7 @@ class UWG(object):
 
             """
             # Experimental code to run diffusion model in the urban area
-            # N.B Commented out in python UWG because computed wind speed in
+            # N.B Commented out in python uwg because computed wind speed in
             # urban VDM: y = =0.84*ln((2-x/20)/0.51) results in negative log
             # for building heights >= 40m.
 
@@ -928,7 +928,7 @@ def procMat(materials, max_thickness, min_thickness):
 
     else:
 
-        # Divide single layer into two (UWG assumes at least 2 layers)
+        # Divide single layer into two (uwg assumes at least 2 layers)
         if materials.layerThickness[0] > max_thickness:
             nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
             for i in xrange(int(nlayers)):
