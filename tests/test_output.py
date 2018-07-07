@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 import math
 import pprint
@@ -27,8 +27,8 @@ class TestOutput(TestBase):
         matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",
             matlab_fname)
 
-        pywtr = UWG.weather.Weather(self.uwg.newPathName, ti, tf)
-        matwtr = UWG.weather.Weather(matlab_path_name, ti, tf)
+        pywtr = uwg.weather.Weather(self.uwg.newPathName, ti, tf)
+        matwtr = uwg.weather.Weather(matlab_path_name, ti, tf)
         #epwwtr = self.uwg.weather # for reference only
 
         assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)

@@ -141,7 +141,7 @@ class UCMDef(object):
             )
 
     def UCModel(self,BEM,T_ubl,forc,parameter):
-        # Calculate the urban canyon temperature per The UWG (2012) Eq. 10
+        # Calculate the urban canyon temperature per The uwg (2012) Eq. 10
         dens = forc.pres/(1000*0.287042*self.canTemp*(1.+1.607858*self.canHum))     # air density
         dens_ubl = forc.pres/(1000*0.287042*T_ubl*(1.+1.607858*forc.hum))           # air density
         Cp_air = parameter.cp
@@ -230,7 +230,7 @@ class UCMDef(object):
             self.GasTotal = self.GasTotal + BEM[j].fl_area*BEM[j].building.GasTotal/1.e6
 
         # Sensible Heat
-        # N.B In the current UWG code, latent heat from evapotranspiration, stagnant water,
+        # N.B In the current uwg code, latent heat from evapotranspiration, stagnant water,
         # or anthropogenic sources is not modelled due to the difficulty of validation, and
         # lack of reliability of precipitation data from EPW files.
         self.sensHeat = self.Q_wall + self.Q_road + self.Q_vent + self.Q_window + self.Q_hvac + self.Q_traffic + self.treeSensHeat + self.Q_roof

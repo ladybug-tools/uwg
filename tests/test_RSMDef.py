@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import math
 from test_base import TestBase
 

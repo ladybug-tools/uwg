@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 import math
 import pprint
@@ -17,7 +17,7 @@ class TestSolarCalcs(TestBase):
         self.uwg.init_input_obj()
 
 
-        solar = UWG.SolarCalcs(self.uwg.UCM, self.uwg.BEM, self.uwg.simTime, self.uwg.RSM, \
+        solar = uwg.SolarCalcs(self.uwg.UCM, self.uwg.BEM, self.uwg.simTime, self.uwg.RSM, \
             self.uwg.forc, self.uwg.geoParam, self.uwg.rural)
 
         #timestep every 5 minutes (300s)

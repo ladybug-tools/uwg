@@ -1,5 +1,5 @@
 import pytest
-from UWG import psychrometrics
+from uwg import psychrometrics
 from math import log10
 
 import pprint

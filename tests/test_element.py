@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 import math
 import pprint
@@ -98,7 +98,7 @@ class TestElement(TestBase):
         assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
 
         uwg_python_val = [
-        self.uwg.rural.aeroCond,        # Convection coef (refL UWG, eq.12)
+        self.uwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
         self.uwg.rural.waterStorage,    # thickness of water film (m) (only for horizontal surfaces)
         self.uwg.rural.solAbs,          # solar radiation absorbed (W m-2)
         self.uwg.rural.lat,             # surface latent heat flux (W m-2)
@@ -122,7 +122,7 @@ class TestElement(TestBase):
 
     def test_SurfFlux_integration(self):
         """ test element SurfFlux against matlab references at the
-        end of timestep. Integration test as it requires other UWG
+        end of timestep. Integration test as it requires other uwg
         classes to be working before functioning correctly.
 
         """
@@ -150,7 +150,7 @@ class TestElement(TestBase):
         assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
 
         uwg_python_val = [
-        self.uwg.rural.aeroCond,        # Convection coef (refL UWG, eq.12)
+        self.uwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
         self.uwg.rural.waterStorage,    # thickness of water film (m) (only for horizontal surfaces)
         self.uwg.rural.solAbs,          # solar radiation absorbed (W m-2)
         self.uwg.rural.lat,             # surface latent heat flux (W m-2)

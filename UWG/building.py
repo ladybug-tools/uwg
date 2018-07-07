@@ -186,11 +186,11 @@ class Building(object):
 
             if not chk_tin and chk_tce:
                 raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
-                sys.exit("Exiting UWG due to fatal error.")
+                sys.exit("Exiting uwg due to fatal error.")
 
         except ValueError:
             raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
-            sys.exit("Exiting UWG due to fatal error.")
+            sys.exit("Exiting uwg due to fatal error.")
 
         # If temperature is reasonable assign coefficients
         if T_ceil > T_indoor:                               # set higher ceiling heat convection coefficient

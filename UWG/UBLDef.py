@@ -54,7 +54,7 @@ class UBLDef(object):
         self.sensHeat = UCM.sensHeat
         heatDif = max(self.sensHeat - rural.sens,0)
         Cp = parameter.cp                           # Heat capacity of air (J/kg.K)
-        k_w = parameter.circCoeff                   # k_w per Bueno 'the UWG', eq 8
+        k_w = parameter.circCoeff                   # k_w per Bueno 'the uwg', eq 8
         g = parameter.g                             # Gravity
         v_wind = max(forc.wind,parameter.windMin)   # wind velocity
 
@@ -80,7 +80,7 @@ class UBLDef(object):
         is_day = (sunlight > daylimit) and (time < noon or self.is_near_zero(time-noon)) \
                 or (sunlight > nightlimit) and (time > noon) or (self.sensHeat > 150.0)
         if is_day:
-            # Circulation velocity per Bueno 'the UWG', eq 8
+            # Circulation velocity per Bueno 'the uwg', eq 8
             self.logger.debug("{} Day ubl calcs".format(__name__))
             h_UBL = self.dayBLHeight            # Day boundary layer height
             eqTemp = RSM.tempProf[RSM.nzref-1]

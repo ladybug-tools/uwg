@@ -1,5 +1,5 @@
 import pytest
-import UWG
+import uwg
 import os
 
 
@@ -19,17 +19,17 @@ class TestForcing(object):
         DAY = 1                 # Begin day of the month
         NUM_DAYS = 31           # Number of days of simulation
 
-        simTime = UWG.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
+        simTime = uwg.SimParam(dtSim,dtWeather,MONTH,DAY,NUM_DAYS)
         epw_name = "SGP_Singapore.486980_IWEC.epw"
         climate_file = os.path.join(self.DIR_EPW_PATH, epw_name)
-        self.weather = UWG.Weather(climate_file, simTime.timeInitial, simTime.timeFinal)
+        self.weather = uwg.Weather(climate_file, simTime.timeInitial, simTime.timeFinal)
 
 
     def test_forcing(self):
         """Test for forcing.py"""
         # setup
         self.setup_forcing()
-        self.forcIP = UWG.Forcing(self.weather.staTemp, self.weather) # initialized Forcing class
+        self.forcIP = uwg.Forcing(self.weather.staTemp, self.weather) # initialized Forcing class
 
         # Forcing tests
         assert self.forcIP.deepTemp == pytest.approx(299.8392473118278, abs=1e-12)

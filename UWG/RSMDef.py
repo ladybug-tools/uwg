@@ -8,7 +8,7 @@ class RSMDef(object):
     """
     % Rural Site & Vertical Diffusion Model (VDM)
     % Calculates the vertical profiles of air temperature above the weather
-    % station per 'The UWG' (2012) Eq. 4, 5, 6.
+    % station per 'The uwg' (2012) Eq. 4, 5, 6.
 
     properties
         lat;           % latitude (deg)
@@ -146,7 +146,7 @@ class RSMDef(object):
         f.close()
 
 
-    # Ref: The UWG (2012), Eq. (4)
+    # Ref: The uwg (2012), Eq. (4)
     def VDM(self,forc,rural,parameter,simTime):
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
@@ -174,7 +174,7 @@ class RSMDef(object):
 
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
-        # Ref: The UWG (2012), Eq. (5)
+        # Ref: The uwg (2012), Eq. (5)
         # compute diffusion coefficient
         cd,ustarRur = self.DiffusionCoefficient(self.densityProfC[0], \
             self.z, self.dz, self.z0r, self.disp, \

@@ -1,8 +1,8 @@
 # Urban Weather Generator
 
-[![Build Status](https://travis-ci.org/ladybug-tools/urbanWeatherGen.svg?branch=master)](https://travis-ci.org/ladybug-tools/urbanWeatherGen)
+[![Build Status](https://travis-ci.org/ladybug-tools/uwg.svg?branch=master)](https://travis-ci.org/ladybug-tools/uwg)
 
-The Urban Weather Generator (urbanWeatherGen) is a Python application for modeling the [urban heat island effect](https://en.wikipedia.org/wiki/Urban_heat_island). Specifically, it morphs rural [EnergyPlus weather (.epw) files](http://www.ladybug.tools/epwmap/) to reflect average conditions within the urban canyon using a range of properties including:
+The Urban Weather Generator (uwg) is a Python application for modeling the [urban heat island effect](https://en.wikipedia.org/wiki/Urban_heat_island). Specifically, it morphs rural [EnergyPlus weather (.epw) files](http://www.ladybug.tools/epwmap/) to reflect average conditions within the urban canyon using a range of properties including:
 
 * Building geometry (including building height, ground coverage, window:wall area, and facade:site area)
 * Building use (including program type, HVAC systems, and occupancy/equipment scheduling)
@@ -18,7 +18,7 @@ The [original Urban Weather Generator](http://urbanmicroclimate.scripts.mit.edu/
 This repository is a Python translation of the original [MATLAB Urban Weather Generator](https://github.com/hansukyang/UWG_Matlab).
 
 # Example
-Here is a Python example that shows how to create and run an Urban Weather Generator object. The example script is available [at resources/uwg_example.py](https://github.com/ladybug-tools/urbanWeatherGen/blob/master/resources/uwg_example.py). Run it through your command prompt in the main urbanWeatherGen directory with the following: ```python -m resources.uwg_example```
+Here is a Python example that shows how to create and run an Urban Weather Generator object. The example script is available [at resources/uwg_example.py](https://github.com/ladybug-tools/uwg/blob/master/resources/uwg_example.py). Run it through your command prompt in the main uwg directory with the following: ```python -m resources.uwg_example```
 
 ```python
 from UWG import UWG
@@ -34,7 +34,7 @@ uwg = UWG(epw_filename, param_filename)
 uwg.run()
 ```
 
-Here is the sample .uwg file used in the simulation above. The .uwg file is a a required input where the local building, urban, and geographic features are defined. These features are then used in the simulation to morph the .epw file. This file is available [at resources/initialize_singapore.uwg](https://github.com/ladybug-tools/urbanWeatherGen/blob/master/resources/initialize_singapore.uwg).
+Here is the sample .uwg file used in the simulation above. The .uwg file is a a required input where the local building, urban, and geographic features are defined. These features are then used in the simulation to morph the .epw file. This file is available [at resources/initialize_singapore.uwg](https://github.com/ladybug-tools/uwg/blob/master/resources/initialize_singapore.uwg).
 
 ```
 # =================================================

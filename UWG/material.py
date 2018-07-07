@@ -1,7 +1,7 @@
 """Material class"""
 
 class Material(object):
-    """UWG Material
+    """uwg Material
 
     Attributes:
         thermalCond: Thermal conductivity (W/m K)

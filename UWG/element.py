@@ -3,7 +3,7 @@ import logging
 
 class Element(object):
     """
-    UWG Element
+    uwg Element
 
     # Note: In matlab not all instance variables are instantiated. They are assumed to be a 0-by-0 empty matrix
     # https://www.mathworks.com/help/matlab/matlab_oop/specifying-properties.html
@@ -93,12 +93,12 @@ class Element(object):
 
         # Calculated per unit area (m^2)
         dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density (kgd m-3)
-        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
+        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: uwg, eq. 12))
 
         if (self.horizontal):     # For roof, mass, road
             # Evaporation (m s-1), Film water & soil latent heat
             if not self.is_near_zero(self.waterStorage) and self.waterStorage > 0.0:
-                # N.B In the current UWG code, latent heat from evapotranspiration, stagnant water,
+                # N.B In the current uwg code, latent heat from evapotranspiration, stagnant water,
                 # or anthropogenic sources is not modelled due to the difficulty of validation, and
                 # lack of reliability of precipitation data from EPW files.Therefore this condition
                 # is never run because all elements have had their waterStorage hardcoded to 0.
@@ -143,7 +143,7 @@ class Element(object):
 
         # Calculated per unit area (m^2)
         dens = forc.pres/(1000*0.287042*tempRef*(1.+1.607858*humRef)) # air density (kgd m-3)
-        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: UWG, eq. 12))
+        self.aeroCond = 5.8 + 3.7 * windRef         # Convection coef (ref: uwg, eq. 12))
 
         if (self.horizontal):     # For roof, mass, road
             # Evaporation (m s-1), Film water & soil latent heat
