@@ -184,7 +184,7 @@ class Building(object):
             chk_tin = converge_lo <= T_indoor <= converge_hi
             chk_tce = converge_lo <= T_ceil   <= converge_hi
 
-            if not chk_tin and chk_tce:
+            if chk_tin != True or chk_tce != True:
                 raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
                 sys.exit("Exiting uwg due to fatal error.")
 
