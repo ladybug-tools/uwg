@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="uwg",
-    version="0.0.1",
+    version="5.0.0",
     author="ladybug-tools",
     description="The Urban Weather Generator engine for Urban Heat Island modelling",
     long_description=long_description,
