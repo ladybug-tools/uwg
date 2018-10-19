@@ -132,7 +132,7 @@ class UBLDef(object):
         ublTempdx[0] = (Csurf + advCoef1 + ublTempdx[0])/(1 + advCoef2)
         ublTemp = ublTempdx[0]
 
-        for i in xrange(1,int(charLength)/int(paralLength)):
+        for i in xrange(1,int(charLength)//int(paralLength)):
             eqTemp = ublTempdx[i-1]
             ublTempdx[i] = (Csurf + advCoef2*eqTemp + ublTempdx[i])/(1 + advCoef2)
             ublTemp = ublTemp + ublTempdx[i]
