@@ -1,3 +1,5 @@
+from __future__ import division
+
 from infracalcs import infracalcs
 from math import log
 

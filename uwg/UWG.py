@@ -15,6 +15,7 @@ The urban weather generator, Journal of Building Performance Simulation. 6:4,269
 doi: 10.1080/19401493.2012.718797
 =========================================================================
 """
+from __future__ import division
 
 import os
 import math

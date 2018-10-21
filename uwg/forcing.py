@@ -1,3 +1,6 @@
+from __future__ import division
+
+
 class Forcing (object):
     """
     FORCING
