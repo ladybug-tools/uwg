@@ -1,6 +1,9 @@
 language: python
 python:
   - "2.7"
+
+env:
+  - TRAVIS=true
 # command to install dependencies
 #install:
 #	- pip install -r requirements.txt
@@ -9,3 +12,9 @@ script: pytest
 
 notifications:
   email: never
+
+after_success:
+- git config --global user.name "semantic-release (via TravisCI)"
+- git config --global user.email "semantic-release@travis"
+- pip install python-semantic-release
+- semantic-release version
