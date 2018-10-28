@@ -1,9 +1,14 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
 import pytest
 import uwg
 import os
 import math
 import pprint
-from test_base import TestBase
+from .test_base import TestBase
 
 class TestSolarCalcs(TestBase):
 
@@ -21,7 +26,7 @@ class TestSolarCalcs(TestBase):
             self.uwg.forc, self.uwg.geoParam, self.uwg.rural)
 
         #timestep every 5 minutes (300s)
-        for i in xrange(int(12*24*1.5)): #1.5 days, Jan 2nd, 12 noon
+        for i in range(int(12*24*1.5)): #1.5 days, Jan 2nd, 12 noon
             solar.simTime.UpdateDate()
         solar.solarangles()
 
@@ -31,7 +36,7 @@ class TestSolarCalcs(TestBase):
         assert solar.ad == pytest.approx(0.197963373,abs=1e-8)
 
         # recalculate solar angles with new time simulation, add to previous time increment
-        for i in xrange(12*24*20 + 12*1 + 6): # Increment time to 22 days, 13hrs, 30min = Jan 22 at 1330
+        for i in range(12*24*20 + 12*1 + 6): # Increment time to 22 days, 13hrs, 30min = Jan 22 at 1330
             solar.simTime.UpdateDate()
 
         # Run simulation
@@ -56,7 +61,7 @@ class TestSolarCalcs(TestBase):
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
 
@@ -111,7 +116,7 @@ class TestSolarCalcs(TestBase):
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
 

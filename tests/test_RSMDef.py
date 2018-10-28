@@ -1,7 +1,14 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
+from functools import reduce
+
 import pytest
 import uwg
 import math
-from test_base import TestBase
+from .test_base import TestBase
 
 from pprint import pprint
 from decimal import Decimal
@@ -73,7 +80,7 @@ class TestRSMDef(TestBase):
         assert self.uwg.RSM.presProf[0] == pytest.approx(1.009e5, abs=1e-15)
         assert self.uwg.RSM.presProf[-1] == pytest.approx(0.990802481868362e5, abs=1e-10)
         # Test all
-        for i in xrange(1,len(matlab_presProf)-1):
+        for i in range(1,len(matlab_presProf)-1):
             tol = self.CALCULATE_TOLERANCE(matlab_presProf[i]*1e5,15.0)
             assert self.uwg.RSM.presProf[i] == pytest.approx(matlab_presProf[i]*1e5, abs=tol)
 
@@ -90,7 +97,7 @@ class TestRSMDef(TestBase):
         1.173056716134468,1.171904800590439,1.170638479118457,1.169246475901031,
         1.167716422060640,1.166034753626033,1.165110236615915]
 
-        for i in xrange(len(matlab_densityProfS)):
+        for i in range(len(matlab_densityProfS)):
             tol = self.CALCULATE_TOLERANCE(matlab_densityProfS[i]*1e5,15.0)
             assert self.uwg.RSM.densityProfS[i] == pytest.approx(matlab_densityProfS[i], abs=tol)
 
@@ -149,7 +156,7 @@ class TestRSMDef(TestBase):
         # Matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
@@ -193,7 +200,7 @@ class TestRSMDef(TestBase):
         # Matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],11.0)
             #print dd(uwg_python_val[i])
             #print dd(uwg_matlab_val[i])

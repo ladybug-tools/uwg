@@ -1,6 +1,12 @@
 from __future__ import division
 
+try:
+    range = xrange
+except NameError:
+    pass
+
 import math
+
 
 class SimParam(object):
     """
@@ -64,7 +70,7 @@ class SimParam(object):
             self.day += 1
             self.julian = self.julian + 1
             self.secDay = 0.
-            for j in xrange(12):
+            for j in range(12):
                 if self.is_near_zero(self.julian - self.inobis[j]):
                     self.month = self.month + 1
                     self.day = 1

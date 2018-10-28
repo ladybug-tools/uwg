@@ -1,6 +1,6 @@
 from __future__ import division
 
-from psychrometrics import psychrometrics, moist_air_density
+from .psychrometrics import psychrometrics, moist_air_density
 import logging
 from math import isnan
 import sys

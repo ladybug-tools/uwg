@@ -1,9 +1,15 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
 import pytest
 import uwg
 import os
 import math
 import pprint
-from test_base import TestBase
+from .test_base import TestBase
+
 
 class TestSimParam(TestBase):
 
@@ -48,7 +54,7 @@ class TestSimParam(TestBase):
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
 
@@ -88,7 +94,7 @@ class TestSimParam(TestBase):
 
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=1e-15), "error at index={}".format(i)
 
@@ -110,7 +116,7 @@ class TestSimParam(TestBase):
         assert simTime.nt == pytest.approx(2017,abs=1e-6)
 
         # Test UpdateDate() for < 1 hr
-        for i in xrange(11): #11 * 300 = 3300 seconds = 55min
+        for i in range(11): #11 * 300 = 3300 seconds = 55min
             simTime.UpdateDate()
         assert simTime.secDay == pytest.approx(3300., abs=1e-6)
         assert simTime.day == pytest.approx(30., abs=1e-6)
@@ -120,14 +126,14 @@ class TestSimParam(TestBase):
         assert simTime.secDay == pytest.approx(3600., abs=1e-6)
         assert simTime.hourDay == pytest.approx(1., abs=1e-6)
         # for > 24hr
-        for i in xrange(23 * 12):
+        for i in range(23 * 12):
             simTime.UpdateDate()
         assert simTime.secDay == pytest.approx(0., abs=1e-6)
         assert simTime.day == pytest.approx(31., abs=1e-6)
         assert simTime.hourDay == pytest.approx(0., abs=1e-6)
 
         # for == 1 month
-        for i in xrange(24 * 12):
+        for i in range(24 * 12):
             simTime.UpdateDate()
         assert simTime.secDay == pytest.approx(0., abs=1e-6)
         assert simTime.day == pytest.approx(1., abs=1e-6)
@@ -135,7 +141,7 @@ class TestSimParam(TestBase):
         assert simTime.month == pytest.approx(8, abs=1e-6)
 
         # for + 1 month
-        for i in xrange(24 * 12 * 31):
+        for i in range(24 * 12 * 31):
             simTime.UpdateDate()
         assert simTime.secDay == pytest.approx(0., abs=1e-6)
         assert simTime.day == pytest.approx(1., abs=1e-6)
