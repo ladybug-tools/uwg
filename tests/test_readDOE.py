@@ -1,15 +1,23 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
+from functools import reduce
+
 import pytest
 import os
 import copy
 import math
 
 import uwg
-from test_base import TestBase
+from .test_base import TestBase
 
 from pprint import pprint
 from decimal import Decimal
 dd = Decimal.from_float
 pp = pprint
+
 
 class TestReadDOE(TestBase):
     """Test for readDOE.py
@@ -78,7 +86,7 @@ class TestReadDOE(TestBase):
             'fanMax'
             ]
 
-        for bi in xrange(len(bldlst)):
+        for bi in range(len(bldlst)):
             bldid = bldlst[bi]
             matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_{}_.txt".format(bldid))
             # check file exists
@@ -89,15 +97,15 @@ class TestReadDOE(TestBase):
 
             assert len(refDOE) == pytest.approx(16.0, abs=1e-3)
 
-            for bldType in xrange(16):         # bldType
+            for bldType in range(16):         # bldType
                 assert len(refDOE[bldType]) == pytest.approx(3.0, abs=1e-3)
 
-                for bldEra in xrange(3):        # bltEra
+                for bldEra in range(3):        # bltEra
                     assert len(refDOE[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
 
-                    for climateZone in xrange(16):  # ZoneType
+                    for climateZone in range(16):  # ZoneType
 
-                        matlab_ref_value = matlab_file.next()
+                        matlab_ref_value = matlab_file.readline()
 
                         if bldid != 'condType':
                             matlab_ref_value = float(matlab_ref_value)
@@ -234,8 +242,8 @@ class TestReadDOE(TestBase):
         ("roof", copy.deepcopy(elementlst))
         ]
 
-        for bemi in xrange(len(bemlst)):
-            for ei in xrange(len(elementlst)):
+        for bemi in range(len(bemlst)):
+            for ei in range(len(elementlst)):
                 bemid = bemlst[bemi][0] + "_" + bemlst[bemi][1][ei]
 
                 matlab_path = os.path.join(self.DIR_MATLAB_PATH,"matlab_ref_bemdef_{}.txt".format(bemid))
@@ -247,15 +255,15 @@ class TestReadDOE(TestBase):
 
                 assert len(refBEM) == pytest.approx(16.0, abs=1e-3)
 
-                for bldType in xrange(16):         # bldType
+                for bldType in range(16):         # bldType
                     assert len(refBEM[bldType]) == pytest.approx(3.0, abs=1e-3)
 
-                    for bldEra in xrange(3):        # bltEra
+                    for bldEra in range(3):        # bltEra
                         assert len(refBEM[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
 
-                        for climateZone in xrange(16):  # ZoneType
+                        for climateZone in range(16):  # ZoneType
                             # next line
-                            matlab_ref_value = float(matlab_file.next())
+                            matlab_ref_value = float(matlab_file.readline())
                             tol = self.CALCULATE_TOLERANCE(matlab_ref_value,15.0)
 
                             # run tests
@@ -382,7 +390,7 @@ class TestReadDOE(TestBase):
         'Vswh'
         ]
 
-        for si in xrange(len(schlst)):
+        for si in range(len(schlst)):
             schid = schlst[si]
 
             # Define file path
@@ -395,16 +403,16 @@ class TestReadDOE(TestBase):
 
             assert len(Schedule) == pytest.approx(16.0, abs=1e-3)
 
-            for bldType in xrange(1): # bldType
+            for bldType in range(1): # bldType
                 assert len(Schedule[bldType]) == pytest.approx(3.0, abs=1e-3)
 
-                for bldEra in xrange(1): # bltEra
+                for bldEra in range(1): # bltEra
                     assert len(Schedule[bldType][bldEra]) == pytest.approx(16.0, abs=1e-3)
 
-                    for climateZone in xrange(1): # ZoneType
+                    for climateZone in range(1): # ZoneType
 
                         if schid in schlst[:7]: #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                            matlab_ref_str = matlab_file.next()
+                            matlab_ref_str = matlab_file.readline()
                             # replace [,] -> "" && split at " "
                             matlab_ref_str = matlab_ref_str.replace("[","").replace("]","").replace(";","_").replace(" ", "_")
                             matlab_ref_str = "".join(matlab_ref_str.split())
@@ -416,7 +424,7 @@ class TestReadDOE(TestBase):
                             # Calculate tolerances and set minimum one for all
                             tol = min([self.CALCULATE_TOLERANCE(x,15.0) for x in matlab_ref_value])
                         else:
-                            matlab_ref_value = float(matlab_file.next())
+                            matlab_ref_value = float(matlab_file.readline())
                             tol = self.CALCULATE_TOLERANCE(matlab_ref_value,15.0)
 
                         if schid == 'Elec': #3x24 matrix of schedule for SWH (WD,Sat,Sun)

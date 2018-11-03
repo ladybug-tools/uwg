@@ -1,5 +1,14 @@
+from __future__ import division
+from __future__ import print_function
+
+try:
+    range = xrange
+except NameError:
+    pass
+
 from math import sqrt, pow
 import copy
+
 
 class UCMDef(object):
     """
@@ -169,7 +178,7 @@ class UCMDef(object):
         Q = (self.roofArea+self.roadArea)*(self.sensAnthrop + self.treeSensHeat*self.treeCoverage)
 
         # Building energy output to canyon, in terms of absolute (total) values
-        for j in xrange(len(BEM)):
+        for j in range(len(BEM)):
             # Re-naming variable for readability
             building = BEM[j].building
             wall = BEM[j].wall
@@ -211,7 +220,7 @@ class UCMDef(object):
 
         # Building energy output to canyon, per m^2 of urban area
         T_can = copy.copy(self.canTemp)
-        for j in xrange(len(BEM)):
+        for j in range(len(BEM)):
             V_vent = BEM[j].building.vent*BEM[j].building.nFloor  # ventilation volume per m^2 of building
             V_infil = BEM[j].building.infil*self.bldHeight/3600.0
             T_indoor = BEM[j].building.indoorTemp

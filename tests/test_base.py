@@ -3,6 +3,7 @@ import uwg
 import math
 import logging
 
+
 class TestBase(object):
     """
     Test base class. This is inherited by all other tests.

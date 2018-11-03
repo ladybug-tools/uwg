@@ -1,4 +1,12 @@
+from __future__ import division
+
+try:
+    range = xrange
+except NameError:
+    pass
+
 import logging
+
 
 class UBLDef(object):
     """
@@ -60,11 +68,11 @@ class UBLDef(object):
 
         # Air density
         refDens = 0.
-        for iz in xrange(RSM.nzref):
+        for iz in range(RSM.nzref):
             refDens = refDens + RSM.densityProfC[iz] * RSM.dz[iz] / (RSM.z[RSM.nzref-1] + RSM.dz[RSM.nzref-1]/2.)
 
         forDens = 0.
-        for iz in xrange(RSM.nzfor):
+        for iz in range(RSM.nzfor):
             forDens = forDens + RSM.densityProfC[iz] * RSM.dz[iz] / (RSM.z[RSM.nzfor-1] + RSM.dz[RSM.nzfor-1]/2.)
 
         # ---------------------------------------------------------------------
@@ -92,11 +100,11 @@ class UBLDef(object):
             if v_wind > u_circ:   # Forced problem (usually this)
                 advCoef  = self.orthLength*eqWind*simTime.dt/self.urbArea*1.4
                 self.ublTemp = (Csurf + advCoef * eqTemp + self.ublTemp)/(1. + advCoef)
-                self.ublTempdx = [self.ublTemp for x in xrange(len(self.ublTempdx))]
+                self.ublTempdx = [self.ublTemp for x in range(len(self.ublTempdx))]
             else:                   # Convective problem
                 advCoef  = self.perimeter*u_circ*simTime.dt/self.urbArea*1.4
                 self.ublTemp = (Csurf+advCoef*eqTemp + self.ublTemp)/(1 + advCoef)
-                self.ublTempdx = [self.ublTemp for x in xrange(len(self.ublTempdx))]
+                self.ublTempdx = [self.ublTemp for x in range(len(self.ublTempdx))]
 
 
 
@@ -116,13 +124,13 @@ class UBLDef(object):
         # Night forcing (RSM.nzfor = number of layers of forcing)
         # Average potential temperature & wind speed of the profile
         intAdv1 = 0.
-        for iz in xrange(RSM.nzfor):
+        for iz in range(RSM.nzfor):
             intAdv1 = intAdv1 + RSM.windProf[iz] * RSM.tempProf[iz] * RSM.dz[iz]
 
         advCoef1 = 1.4*dt/paralLength/h_UBL*intAdv1
 
         intAdv2 = 0
-        for iz in xrange(RSM.nzfor):
+        for iz in range(RSM.nzfor):
             intAdv2 = intAdv2 + RSM.windProf[iz]*RSM.dz[iz]
 
         advCoef2 = 1.4*dt/paralLength/h_UBL*intAdv2
@@ -130,7 +138,7 @@ class UBLDef(object):
         ublTempdx[0] = (Csurf + advCoef1 + ublTempdx[0])/(1 + advCoef2)
         ublTemp = ublTempdx[0]
 
-        for i in xrange(1,int(charLength)/int(paralLength)):
+        for i in range(1,int(charLength)//int(paralLength)):
             eqTemp = ublTempdx[i-1]
             ublTempdx[i] = (Csurf + advCoef2*eqTemp + ublTempdx[i])/(1 + advCoef2)
             ublTemp = ublTemp + ublTempdx[i]

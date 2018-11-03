@@ -1,5 +1,13 @@
+from __future__ import division
+
+try:
+    range = xrange
+except NameError:
+    pass
+
 import math
 import logging
+
 
 class SolarCalcs(object):
     """
@@ -99,7 +107,7 @@ class SolarCalcs(object):
             # Receiving solar, including bounces (W m-2)
             self.UCM.road.solRec = self.roadSol + (1 - self.UCM.roadConf)*self.mw
 
-            for j in xrange(len(self.BEM)):
+            for j in range(len(self.BEM)):
                 self.BEM[j].roof.solRec = self.horSol + self.dif
                 self.BEM[j].wall.solRec = self.bldSol + (1 - 2*self.UCM.wallConf) * self.mw + self.UCM.wallConf * self.mr
 
@@ -119,7 +127,7 @@ class SolarCalcs(object):
             self.UCM.road.solRec = 0.
             self.rural.solRec = 0.
 
-            for j in xrange(len(self.BEM)):
+            for j in range(len(self.BEM)):
                 self.BEM[j].roof.solRec = 0.
                 self.BEM[j].wall.solRec = 0.
 
@@ -164,9 +172,9 @@ class SolarCalcs(object):
         GMT = self.RSM.GMT
 
         self.ut = (24. + (int(secDay)/3600.%24.)) % 24. # Get elapsed hours on current day
-        ibis = range(len(inobis))
+        ibis = list(range(len(inobis)))
 
-        for JI in xrange(1,12):
+        for JI in range(1, 12):
              ibis[JI] = inobis[JI]+1
 
         date = day + inobis[month-1]-1 # Julian day of the year

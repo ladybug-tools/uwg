@@ -3,7 +3,7 @@ import os
 import pytest
 import uwg
 import math
-from test_base import TestBase
+from .test_base import TestBase
 
 from pprint import pprint
 from decimal import Decimal
@@ -48,8 +48,8 @@ class TestUWG(TestBase):
         self.uwg.init_input_obj()
 
         #test uwg param dictionary first and last
-        assert self.uwg._init_param_dict.has_key('bldHeight') == True
-        assert self.uwg._init_param_dict.has_key('h_obs') == True
+        assert 'bldHeight' in self.uwg._init_param_dict
+        assert 'h_obs' in self.uwg._init_param_dict
 
         assert self.uwg._init_param_dict['bldHeight'] == pytest.approx(10., abs=1e-6)
         assert self.uwg._init_param_dict['vegEnd'] == pytest.approx(10, abs=1e-6)

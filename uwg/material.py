@@ -1,5 +1,6 @@
 """Material class"""
 
+
 class Material(object):
     """uwg Material
 
@@ -9,7 +10,7 @@ class Material(object):
         name: Name of the material.
     """
     def __init__(self, thermalCond, volHeat, name='noname'):
-        self._name = name # purely for internal purpose
+        self._name = name  # purely for internal purpose
         self.thermalCond = thermalCond
         self.volHeat = volHeat
 

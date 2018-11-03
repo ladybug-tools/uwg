@@ -1,5 +1,13 @@
-from infracalcs import infracalcs
+from __future__ import division
+
+try:
+    range = xrange
+except NameError:
+    pass
+
+from .infracalcs import infracalcs
 from math import log
+
 
 def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     """
@@ -13,7 +21,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     UCM.roofTemp = 0.       # Average urban roof temperature
     UCM.wallTemp = 0.       # Average urban wall temperature
 
-    for j in xrange(len(BEM)):
+    for j in range(len(BEM)):
         # Building energy model
         BEM[j].building.BEMCalc(UCM, BEM[j], forc, parameter, simTime)
         BEM[j].ElecTotal = BEM[j].building.ElecTotal * BEM[j].fl_area # W m-2
@@ -68,7 +76,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     c2 = 0.0
     c3 = 0.0
 
-    for iz in xrange(RSM.nzfor):
+    for iz in range(RSM.nzfor):
         # At c loss of precision at at low order of magnitude, that we need in UBL.advHeat calc
         # Algebraically t is 0, but with floating pt numbers c will accumulate truncated values
         y = RSM.densityProfC[iz]*RSM.dz[iz]/(RSM.z[RSM.nzfor-1] + RSM.dz[RSM.nzfor-1]/2.)
@@ -121,7 +129,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     UCM.turbW = 1.3*UCM.ustarMod
 
     # Urban wind profile
-    for iz in xrange(RSM.nzref):
+    for iz in range(RSM.nzref):
         UCM.windProf.append(UCM.ustar/parameter.vk*\
             log((RSM.z[iz]+UCM.bldHeight-UCM.l_disp)/UCM.z0u))
 
