@@ -15,9 +15,7 @@ The urban weather generator, Journal of Building Performance Simulation. 6:4,269
 doi: 10.1080/19401493.2012.718797
 =========================================================================
 """
-from __future__ import division
-from __future__ import print_function
-
+from __future__ import division, print_function
 from functools import reduce
 
 try:
