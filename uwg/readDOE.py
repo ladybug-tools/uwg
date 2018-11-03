@@ -1,17 +1,25 @@
 from __future__ import division
+from __future__ import print_function
+
+try:
+    range = xrange
+except NameError:
+    pass
 
 import sys
 import os
-import cPickle
 
-from building import Building
-from material import Material
-from element import Element
-from BEMDef import BEMDef
-from schdef import SchDef
-from utilities import read_csv, str2fl
-import utilities
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
+from .building import Building
+from .material import Material
+from .element import Element
+from .BEMDef import BEMDef
+from .schdef import SchDef
+from .utilities import read_csv, str2fl
 
 # For debugging only
 #import pprint
@@ -68,6 +76,7 @@ ZONETYPE = [
     '8 (Fairbanks)'             # 16
     ]
 
+
 def readDOE(serialize_output=True):
     """
     Read csv files of DOE buildings
@@ -105,13 +114,13 @@ def readDOE(serialize_output=True):
     """
 
     #Nested, nested lists of Building, SchDef, BEMDef objects
-    refDOE   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refDOE(16,3,16) = Building
-    Schedule = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #Schedule (16,3,16) = SchDef
-    refBEM   = [[[None]*16 for k_ in xrange(3)] for j_ in xrange(16)]                #refBEM (16,3,16) = BEMDef
+    refDOE   = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #refDOE(16,3,16) = Building
+    Schedule = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #Schedule (16,3,16) = SchDef
+    refBEM   = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #refBEM (16,3,16) = BEMDef
 
     #Purpose: Loop through every DOE reference csv and extract building data
     #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
-    for i in xrange(16):
+    for i in range(16):
 
         #i = 16 types of buildings
         #print "\tType: {} @i={}".format(BLDTYPE[i], i)
@@ -172,12 +181,12 @@ def readDOE(serialize_output=True):
         SchSWH      = str2fl([list_doe4[19][6:30],list_doe4[20][6:30],list_doe4[21][6:30]])   # Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin
 
 
-        for j in xrange(3):
+        for j in range(3):
 
             # j = 3 built eras
             #print"\tEra: {} @j={}".format(BUILTERA[j], j)
 
-            for k in xrange(16):
+            for k in range(16):
 
                 # k = 16 climate zones
                 #print "\tClimate zone: {} @k={}".format(ZONETYPE[k], k)
@@ -357,9 +366,9 @@ def readDOE(serialize_output=True):
 
         # dump in ../resources
         # Pickle objects, protocol 1 b/c binary file
-        cPickle.dump(refDOE, pickle_readDOE,1)
-        cPickle.dump(refBEM, pickle_readDOE,1)
-        cPickle.dump(Schedule, pickle_readDOE,1)
+        pickle.dump(refDOE, pickle_readDOE,1)
+        pickle.dump(refBEM, pickle_readDOE,1)
+        pickle.dump(Schedule, pickle_readDOE,1)
 
         pickle_readDOE.close()
 

@@ -16,31 +16,35 @@ doi: 10.1080/19401493.2012.718797
 =========================================================================
 """
 from __future__ import division
+from __future__ import print_function
 
 import os
 import math
-import cPickle
 import copy
 import utilities
 import logging
 
-from simparam import SimParam
-from weather import Weather
-from building import Building
-from material import Material
-from element import Element
-from BEMDef import BEMDef
-from schdef import SchDef
-from param import Param
-from UCMDef import UCMDef
-from forcing import Forcing
-from UBLDef import UBLDef
-from RSMDef import RSMDef
-from solarcalcs import SolarCalcs
-import urbflux
-from psychrometrics import psychrometrics
-from readDOE import readDOE
-from urbflux import urbflux
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+from .simparam import SimParam
+from .weather import Weather
+from .building import Building
+from .material import Material
+from .element import Element
+from .BEMDef import BEMDef
+from .schdef import SchDef
+from .param import Param
+from .UCMDef import UCMDef
+from .forcing import Forcing
+from .UBLDef import UBLDef
+from .RSMDef import RSMDef
+from .solarcalcs import SolarCalcs
+from .psychrometrics import psychrometrics
+from .readDOE import readDOE
+from .urbflux import urbflux
 
 # For debugging only
 #from pprint import pprint
@@ -431,10 +435,10 @@ class uwg(object):
         # If a uwgParamFileName is set, then read inputs from .uwg file.
         # User-defined class properties will override the inputs from the .uwg file.
         if self.uwgParamFileName is not None:
-            print "\nReading uwg file input."
+            print("\nReading uwg file input.")
             self.read_input()
         else:
-            print "\nNo .uwg file input."
+            print("\nNo .uwg file input.")
 
         # Required parameters
         is_defined = (type(self.Month) == float or type(self.Month) == int) and \
@@ -485,9 +489,9 @@ class uwg(object):
             raise Exception("readDOE.pkl file: '{}' does not exist.".format(readDOE_file_path))
 
         readDOE_file = open(self.readDOE_file_path, 'rb')  # open pickle file in binary form
-        refDOE = cPickle.load(readDOE_file)
-        refBEM = cPickle.load(readDOE_file)
-        refSchedule = cPickle.load(readDOE_file)
+        refDOE = pickle.load(readDOE_file)
+        refBEM = pickle.load(readDOE_file)
+        refSchedule = pickle.load(readDOE_file)
         readDOE_file.close()
 
         # Define building energy models
@@ -688,7 +692,7 @@ class uwg(object):
         self.RSMData = [None for x in xrange(self.N)]
         self.USMData = [None for x in xrange(self.N)]
 
-        print '\nSimulating new temperature and humidity values for {} days from {}/{}.\n'.format(
+        print('\nSimulating new temperature and humidity values for {} days from {}/{}.\n').format(
             int(self.nDay), int(self.Month), int(self.Day))
         self.logger.info("Start simulation")
 
@@ -885,7 +889,7 @@ class uwg(object):
 
         epw_new_id.close()
 
-        print "New climate file '{}' is generated at {}.".format(
+        print("New climate file '{}' is generated at {}.".format(
             self.destinationFileName, self.destinationDir)
 
     def run(self):
@@ -921,7 +925,7 @@ def procMat(materials, max_thickness, min_thickness):
                     newthickness.append(materials.layerThickness[j]/float(nlayers))
             # Material that's less then min_thickness is not added.
             elif materials.layerThickness[j] < min_thickness:
-                print "WARNING: Material '{}' layer found too thin (<{:.2f}cm), ignored.".format(
+                print("WARNING: Material '{}' layer found too thin (<{:.2f}cm), ignored.").format(
                     materials._name, min_thickness*100)
             else:
                 newmat.append(Material(k[j], Vhc[j], name=materials._name))
@@ -941,7 +945,7 @@ def procMat(materials, max_thickness, min_thickness):
             newthickness = [min_thickness/2., min_thickness/2.]
             newmat = [Material(k[0], Vhc[0], name=materials._name),
                       Material(k[0], Vhc[0], name=materials._name)]
-            print "WARNING: a thin (<2cm) single material '{}' layer found. May cause error.".format(
+            print("WARNING: a thin (<2cm) single material '{}' layer found. May cause error.".format(
                 materials._name)
         else:
             newthickness = [materials.layerThickness[0]/2., materials.layerThickness[0]/2.]
