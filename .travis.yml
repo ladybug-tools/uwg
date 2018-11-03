@@ -1,9 +1,8 @@
 language: python
 python:
   - "2.7"
-
-env:
-  - TRAVIS=true
+  - "3.6"
+  
 # command to install dependencies
 #install:
 #	- pip install -r requirements.txt

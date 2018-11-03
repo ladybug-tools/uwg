@@ -1,3 +1,8 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
 import pytest
 import uwg
 import os
@@ -7,7 +12,7 @@ import decimal
 
 import logging
 
-from test_base import TestBase
+from .test_base import TestBase
 
 dd = decimal.Decimal.from_float
 pp = pprint.pprint
@@ -33,7 +38,7 @@ class TestOutput(TestBase):
 
         assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)
 
-        for i in xrange(0,len(pywtr.staTemp)):
+        for i in range(0,len(pywtr.staTemp)):
 
             # Check dry bulb [K]
             tol = self.CALCULATE_TOLERANCE(pywtr.staTemp[i],precision)

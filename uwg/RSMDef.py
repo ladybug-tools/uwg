@@ -1,10 +1,17 @@
 from __future__ import division
+from __future__ import print_function
+
+try:
+    range = xrange
+except NameError:
+    pass
 
 import os
 import math
 from pprint import pprint
 
 ppr = pprint
+
 
 class RSMDef(object):
     """
@@ -54,7 +61,7 @@ class RSMDef(object):
         self.z  = [0 for x in range(len(self.z_meso)-1)] # Midht btwn each distance interval
         self.dz = [0 for x in range(len(self.z_meso)-1)] # Distance betweeen each interval
 
-        for zi in xrange(len(self.z_meso)-1):
+        for zi in range(len(self.z_meso)-1):
             self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])
             self.dz[zi] = self.z_meso[zi+1] - self.z_meso[zi]
 
@@ -66,7 +73,7 @@ class RSMDef(object):
         pp = True
 
         # Define self.nz0, self.nzref, self.nzfor, self.nz10, self.nzi
-        for iz in xrange(len(self.z_meso)-1):
+        for iz in range(len(self.z_meso)-1):
             # self.nz0: self.z index >= reference height for weather station
             eq_th = self.is_near_zero(self.z[iz] - parameter.tempHeight)
             if (eq_th == True or self.z[iz] > parameter.tempHeight) and ll==True:
@@ -100,21 +107,21 @@ class RSMDef(object):
         self.tempProf = [T_init for x in range(self.nzref)]
         self.presProf = [P_init for x in range(self.nzref)]
 
-        for iz in xrange(1,self.nzref):
+        for iz in range(1,self.nzref):
             self.presProf[iz] = (self.presProf[iz-1]**(parameter.r/parameter.cp) -\
                parameter.g/parameter.cp * (P_init**(parameter.r/parameter.cp)) * (1./self.tempProf[iz] +\
                1./self.tempProf[iz-1]) * 0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
         self.tempRealProf = [T_init for x in range(self.nzref)]
-        for iz in xrange(self.nzref):
+        for iz in range(self.nzref):
            self.tempRealProf[iz] = self.tempProf[iz] * (self.presProf[iz] / P_init)**(parameter.r/parameter.cp)
 
         self.densityProfC = [None for x in range(self.nzref)]
-        for iz in xrange(self.nzref):
+        for iz in range(self.nzref):
            self.densityProfC[iz] = self.presProf[iz] / parameter.r / self.tempRealProf[iz]
 
         self.densityProfS = [self.densityProfC[0] for x in range(self.nzref+1)]
-        for iz in xrange(1,self.nzref):
+        for iz in range(1,self.nzref):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] +\
                self.densityProfC[iz-1] * self.dz[iz]) / (self.dz[iz-1]+self.dz[iz])
 
@@ -154,23 +161,23 @@ class RSMDef(object):
         self.tempProf[0] = forc.temp    # Lower boundary condition
 
         # compute pressure profile
-        for iz in reversed(range(self.nzref)[1:]):
+        for iz in reversed(list(range(self.nzref))[1:]):
            self.presProf[iz-1] = (math.pow(self.presProf[iz],parameter.r/parameter.cp) + \
                parameter.g/parameter.cp*(math.pow(forc.pres,parameter.r/parameter.cp)) * \
                (1./self.tempProf[iz] + 1./self.tempProf[iz-1]) * \
                0.5 * self.dz[iz])**(1./(parameter.r/parameter.cp))
 
         # compute the real temperature profile
-        for iz in xrange(self.nzref):
+        for iz in range(self.nzref):
             self.tempRealProf[iz]= self.tempProf[iz] * \
             (self.presProf[iz]/forc.pres)**(parameter.r/parameter.cp)
 
         # compute the density profile
-        for iz in xrange(self.nzref):
+        for iz in range(self.nzref):
            self.densityProfC[iz] = self.presProf[iz]/parameter.r/self.tempRealProf[iz]
         self.densityProfS[0] = self.densityProfC[0]
 
-        for iz in xrange(1,self.nzref):
+        for iz in range(1,self.nzref):
            self.densityProfS[iz] = (self.densityProfC[iz] * self.dz[iz-1] + \
                self.densityProfC[iz-1] * self.dz[iz])/(self.dz[iz-1] + self.dz[iz])
 
@@ -193,25 +200,25 @@ class RSMDef(object):
         # log(-x) = log(x) + log(-1) = log(x) + i*pi
         # Python will throw an exception. Negative value occurs here if
         # VDM is run for average obstacle height ~ 4m.
-        for iz in xrange(self.nzref):
+        for iz in range(self.nzref):
             self.windProf[iz] = ustarRur/parameter.vk*\
                 math.log((self.z[iz]-self.disp)/self.z0r)
 
         # Average pressure
         self.ublPres = 0.
-        for iz in xrange(self.nzfor):
+        for iz in range(self.nzfor):
             self.ublPres = self.ublPres + \
                 self.presProf[iz]*self.dz[iz]/(self.z[self.nzref-1]+self.dz[self.nzref-1]/2.)
 
     def DiffusionEquation(self,nz,dt,co,da,daz,cd,dz):
 
-        cddz = [0 for i in xrange(nz+2)]
-        a = [[0 for j in xrange(3)] for i in xrange(nz)]
-        c = [0 for i in xrange(nz)]
+        cddz = [0 for i in range(nz+2)]
+        a = [[0 for j in range(3)] for i in range(nz)]
+        c = [0 for i in range(nz)]
 
         #--------------------------------------------------------------------------
         cddz[0] = daz[0]*cd[0]/dz[0]
-        for iz in xrange(1,nz):
+        for iz in range(1,nz):
             cddz[iz] = 2.*daz[iz]*cd[iz]/(dz[iz]+dz[iz-1])
         cddz[nz] = daz[nz]*cd[nz]/dz[nz]
         #--------------------------------------------------------------------------
@@ -220,7 +227,7 @@ class RSMDef(object):
         a[0][2] = 0.
         c[0] = co[0]
 
-        for iz in xrange(1,nz-1):
+        for iz in range(1,nz-1):
             dzv = dz[iz]
             a[iz][0]=-cddz[iz]*dt/dzv/da[iz]
             a[iz][1]=1+dt*(cddz[iz]+cddz[iz+1])/dzv/da[iz]
@@ -238,9 +245,9 @@ class RSMDef(object):
 
     def DiffusionCoefficient(self,rho,z,dz,z0,disp,tempRur,heatRur,nz,uref,th,parameter):
         # Initialization
-        Kt = [0 for x in xrange(nz+1)]
-        ws = [0 for x in xrange(nz)]
-        te = [0 for x in xrange(nz)]
+        Kt = [0 for x in range(nz+1)]
+        ws = [0 for x in range(nz)]
+        te = [0 for x in range(nz)]
         # Friction velocity (Louis 1979)
         ustar = parameter.vk * uref/math.log((10.-disp)/z0)
 
@@ -254,14 +261,14 @@ class RSMDef(object):
             # Wind profile function
             phi_m = (1-8.*0.1*parameter.dayBLHeight/lengthRur)**(-1./3.)
 
-            for iz in xrange(nz):
+            for iz in range(nz):
                 # Mixed-layer velocity scale
                 ws[iz] = (ustar**3 + phi_m*parameter.vk*wstar**3*z[iz]/parameter.dayBLHeight)**(1/3.)
                 # TKE approximation
                 te[iz] = max(ws[iz]**2., 0.01)
 
         else: # Stable and neutral conditions
-            for iz in xrange(nz):
+            for iz in range(nz):
                 # TKE approximation
                 te[iz] = max(ustar**2.,0.01)
 
@@ -271,7 +278,7 @@ class RSMDef(object):
         self.dld,dls,dlk = self.LengthBougeault(nz,self.dld,self.dlu,z)
 
         # Boundary-layer diffusion coefficient
-        for iz in xrange(nz):
+        for iz in range(nz):
            Kt[iz] = 0.4*dlk[iz]*math.sqrt(te[iz])
 
         Kt[nz] = Kt[nz-1]
@@ -283,17 +290,17 @@ class RSMDef(object):
         # list length (i.e nz) != list indexing (i.e dlu[0] in python
         # wherease in matlab it is
 
-        dlu = [0 for x in xrange(nz)]
-        dld = [0 for x in xrange(nz)]
+        dlu = [0 for x in range(nz)]
+        dld = [0 for x in range(nz)]
 
-        for iz in xrange(nz):
+        for iz in range(nz):
             zup=0.
             dlu[iz] = z[nz] - z[iz] - dz[iz]/2.
             zzz=0.
             zup_inf=0.
             beta=g/pt[iz]
 
-            for izz in xrange(iz,nz-1):
+            for izz in range(iz,nz-1):
                 dzt=(dz[izz+1]+dz[izz])/2.
                 zup=zup-beta*pt[iz]*dzt
                 zup=zup+beta*(pt[izz+1]+pt[izz])*dzt/2.
@@ -316,7 +323,7 @@ class RSMDef(object):
             dld[iz]=z[iz]+dz[iz]/2.
             zzz=0.
 
-            for izz in xrange(iz,0,-1):
+            for izz in range(iz,0,-1):
                 dzt=(dz[izz-1]+dz[izz])/2.
                 zdo=zdo+beta*pt[iz]*dzt
                 zdo=zdo-beta*(pt[izz-1]+pt[izz])*dzt/2.
@@ -338,14 +345,14 @@ class RSMDef(object):
 
     def LengthBougeault(self,nz,dld,dlu,z):
 
-        dlg = [0 for x in xrange(nz)]
-        dls = [0 for x in xrange(nz)]
-        dlk = [0 for x in xrange(nz)]
+        dlg = [0 for x in range(nz)]
+        dls = [0 for x in range(nz)]
+        dlk = [0 for x in range(nz)]
 
-        for iz in xrange(nz):
+        for iz in range(nz):
             dlg[iz] = (z[iz]+z[iz+1])/2.
 
-        for iz in xrange(nz):
+        for iz in range(nz):
             dld[iz] = min(dld[iz], dlg[iz])
             dls[iz] = math.sqrt(dlu[iz]*dld[iz])
             dlk[iz] = min(dlu[iz],dld[iz])
@@ -366,16 +373,16 @@ class RSMDef(object):
          x     results
         """
 
-        X = [0 for i in xrange(nz)]
+        X = [0 for i in range(nz)]
 
-        for i in reversed(xrange(nz-1)):
+        for i in reversed(range(nz-1)):
             C[i] = C[i] - A[i][2] * C[i+1]/A[i+1][1]
             A[i][1] = A[i][1] - A[i][2] * A[i+1][0]/A[i+1][1]
 
-        for i in  xrange(1,nz,1):
+        for i in  range(1,nz,1):
             C[i] = C[i] - A[i][0] * C[i-1]/A[i-1][1]
 
-        for i in xrange(nz):
+        for i in range(nz):
             X[i] = C[i]/A[i][1]
 
         return X

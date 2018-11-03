@@ -8,6 +8,7 @@ import decimal
 dd = decimal.Decimal.from_float
 pp = pprint.pprint
 
+
 def test_psychrometric_float_point():
 
     # Input values
@@ -23,6 +24,7 @@ def test_psychrometric_float_point():
     assert h == pytest.approx(7.183036653518451e+04, abs=1e-15) # enthalpy [J/kgd]
     assert Tdp == pytest.approx(-10.012150181172135, abs=1e-15) # Wet bulb temp [C]
     assert v == pytest.approx(8.717031296493113, abs=1e-15)     # specific volume [m3/kga]s
+
 
 def test_psychrometric_simple_1():
     # Really simple, coarse tests

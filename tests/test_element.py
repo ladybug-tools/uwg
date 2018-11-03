@@ -1,9 +1,15 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
 import pytest
 import uwg
 import os
 import math
 import pprint
-from test_base import TestBase
+from .test_base import TestBase
+
 
 class TestElement(TestBase):
 
@@ -114,7 +120,7 @@ class TestElement(TestBase):
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i],15.0)
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
@@ -166,7 +172,7 @@ class TestElement(TestBase):
         # matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             #print uwg_python_val[i], uwg_matlab_val[i]
             tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i],15.0)
             assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)

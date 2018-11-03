@@ -1,11 +1,17 @@
+try:
+    range = xrange
+except NameError:
+    pass
+
 import pytest
 import os
 import math
 import uwg
 import pprint
-from test_base import TestBase
+from .test_base import TestBase
 
 pp = pprint.pprint
+
 
 class TestUrbFlux(TestBase):
 
@@ -78,7 +84,7 @@ class TestUrbFlux(TestBase):
         #matlab ref checking
         assert len(uwg_matlab_val) == len(uwg_python_val)
 
-        for i in xrange(len(uwg_matlab_val)):
+        for i in range(len(uwg_matlab_val)):
             if uwg_matlab_val[i] == "\n":
                 uwg_matlab_val[i] = None
                 assert uwg_python_val[i] == uwg_matlab_val[i], "error at index={}".format(i)
