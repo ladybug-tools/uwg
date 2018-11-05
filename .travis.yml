@@ -2,7 +2,10 @@ language: python
 python:
   - "2.7"
   - "3.6"
-  
+
+env:
+  - TRAVIS=true
+
 # command to install dependencies
 #install:
 #	- pip install -r requirements.txt
@@ -13,7 +16,7 @@ notifications:
   email: never
 
 after_success:
-- git config --global user.name "semantic-release (via TravisCI)"
-- git config --global user.email "semantic-release@travis"
-- pip install python-semantic-release
-- semantic-release version
+  - git config --global user.name "ladybugbot"
+  - git config --global user.email "release@ladybug.tools"
+  - pip install python-semantic-release
+  - semantic-release publish
