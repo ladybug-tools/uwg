@@ -13,6 +13,3 @@ __pycache__/
 
 #logs
 *.log
-
-#virtual environment
-venv/
