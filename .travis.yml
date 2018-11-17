@@ -2,11 +2,17 @@ language: python
 python:
   - "2.7"
   - "3.6"
-# command to install dependencies
-#install:
-#	- pip install -r requirements.txt
-# command to run tests
+
+env:
+  - TRAVIS=true
+
 script: pytest
 
 notifications:
   email: never
+
+after_success:
+  - git config --global user.name "ladybugbot"
+  - git config --global user.email "release@ladybug.tools"
+  - pip install python-semantic-release
+  - semantic-release publish
