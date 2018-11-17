@@ -881,7 +881,7 @@ class uwg(object):
         epw_new_id = open(self.newPathName, "w")
 
         for i in range(8):
-            new_epw_line = '{}\r\n'.format(reduce(lambda x, y: x+","+y, self._header[i]))
+            new_epw_line = '{}\n'.format(reduce(lambda x, y: x+","+y, self._header[i]))
             epw_new_id.write(new_epw_line)
 
         for i in range(len(self.epwinput)):
@@ -889,7 +889,7 @@ class uwg(object):
             for ei in range(34):
                 printme += "{}".format(self.epwinput[i][ei]) + ','
             printme = printme + "{}".format(self.epwinput[i][ei])
-            new_epw_line = "{0}\r\n".format(printme)
+            new_epw_line = "{0}\n".format(printme)
             epw_new_id.write(new_epw_line)
 
         epw_new_id.close()
