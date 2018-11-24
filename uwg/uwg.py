@@ -340,26 +340,28 @@ class uwg(object):
                     row[0] == "SHGC"
                 )
             )
-
-            if row == [] or "#" in row[0]:
-                count += 1
-                continue
-            elif row[0] == "SchTraffic":
-                # SchTraffic: 3 x 24 matrix
-                trafficrows = uwg_param_data[count+1:count+4]
-                self._init_param_dict[row[0]] = [utilities.str2fl(r[:24]) for r in trafficrows]
-                count += 4
-            elif row[0] == "bld":
-                # bld: 17 x 3 matrix
-                bldrows = uwg_param_data[count+1:count+17]
-                self._init_param_dict[row[0]] = [utilities.str2fl(r[:3]) for r in bldrows]
-                count += 17
-            elif is_optional_parameter:
-                self._init_param_dict[row[0]] = float(row[1]) if row[1] != "" else None
-                count += 1
-            else:
-                self._init_param_dict[row[0]] = float(row[1])
-                count += 1
+            try:
+                if row == [] or "#" in row[0]:
+                    count += 1
+                    continue
+                elif row[0] == "SchTraffic":
+                    # SchTraffic: 3 x 24 matrix
+                    trafficrows = uwg_param_data[count+1:count+4]
+                    self._init_param_dict[row[0]] = [utilities.str2fl(r[:24]) for r in trafficrows]
+                    count += 4
+                elif row[0] == "bld":
+                    # bld: 17 x 3 matrix
+                    bldrows = uwg_param_data[count+1:count+17]
+                    self._init_param_dict[row[0]] = [utilities.str2fl(r[:3]) for r in bldrows]
+                    count += 17
+                elif is_optional_parameter:
+                    self._init_param_dict[row[0]] = float(row[1]) if row[1] != "" else None
+                    count += 1
+                else:
+                    self._init_param_dict[row[0]] = float(row[1])
+                    count += 1
+            except ValueError:
+                print("Error while reading parameter at {} {}".format(count, row))
 
         ipd = self._init_param_dict
 
@@ -432,19 +434,7 @@ class uwg(object):
         if self.albWall is None: self.albWall = ipd['albWall']
         if self.SHGC is None: self.SHGC = ipd['SHGC']
 
-    def set_input(self):
-        """ Set inputs from .uwg input file if not already defined, the check if all
-        the required input parameters are there.
-        """
-
-        # If a uwgParamFileName is set, then read inputs from .uwg file.
-        # User-defined class properties will override the inputs from the .uwg file.
-        if self.uwgParamFileName is not None:
-            print("\nReading uwg file input.")
-            self.read_input()
-        else:
-            print("\nNo .uwg file input.")
-
+    def check_required_inputs(self):
         # Required parameters
         is_defined = (type(self.Month) == float or type(self.Month) == int) and \
             (type(self.Day) == float or type(self.Day) == int) and \
@@ -477,6 +467,21 @@ class uwg(object):
         if not is_defined:
             raise Exception(
                 "The required parameters have not been defined correctly. Check input parameters and try again.")
+
+    def set_input(self):
+        """ Set inputs from .uwg input file if not already defined, the check if all
+        the required input parameters are there.
+        """
+
+        # If a uwgParamFileName is set, then read inputs from .uwg file.
+        # User-defined class properties will override the inputs from the .uwg file.
+        if self.uwgParamFileName is not None:
+            print("\nReading uwg file input.")
+            self.read_input()
+        else:
+            print("\nNo .uwg file input.")
+
+        self.check_required_inputs()
 
         # Modify zone to be used as python index
         self.zone = int(self.zone)-1
@@ -756,8 +761,7 @@ class uwg(object):
                 self.dayType = 1                                        # Weekday
 
             # Update anthropogenic heat load for each hour (building & UCM)
-            self.UCM.sensAnthrop = self.sensAnth * \
-                (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
+            self.UCM.sensAnthrop = self.sensAnth * (self.SchTraffic[self.dayType-1][self.simTime.hourDay])
 
             # Update the energy components for building types defined in initialize.uwg
             for i in range(len(self.BEM)):
