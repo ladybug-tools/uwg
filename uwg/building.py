@@ -75,7 +75,7 @@ class Building(object):
         Qheat;              % total heat added (sensible only)
     """
 
-    TEMPERATURE_COEFFICIENT_CONFLICT_MSG = "FATAL ERROR!"
+    TEMPERATURE_COEFFICIENT_CONFLICT_MSG = "FATAL ERROR! Try reducing the simulation timstep to fix this error."
 
     def __init__(self,floorHeight,intHeatNight,intHeatDay,intHeatFRad,\
             intHeatFLat,infil,vent,glazingRatio,uValue,shgc,\
@@ -183,15 +183,13 @@ class Building(object):
 
         try:
             chk_tin = converge_lo <= T_indoor <= converge_hi
-            chk_tce = converge_lo <= T_ceil   <= converge_hi
+            chk_tce = converge_lo <= T_ceil <= converge_hi
 
-            if chk_tin != True or chk_tce != True:
-                raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
-                sys.exit("Exiting uwg due to fatal error.")
+            if chk_tin is not True or chk_tce is not True:
+                raise Exception("{}.\n Error at {}/{} {}s for bld {}.".format(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG, simTime.month, simTime.day, simTime.secDay, BEM))
 
         except ValueError:
-            raise Exception(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG)
-            sys.exit("Exiting uwg due to fatal error.")
+            raise Exception("{}.\n Error at {}/{} {}s for bld {}".format(self.TEMPERATURE_COEFFICIENT_CONFLICT_MSG, simTime.month, simTime.day, simTime.secDay, BEM))
 
         # If temperature is reasonable assign coefficients
         if T_ceil > T_indoor:                               # set higher ceiling heat convection coefficient
