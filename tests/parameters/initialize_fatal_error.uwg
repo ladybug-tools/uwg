@@ -1,0 +1,118 @@
+# =================================================
+# Sample UWGv4.2 simulation initialization parameters
+# Chris Mackey,2017
+# =================================================
+
+# =================================================
+# REQUIRED PARAMETERS
+# =================================================
+
+# Urban characteristics
+bldHeight,40.1365753206,
+bldDensity,0.466700307535,
+verToHor,1.71091682705,
+h_mix,0.5,
+charLength,387.861380315,
+albRoad,0.2,
+dRoad,0.5,
+kRoad,1,
+cRoad,1600000,
+sensAnth,10.0,
+latAnth,2,
+
+# Climate Zone (Eg. City)   Zone number
+# 1A(Miami)                     1
+# 2A(Houston)                   2
+# 2B(Phoenix)                   3
+# 3A(Atlanta)                   4
+# 3B-CA(Los Angeles)            5
+# 3B(Las Vegas)                 6
+# 3C(San Francisco)             7
+# 4A(Baltimore)                 8
+# 4B(Albuquerque)               9
+# 4C(Seattle)                   10
+# 5A(Chicago)                   11
+# 5B(Boulder)                   12
+# 6A(Minneapolis)               13
+# 6B(Helena)                    14
+# 7(Duluth)                     15
+# 8(Fairbanks)                  16
+
+zone,1,
+
+# Vegetation parameters
+vegCover,0.0351485672949,
+treeCoverage,0.0522429901946,
+vegStart,1,
+vegEnd,12,
+albVeg,0.35,
+rurVegCover,0.85,
+latGrss,0.5,
+latTree,0.7,
+
+# Traffic schedule [1 to 24 hour],
+SchTraffic,
+0.2,0.2,0.2,0.2,0.2,0.4,0.7,0.9,0.9,0.6,0.6,0.6,0.6,0.6,0.7,0.8,0.9,0.9,0.8,0.8,0.7,0.3,0.2,0.2,
+0.2,0.2,0.2,0.2,0.2,0.3,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.7,0.7,0.7,0.7,0.5,0.4,0.3,0.2,0.2,
+0.2,0.2,0.2,0.2,0.2,0.3,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.7,0.7,0.7,0.7,0.5,0.4,0.3,0.2,0.2,
+
+# Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
+# Note that sum(bld) must be equal to 1
+bld,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0.64,0,
+0,0,0,
+0.221,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0.138,0,
+
+# =================================================
+# OPTIONAL URBAN PARAMETERS
+# =================================================
+# If not provided, optional parameters are taken from corresponding DOE Reference building
+albRoof,0.332095888724,
+vegRoof,0.332095888724,
+glzR,,
+SHGC,,
+albWall,,
+
+# =================================================
+# OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
+# =================================================
+# Simulation parameters,
+Month,8,
+Day,1,
+nDay,1,
+dtSim,300.0,
+dtWeather,3600.0,
+
+# HVAC system and internal loads
+autosize,0,
+sensOcc,100.0,
+LatFOcc,0.3,
+RadFOcc,0.2,
+RadFEquip,0.5,
+RadFLight,0.7,
+
+#Urban climate parameters
+h_ubl1,1000,
+h_ubl2,80,
+h_ref,150,
+h_temp,10,
+h_wind,10,
+c_circ,1.2,
+c_exch,1.0,
+maxDay,150.0,
+maxNight,20.0,
+windMin,1.0,
+h_obs,0.1,
