@@ -1,18 +1,23 @@
 language: python
+
 python:
   - "2.7"
   - "3.6"
 
-env:
-  - TRAVIS=true
+install:
+  - pip install pytest pytest-cov
 
-script: pytest
+script:
+  - python -m pytest
 
-notifications:
-  email: never
-
-after_success:
-  - git config --global user.name "ladybugbot"
-  - git config --global user.email "release@ladybug.tools"
-  - pip install python-semantic-release
-  - semantic-release publish
+jobs:
+  include:
+    - stage: deploy
+      if: branch = master AND (NOT type IN (pull_request))
+      python: "3.6"
+      env: TRAVIS=true
+      script:
+        - git config --global user.name "ladybugbot"
+        - git config --global user.email "release@ladybug.tools"
+        - pip install python-semantic-release
+        - semantic-release publish
