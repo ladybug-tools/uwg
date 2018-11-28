@@ -199,14 +199,14 @@ class SolarCalcs(object):
         self.zenith = math.acos(math.sin(zlat)*math.sin(self.decsol) + math.cos(zlat)*math.cos(self.decsol)*math.cos(ha))
 
         # tangente of solar zenithal angle
-        if (abs(0.5*math.pi-self.zenith) < 1e-6):
-            if(0.5*math.pi-self.zenith > 0.):
-                self.tanzen = math.tan(0.5*math.pi-1e-6);
+        if abs(0.5*math.pi - self.zenith) < 1e-6:
+            if 0.5*math.pi - self.zenith > 0.:
+                self.tanzen = math.tan(0.5*math.pi-1e-6)
 
-            if(0.5*math.pi-self.zenith <= 0.):
-                self.tanzen = math.tan(0.5*math.pi+1e-6);
+            elif 0.5*math.pi - self.zenith <= 0.:
+                self.tanzen = math.tan(0.5*math.pi+1e-6)
 
-        elif (abs(self.zenith) <  1e-6):
+        elif abs(self.zenith) < 1e-6:
             # lim x->0 tan(x) -> 0 which results in division by zero error
             # when calculating the critical canyon angle
             # so set tanzen to 1e-6 which will result in critical canyon angle = 90
