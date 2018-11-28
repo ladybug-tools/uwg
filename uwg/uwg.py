@@ -180,7 +180,8 @@ class uwg(object):
         self.alb_road = None     # road albedo
         self.d_road = None       # road pavement thickness
         self.sensAnth = None     # non-building sensible heat (W/m^2)
-        self.latAnth = None      # non-building latent heat heat (W/m^2)
+        self.latAnth = None      # non-building latent heat heat (W/m^2). Not used, taken out by JH.
+
 
         # Fraction of building typology stock
         self.bld = None         # 16x3 matrix of fraction of building type by era
@@ -402,7 +403,7 @@ class uwg(object):
         if self.alb_road is None: self.alb_road = ipd['albRoad']
         if self.d_road is None: self.d_road = ipd['dRoad']
         if self.sensAnth is None: self.sensAnth = ipd['sensAnth']
-        if self.latAnth is None: self.latAnth = ipd['latAnth']
+        # if self.latAnth is None: self.latAnth = ipd['latAnth'] # Not used, taken out by JH.
 
         # climate Zone
         if self.zone is None: self.zone = ipd['zone']
@@ -435,38 +436,53 @@ class uwg(object):
         if self.SHGC is None: self.SHGC = ipd['SHGC']
 
     def check_required_inputs(self):
-        # Required parameters
-        is_defined = (type(self.Month) == float or type(self.Month) == int) and \
-            (type(self.Day) == float or type(self.Day) == int) and \
-            (type(self.nDay) == float or type(self.nDay) == int) and \
-            type(self.dtSim) == float and type(self.dtWeather) == float and \
-            (type(self.autosize) == float or type(self.autosize) == int) and \
-            type(self.sensOcc) == float and type(self.LatFOcc) == float and \
-            type(self.RadFOcc) == float and type(self.RadFEquip) == float and \
-            type(self.RadFLight) == float and type(self.h_ubl1) == float and \
-            type(self.h_ubl2) == float and type(self.h_ref) == float and \
-            type(self.h_temp) == float and type(self.h_wind) == float and \
-            type(self.c_circ) == float and type(self.c_exch) == float and \
-            type(self.maxDay) == float and type(self.maxNight) == float and \
-            type(self.windMin) == float and type(self.h_obs) == float and \
-            type(self.bldHeight) == float and type(self.h_mix) == float and \
-            type(self.bldDensity) == float and type(self.verToHor) == float and \
-            type(self.charLength) == float and type(self.alb_road) == float and \
-            type(self.d_road) == float and type(self.sensAnth) == float and \
-            type(self.latAnth) == float and type(self.bld) == type([]) and \
-            self.is_near_zero(len(self.bld)-16.0) and \
-            type(self.latTree) == float and type(self.latGrss) == float and \
-            (type(self.zone) == float or type(self.zone) == int) and \
-            (type(self.vegStart) == float or type(self.vegStart) == int) and \
-            (type(self.vegEnd) == float or type(self.vegEnd) == int) and \
-            type(self.vegCover) == float and type(self.treeCoverage) == float and \
-            type(self.albVeg) == float and type(self.rurVegCover) == float and \
-            type(self.kRoad) == float and type(self.cRoad) == float and \
-            type(self.SchTraffic) == type([]) and self.is_near_zero(len(self.SchTraffic)-3.0)
-
-        if not is_defined:
-            raise Exception(
-                "The required parameters have not been defined correctly. Check input parameters and try again.")
+        # Fail if required parameters aren't correct
+        assert type(self.Month) == float or type(self.Month) == int
+        assert type(self.Day) == float or type(self.Day) == int
+        assert type(self.nDay) == float or type(self.nDay) == int
+        assert type(self.dtSim) == float
+        assert type(self.dtWeather) == float
+        assert type(self.autosize) == float or type(self.autosize) == int
+        assert type(self.sensOcc) == float
+        assert type(self.LatFOcc) == float
+        assert type(self.RadFOcc) == float
+        assert type(self.RadFEquip) == float
+        assert type(self.RadFLight) == float
+        assert type(self.h_ubl1) == float
+        assert type(self.h_ubl2) == float
+        assert type(self.h_ref) == float
+        assert type(self.h_temp) == float
+        assert type(self.h_wind) == float
+        assert type(self.c_circ) == float
+        assert type(self.c_exch) == float
+        assert type(self.maxDay) == float
+        assert type(self.maxNight) == float
+        assert type(self.windMin) == float
+        assert type(self.h_obs) == float
+        assert type(self.bldHeight) == float
+        assert type(self.h_mix) == float
+        assert type(self.bldDensity) == float
+        assert type(self.verToHor) == float
+        assert type(self.charLength) == float
+        assert type(self.alb_road) == float
+        assert type(self.d_road) == float
+        assert type(self.sensAnth) == float
+        # assert type(self.latAnth) == float # Take this out as isn't being used
+        assert isinstance(self.bld, list)
+        assert len(self.bld) == 16
+        assert type(self.latTree) == float
+        assert type(self.latGrss) == float
+        assert type(self.zone) == float or type(self.zone) == int
+        assert type(self.vegStart) == float or type(self.vegStart) == int
+        assert type(self.vegEnd) == float or type(self.vegEnd) == int
+        assert type(self.vegCover) == float
+        assert type(self.treeCoverage) == float
+        assert type(self.albVeg) == float
+        assert type(self.rurVegCover) == float
+        assert type(self.kRoad) == float
+        assert type(self.cRoad) == float
+        assert isinstance(self.SchTraffic, list)
+        assert len(self.SchTraffic) == 3
 
     def set_input(self):
         """ Set inputs from .uwg input file if not already defined, the check if all
