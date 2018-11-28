@@ -24,6 +24,10 @@ class TestUCMDef(TestBase):
         self.uwg.init_BEM_obj()
         self.uwg.init_input_obj()
 
+        # Because we are not using latAnthrop, this value can be None in uwg.
+        # So we will hardcode value for now.
+        self.uwg.UCM.latAnthrop = 2.0
+
         # Get uwg_python values
         uwg_python_val = [
             self.uwg.UCM.h_mix,         # waste heat mix into canyon ratio
