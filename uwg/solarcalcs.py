@@ -203,7 +203,7 @@ class SolarCalcs(object):
             if(0.5*math.pi-self.zenith > 0.):
                 self.tanzen = math.tan(0.5*math.pi-1e-6);
 
-            if(0.5*math.pi-zenith <= 0.):
+            if(0.5*math.pi-self.zenith <= 0.):
                 self.tanzen = math.tan(0.5*math.pi+1e-6);
 
         elif (abs(self.zenith) <  1e-6):
