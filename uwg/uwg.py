@@ -437,50 +437,50 @@ class uwg(object):
 
     def check_required_inputs(self):
         # Fail if required parameters aren't correct
-        assert type(self.Month) == float or type(self.Month) == int
-        assert type(self.Day) == float or type(self.Day) == int
-        assert type(self.nDay) == float or type(self.nDay) == int
-        assert type(self.dtSim) == float
-        assert type(self.dtWeather) == float
-        assert type(self.autosize) == float or type(self.autosize) == int
-        assert type(self.sensOcc) == float
-        assert type(self.LatFOcc) == float
-        assert type(self.RadFOcc) == float
-        assert type(self.RadFEquip) == float
-        assert type(self.RadFLight) == float
-        assert type(self.h_ubl1) == float
-        assert type(self.h_ubl2) == float
-        assert type(self.h_ref) == float
-        assert type(self.h_temp) == float
-        assert type(self.h_wind) == float
-        assert type(self.c_circ) == float
-        assert type(self.c_exch) == float
-        assert type(self.maxDay) == float
-        assert type(self.maxNight) == float
-        assert type(self.windMin) == float
-        assert type(self.h_obs) == float
-        assert type(self.bldHeight) == float
-        assert type(self.h_mix) == float
-        assert type(self.bldDensity) == float
-        assert type(self.verToHor) == float
-        assert type(self.charLength) == float
-        assert type(self.alb_road) == float
-        assert type(self.d_road) == float
-        assert type(self.sensAnth) == float
-        # assert type(self.latAnth) == float # Take this out as isn't being used
+        assert isinstance(self.Month,(float, int))
+        assert isinstance(self.Day, (float, int))
+        assert isinstance(self.nDay, (float, int))
+        assert isinstance(self.dtSim, float)
+        assert isinstance(self.dtWeather, float)
+        assert isinstance(self.autosize, (float, int))
+        assert isinstance(self.sensOcc, float)
+        assert isinstance(self.LatFOcc, float)
+        assert isinstance(self.RadFOcc, float)
+        assert isinstance(self.RadFEquip, float)
+        assert isinstance(self.RadFLight, float)
+        assert isinstance(self.h_ubl1, float)
+        assert isinstance(self.h_ubl2, float)
+        assert isinstance(self.h_ref, float)
+        assert isinstance(self.h_temp, float)
+        assert isinstance(self.h_wind, float)
+        assert isinstance(self.c_circ, float)
+        assert isinstance(self.c_exch, float)
+        assert isinstance(self.maxDay, float)
+        assert isinstance(self.maxNight, float)
+        assert isinstance(self.windMin, float)
+        assert isinstance(self.h_obs, float)
+        assert isinstance(self.bldHeight, float)
+        assert isinstance(self.h_mix, float)
+        assert isinstance(self.bldDensity, float)
+        assert isinstance(self.verToHor, float)
+        assert isinstance(self.charLength, float)
+        assert isinstance(self.alb_road, float)
+        assert isinstance(self.d_road, float)
+        assert isinstance(self.sensAnth, float)
+        # assert isinstance(self.latAnth, float) # Take this out as isn't being used
         assert isinstance(self.bld, list)
         assert len(self.bld) == 16
-        assert type(self.latTree) == float
-        assert type(self.latGrss) == float
-        assert type(self.zone) == float or type(self.zone) == int
-        assert type(self.vegStart) == float or type(self.vegStart) == int
-        assert type(self.vegEnd) == float or type(self.vegEnd) == int
-        assert type(self.vegCover) == float
-        assert type(self.treeCoverage) == float
-        assert type(self.albVeg) == float
-        assert type(self.rurVegCover) == float
-        assert type(self.kRoad) == float
-        assert type(self.cRoad) == float
+        assert isinstance(self.latTree, float)
+        assert isinstance(self.latGrss, float)
+        assert isinstance(self.zone, (float, int))
+        assert isinstance(self.vegStart, (float, int))
+        assert isinstance(self.vegEnd, (float, int))
+        assert isinstance(self.vegCover, float)
+        assert isinstance(self.treeCoverage, float)
+        assert isinstance(self.albVeg, float)
+        assert isinstance(self.rurVegCover, float)
+        assert isinstance(self.kRoad, float)
+        assert isinstance(self.cRoad, float)
         assert isinstance(self.SchTraffic, list)
         assert len(self.SchTraffic) == 3
 
