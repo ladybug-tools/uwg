@@ -18,7 +18,6 @@ dRoad,0.5,        # road pavement thickness (m)
 kRoad,1,          # road pavement conductivity (W/m K)
 cRoad,1600000,    # road volumetric heat capacity (J/m^3 K)
 sensAnth,20,      # non-building sensible heat at street level [aka. heat from cars, pedestrians, street cooking, etc. ] (W/m^2)
-latAnth,2,        # non-building latent heat (W/m^2) (currently not used)
 
 # Climate Zone (Eg. City)   Zone number
 # 1A(Miami)                     1

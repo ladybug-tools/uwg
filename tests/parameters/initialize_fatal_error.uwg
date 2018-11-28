@@ -18,7 +18,6 @@ dRoad,0.5,
 kRoad,1,
 cRoad,1600000,
 sensAnth,10.0,
-latAnth,2,
 
 # Climate Zone (Eg. City)   Zone number
 # 1A(Miami)                     1
