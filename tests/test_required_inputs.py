@@ -24,6 +24,18 @@ class TestRequiredParams(TestBase):
         self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
         self.uwg.set_input()
 
+        with pytest.raises(AssertionError):
+            self.uwg.h_temp = 6
+            self.uwg.check_required_inputs()
+        self.uwg.h_temp = 2.0
+        self.uwg.check_required_inputs()
+
+        with pytest.raises(AssertionError):
+            self.uwg.windMin = 100
+            self.uwg.check_required_inputs()
+        self.uwg.windMin = 2.0
+        self.uwg.check_required_inputs()
+
         # assert type(self.Day) == float or type(self.Day) == int
         with pytest.raises(AssertionError):
             self.uwg.Day = "a"
