@@ -1,6 +1,6 @@
 """Urban Weather Generator Library."""
 
-__version__ = '5.3.0'
+__version__ = '5.3.1'
 
 from .simparam import SimParam
 from .weather import Weather
