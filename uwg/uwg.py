@@ -437,52 +437,97 @@ class uwg(object):
 
     def check_required_inputs(self):
         # Fail if required parameters aren't correct
-        assert isinstance(self.Month,(float, int))
-        assert isinstance(self.Day, (float, int))
-        assert isinstance(self.nDay, (float, int))
-        assert isinstance(self.dtSim, float)
-        assert isinstance(self.dtWeather, float)
-        assert isinstance(self.autosize, (float, int))
-        assert isinstance(self.sensOcc, float)
-        assert isinstance(self.LatFOcc, float)
-        assert isinstance(self.RadFOcc, float)
-        assert isinstance(self.RadFEquip, float)
-        assert isinstance(self.RadFLight, float)
-        assert isinstance(self.h_ubl1, float)
-        assert isinstance(self.h_ubl2, float)
-        assert isinstance(self.h_ref, float)
-        assert isinstance(self.h_temp, float)
-        assert isinstance(self.h_wind, float)
-        assert isinstance(self.c_circ, float)
-        assert isinstance(self.c_exch, float)
-        assert isinstance(self.maxDay, float)
-        assert isinstance(self.maxNight, float)
-        assert isinstance(self.windMin, float)
-        assert isinstance(self.h_obs, float)
-        assert isinstance(self.bldHeight, float)
-        assert isinstance(self.h_mix, float)
-        assert isinstance(self.bldDensity, float)
-        assert isinstance(self.verToHor, float)
-        assert isinstance(self.charLength, float)
-        assert isinstance(self.alb_road, float)
-        assert isinstance(self.d_road, float)
-        assert isinstance(self.sensAnth, float)
+        assert isinstance(self.Month, (float, int)), \
+            'Month must be a number. Got {}'.format(type(self.Month))
+        assert isinstance(self.Day, (float, int)), \
+            'Day must be a number. Got {}'.format(type(self.Day))
+        assert isinstance(self.nDay, (float, int)), \
+            'nDay must be a number. Got {}'.format(type(self.nDay))
+        assert isinstance(self.dtSim, float), \
+            'dtSim must be a float. Got {}'.format(type(self.dtSim))
+        assert isinstance(self.dtWeather, float), \
+            'dtWeather must be a float. Got {}'.format(type(self.dtWeather))
+        assert isinstance(self.autosize, (float, int)), \
+            'autosize must be a number. Got {}'.format(type(self.autosize))
+        assert isinstance(self.sensOcc, float), \
+            'sensOcc must be a float. Got {}'.format(type(self.sensOcc))
+        assert isinstance(self.LatFOcc, float), \
+            'LatFOcc must be a float. Got {}'.format(type(self.LatFOcc))
+        assert isinstance(self.RadFOcc, float), \
+            'RadFOcc must be a float. Got {}'.format(type(self.RadFOcc))
+        assert isinstance(self.RadFEquip, float), \
+            'RadFEquip must be a float. Got {}'.format(type(self.RadFEquip))
+        assert isinstance(self.RadFLight, float), \
+            'RadFLight must be a float. Got {}'.format(type(self.RadFLight))
+        assert isinstance(self.h_ubl1, float), \
+            'h_ubl1 must be a float. Got {}'.format(type(self.h_ubl1))
+        assert isinstance(self.h_ubl2, float), \
+            'h_ubl2 must be a float. Got {}'.format(type(self.h_ubl2))
+        assert isinstance(self.h_ref, float), \
+            'h_ref must be a float. Got {}'.format(type(self.h_ref))
+        assert isinstance(self.h_temp, float), \
+            'h_temp must be a float. Got {}'.format(type(self.h_temp))
+        assert isinstance(self.h_wind, float), \
+            'h_wind must be a float. Got {}'.format(type(self.h_wind))
+        assert isinstance(self.c_circ, float), \
+            'c_circ must be a float. Got {}'.format(type(self.c_circ))
+        assert isinstance(self.c_exch, float), \
+            'c_exch must be a float. Got {}'.format(type(self.c_exch))
+        assert isinstance(self.maxDay, float), \
+            'maxDay must be a float. Got {}'.format(type(self.maxDay))
+        assert isinstance(self.maxNight, float), \
+            'maxNight must be a float. Got {}'.format(type(self.maxNight))
+        assert isinstance(self.windMin, float), \
+            'windMin must be a float. Got {}'.format(type(self.windMin))
+        assert isinstance(self.h_obs, float), \
+            'h_obs must be a float. Got {}'.format(type(self.h_obs))
+        assert isinstance(self.bldHeight, float), \
+            'bldHeight must be a float. Got {}'.format(type(self.bldHeight))
+        assert isinstance(self.h_mix, float), \
+            'h_mix must be a float. Got {}'.format(type(self.h_mix))
+        assert isinstance(self.bldDensity, float), \
+            'bldDensity must be a float. Got {}'.format(type(self.bldDensity))
+        assert isinstance(self.verToHor, float), \
+            'verToHor must be a float. Got {}'.format(type(self.verToHor))
+        assert isinstance(self.charLength, float), \
+            'charLength must be a float. Got {}'.format(type(self.charLength))
+        assert isinstance(self.alb_road, float), \
+            'alb_road must be a float. Got {}'.format(type(self.alb_road))
+        assert isinstance(self.d_road, float), \
+            'd_road must be a float. Got {}'.format(type(self.d_road))
+        assert isinstance(self.sensAnth, float), \
+            'sensAnth must be a float. Got {}'.format(type(self.sensAnth))
         # assert isinstance(self.latAnth, float) # Take this out as isn't being used
-        assert isinstance(self.bld, list)
-        assert len(self.bld) == 16
-        assert isinstance(self.latTree, float)
-        assert isinstance(self.latGrss, float)
-        assert isinstance(self.zone, (float, int))
-        assert isinstance(self.vegStart, (float, int))
-        assert isinstance(self.vegEnd, (float, int))
-        assert isinstance(self.vegCover, float)
-        assert isinstance(self.treeCoverage, float)
-        assert isinstance(self.albVeg, float)
-        assert isinstance(self.rurVegCover, float)
-        assert isinstance(self.kRoad, float)
-        assert isinstance(self.cRoad, float)
-        assert isinstance(self.SchTraffic, list)
-        assert len(self.SchTraffic) == 3
+        assert isinstance(self.bld, list), \
+            'bld must be a list. Got {}'.format(type(self.bld))
+        assert len(self.bld) == 16, \
+            'length of bld must be 16. Got {}'.format(len(self.bld))
+        assert isinstance(self.latTree, float), \
+            'latTree must be a float. Got {}'.format(type(self.latTree))
+        assert isinstance(self.latGrss, float), \
+            'latGrss must be a float. Got {}'.format(type(self.latGrss))
+        assert isinstance(self.zone, (float, int)), \
+            'zone must be a number. Got {}'.format(type(self.zone))
+        assert isinstance(self.vegStart, (float, int)), \
+            'vegStart must be a number. Got {}'.format(type(self.vegStart))
+        assert isinstance(self.vegEnd, (float, int)), \
+            'vegEnd must be a number. Got {}'.format(type(self.vegEnd))
+        assert isinstance(self.vegCover, float), \
+            'vegCover must be a float. Got {}'.format(type(self.vegCover))
+        assert isinstance(self.treeCoverage, float), \
+            'treeCoverage must be a float. Got {}'.format(type(self.treeCoverage))
+        assert isinstance(self.albVeg, float), \
+            'albVeg must be a float. Got {}'.format(type(self.albVeg))
+        assert isinstance(self.rurVegCover, float), \
+            'rurVegCover must be a float. Got {}'.format(type(self.rurVegCover))
+        assert isinstance(self.kRoad, float), \
+            'kRoad must be a float. Got {}'.format(type(self.kRoad))
+        assert isinstance(self.cRoad, float), \
+            'cRoad must be a float. Got {}'.format(type(self.cRoad))
+        assert isinstance(self.SchTraffic, list), \
+            'SchTraffic must be a list. Got {}'.format(type(self.SchTraffic))
+        assert len(self.SchTraffic) == 3, \
+            'length of SchTraffic must be 3. Got {}'.format(len(self.SchTraffic))
 
     def set_input(self):
         """ Set inputs from .uwg input file if not already defined, the check if all
