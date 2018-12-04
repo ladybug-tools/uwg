@@ -769,7 +769,7 @@ class uwg(object):
 
         for it in range(1, self.simTime.nt, 1):  # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
-            if self.is_near_zero(self.nSoil):
+            if self.nSoil < 3: # correction to original matlab code
                 # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))
                 self.forc.waterTemp = sum(
