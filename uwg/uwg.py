@@ -777,7 +777,6 @@ class uwg(object):
             else:
                 # soil temperature by depth, by month
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month-1]
-                print(len(self.Tsoil))
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month-1]
 
             # There's probably a better way to update the weather...
