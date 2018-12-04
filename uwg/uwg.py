@@ -724,7 +724,7 @@ class uwg(object):
 
         for it in range(1, self.simTime.nt, 1):  # for every simulation time-step (i.e 5 min) defined by uwg
             # Update water temperature (estimated)
-            if self.is_near_zero(self.nSoil):
+            if self.nSoil < 3: # correction to original matlab code
                 # for BUBBLE/CAPITOUL/Singapore only
                 self.forc.deepTemp = sum(self.forcIP.temp)/float(len(self.forcIP.temp))
                 self.forc.waterTemp = sum(
@@ -732,6 +732,7 @@ class uwg(object):
             else:
                 # soil temperature by depth, by month
                 self.forc.deepTemp = self.Tsoil[self.soilindex1][self.simTime.month-1]
+                print(len(self.Tsoil))
                 self.forc.waterTemp = self.Tsoil[2][self.simTime.month-1]
 
             # There's probably a better way to update the weather...
