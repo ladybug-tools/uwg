@@ -47,7 +47,6 @@ from .UBLDef import UBLDef
 from .RSMDef import RSMDef
 from .solarcalcs import SolarCalcs
 from .psychrometrics import psychrometrics
-from .readDOE import readDOE
 from .urbflux import urbflux
 from . import utilities
 
