@@ -10,7 +10,7 @@ import os
 import copy
 import math
 
-import uwg
+from uwg.readDOE import readDOE
 from .test_base import TestBase
 
 from pprint import pprint
@@ -56,7 +56,7 @@ class TestReadDOE(TestBase):
         """ Tests for refDOE (Building class)"""
 
         # Run readDOE.py
-        refDOE, refBEM, Schedule = uwg.readDOE(serialize_output=False)
+        refDOE, refBEM, Schedule = readDOE(serialize_output=False)
 
         bldlst = [
             'floorHeight',
@@ -223,7 +223,7 @@ class TestReadDOE(TestBase):
     def test_refBEM(self):
         """ Tests for refBEM (BEMDef class) """
 
-        refDOE, refBEM, Schedule = uwg.readDOE(serialize_output=False)
+        refDOE, refBEM, Schedule = readDOE(serialize_output=False)
 
         elementlst=[
         'albedo',
@@ -372,7 +372,7 @@ class TestReadDOE(TestBase):
     def test_Schedule(self):
         """ Tests for Schedule (Schdef class) """
 
-        refDOE, refBEM, Schedule = uwg.readDOE(serialize_output=False)
+        refDOE, refBEM, Schedule = readDOE(serialize_output=False)
 
         schlst=[
         'Elec',
