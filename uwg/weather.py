@@ -52,12 +52,19 @@ class Weather(object):
         self.staDif = str2fl([cd[i][15] for i in range(len(cd))])           # horizontal solar diffuse radiation (W m-2)
         self.staUdir = str2fl([cd[i][20] for i in range(len(cd))])          # wind direction ()
         self.staUmod = str2fl([cd[i][21] for i in range(len(cd))])          # wind speed (m s-1)
-        self.staRobs = str2fl([cd[i][33] for i in range(len(cd))])          # Precipitation (mm h-1)
-        self.staHum = [0.0] * len(self.staTemp)                                     # specific humidty (kgH20 kgN202-1)
+        self.staHum = [0.0] * len(self.staTemp)                             # specific humidty (kgH20 kgN202-1)
         for i in range(len(self.staTemp)):
             self.staHum[i] = HumFromRHumTemp(self.staRhum[i], self.staTemp[i], self.staPres[i])
 
-        self.staTemp = [s+273.15 for s in self.staTemp]                             # air temperature (K)
+        self.staTemp = [s+273.15 for s in self.staTemp]                     # air temperature (K)
+
+        # Set precipitation to array of zeros. This is done to avoid errors
+        # for EPW files with incomplete or missing precipitation data. The
+        # current implementation of the UWG doesn't use precipitation data
+        # due to the difficulty in validating latent heat impact, the poor
+        # quality precipitation data from weather sensors, and the marginal
+        # impact it has on UHI.
+        self.staRobs = [0.0] * len(self.staTemp)                            # Precipitation (mm h-1)
 
     def __repr__(self):
         return "Weather: City = {}, Max Tdb = {}C, Min Tdb = {}C".format(
