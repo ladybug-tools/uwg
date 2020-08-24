@@ -2,6 +2,9 @@ from __future__ import division, print_function
 
 from .psychrometrics import psychrometrics, moist_air_density
 import logging
+# Logger will be disabled by default unless explicitly called in tests
+logger = logging.getLogger(__name__)
+
 from math import isnan
 import sys
 
@@ -112,9 +115,6 @@ class Building(object):
             self.Era = "null"                           # pre80, pst80, new
             self.Zone = "null"                          # Climate zone number
 
-            # Logger will be disabled by default unless explicitly called in tests
-            self.logger = logging.getLogger(__name__)
-
     def __repr__(self):
         return "BuildingType: {a}, Era: {b}, Zone: {c}".format(
             a=self.Type,
@@ -127,7 +127,7 @@ class Building(object):
 
     def BEMCalc(self,UCM,BEM,forc,parameter,simTime):
 
-        self.logger.debug("Logging at {} {}".format(__name__, self.__repr__()))
+        logger.debug("Logging at {} {}".format(__name__, self.__repr__()))
 
         # Building Energy Model
         self.ElecTotal = 0.0                            # total electricity consumption - (W/m^2) of floor
@@ -161,13 +161,13 @@ class Building(object):
         # Set temperature set points according to night/day setpoints in building schedule & simTime hr
         isEqualNightStart = self.is_near_zero((simTime.secDay/3600.) - parameter.nightSetStart)
         if simTime.secDay/3600. < parameter.nightSetEnd or (simTime.secDay/3600. > parameter.nightSetStart or isEqualNightStart):
-            self.logger.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
+            logger.debug("{} Night setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointNight
             T_heat = self.heatSetpointNight
             self.intHeat = self.intHeatNight * self.nFloor
         else:
-            self.logger.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
+            logger.debug("{} Day setpoints @{}".format(__name__,simTime.secDay/3600.))
 
             T_cool = self.coolSetpointDay
             T_heat = self.heatSetpointDay
