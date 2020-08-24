@@ -55,7 +55,6 @@ class TestDragonfly(TestBase):
 
     @staticmethod
     def check_obj_attr(obj1, obj2, attr_lst):
-        is_equal = True
         for attr in attr_lst:
             v1, v2 = [getattr(obj, attr) for obj in [obj1, obj2]]
 
@@ -65,7 +64,7 @@ class TestDragonfly(TestBase):
             # else:
             #     print("{}: {} == {}".format(attr, v1, v2))
 
-            if type(v1) is not type(""):
+            if isinstance(v1, (int, float)) and isinstance(v2, (int, float)):
                 assert v1 == pytest.approx(v2, abs=1e-10)
             else:
                 assert v1 == v2

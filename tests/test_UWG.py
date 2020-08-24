@@ -10,6 +10,7 @@ from decimal import Decimal
 pp = pprint
 dd = Decimal.from_float
 
+
 class TestUWG(TestBase):
     """Test for uwg.py
     """

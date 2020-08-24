@@ -15,7 +15,7 @@ class TestBase(object):
     DIR_DESTINATION_PATH = os.path.join(DIR_CURR,"epw_uwg")
     DIR_MATLAB_PATH = os.path.join(DIR_CURR, "matlab_ref")
 
-    RUN_LOG = True
+    RUN_LOG = False
 
     def CALCULATE_TOLERANCE(self,x,p):
         if abs(float(x)) > 1e-15:
