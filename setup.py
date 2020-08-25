@@ -19,6 +19,12 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests*", "resources*"]),
     include_package_data=True,
     install_requires=requirements,
+    extras_require={
+        'cli': ['click==7.1.2']
+    },
+    entry_points={
+        "console_scripts": ["uwg = uwg.cli:main"]
+    },
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.6",

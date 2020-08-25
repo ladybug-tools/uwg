@@ -46,8 +46,6 @@ from . import utilities
 
 class uwg(object):
     """Morph a rural EPW file to urban conditions based on defined urban parameters.
-    self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None,
-                 destinationDir=None, destinationFileName=None):
 
     # TODO: Change None to string defaults = ""?
     Args:
