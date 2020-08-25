@@ -1,20 +1,16 @@
-"""
-=========================================================================
- THE URBAN WEATHER GENERATOR (uwg)
-=========================================================================
-Version 4.2
+"""Urban Weather Generator (UWG) Version 4.2
 
-Original Author: B. Bueno
+Original Author: B. Bueno[1]
 Edited by A. Nakano & Lingfu Zhang
 Modified by Joseph Yang (joeyang@mit.edu) - May, 2016
 Translated to Python by Saeran Vasanthakumar - February, 2018
 
-Original Pulbication on the uwg's Methods:
-Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2013).
-The urban weather generator, Journal of Building Performance Simulation. 6:4,269-281.
-doi: 10.1080/19401493.2012.718797
-=========================================================================
+Note:
+    [1] Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2013).
+    The urban weather generator, Journal of Building Performance Simulation. 6:4,269-281.
+    doi: 10.1080/19401493.2012.718797
 """
+
 from __future__ import division, print_function
 from functools import reduce
 
@@ -35,11 +31,8 @@ except ImportError:
 
 from .simparam import SimParam
 from .weather import Weather
-from .building import Building
 from .material import Material
 from .element import Element
-from .BEMDef import BEMDef
-from .schdef import SchDef
 from .param import Param
 from .UCMDef import UCMDef
 from .forcing import Forcing
@@ -50,29 +43,30 @@ from .psychrometrics import psychrometrics
 from .urbflux import urbflux
 from . import utilities
 
-# For debugging only
-#from pprint import pprint
-#from decimal import Decimal
-#pp = pprint
-#dd = Decimal.from_float
-
 
 class uwg(object):
-    """Morph a rural EPW file to urban conditions using a file with a list of urban parameters.
+    """Morph a rural EPW file to urban conditions based on defined urban parameters.
+    self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None,
+                 destinationDir=None, destinationFileName=None):
 
-    args:
-        epwDir: The directory in which the rural EPW file sits.
-        epwFileName: The name of the rural epw file that will be morphed.
-        uwgParamDir: The directory in which the uwg Parameter File (.uwg) sits.
-        uwgParamFileName: The name of the uwg Parameter File (.uwg).
-        destinationDir: Optional destination directory for the morphed EPW file.
-            If left blank, the morphed file will be written into the same directory
-            as the rural EPW file (the epwDir).
+    # TODO: Change None to string defaults = ""?
+    Args:
+        epwFileName: Text string for the name of the rural epw file that will be morphed.
+        uwgParamFileName: Optional text string for the Uwg parameter file (.uwg) name.
+            If None the Uwg input parameters must be manually set in the Uwg object.
+            (Default: None).
+        epwDir: Optional text string for the directory of the rural EPW file. If None
+            the Uwg will assume the rural epw file is located in the Uwg resources
+            directory. (Default: None).
+        uwgParamDir: Optional text string for the directory of the Uwg parameter file
+            (.uwg). If None the Uwg will assume the parameter file is located in the
+            Uwg resources directory. (Default: None).
+        destinationDir: Optional text string destination directory for the morphed EPW
+            file. If None the morphed file will be written into the same directory
+            as the rural EPW file (the epwDir). (Default: None).
         destinationFileName: Optional destination file name for the morphed EPW file.
-            If left blank, the morphed file will append "_UWG" to the original file name.
-    returns:
-        newClimateFile: the path to a new EPW file that has been morphed to account
-            for uban conditions.
+            If None the morphed file will append "_UWG" to the original file name.
+            (Default: None).
     """
 
     """ Section 1 - Definitions for constants / other parameters """
@@ -80,7 +74,8 @@ class uwg(object):
     MAXTHICKNESS = 0.05    # Maximum layer thickness (m)
     # http://web.mit.edu/parmstr/Public/NRCan/nrcc29118.pdf (Figly & Snodgrass)
     SOILTCOND = 1
-    # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf (average taken from Table 1)
+    # http://www.europment.org/library/2013/venice/bypaper/MFHEEF/MFHEEF-21.pdf
+    # (average taken from Table 1)
     SOILVOLHEAT = 2e6
     # Soil material used for soil-depth padding
     SOIL = Material(SOILTCOND, SOILVOLHEAT, name="soil")
@@ -108,23 +103,26 @@ class uwg(object):
     WGMAX = 0.005  # maximum film water depth on horizontal surfaces (m)
 
     # File path parameter
-    RESOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "resources"))
+    RESOURCE_PATH = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "resources"))
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
-    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None, destinationDir=None, destinationFileName=None):
+    def __init__(self, epwFileName, uwgParamFileName=None, epwDir=None, uwgParamDir=None,
+                 destinationDir=None, destinationFileName=None):
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
 
-        # User defined
-        self.epwFileName = epwFileName if epwFileName.lower().endswith('.epw') else epwFileName + \
-            '.epw'  # Revise epw file name if not end with epw
-        # If file name is entered then will uwg will set input from .uwg file
+        # Revise epw file name if not end with epw
+        self.epwFileName = epwFileName \
+            if epwFileName.lower().endswith('.epw') else epwFileName + '.epw'
+
+        # If file name is entered then uwg will set input from .uwg file
         self.uwgParamFileName = uwgParamFileName
 
         # If user does not overload
-        self.destinationFileName = destinationFileName if destinationFileName else self.epwFileName.strip(
-            '.epw') + '_UWG.epw'
+        self.destinationFileName = destinationFileName \
+            if destinationFileName else self.epwFileName.strip('.epw') + '_UWG.epw'
         self.epwDir = epwDir if epwDir else os.path.join(self.RESOURCE_PATH, "epw")
         self.uwgParamDir = uwgParamDir if uwgParamDir else os.path.join(
             self.RESOURCE_PATH, "parameters")
@@ -132,7 +130,8 @@ class uwg(object):
             self.RESOURCE_PATH, "epw_uwg")
 
         # refdata: Serialized DOE reference data, z_meso height data
-        self.readDOE_file_path = os.path.join(self.CURRENT_PATH, "refdata", "readDOE.pkl")
+        self.readDOE_file_path = os.path.join(
+            self.CURRENT_PATH, "refdata", "readDOE.pkl")
         self.z_meso_dir_path = os.path.join(self.CURRENT_PATH, "refdata")
 
         # EPW precision
@@ -179,8 +178,7 @@ class uwg(object):
         self.alb_road = None     # road albedo
         self.d_road = None       # road pavement thickness
         self.sensAnth = None     # non-building sensible heat (W/m^2)
-        self.latAnth = None      # non-building latent heat heat (W/m^2). Not used, taken out by JH.
-
+        self.latAnth = None      # non-building latent heat heat (W/m^2). Not used.
 
         # Fraction of building typology stock
         self.bld = None         # 16x3 matrix of fraction of building type by era
@@ -213,33 +211,7 @@ class uwg(object):
         self.SHGC = None       # Solar Heat Gain Coefficient
         self.albWall = None    # Wall albedo
 
-    def ToString(self):
-        """Overwrite .NET ToString method."""
-        return self.__repr__()
-
-    def __repr__(self):
-        def _split_string(s):
-            return s[0] + ":\n  " + s[1].replace(",", "\n  ")
-
-        def _tabbed(s):
-            return _split_string(s.__repr__().split(":"))
-
-        def _list_2_tabbed(b):
-            return reduce(lambda a, b: a+"\n"+b, [_tabbed(_b) for _b in b])
-
-        return "uwg for {}:\n\n{}{}{}{}{}{}{}{}".format(
-            self.epwFileName,
-            _tabbed(self.simTime)+"\n" if hasattr(self, "simTime") else "No simTime attr.\n",
-            _tabbed(self.weather)+"\n" if hasattr(self, "weather") else "No weather attr.\n",
-            _tabbed(self.geoParam)+"\n" if hasattr(self, "geoParam") else "No geoParam attr.\n",
-            _tabbed(self.UBL)+"\n" if hasattr(self, "UBL") else "No UBL attr.\n",
-            "Rural "+_tabbed(self.RSM)+"\n" if hasattr(self, "RSM") else "No Rural RSM attr.\n",
-            "Urban "+_tabbed(self.USM)+"\n" if hasattr(self, "USM") else "No Urban RSM attr.\n",
-            _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
-            _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr."
-            )
-
-    def is_near_zero(self,num,eps=1e-10):
+    def is_near_zero(self, num, eps=1e-10):
         return abs(float(num)) < eps
 
     def read_epw(self):
@@ -971,6 +943,31 @@ class uwg(object):
         self.hvac_autosize()
         self.simulate()
         self.write_epw()
+
+    def ToString(self):
+        """Overwrite .NET ToString method."""
+        return self.__repr__()
+
+    def __repr__(self):
+        def _split_string(s):
+            return s[0] + ":\n  " + s[1].replace(",", "\n  ")
+
+        def _tabbed(s):
+            return _split_string(s.__repr__().split(":"))
+
+        def _list_2_tabbed(b):
+            return reduce(lambda a, b: a+"\n"+b, [_tabbed(_b) for _b in b])
+
+        return "uwg for {}:\n\n{}{}{}{}{}{}{}{}".format(
+            self.epwFileName,
+            _tabbed(self.simTime)+"\n" if hasattr(self, "simTime") else "No simTime attr.\n",
+            _tabbed(self.weather)+"\n" if hasattr(self, "weather") else "No weather attr.\n",
+            _tabbed(self.geoParam)+"\n" if hasattr(self, "geoParam") else "No geoParam attr.\n",
+            _tabbed(self.UBL)+"\n" if hasattr(self, "UBL") else "No UBL attr.\n",
+            "Rural "+_tabbed(self.RSM)+"\n" if hasattr(self, "RSM") else "No Rural RSM attr.\n",
+            "Urban "+_tabbed(self.USM)+"\n" if hasattr(self, "USM") else "No Urban RSM attr.\n",
+            _tabbed(self.UCM)+"\n" if hasattr(self, "UCM") else "No UCM attr.\n",
+            _list_2_tabbed(self.BEM) if hasattr(self, "BEM") else "No BEM attr.")
 
 
 def procMat(materials, max_thickness, min_thickness):
