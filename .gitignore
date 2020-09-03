@@ -16,3 +16,6 @@ tox.ini
 #logs
 logs/
 *.log
+
+#pycharm
+/.idea
