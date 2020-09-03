@@ -1,186 +1,168 @@
-try:
-    range = xrange
-except NameError:
-    pass
+"""Test Element class."""
 
 import pytest
-import uwg
-import os
-import math
-import pprint
-from .test_base import TestBase
+from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
 
 
-class TestElement(TestBase):
+def test_SurfFlux_with_waterStorage_start():
+    """Edge case: test element SurfFlux against matlab reference
 
-    def test_SurfFlux_with_waterStorage_start(self):
-        """ Edge case: test element SurfFlux against matlab reference
-        when waterStorage > 0.0.
-        This has to be hardcoded b/c doesn't get used otherwise
+    When waterStorage > 0.0. This has to be hardcoded b/c doesn't get used
+    otherwise.
+    """
 
-        """
-        self.setup_uwg_integration()
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        # We subtract 30 days and 11 hours
-        # New time: Jan 1, 1:00
-        self.uwg.simTime.nt -= (30*24*12 + 23*12 + 11)
+    testuwg = setup_uwg_integration()
+    testuwg._read_epw()
+    testuwg.read_input()
+    testuwg._compute_BEM()
+    testuwg._compute_input()
 
-        # turn rural road waterStorage to 1.
-        self.uwg.rural.waterStorage = 0.005 # .5cm thick film (from wgmax constant)
+    # We subtract 30 days and 11 hours
+    # New time: Jan 1, 1:00
+    testuwg.simTime.nt -= (30 * 24 * 12 + 23 * 12 + 11)
 
-        # run simulation
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
+    # turn rural road waterStorage to 1.
+    testuwg.rural.waterStorage = 0.005  # .5cm thick film (from wgmax constant)
 
-        # check date
-        #print self.uwg.simTime
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 1
-        assert self.uwg.simTime.secDay == pytest.approx(300.,abs=1e-15)
+    # run simulation
+    testuwg._hvac_autosize()
+    testuwg.simulate()
 
-        # Check waterStorage
-        assert 0.005 == pytest.approx(self.uwg.rural.waterStorage, 1e-15)
+    # check date
+    assert testuwg.simTime.month == 1
+    assert testuwg.simTime.day == 1
+    assert testuwg.simTime.secDay == pytest.approx(300., abs=1e-15)
 
-    def test_SurfFlux_with_waterStorage_middle(self):
-        """ Edge case: test element SurfFlux against matlab reference
-        when waterStorage > 0.0.
-        This has to be hardcoded b/c doesn't get used otherwise
-
-        """
-        self.setup_uwg_integration()
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        # We subtract 30 days and 11 hours
-        # New time: Jan 1, 1:00
-        self.uwg.simTime.nt -= (30*24*12 + 11*12)
-
-        # turn rural road waterStorage to 1.
-        self.uwg.rural.waterStorage = 0.005 # .5cm thick film (from wgmax constant)
-
-        # run simulation
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-
-        # check date
-        #print self.uwg.simTime
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 1
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
-
-        # Check waterStorage
-        #print self.uwg.rural.waterStorage
-        assert 0.004643553960210 == pytest.approx(self.uwg.rural.waterStorage, 1e-15)
-
-    def test_SurfFlux_unit(self):
-        """ test element SurfFlux against matlab references at the
-        start of timestep.
-
-        """
-
-        self.setup_uwg_integration()
-
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-
-        # We subtract 23 hours and 55 minutes so we can test
-        # initial timestep (1, 1, 300). New time: Jan 1, 5min
-        self.uwg.simTime.nt -= (23*12 + 24*12*30 + 11)
-
-        # run simulation
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-
-        # check date is Jan 1st, 300s
-        #print self.uwg.simTime
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 1
-        assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
-
-        uwg_python_val = [
-        self.uwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
-        self.uwg.rural.waterStorage,    # thickness of water film (m) (only for horizontal surfaces)
-        self.uwg.rural.solAbs,          # solar radiation absorbed (W m-2)
-        self.uwg.rural.lat,             # surface latent heat flux (W m-2)
-        self.uwg.rural.sens,            # surface sensible heat flux (W m-2)
-        self.uwg.rural.flux,            # external surface heat flux (W m-2)
-        self.uwg.rural.T_ext,           # external surface temperature (K)
-        self.uwg.rural.T_int            # interior surface temperature (K)
-        ]
-
-        # Matlab Checking for rural road
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_element","matlab_ref_element_surfflux_winter.txt")
-
-        # matlab ref checking
-        assert len(uwg_matlab_val) == len(uwg_python_val)
-
-        for i in range(len(uwg_matlab_val)):
-            #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i],15.0)
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+    # Check waterStorage
+    assert 0.005 == pytest.approx(testuwg.rural.waterStorage, 1e-15)
 
 
-    def test_SurfFlux_integration(self):
-        """ test element SurfFlux against matlab references at the
-        end of timestep. Integration test as it requires other uwg
-        classes to be working before functioning correctly.
+def test_SurfFlux_with_waterStorage_middle():
+    """ Edge case: test element SurfFlux against matlab reference.
 
-        """
-        self.setup_uwg_integration()
+    When waterStorage > 0.0. This has to be hardcoded b/c doesn't get used otherwise.
+    """
+    testuwg = setup_uwg_integration()
+    testuwg._read_epw()
+    testuwg.read_input()
+    testuwg._compute_BEM()
+    testuwg._compute_input()
 
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        # Change time and vegCoverage parameters so we can get
-        # effect of vegetation on surface heat flux
-        self.uwg.vegStart = 2   # February
-        self.uwg.nDay = 31 + 15 # February, 15
+    # We subtract 30 days and 11 hours
+    # New time: Jan 1, 1:00
+    testuwg.simTime.nt -= (30 * 24 * 12 + 11 * 12)
 
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
+    # turn rural road waterStorage to 1.
+    testuwg.rural.waterStorage = 0.005  # .5cm thick film (from wgmax constant)
 
-        # We subtract 11 hours from total timestep so still have sun. New time: 1300
-        self.uwg.simTime.nt -= 12*11
+    # run simulation
+    testuwg._hvac_autosize()
+    testuwg.simulate()
 
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
+    # check date
+    assert testuwg.simTime.month == 1
+    assert testuwg.simTime.day == 1
+    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-15)
 
-        # check date is February 15th, 13:00
-        assert self.uwg.simTime.month == 2
-        assert self.uwg.simTime.day == 15
-        assert self.uwg.simTime.secDay/3600. == pytest.approx(13.0,abs=1e-15)
-
-        uwg_python_val = [
-        self.uwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
-        self.uwg.rural.waterStorage,    # thickness of water film (m) (only for horizontal surfaces)
-        self.uwg.rural.solAbs,          # solar radiation absorbed (W m-2)
-        self.uwg.rural.lat,             # surface latent heat flux (W m-2)
-        self.uwg.rural.sens,            # surface sensible heat flux (W m-2)
-        self.uwg.rural.flux,             # external surface heat flux (W m-2)
-        self.uwg.rural.T_ext,           # external surface temperature (K)
-        self.uwg.rural.T_int            # interior surface temperature (K)
-        ]
-
-        # Matlab Checking for rural road
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_element","matlab_ref_element_surfflux.txt")
-
-        # matlab ref checking
-        assert len(uwg_matlab_val) == len(uwg_python_val)
-
-        for i in range(len(uwg_matlab_val)):
-            #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_matlab_val[i],15.0)
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), "error at index={}".format(i)
+    # Check waterStorage
+    assert 0.004643553960210 == pytest.approx(testuwg.rural.waterStorage, 1e-15)
 
 
-if __name__ == "__main__":
-    te = TestElement()
-    #te.test_SurfFlux_with_waterStorage_start()
-    #te.test_SurfFlux_with_waterStorage_middle()
-    #te.test_SurfFlux_unit()
-    te.test_SurfFlux_integration()
+def test_SurfFlux_unit():
+    """Test element SurfFlux against matlab references at the start of timestep."""
+
+    testuwg = setup_uwg_integration()
+
+    testuwg._read_epw()
+    testuwg.read_input()
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+
+    # We subtract 23 hours and 55 minutes so we can test
+    # initial timestep (1, 1, 300). New time: Jan 1, 5min
+    testuwg.simTime.nt -= (23 * 12 + 24 * 12 * 30 + 11)
+
+    # run simulation
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+
+    # check date is Jan 1st, 300s
+    assert testuwg.simTime.month == 1
+    assert testuwg.simTime.day == 1
+    assert testuwg.simTime.secDay == pytest.approx(300.0, abs=1e-15)
+
+    uwg_python_val = [
+        testuwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
+        testuwg.rural.waterStorage,    # thickness of water film (m) (only for hor surf)
+        testuwg.rural.solAbs,          # solar radiation absorbed (W m-2)
+        testuwg.rural.lat,             # surface latent heat flux (W m-2)
+        testuwg.rural.sens,            # surface sensible heat flux (W m-2)
+        testuwg.rural.flux,            # external surface heat flux (W m-2)
+        testuwg.rural.T_ext,           # external surface temperature (K)
+        testuwg.rural.T_int]           # interior surface temperature (K)
+
+    # Matlab Checking for rural road
+    uwg_matlab_val = setup_open_matlab_ref(
+        'matlab_element', 'matlab_ref_element_surfflux_winter.txt')
+
+    # matlab ref checking
+    assert len(uwg_matlab_val) == len(uwg_python_val)
+
+    for i in range(len(uwg_matlab_val)):
+        tol = calculate_tolerance(uwg_matlab_val[i], 15.0)
+        assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), \
+            'error at index={}'.format(i)
+
+
+def test_SurfFlux_integration():
+    """Test element SurfFlux against matlab references at the end of timestep.
+
+    Integration test as it requires other uwg classes to be working before functioning
+    correctly.
+    """
+
+    testuwg = setup_uwg_integration()
+
+    testuwg._read_epw()
+    testuwg.read_input()
+
+    # Change time and vegCoverage parameters so we can get
+    # effect of vegetation on surface heat flux
+    testuwg.vegstart = 2    # February
+    testuwg.nday = 31 + 15  # February, 15
+
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+
+    # We subtract 11 hours from total timestep so still have sun. New time: 1300
+    testuwg.simTime.nt -= 12 * 11
+
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+
+    # check date is February 15th, 13:00
+    assert testuwg.simTime.month == 2
+    assert testuwg.simTime.day == 15
+    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-15)
+
+    uwg_python_val = [
+        testuwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)
+        testuwg.rural.waterStorage,    # thickness of water film (m) (only for hor surf)
+        testuwg.rural.solAbs,          # solar radiation absorbed (W m-2)
+        testuwg.rural.lat,             # surface latent heat flux (W m-2)
+        testuwg.rural.sens,            # surface sensible heat flux (W m-2)
+        testuwg.rural.flux,            # external surface heat flux (W m-2)
+        testuwg.rural.T_ext,           # external surface temperature (K)
+        testuwg.rural.T_int]           # interior surface temperature (K)
+
+    # Matlab Checking for rural road
+    uwg_matlab_val = \
+        setup_open_matlab_ref('matlab_element', 'matlab_ref_element_surfflux.txt')
+
+    # matlab ref checking
+    assert len(uwg_matlab_val) == len(uwg_python_val)
+
+    for i in range(len(uwg_matlab_val)):
+        tol = calculate_tolerance(uwg_matlab_val[i], 15.0)
+        assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), \
+            'error at index={}'.format(i)

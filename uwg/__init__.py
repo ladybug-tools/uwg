@@ -1,4 +1,4 @@
-"""Urban Weather Generator Library."""
+'''Urban Weather Generator Library.'''
 
 __version__ = '5.3.4'
 
@@ -19,24 +19,8 @@ from .solarcalcs import SolarCalcs
 from .infracalcs import infracalcs
 from .urbflux import urbflux
 
-from .uwg import uwg
-from .uwg import procMat
+from .uwg import UWG
 
-
-__all__ = [
-    "uwg",
-    "utilities",
-    "material",
-    "element",
-    "building",
-    "BEMDef",
-    "forcing",
-    "param",
-    "psychrometrics",
-    "schdef",
-    "simparam",
-    "UCMDef",
-    "urbflux",
-    "weather",
-    "RSMDef",
-    ]
+__all__ = ['UWG', 'utilities', 'material', 'element', 'building', 'BEMDef', 'forcing',
+           'param', 'psychrometrics', 'schdef', 'simparam', 'UCMDef', 'urbflux',
+           'weather', 'RSMDef', 'infracalcs']

@@ -129,7 +129,7 @@ class UCMDef(object):
 
         self.alb_wall = alb_wall                                    # average wall albedo (-)
         self.facAbsor = (1-r_glaze)*(1-alb_wall) + r_glaze*(1-0.75*SHGC) # avg facade absorptivity (-) == wall_mat_fraction * absorption + window_frac * non_solar_heat_gain
-        self.roadAbsor = (1-road.vegCoverage)*(1-road.albedo)       # average road absorptivity
+        self.roadAbsor = (1 - road.vegCoverage) * (1 - road.albedo)       # average road absorptivity
         self.sensHeat = 0.0                                         # urban sensible heat [W m-2]
         # Variables set in urbflux()
         self.latHeat = None                                         # urban latent heat [W m-2]

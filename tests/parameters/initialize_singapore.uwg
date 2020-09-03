@@ -84,6 +84,7 @@ vegRoof,,  # Fraction of the roofs covered in grass/shrubs (0 - 1)
 glzR,,     # Glazing Ratio (0 - 1)
 SHGC,,     # Solar Heat Gain Coefficient (0 - 1)
 albWall,,  # wall albedo (0 - 1)
+flr_h,,    # average building floor height
 
 # =================================================,
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,

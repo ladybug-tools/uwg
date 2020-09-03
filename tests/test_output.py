@@ -1,259 +1,232 @@
-try:
-    range = xrange
-except NameError:
-    pass
+"""Test the matlab generated epw file against the python generated epw files."""
 
 import pytest
-import uwg
 import os
-import math
-import pprint
-import decimal
 
-import logging
-
-from .test_base import TestBase
-
-dd = decimal.Decimal.from_float
-pp = pprint.pprint
+from .test_base import setup_uwg_integration, calculate_tolerance, set_input_manually, \
+    MATLAB_DIR, TEST_DIR
+import uwg
 
 
-class TestOutput(TestBase):
+def compare_epw(testuwg, matlab_fname, precision=10.0):
+    # shorten some variable names
+    ti = testuwg.simTime.timeInitial
+    tf = testuwg.simTime.timeFinal
+
+    # Make weather files for testing
+    matlab_path_name = os.path.join(MATLAB_DIR, 'matlab_output', matlab_fname)
+
+    pywtr = uwg.weather.Weather(testuwg.new_epw_path, ti, tf)
+    matwtr = uwg.weather.Weather(matlab_path_name, ti, tf)
+
+    assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)
+
+    for i in range(0, len(pywtr.staTemp)):
+
+        # Check dry bulb [K]
+        tol = calculate_tolerance(pywtr.staTemp[i], precision)
+        assert pywtr.staTemp[i] == \
+            pytest.approx(matwtr.staTemp[i], abs=tol), 'error at index={}'.format(i)
+
+        # Check dew point [K]
+        tol = calculate_tolerance(pywtr.staTdp[i], precision)
+        assert pywtr.staTdp[i] == \
+            pytest.approx(matwtr.staTdp[i], abs=tol), 'error at index={}'.format(i)
+
+        # Check relative humidity [%]
+        tol = calculate_tolerance(pywtr.staRhum[i], precision)
+        assert pywtr.staRhum[i] == \
+            pytest.approx(matwtr.staRhum[i], abs=tol), 'error at index={}'.format(i)
+
+        # Check wind speed [m/s]
+        tol = calculate_tolerance(pywtr.staUmod[i], precision)
+        assert pywtr.staUmod[i] == \
+            pytest.approx(matwtr.staUmod[i], abs=tol), 'error at index={}'.format(i)
+
+
+def test_uwg_output_heatdemand_1_1_0000():
+    """Initial conditions
+        - night time
+        - before vegstart
+        - sensHeatDemand
     """
-    Compare the matlab generated epw file against the python generated epw files using the same .m/.uwg inputs.
+    epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
+    testuwg = setup_uwg_integration(epw_path=epw_path)
+    testuwg._read_epw()
+    testuwg.read_input()
+
+    # Test all year
+    testuwg.month = 1
+    testuwg.day = 1
+    testuwg.nday = 365
+
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+    testuwg.write_epw()
+
+    compare_epw(testuwg, 'CAN_ON_Toronto.716240_CWEC_heatdemand_UWG_Matlab.epw')
+
+
+def test_program_input():
+
+    epw_path = os.path.join(TEST_DIR, 'epw', 'SGP_Singapore.486980_IWEC.epw')
+    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=None)
+
+    # Assign manually
+    testuwg = set_input_manually(testuwg)
+
+    # main
+    testuwg.generate()
+    testuwg.simulate()
+    testuwg.write_epw()
+
+    # Check some of the inputs
+
+    # Check building parameters
+    assert testuwg.BEM[0].building.coolCap == \
+        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[0].building.heatCap == \
+        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[1].building.coolCap == \
+        pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
+    assert testuwg.BEM[1].building.heatCap == \
+        pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
+
+    # Check that final day of timestep is at correct dayType
+    assert testuwg.dayType == 1
+    assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
+        pytest.approx(0.2, abs=1e-6)
+
+    compare_epw(testuwg, 'SGP_Singapore.486980_IWEC_UWG_Matlab.epw')
+
+
+def test_program_hybrid_input():
+    """Testing inputting with api and with .uwg file."""
+
+    testuwg = setup_uwg_integration()
+
+    # Assign manually
+    testuwg = set_input_manually(testuwg)
+
+    # override (from intialize_singapore.uwg)
+    testuwg.bldheight = 10
+    testuwg.h_mix = 1
+    testuwg.blddensity = 0.5
+    testuwg.vertohor = 0.8
+    testuwg.charlength = 1000
+    testuwg.albroad = 0.1
+    testuwg.d_road = 0.5
+    testuwg.sensanth = 20
+
+    # main
+    testuwg._read_epw()
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+    testuwg.write_epw()
+
+    # Check some of the inputs
+
+    # Check building parameters
+    assert testuwg.BEM[0].building.coolCap == \
+        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[0].building.heatCap == \
+        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[1].building.coolCap \
+        == pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
+    assert testuwg.BEM[1].building.heatCap == \
+        pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
+
+    # Check that final day of timestep is at correct dayType
+    assert testuwg.dayType == 1
+    assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
+        pytest.approx(0.2, abs=1e-6)
+
+    compare_epw(testuwg, 'SGP_Singapore.486980_IWEC_UWG_Matlab.epw')
+
+
+def test_uwg_output_beijing():
+    """Initial conditions:
+        - day time
+        - after vegstart
+        - sensHeatDemand
     """
-    def compare_epw(self,matlab_fname,precision = 10.0):
 
-        # shorten some variable names
-        ti = self.uwg.simTime.timeInitial
-        tf = self.uwg.simTime.timeFinal
+    epw_path = os.path.join(TEST_DIR, 'epw', 'CHN_Beijing.Beijing.545110_IWEC.epw')
+    param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_beijing.uwg')
+    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=param_path)
 
-        # Make weather files for testing
-        matlab_path_name = os.path.join(self.DIR_CURR,"..","tests","matlab_ref","matlab_output",
-            matlab_fname)
+    testuwg._read_epw()
+    testuwg.read_input()
 
-        pywtr = uwg.weather.Weather(self.uwg.newPathName, ti, tf)
-        matwtr = uwg.weather.Weather(matlab_path_name, ti, tf)
-        #epwwtr = self.uwg.weather # for reference only
+    # Test all year
+    testuwg.month = 1
+    testuwg.day = 1
+    testuwg.nday = 365
 
-        assert len(pywtr.staTemp) == pytest.approx(len(matwtr.staTemp), abs=1e-15)
+    # main
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+    testuwg.write_epw()
 
-        for i in range(0,len(pywtr.staTemp)):
-
-            # Check dry bulb [K]
-            tol = self.CALCULATE_TOLERANCE(pywtr.staTemp[i],precision)
-            assert pywtr.staTemp[i] == pytest.approx(matwtr.staTemp[i], abs=tol), "error at index={}".format(i)
-
-            # Check dew point [K]
-            tol = self.CALCULATE_TOLERANCE(pywtr.staTdp[i],precision)
-            assert pywtr.staTdp[i] == pytest.approx(matwtr.staTdp[i], abs=tol), "error at index={}".format(i)
-
-            # Check relative humidity [%]
-            tol = self.CALCULATE_TOLERANCE(pywtr.staRhum[i],precision)
-            assert pywtr.staRhum[i] == pytest.approx(matwtr.staRhum[i], abs=tol), "error at index={}".format(i)
-
-            # Check wind speed [m/s]
-            tol = self.CALCULATE_TOLERANCE(pywtr.staUmod[i],precision)
-            assert pywtr.staUmod[i] == pytest.approx(matwtr.staUmod[i], abs=tol), "error at index={}".format(i)
-
-    def test_uwg_output_heatdemand_1_1_0000(self):
-        """
-        Initial conditions:
-            - night time
-            - before vegstart
-            - sensHeatDemand
-        """
-
-        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")
-        self.uwg.read_epw()
-        self.uwg.set_input()
-
-        # Test all year
-        self.uwg.Month = 1
-        self.uwg.Day = 1
-        self.uwg.nDay = 365
-
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
-        self.compare_epw("CAN_ON_Toronto.716240_CWEC_heatdemand_UWG_Matlab.epw")#,precision=3.0)
-
-    def test_program_input(self):
-        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", None)
-
-        # Check some random variables
-        assert self.uwg.vegCover == None
-        assert self.uwg.treeCoverage == None
-        assert self.uwg.vegStart == None
-
-        # Assign manually
-        self.set_input_manually()
-
-        # main
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
-        # Check some of the inputs
-
-        # Check building parameters
-        assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
-        assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)
-        assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
-        assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
-
-        # Check that final day of timestep is at correct dayType
-        assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
-        assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
-
-        self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
+    compare_epw(testuwg, 'CHN_Beijing.Beijing.545110_IWEC_UWG_Matlab.epw')
 
 
-    def test_program_hybrid_input(self):
-        """ Testing inputting with api and with .uwg file"""
+def test_uwg_output_cooldemand_6_1_0000():
+    """Initial conditions:
+        - day time
+        - after vegstart
+        - sensHeatDemand
+    """
 
-        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
+    # set up the logger
+    epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
+    testuwg = setup_uwg_integration(epw_path=epw_path)
+    testuwg._read_epw()
+    testuwg.read_input()
 
-        # Check some random variables
-        assert self.uwg.vegCover == None
-        assert self.uwg.treeCoverage == None
-        assert self.uwg.vegStart == None
+    # Test 30 days in summer
+    testuwg.month = 6
+    testuwg.day = 1
+    testuwg.nday = 30
 
-        # Assign manually
-        self.set_input_manually()
+    # main
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+    testuwg._hvac_autosize()
+    testuwg.simulate()
+    testuwg.write_epw()
 
-        # Empty some parameters so that it can be defined by uwg file
-        # Urban characteristics
-        self.uwg.bldHeight = None
-        self.uwg.h_mix = None
-        self.uwg.bldDensity = None
-        self.uwg.verToHor = None
-        self.uwg.charLength = None
-        self.uwg.alb_road = None
-        self.uwg.d_road = None
-        self.uwg.sensAnth = None
-        self.uwg.latAnth = None
-
-        # main
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
-        # Check some of the inputs
-
-        # Check building parameters
-        assert self.uwg.BEM[0].building.coolCap == pytest.approx((3525.66904*1000.0)/46320.0, abs=1e-3)
-        assert self.uwg.BEM[0].building.heatCap == pytest.approx((2875.97378*1000.0)/46320.0, abs=1e-3)
-        assert self.uwg.BEM[1].building.coolCap == pytest.approx((252.20895*1000.0)/3135., abs=1e-2)
-        assert self.uwg.BEM[1].building.heatCap == pytest.approx((132.396*1000.0)/3135., abs=1e-2)
-
-        # Check that final day of timestep is at correct dayType
-        assert self.uwg.dayType == pytest.approx(1., abs=1e-3)
-        assert self.uwg.SchTraffic[self.uwg.dayType-1][self.uwg.simTime.hourDay] == pytest.approx(0.2, abs=1e-6)
-
-        self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
-
-    def test_uwg_output_beijing(self):
-        """
-        Initial conditions:
-            - day time
-            - after vegstart
-            - sensHeatDemand
-        """
-
-        self.setup_uwg_integration(
-            epw_file="CHN_Beijing.Beijing.545110_IWEC.epw",
-            uwg_param_file="initialize_beijing.uwg"
-            )
-
-        self.uwg.read_epw()
-        self.uwg.set_input()
-
-        # Test all year
-        self.uwg.Month = 1
-        self.uwg.Day = 1
-        self.uwg.nDay = 365
+    testuwg = compare_epw(testuwg, 'CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw')
 
 
-        # main
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
+def test_uwg_output_cooldemand_1_1_0000():
+    """Initial conditions:
+        - night time
+        - before vegstart
+        - sensCoolDemand
+    """
+    testuwg = setup_uwg_integration()
+    testuwg.read_input()
 
-        self.compare_epw("CHN_Beijing.Beijing.545110_IWEC_UWG_Matlab.epw")
+    # Test all year
+    testuwg.month = 1
+    testuwg.day = 1
+    testuwg.nday = 365
 
-    def test_uwg_output_cooldemand_6_1_0000(self):
-        """
-        Initial conditions:
-            - day time
-            - after vegstart
-            - sensHeatDemand
-        """
-        # set up the logger
+    # main
+    testuwg._read_epw()
+    testuwg._compute_BEM()
+    testuwg._compute_input()
+    testuwg._hvac_autosize()
 
-        self.setup_uwg_integration(epw_file="CAN_ON_Toronto.716240_CWEC.epw")#,log_file_name="test_uwg_output_cooldemand_6_1_1300.log",log_level=logging.INFO)
+    testuwg.simulate()
+    testuwg.write_epw()
 
-        #self.uwg.logger.critical("Cool demand output")
+    compare_epw(testuwg, 'SGP_Singapore.486980_IWEC_UWG_Matlab.epw')
 
-        self.uwg.read_epw()
-        self.uwg.set_input()
-
-        # Test 30 days in summer
-        self.uwg.Month = 6
-        self.uwg.Day = 1
-        self.uwg.nDay = 30
-
-        # main
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
-        self.compare_epw("CAN_ON_Toronto.716240_CWEC_cooldemand_UWG_Matlab.epw")
-
-    def test_uwg_output_cooldemand_1_1_0000(self):
-        """
-        Initial conditions:
-            - night time
-            - before vegstart
-            - sensCoolDemand
-        """
-        self.setup_uwg_integration()
-        self.uwg.read_epw()
-        self.uwg.set_input()
-
-        # Test all year
-        self.uwg.Month = 1
-        self.uwg.Day = 1
-        self.uwg.nDay = 365
-
-        # main
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-        self.uwg.write_epw()
-
-        self.compare_epw("SGP_Singapore.486980_IWEC_UWG_Matlab.epw")
-
-
-if __name__ == "__main__":
-    test = TestOutput()
-    #test.test_uwg_output_heatdemand_1_1_0000()
-    #test.test_uwg_output_beijing()
-    #test.test_uwg_output_cooldemand_6_1_0000()
-    #test.test_uwg_output_cooldemand_1_1_0000()

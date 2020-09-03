@@ -84,6 +84,7 @@ vegRoof,0.332095888724,
 glzR,,
 SHGC,,
 albWall,,
+flr_h,,
 
 # =================================================
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,

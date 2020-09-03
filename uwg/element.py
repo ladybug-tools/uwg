@@ -123,9 +123,9 @@ class Element(object):
                 vegLat = 0.
                 vegSens = 0.
             else:    # Summer, veg
-                self.solAbs = ((1.-self.vegCoverage)*(1.-self.albedo)+self.vegCoverage*(1.-parameter.vegAlbedo))*self.solRec
-                vegLat = self.vegCoverage*parameter.grassFLat*(1.-parameter.vegAlbedo)*self.solRec
-                vegSens = self.vegCoverage*(1.-parameter.grassFLat)*(1.-parameter.vegAlbedo)*self.solRec
+                self.solAbs = ((1. - self.vegCoverage) * (1. - self.albedo) + self.vegCoverage * (1. - parameter.vegAlbedo)) * self.solRec
+                vegLat = self.vegCoverage * parameter.grassFLat * (1. - parameter.vegAlbedo) * self.solRec
+                vegSens = self.vegCoverage * (1. - parameter.grassFLat) * (1. - parameter.vegAlbedo) * self.solRec
 
             self.lat = soilLat + vegLat
             # Sensible & net heat flux

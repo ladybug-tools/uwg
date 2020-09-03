@@ -19,24 +19,24 @@ def zeros(h, w):
     return [[0 for x in range(w)] for y in range(h)]
 
 
+def is_near_zero(num, eps=1e-10):
+    return abs(float(num)) < eps
+
+
 def read_csv(file_name_):
     # open csv file and read
-    if os.path.exists(file_name_):
-        if sys.version_info[0] >= 3:
-            file_ = open(file_name_, "r", errors='ignore')
-        else:
-            file_ = open(file_name_, "r")
+    assert os.path.exists(file_name_), "File: '{}' does not " \
+        "exist.".format(file_name_)
 
-        gen_ = csv_reader(file_, delimiter=",")
-        L = [r for r in gen_]
-        file_.close()
-        return L
+    if sys.version_info[0] >= 3:
+        file_ = open(file_name_, "r", errors='ignore')
     else:
-        raise Exception("File name: '{}' does not exist.".format(file_name_))
+        file_ = open(file_name_, "r")
 
-
-def is_near_zero(num, eps=1e-10):
-    return abs(num) < eps
+    gen_ = csv_reader(file_, delimiter=",")
+    L = [r for r in gen_]
+    file_.close()
+    return L
 
 
 def str2fl(x):
@@ -46,7 +46,7 @@ def str2fl(x):
         x: string or list of strings
     """
     def helper_to_fl(s_):
-        """ deals with odd string imports converts to float"""
+        """Deals with odd string imports converts to float"""
         if s_ == "":
             return "null"
         elif "," in s_:
@@ -54,14 +54,16 @@ def str2fl(x):
 
         try:
             return float(s_)
-        except:
+        except (ValueError, TypeError):
             return (s_)
 
     fl_lst = []
-    if isinstance(x[0], str):                # Check if list of strings, then sent to conversion
+    if isinstance(x[0], str):
+        # Check if list of strings then conversion
         for xi in range(len(x)):
             fl_lst.append(helper_to_fl(x[xi]))
-    elif isinstance(x[0], list):                    # Check if list of lists, then recurse
+    elif isinstance(x[0], list):
+        # Check if list of lists, then recurse
         for xi in range(len(x)):
             fl_lst.append(str2fl(x[xi]))
     else:

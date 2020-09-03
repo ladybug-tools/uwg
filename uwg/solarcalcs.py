@@ -90,7 +90,8 @@ class SolarCalcs(object):
             if self.simTime.month < self.parameter.vegStart or self.simTime.month > self.parameter.vegEnd:
                 alb_road = self.UCM.road.albedo
             else:
-                alb_road = self.UCM.road.albedo*(1.-self.UCM.road.vegCoverage) + self.parameter.vegAlbedo*self.UCM.road.vegCoverage
+                alb_road = self.UCM.road.albedo * (1. - self.UCM.road.vegCoverage) + \
+                    self.parameter.vegAlbedo * self.UCM.road.vegCoverage
 
             # First set of reflections
             rr = alb_road * self.roadSol
