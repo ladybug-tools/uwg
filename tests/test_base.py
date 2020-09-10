@@ -26,7 +26,10 @@ def setup_uwg_integration(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PA
     if log_file_name and log_level:
         setup_log_file(log_file_name, log_level)
 
-    testuwg = UWG(epw_path, param_path, new_epw_dir=NEW_DIR)
+    if param_path:
+        testuwg = UWG.from_param_file(epw_path, param_path, new_epw_dir=NEW_DIR)
+    else:
+        testuwg = UWG(epw_path, new_epw_dir=NEW_DIR)
 
     # Increase precision for testing
     testuwg.epw_precision = 16

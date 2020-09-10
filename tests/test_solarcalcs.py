@@ -9,7 +9,6 @@ def test_solarangles():
     """Test solar angles."""
 
     testuwg = setup_uwg_integration()
-    testuwg.read_input()
     testuwg.generate()
 
     solar = SolarCalcs(testuwg.UCM, testuwg.BEM, testuwg.simTime, testuwg.RSM,
@@ -61,7 +60,6 @@ def test_solarcalcs():
     """Test solar calculation."""
 
     testuwg = setup_uwg_integration()
-    testuwg.read_input()
     testuwg.generate()
 
     # We subtract 11 hours from total timestep so
@@ -69,7 +67,6 @@ def test_solarcalcs():
     # New time: Jan 31, 1300
     testuwg.simTime.nt -= 12 * 11
 
-    testuwg._hvac_autosize()
     testuwg.simulate()
 
     # check date

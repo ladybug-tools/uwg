@@ -28,7 +28,8 @@ class RSMDef(object):
         T_init: Number for initial dry bulb temperature.
         P_init: Number for initial pressure.
         parameter: Param object for geographic parameters.
-        z_meso_dir: Text string for file path to the z_meso height reference data.
+        z_meso_path: Text string for height reference data filepath for mesoscale
+            component.
 
     Properties
         * lat
@@ -53,57 +54,42 @@ class RSMDef(object):
         * ublPres
     """
 
-    Z_MESO_FILE_NAME = 'z_meso.txt'
+    def __init__(self, lat, lon, GMT, height, T_init, P_init, parameter, z_meso_path):
 
-    def __init__(self, lat, lon, GMT, height, T_init, P_init, parameter, z_meso_dir):
+        # z_meso: list of mesoscale heights
+        self.z_meso = RSMDef.load_z_meso(z_meso_path)
+        self.lat = lat  # latitude [deg]
+        self.lon = lon  # longitude [deg]
+        self.GMT = GMT  # GMT hour correction
+        self.height = height  # average obstacle height [m]
+        self.z0r = 0.1 * height  # rural roughness length [m]
+        self.disp = 0.5 * height  # rural displacement lenght [m]
 
-        # defines self.z_meso property
-        self.z_meso = RSMDef._load_z_meso(z_meso_dir, self.Z_MESO_FILE_NAME)
-
-        # lat: latitude (deg)
-        self.lat = lat
-        # lon: longitude (deg)
-        self.lon = lon
-        # GMT: GMT hour correction
-        self.GMT = GMT
-        # height: average obstacle height (m)
-        self.height = height
-        # z0r: rural roughness length (m)
-        self.z0r = 0.1 * height
-        # disp: rural displacement lenght (m)
-        self.disp = 0.5 * height
         # vertical grid at the rural site
-        # z: vertical height (m)
-        self.z = [0 for x in range(len(self.z_meso) - 1)]
-        # dz: vertical discretization (m)
-        self.dz = [0 for x in range(len(self.z_meso) - 1)]
+        # z: vertical height [m]
+        self.z = [0 for x in range(len(self.z_meso)-1)]
+        # dz: vertical discretization [m]
+        self.dz = [0 for x in range(len(self.z_meso)-1)]
 
         # Initialize empty parameters to compute for RSMDef
-
-        # nz0: layer number at zmt (m)
-        self.nz0 = None
-        # nzref: layer number at zref (m)
-        self.nzref = None
-        # nzfor: layer number at zfor (m)
-        self.nzfor = None
-        # nz10: layer number at zmu (m)
-        self.nz10 = None
-        # nzi: layer number at zi_d (m)
-        self.nzi = None
-        # tempProf: potential temperature profile at the rural site (K)
+        self.nz0 = None  # layer number at zmt [m]
+        self.nzref = None  # layer number at zref [m]
+        self.nzfor = None  # layer number at zfor [m]
+        self.nz10 = None  # layer number at zmu [m]
+        self.nzi = None  # layer number at zi_d [m]
+        # tempProf: potential temperature profile at the rural site [K]
         self.tempProf = None
-        # presProf: pressure profile at the rural site (Pa)
+        # presProf: pressure profile at the rural site [Pa]
         self.presProf = None
-        # tempRealProf: real temperature profile at the rural site (K)
+        # tempRealProf: real temperature profile at the rural site [K]
         self.tempRealProf = None
-        # densityProfC: density profile at the center of layers (kg m-3)
+        # densityProfC: density profile at the center of layers [kg m-3]
         self.densityProfC = None
-        # densityProfS: density profile at the sides of layers (kg m-3)
+        # densityProfS: density profile at the sides of layers [kg m-3]
         self.densityProfS = None
-        # windProf: wind profile at the rural site (m s-1)
+        # windProf: wind profile at the rural site [m s-1]
         self.windProf = None
-        # ublPres: Average pressure at UBL (Pa)
-        self.ublPres = None
+        self.ublPres = None  # Average pressure at UBL [Pa]
 
         for zi in range(len(self.z_meso)-1):
             self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])
@@ -292,12 +278,11 @@ class RSMDef(object):
         a = [[0 for j in range(3)] for i in range(nz)]
         c = [0 for i in range(nz)]
 
-        # --------------------------------------------------------------------------
         cddz[0] = daz[0] * cd[0] / dz[0]
         for iz in range(1, nz):
             cddz[iz] = 2. * daz[iz] * cd[iz] / (dz[iz] + dz[iz-1])
         cddz[nz] = daz[nz] * cd[nz] / dz[nz]
-        # --------------------------------------------------------------------------
+
         a[0][0] = 0.
         a[0][1] = 1.
         a[0][2] = 0.
@@ -314,7 +299,6 @@ class RSMDef(object):
         a[nz-1][1] = 1.
         a[nz-1][2] = 0.
         c[nz-1] = 0.
-        # --------------------------------------------------------------------------
 
         return RSMDef.invert(nz, a, c)
 
@@ -422,21 +406,19 @@ class RSMDef(object):
         return X
 
     @staticmethod
-    def _load_z_meso(z_meso_dir, z_meso_file_name):
-        """Open the z_meso.txt file and return heights as list """
+    def load_z_meso(z_meso_path):
+        """Get list of mesoscale height reference data."""
+
+        assert os.path.exists(z_meso_path), \
+            "File: '{}' does not exist.".format(z_meso_path)
 
         z_meso = []
-        z_meso_path = os.path.join(z_meso_dir, z_meso_file_name)
+        with open(z_meso_path, 'r') as f:
+            for txtline in f:
+                # Strip white spaces, change to float
+                z = float(''.join(txtline.split()))
+                z_meso.append(z)
 
-        # Check if exists
-        if not os.path.exists(z_meso_path):
-            raise Exception('z_meso.txt file: "{}" does not exist.'.format(z_meso_path))
-
-        f = open(z_meso_path, 'r')
-        for txtline in f:
-            z_ = float(''.join(txtline.split()))  # Strip white spaces, change to float
-            z_meso.append(z_)
-        f.close()
         return z_meso
 
     def __repr__(self):

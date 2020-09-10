@@ -107,10 +107,6 @@ class Building(object):
             self.copAdj = cop                           # adjusted COP per temperature
             self.canyon_fraction = 1.0                  # Default canyon fraction
 
-            self.Type = "null"                          # DOE reference building type
-            self.Era = "null"                           # pre80, pst80, new
-            self.Zone = "null"                          # Climate zone number
-
     def BEMCalc(self, UCM, BEM, forc, parameter, simTime):
         """Update BEM by a single timestep."""
 
@@ -130,7 +126,7 @@ class Building(object):
         volVent = self.vent * self.nFloor               # total vent volumetric flow [m3 s-1]
         volInfil = self.infil * UCM.bldHeight / 3600.   # Change of units AC/H -> [m3 s-1]
         T_wall = BEM.wall.layerTemp[-1]                 # Inner layer
-        volSWH = BEM.SWH * self.nFloor/3600.            # Change of units l/hr per m^2 -> [L/s]
+        volSWH = BEM.swh * self.nFloor / 3600.            # Change of units l/hr per m^2 -> [L/s]
         T_ceil = BEM.roof.layerTemp[-1]                 # Inner layer
         T_mass = BEM.mass.layerTemp[0]                  # Outer layer
         T_indoor = self.indoorTemp                      # Indoor temp (initial)
@@ -313,15 +309,15 @@ class Building(object):
         self.sensCoolDemand = self.sensCoolDemand/self.nFloor
 
         # Total Electricity/building floor area (W/m^2)
-        self.ElecTotal = self.coolConsump + BEM.Elec + BEM.Light
+        self.ElecTotal = self.coolConsump + BEM.elec + BEM.light
 
         # Waste heat to canyon, W/m^2 of building + water
         CpH20 = 4200.           # heat capacity of water
         T_hot = 49 + 273.15     # Service water temp (assume no storage)
-        self.sensWaste = self.sensWaste + (1/self.heatEff-1.)*(volSWH*CpH20*(T_hot - forc.waterTemp)) + BEM.Gas*(1-self.heatEff)*self.nFloor
+        self.sensWaste = self.sensWaste + (1/self.heatEff-1.) * (volSWH*CpH20*(T_hot - forc.waterTemp)) + BEM.gas * (1 - self.heatEff) * self.nFloor
 
         # Gas equip per floor + water usage per floor + heating/floor
-        self.GasTotal = BEM.Gas + volSWH * CpH20 * (T_hot - forc.waterTemp) / self.nFloor / self.heatEff + self.heatConsump
+        self.GasTotal = BEM.gas + volSWH * CpH20 * (T_hot - forc.waterTemp) / self.nFloor / self.heatEff + self.heatConsump
 
     def __repr__(self):
         return "BuildingType: {}, Era: {}, Zone: {}".format(

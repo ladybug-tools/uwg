@@ -8,7 +8,6 @@ def test_bem_building_init_largeoffice():
     """Test for BEM.building init"""
 
     testuwg = setup_uwg_integration()
-    testuwg.read_input()
     testuwg.generate()
 
     uwg_python_val = [
@@ -36,9 +35,9 @@ def test_bem_building_init_largeoffice():
         testuwg.BEM[0].building.indoorTemp,
         testuwg.BEM[0].building.indoorHum,
         testuwg.BEM[0].building.FanMax,
-        testuwg.BEM[0].building.Type,
-        testuwg.BEM[0].building.Era,
-        testuwg.BEM[0].building.Zone]
+        testuwg.BEM[0].Type,
+        testuwg.BEM[0].Era,
+        testuwg.BEM[0].Zone]
 
     uwg_matlab_val = setup_open_matlab_ref(
         'matlab_bem', 'matlab_ref_bem_building_init_largeoffice.txt')
@@ -60,8 +59,6 @@ def test_bem_building_bemcalc_largeoffice_cooling():
     """Test for bem.building bemcalc during cooling period."""
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1
@@ -69,15 +66,13 @@ def test_bem_building_bemcalc_largeoffice_cooling():
     testuwg.nday = 1
 
     # set_input
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # In order to avoid integration effects. Test only first time step
     # Subtract timestep to stop at 300 sec
     testuwg.simTime.nt -= (23 * 12 + 11)
 
     # Run simulation
-    testuwg._hvac_autosize()
     testuwg.simulate()
 
     # check date

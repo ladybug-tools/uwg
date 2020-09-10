@@ -12,10 +12,7 @@ def test_SurfFlux_with_waterStorage_start():
     """
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # We subtract 30 days and 11 hours
     # New time: Jan 1, 1:00
@@ -43,10 +40,7 @@ def test_SurfFlux_with_waterStorage_middle():
     When waterStorage > 0.0. This has to be hardcoded b/c doesn't get used otherwise.
     """
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # We subtract 30 days and 11 hours
     # New time: Jan 1, 1:00
@@ -74,9 +68,7 @@ def test_SurfFlux_unit():
     testuwg = setup_uwg_integration()
 
     testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # We subtract 23 hours and 55 minutes so we can test
     # initial timestep (1, 1, 300). New time: Jan 1, 5min
@@ -123,21 +115,16 @@ def test_SurfFlux_integration():
 
     testuwg = setup_uwg_integration()
 
-    testuwg._read_epw()
-    testuwg.read_input()
-
     # Change time and vegCoverage parameters so we can get
     # effect of vegetation on surface heat flux
     testuwg.vegstart = 2    # February
     testuwg.nday = 31 + 15  # February, 15
 
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # We subtract 11 hours from total timestep so still have sun. New time: 1300
     testuwg.simTime.nt -= 12 * 11
 
-    testuwg._hvac_autosize()
     testuwg.simulate()
 
     # check date is February 15th, 13:00

@@ -14,7 +14,6 @@ def test_ucm_init():
     """Test ucm constructor."""
 
     testuwg = setup_uwg_integration()
-    testuwg.read_input()
     testuwg.generate()
 
     # Because we are not using latAnthrop, this value can be None in uwg.
@@ -68,8 +67,6 @@ def test_ucm_ucmodel():
     """Test ucm ucmodel."""
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1
@@ -77,12 +74,13 @@ def test_ucm_ucmodel():
     testuwg.nday = 1
 
     # set_input
+    testuwg._read_epw()
     testuwg._compute_BEM()
     testuwg._compute_input()
 
     # In order to avoid integration effects. Test only first time step
     # Subtract timestep to stop at 300 sec
-    testuwg.simTime.nt -= (23*12 + 11)
+    testuwg.simTime.nt -= (23 * 12 + 11)
 
     # Run simulation
     testuwg._hvac_autosize()

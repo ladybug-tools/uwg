@@ -19,11 +19,7 @@ def test_uwg_simparam_matlab_init():
     # dtWeather,3600, # weather time step (s)
 
     testuwg = setup_uwg_integration()
-
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # open matlab ref file
     uwg_matlab_val = \
@@ -68,11 +64,7 @@ def test_uwg_simparam_matlab_update_date():
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_simparam.uwg')
     testuwg = setup_uwg_integration(param_path=param_path)
 
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
+    testuwg.generate()
     testuwg.simulate()
 
     # open matlab ref file

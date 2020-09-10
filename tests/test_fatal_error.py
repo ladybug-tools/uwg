@@ -20,7 +20,7 @@ BUILDINGPARAMS = [
     'infil', 'vent', 'glazingRatio', 'uValue', 'shgc', 'condType', 'cop',
     'coolSetpointDay', 'coolSetpointNight', 'heatSetpointDay', 'heatSetpointNight',
     'coolCap', 'heatEff', 'mSys', 'indoorTemp', 'indoorHum', 'heatCap', 'copAdj',
-    'canyon_fraction', 'Type', 'Era', 'Zone']
+    'canyon_fraction']
 
 
 def check_obj_attr(obj1, obj2, attr_lst):
@@ -52,15 +52,14 @@ def uwg_from_df():
     # spelling mistake
     # lathAnth = in DF = latAnth
     testuwg = setup_uwg_integration(EPW_PATH, PARAM_PATH)
-    testuwg.read_input()
-    bem = unpickle(os.path.join(PARAM_DIR, 'initialize_fatal_error_bem.pkl'))
-    testuwg._compute_BEM()
-    testuwg.BEM = bem
-
     # Error on Aug 22 if dt at 300
     testuwg.month = 8
     testuwg.day = 1
     testuwg.nday = 31
+
+    bem = unpickle(os.path.join(PARAM_DIR, 'initialize_fatal_error_bem.pkl'))
+    testuwg._compute_BEM()
+    testuwg.BEM = bem
 
     testuwg._read_epw()
     testuwg._compute_input()
@@ -73,7 +72,6 @@ def uwg_manual():
     # spelling mistake
     # lathAnth = in DF = latAnth
     testuwg = setup_uwg_integration(EPW_PATH, PARAM_PATH)
-    testuwg.read_input()
     testuwg._compute_BEM()
 
     # # Add custom typology parameters from DF

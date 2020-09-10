@@ -42,6 +42,7 @@ from .RSMDef import RSMDef
 from .solarcalcs import SolarCalcs
 from .psychrometrics import psychrometrics
 from .urbflux import urbflux
+from .schdef import SchDef
 from . import utilities
 
 
@@ -62,10 +63,9 @@ class UWG(object):
 
     Properties:
         * epw_path
-        * param_path
-        * new_epw_dir
-        * new_epw_name
         * new_epw_path
+        * refBEM
+        * refSchedule
         * month
         * day
         * nday
@@ -115,19 +115,6 @@ class UWG(object):
         * albwall
         * shgc
         * flr_h
-        * BEM
-        * Sch
-        * simTime
-        * weather
-        * forcIP
-        * forc
-        * RSM
-        * USM
-        * geoParam
-        * UBL
-        * UCM
-        * road
-        * rural
     """
 
     # Definitions for constants / other parameters
@@ -140,7 +127,6 @@ class UWG(object):
     SOILVOLHEAT = 2e6
     # Soil material used for soil-depth padding
     SOIL = Material(SOILTCOND, SOILVOLHEAT, name='soil')
-
     # Physical constants
     G = 9.81               # gravity (m s-2)
     CP = 1004.             # heat capacity for air (J/kg K)
@@ -159,44 +145,63 @@ class UWG(object):
     CM = 7.4               #
     # (Pr/Sc)^(2/3) for Colburn analogy in water evaporation
     COLBURN = math.pow((0.713 / 0.621), (2 / 3.))
-
     # Site-specific parameters
     WGMAX = 0.005  # maximum film water depth on horizontal surfaces (m)
 
     # UWG object constants
-    ATTRIBUTE_LIST = ['month', 'day', 'nday', 'dtsim', 'dtweather', 'autosize',
+    PARAMETER_LIST = ['month', 'day', 'nday', 'dtsim', 'dtweather', 'autosize',
                       'sensocc', 'latfocc', 'radfocc', 'radfequip', 'radflight',
                       'h_ubl1', 'h_ubl2', 'h_ref', 'h_temp', 'h_wind', 'c_circ',
                       'c_exch', 'maxday', 'maxnight', 'windmin', 'h_obs', 'bldheight',
                       'h_mix', 'blddensity', 'vertohor', 'charlength', 'albroad',
                       'droad', 'sensanth', 'zone', 'vegcover', 'treecoverage',
                       'vegstart', 'vegend', 'albveg', 'rurvegcover', 'latgrss',
-                      'lattree', 'schtraffic', 'kroad', 'croad', 'bld', 'albroof',
-                      'vegroof', 'glzr', 'albwall', 'shgc', 'flr_h']
-    OPTIONAL_PARAMETERS_SET = {'shgc', 'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h'}
-    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+                      'lattree', 'schtraffic', 'kroad', 'croad', 'bld', 'shgc',
+                      'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h']
+    OPTIONAL_PARAMETER_SET = {'shgc', 'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h'}
+    DEFAULT_BLD = [
+        [0, 0, 0],  # FullServiceRestaurant
+        [0, 0, 0],  # Hospital
+        [0, 0, 0],  # LargeHotel
+        [0, 0.4, 0],  # LargeOffice
+        [0, 0, 0],  # MediumOffice
+        [0, 0.6, 0],  # MidRiseApartment
+        [0, 0, 0],  # OutPatient
+        [0, 0, 0],  # PrimarySchool
+        [0, 0, 0],  # QuickServiceRestaurant
+        [0, 0, 0],  # SecondarySchool
+        [0, 0, 0],  # SmallHotel
+        [0, 0, 0],  # SmallOffice
+        [0, 0, 0],  # Stand-aloneRetail
+        [0, 0, 0],  # StripMall
+        [0, 0, 0],  # SuperMarket
+        [0, 0, 0]]  # Warehouse
+    DEFAULT_SCHTRAFFIC = [
+        [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.7, 0.9, 0.9, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.8,
+         0.9, 0.9, 0.8, 0.8, 0.7, 0.3, 0.2, 0.2],  # Weekday
+        [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.6, 0.7,
+         0.7, 0.7, 0.7, 0.5, 0.4, 0.3, 0.2, 0.2],  # Saturday
+        [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+         0.4, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2]]  # Sunday
 
-    def __init__(self, epw_path, param_path=None, new_epw_dir=None,
-                 new_epw_name=None):
+    # Constant file paths
+    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+    Z_MESO_PATH = os.path.join(CURRENT_PATH, 'refdata', 'z_meso.txt')
+    READDOE_PATH = os.path.join(CURRENT_PATH, 'refdata', 'readDOE.pkl')
+
+    def __init__(self, epw_path, new_epw_dir=None, new_epw_name=None):
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
 
+        # set filepath data
         self.epw_path = epw_path
-        # If file name is entered then UWG will set input from .UWG file
-        self.param_path = param_path
+        self._new_epw_dir, self._new_epw_name = new_epw_dir, new_epw_name
+        self._new_epw_path = None
 
-        # If user does not overload
-        epw_dir, epw_name = os.path.split(epw_path)
-        self.new_epw_name = new_epw_name \
-            if new_epw_name else epw_name.strip('.epw') + '_UWG.epw'
-        self.new_epw_dir = new_epw_dir if new_epw_dir else \
-            os.path.join(epw_dir)
-
-        # Serialized DOE reference data, z_meso height reference data
-        self.readDOE_file_path = os.path.join(
-            self.CURRENT_PATH, 'refdata', 'readDOE.pkl')
-        self.z_meso_dir = os.path.join(self.CURRENT_PATH, 'refdata')
+        # set defaults for reference data
+        self._refBEM = None
+        self._refSchedule = None
 
         # Parameters for UWG computation
         self.epw_precision = 1
@@ -210,8 +215,194 @@ class UWG(object):
         self._glzr = None
         self._vegroof = None
 
-        # Not used.
-        self.latanth = None  # non-building latent heat heat (W/m^2).
+        # Empty latanth not used.
+        self.latanth = None
+
+    @classmethod
+    def from_param_args(cls, epw_path, bldheight, blddensity, vertohor, zone, month=1,
+                        day=1, nday=31, dtsim=300, dtweather=3600, autosize=False,
+                        h_mix=1, sensOcc=100, latfocc=0.3, radfocc=0.2, radfequip=0.5,
+                        radflight=0.7, bld=DEFAULT_BLD, charlength=1000, albroad=0.1,
+                        droad=0.5, sensanth=20, kroad=1, croad=1600000, vegcover=0.2,
+                        treecoverage=0.1, vegstart=4, vegend=10, albveg=0.25,
+                        rurvegcover=0.9, latgrss=0.4, lattree=0.6,
+                        schtraffic=DEFAULT_SCHTRAFFIC, h_ubl1=1000, h_ubl2=80, h_ref=150,
+                        h_temp=2, h_wind=10, c_circ=1.2, c_exch=1, maxday=150,
+                        maxnight=20, windmin=1, h_obs=0.1, new_epw_dir=None,
+                        new_epw_name=None):
+
+        uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
+
+        # Set defaults of parameters
+        uwg_model.bldheight = bldheight
+        uwg_model.blddensity = blddensity
+        uwg_model.vertohor = vertohor
+        uwg_model.zone = zone
+        uwg_model.month = month
+        uwg_model.day = day
+        uwg_model.nday = nday
+        uwg_model.dtsim = dtsim
+        uwg_model.dtweather = dtweather
+        uwg_model.autosize = autosize
+        uwg_model.h_mix = h_mix
+        uwg_model.sensOcc = sensOcc
+        uwg_model.latfocc = latfocc
+        uwg_model.radfocc = radfocc
+        uwg_model.radfequip = radfequip
+        uwg_model.radflight = radflight
+        uwg_model.bld = bld
+        uwg_model.charlength = charlength
+        uwg_model.albroad = albroad
+        uwg_model.droad = droad
+        uwg_model.sensanth = sensanth
+        uwg_model.kroad = kroad
+        uwg_model.croad = croad
+        uwg_model.vegcover = vegcover
+        uwg_model.treecoverage = treecoverage
+        uwg_model.vegstart = vegstart
+        uwg_model.vegend = vegend
+        uwg_model.albveg = albveg
+        uwg_model.rurvegcover = rurvegcover
+        uwg_model.latgrss = latgrss
+        uwg_model.lattree = lattree
+        uwg_model.schtraffic = schtraffic
+        uwg_model.h_ubl1 = h_ubl1
+        uwg_model.h_ubl2 = h_ubl2
+        uwg_model.h_ref = h_ref
+        uwg_model.h_temp = h_temp
+        uwg_model.h_wind = h_wind
+        uwg_model.c_circ = c_circ
+        uwg_model.c_exch = c_exch
+        uwg_model.maxday = maxday
+        uwg_model.maxnight = maxnight
+        uwg_model.windmin = windmin
+        uwg_model.h_obs = h_obs
+
+        return uwg_model
+
+    @classmethod
+    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None):
+        """Morph a rural EPW file to urban conditions based on .uwg file."""
+
+        uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
+        uwg_model._read_input(param_path)
+        return uwg_model
+
+    @classmethod
+    def from_dict(cls, data):
+        """Create an UWG object from a dictionary.
+
+        Args:
+            data: An UWG dictionary following the format below. Note that
+                this example has been truncated for the sake of brevity. For
+                the full list of required properties in the UWG, see the
+                initialization docstrings.
+
+        .. code-block:: python
+
+            {
+            "type": "UWG",
+            "epw_path": "/path/to/epw/SGP_Singapore.486980_IWEC.epw",
+            "new_epw_dir": null,
+            "new_epw_name": null,
+            "bldheight": 10,
+            "blddensity": 0.5,
+            "vertohor": 0.8,
+            ...
+            "h_obs": 0.1,
+            "flr_h": 3.5,
+            "shgc": None,
+            "ref_sch_vector": [sch.to_dict()]  # Optional vector of SchDef dictionary.
+            "ref_bem_vector": [bem.to_dict()]  # Optional vector of BEMDef dictionary.
+            }
+        """
+        assert data['type'] == 'UWG', \
+            'Expected UWG dictionary. Got {}.'.format(data['type'])
+        assert 'epw_path' in data, \
+            'The epw_path must be defined to create an UWG object.'
+
+        uwg_model = UWG(data['epw_path'], data['new_epw_dir'], data['new_epw_name'])
+
+        # Set UWG parameters
+        for attr in cls.PARAMETER_LIST:
+            setattr(uwg_model, attr, data[attr])
+
+        if 'ref_sch_vector' in data:
+            for sch in data['ref_sch_vector']:
+                ti, ei, zi = sch['building_type'], sch['built_era'], sch['zone_type']
+
+                # Initializes and overwrites refBEM, refSch
+                try:
+                    uwg_model.refSchedule[ti][ei][zi] = SchDef.from_dict(sch)
+                except IndexError:
+                    # Add new rows based on type index in object
+                    new_rows_num = ti + 1 - len(uwg_model.refSchedule)
+                    for i in range(new_rows_num):
+                        uwg_model.refSchedule.append(
+                            [[None for c in range(3)] for r in range(16)])
+                    uwg_model.refSchedule[ti][ei][zi] = SchDef.from_dict(sch)
+
+        return uwg_model
+
+    def to_dict(self, include_refDOE=False):
+        """UWG dictionary representation.
+
+        Args:
+            add_refDOE: Optional boolean to include reference DOE data
+                collections: bld, refBEM, and refSch. Set to True if
+                custom reference data has been added to this UWG object.
+                (Default: False).
+        """
+
+        base = {'type': 'UWG'}
+        base['epw_path'] = self.epw_path
+        base['new_epw_dir'] = self._new_epw_dir
+        base['new_epw_name'] = self._new_epw_path
+
+        # Add UWG parameters
+        for attr in self.PARAMETER_LIST:
+            base[attr] = getattr(self, attr)
+
+        # Add reference data
+        if include_refDOE:
+            # TODO: only after _init_BEM, change refBEM, refSch
+            type_num = len(self.refBEM)
+            base['ref_sch_vector'] = [None for i in range(3 * 16 * type_num)]
+            #    [[[0 for c in range(16)] for r in range(3)] for d in range(type_num)]
+
+            c = 0
+            for ti in range(type_num):
+                for ei in range(3):
+                    for zi in range(16):
+                        base['ref_sch_vector'][c] = \
+                            self.refSchedule[ti][ei][zi].to_dict()
+                        c += 1
+        return base
+
+    @property
+    def new_epw_path(self):
+        """Get text string for new epw filepath."""
+        if self._new_epw_path is None:
+            if self._new_epw_dir is None or self._new_epw_name is None:
+                epw_dir, epw_name = os.path.split(self.epw_path)
+                if self._new_epw_dir is None:
+                    self._new_epw_dir = epw_dir
+                if self._new_epw_name is None:
+                    self._new_epw_name = epw_name.strip('.epw') + '_UWG.epw'
+            self._new_epw_path = os.path.join(self._new_epw_dir, self._new_epw_name)
+        return self._new_epw_path
+
+    @property
+    def refBEM(self):
+        if self._refBEM is None:
+            self._load_readDOE(self.READDOE_PATH)
+        return self._refBEM
+
+    @property
+    def refSchedule(self):
+        if self._refSchedule is None:
+            self._load_readDOE(self.READDOE_PATH)
+        return self._refSchedule
 
     @property
     def month(self):
@@ -233,7 +424,7 @@ class UWG(object):
 
     @property
     def nday(self):
-        """Get or set number for number of days to simulate."""
+        """Get or set number of days to simulate."""
         return self._nday
 
     @nday.setter
@@ -242,7 +433,7 @@ class UWG(object):
 
     @property
     def dtsim(self):
-        """Get or set number for simulation time step in seconds."""
+        """Get or set simulation timestep in seconds."""
         return self._dtsim
 
     @dtsim.setter
@@ -251,7 +442,7 @@ class UWG(object):
 
     @property
     def dtweather(self):
-        """Get or set number for weather data time-step in seconds."""
+        """Get or set weather data timestep in seconds."""
         return self._dtweather
 
     @dtweather.setter
@@ -272,7 +463,7 @@ class UWG(object):
 
     @property
     def sensocc(self):
-        """Get or set number for sensible heat in Watts from occupant."""
+        """Get or set sensible heat in Watts from occupant."""
         return self._sensocc
 
     @sensocc.setter
@@ -281,7 +472,7 @@ class UWG(object):
 
     @property
     def latfocc(self):
-        """Get or set number for latent heat fraction from occupant."""
+        """Get or set latent heat fraction from occupant."""
         return self._latfocc
 
     @latfocc.setter
@@ -290,16 +481,16 @@ class UWG(object):
 
     @property
     def radfocc(self):
-        """Get or set number for radiant heat fraction from occupant."""
+        """Get or set radiant heat fraction from occupant."""
         return self._radfocc
 
     @radfocc.setter
     def radfocc(self, value):
-        self._rafocc = float_in_range(value, 0, 1, 'radfocc')
+        self._radfocc = float_in_range(value, 0, 1, 'radfocc')
 
     @property
     def radfequip(self):
-        """Get or set number for radiant heat fraction from equipment."""
+        """Get or set radiant heat fraction from equipment."""
         return self._radfequip
 
     @radfequip.setter
@@ -308,7 +499,7 @@ class UWG(object):
 
     @property
     def radflight(self):
-        """Get or set for radiant heat fraction from electric light."""
+        """Get or set radiant heat fraction from electric light."""
         return self._radflight
 
     @radflight.setter
@@ -317,7 +508,7 @@ class UWG(object):
 
     @property
     def h_ubl1(self):
-        """Get or set number for daytime urban boundary layer height in meters."""
+        """Get or set daytime urban boundary layer height in meters."""
         return self._h_ubl1
 
     @h_ubl1.setter
@@ -326,7 +517,7 @@ class UWG(object):
 
     @property
     def h_ubl2(self):
-        """Get or set number for nighttime urban boundary layer height in meters."""
+        """Get or set nighttime urban boundary layer height in meters."""
         return self._h_ubl2
 
     @h_ubl2.setter
@@ -335,7 +526,7 @@ class UWG(object):
 
     @property
     def h_ref(self):
-        """Get or set number for microclimate inversion height in meters."""
+        """Get or set microclimate inversion height in meters."""
         return self._h_ref
 
     @h_ref.setter
@@ -344,7 +535,7 @@ class UWG(object):
 
     @property
     def h_temp(self):
-        """Get or set number for microclimate temperature height in meters."""
+        """Get or set microclimate temperature height in meters."""
         return self._h_temp
 
     @h_temp.setter
@@ -353,7 +544,7 @@ class UWG(object):
 
     @property
     def h_wind(self):
-        """Get or set number for microclimate wind height in meters."""
+        """Get or set microclimate wind height in meters."""
         return self._h_wind
 
     @h_wind.setter
@@ -362,7 +553,7 @@ class UWG(object):
 
     @property
     def c_circ(self):
-        """Get or set number for microclimate circulation coefficient."""
+        """Get or set microclimate circulation coefficient."""
         return self._c_circ
 
     @c_circ.setter
@@ -371,7 +562,7 @@ class UWG(object):
 
     @property
     def c_exch(self):
-        """Get or set number for microclimate exchange coefficient."""
+        """Get or set microclimate exchange coefficient."""
         return self._c_exch
 
     @c_exch.setter
@@ -380,7 +571,7 @@ class UWG(object):
 
     @property
     def maxday(self):
-        """Get or set number for microclimate maximum day threshold."""
+        """Get or set microclimate maximum day threshold."""
         return self._maxday
 
     @maxday.setter
@@ -393,7 +584,7 @@ class UWG(object):
 
     @property
     def maxnight(self):
-        """Get or set number for microclimate maximum night threshold."""
+        """Get or set microclimate maximum night threshold."""
         return self._maxnight
 
     @maxnight.setter
@@ -406,7 +597,7 @@ class UWG(object):
 
     @property
     def windmin(self):
-        """Get or set number for microclimate minimum wind speed in m/s."""
+        """Get or set microclimate minimum wind speed in m/s."""
         return self._windmin
 
     @windmin.setter
@@ -415,7 +606,7 @@ class UWG(object):
 
     @property
     def h_obs(self):
-        """Get or set number for rural average obstacle height in meters."""
+        """Get or set rural average obstacle height in meters."""
         return self._h_obs
 
     @h_obs.setter
@@ -424,7 +615,7 @@ class UWG(object):
 
     @property
     def bldheight(self):
-        """Get or set number for average urban building height in meters."""
+        """Get or set average urban building height in meters."""
         return self._bldheight
 
     @bldheight.setter
@@ -433,7 +624,7 @@ class UWG(object):
 
     @property
     def h_mix(self):
-        """Get or set number for fraction of building HVAC waste heat released to street canyon.
+        """Get or set fraction of building HVAC waste heat released to street canyon.
 
         It is assumed the rest of building HVAC waste heat is released from the roof.
         """
@@ -445,7 +636,7 @@ class UWG(object):
 
     @property
     def blddensity(self):
-        """Get or set number for building footprint density relative to urban area."""
+        """Get or set building footprint density relative to urban area."""
         return self._blddensity
 
     @blddensity.setter
@@ -454,7 +645,7 @@ class UWG(object):
 
     @property
     def vertohor(self):
-        """Get or set number for vertical-to-horizontal urban area ratio.
+        """Get or set vertical-to-horizontal urban area ratio.
 
         The vertical-to-horizontal urban area ratio is calculated by dividing the
         urban facade area by total urban area.
@@ -467,7 +658,7 @@ class UWG(object):
 
     @property
     def charlength(self):
-        """Get or set number for the urban characteristic length in meters.
+        """Get or set the urban characteristic length in meters.
 
         The characteristic length is the dimension of a square that encompasses the
         whole neighborhood.
@@ -480,7 +671,7 @@ class UWG(object):
 
     @property
     def albroad(self):
-        """Get or set number for urban road albedo."""
+        """Get or set urban road albedo."""
         return self._albroad
 
     @albroad.setter
@@ -489,7 +680,7 @@ class UWG(object):
 
     @property
     def droad(self):
-        """Get or set number for thickness of urban road pavement thickness in meters."""
+        """Get or set thickness of urban road pavement thickness in meters."""
         return self._droad
 
     @droad.setter
@@ -498,7 +689,7 @@ class UWG(object):
 
     @property
     def sensanth(self):
-        """Get or set number for street level anthropogenic sensible heat in W/m^2.
+        """Get or set street level anthropogenic sensible heat [W/m^2].
 
         Street level anthropogenic heat is non-building heat like heat emitted from cars,
         pedestrians, and street cooking.
@@ -511,7 +702,7 @@ class UWG(object):
 
     @property
     def bld(self):
-        """Get or set matrix of numbers representing fraction of urban building stock.
+        """Get or set matrix representing fraction of urban building stock.
 
         This property consists of a 16 x 3 matrix referencing the fraction of the urban
         building stock from 16 building types and 3 built eras representing, in
@@ -549,21 +740,22 @@ class UWG(object):
 
         assert isinstance(value, (list, tuple)), 'The bld property must be a list ' \
             'or tuple. Got {}.'.format(value)
-        assert len(value) == 16, 'The bld property must be a 16 x 3 matrix. Got ' \
-            '{} rows.'.format(len(value))
+        type_num = len(value)
+        assert type_num >= 16, 'The bld property must have greater than or equal to ' \
+            '16 rows. Got {} rows.'.format(type_num)
 
-        self._bld = utilities.zeros(16, 3)
+        self._bld = [[0 for c in range(3)] for r in range(type_num)]
 
         # Check column number and add value
-        for i in range(16):
-            assert len(value[i]) == 3, 'The bld property must be a 16 x 3 matrix. Got ' \
-                '{} columns for the row {}.'.format(len(value[i]), i)
+        for i in range(type_num):
+            assert len(value[i]) == 3, 'The bld property must be a 16 (or greater) ' \
+                'x 3 matrix. Got {} columns for the row {}.'.format(len(value[i]), i)
             for j in range(3):
                 self._bld[i][j] = float_in_range(value[i][j])
 
     @property
     def lattree(self):
-        """Get or set number for fraction of latent heat absorbed by tree."""
+        """Get or set fraction of latent heat absorbed by tree."""
         return self._lattree
 
     @lattree.setter
@@ -572,7 +764,7 @@ class UWG(object):
 
     @property
     def latgrss(self):
-        """Get or set number for fraction of latent heat absorbed by grass."""
+        """Get or set fraction of latent heat absorbed by grass."""
         return self._latgrss
 
     @latgrss.setter
@@ -634,7 +826,7 @@ class UWG(object):
 
     @property
     def vegcover(self):
-        """Get or set number for fraction of urban ground covered in grass only."""
+        """Get or set fraction of urban ground covered in grass only."""
         return self._vegcover
 
     @vegcover.setter
@@ -643,7 +835,7 @@ class UWG(object):
 
     @property
     def treecoverage(self):
-        """Get or set number for fraction of urban ground covered in trees."""
+        """Get or set fraction of urban ground covered in trees."""
         return self._treecoverage
 
     @treecoverage.setter
@@ -652,7 +844,7 @@ class UWG(object):
 
     @property
     def albveg(self):
-        """Get or set number for vegetation albedo."""
+        """Get or set vegetation albedo."""
         return self._albveg
 
     @albveg.setter
@@ -661,7 +853,7 @@ class UWG(object):
 
     @property
     def rurvegcover(self):
-        """Get or set number for fraction of rural ground covered by vegetation."""
+        """Get or set fraction of rural ground covered by vegetation."""
         return self._rurvegcover
 
     @rurvegcover.setter
@@ -670,7 +862,7 @@ class UWG(object):
 
     @property
     def kroad(self):
-        """Get or set number for road pavement conductivity in W/(m K)."""
+        """Get or set road pavement conductivity [W/mK]."""
         return self._kroad
 
     @kroad.setter
@@ -679,7 +871,7 @@ class UWG(object):
 
     @property
     def croad(self):
-        """Get or set number for road pavement volumentric heat capacity J/(m^3 K)."""
+        """Get or set road pavement volumetric heat capacity [J/m^3K]."""
         return self._croad
 
     @croad.setter
@@ -688,7 +880,7 @@ class UWG(object):
 
     @property
     def schtraffic(self):
-        """Get or set matrix of numbers for schedule of fractional anthropogenic heat load.
+        """Get or set matrix for schedule of fractional anthropogenic heat load.
 
         This property consists of a 3 x 24 matrix. Each row corresponding to a schedule
         for a weekday, Saturday, and Sunday, and each column corresponds to an hour in
@@ -712,23 +904,18 @@ class UWG(object):
 
     @schtraffic.setter
     def schtraffic(self, value):
-        assert isinstance(value, (list, tuple)), 'The schtraffic property must be a ' \
-            'list or tuple. Got {}.'.format(value)
 
-        assert len(value) == 3, 'The schtraffic property must be a 3 x 24 matrix. Got ' \
-            '{} rows.'.format(len(value))
+        value = SchDef.check_week_validity(value, 'schtraffic')
+        self._schtraffic = [[0 for c in range(24)] for r in range(3)]
 
-        self._schtraffic = utilities.zeros(3, 24)
         # Check column number and add value
         for i in range(3):
-            assert len(value[i]) == 24, 'The schtraffic property must be a 3 x 24 ' \
-                'matrix. Got {} columns for row {}.'.format(len(value[i]), i)
             for j in range(24):
                 self._schtraffic[i][j] = float_in_range(value[i][j])
 
     @property
     def shgc(self):
-        """Get or set number for average building glazing Solar Heat Gain Coefficient."""
+        """Get or set average building glazing Solar Heat Gain Coefficient."""
         return self._shgc
 
     @shgc.setter
@@ -740,49 +927,49 @@ class UWG(object):
 
     @property
     def albroof(self):
-        """Get or set number for average building roof albedo."""
+        """Get or set average building roof albedo."""
         return self._albroof
 
     @albroof.setter
     def albroof(self, value):
         if value is None:
-            self._shgc = value
+            self._albroof = value
         else:
             self._albroof = float_in_range(value, 0, 1, 'albroof')
 
     @property
     def glzr(self):
-        """Get or set number for average building glazing ratio."""
+        """Get or set average building glazing ratio."""
         return self._glzr
 
     @glzr.setter
     def glzr(self, value):
         if value is None:
-            self._shgc = value
+            self._glzr = value
         else:
             self._glzr = float_in_range(value, 0, 1, 'glzr')
 
     @property
     def vegroof(self):
-        """Get or set number for fraction of roofs covered in grass/shrubs."""
+        """Get or set fraction of roofs covered in grass/shrubs."""
         return self._vegroof
 
     @vegroof.setter
     def vegroof(self, value):
         if value is None:
-            self._shgc = value
+            self._vegroof = value
         else:
             self._vegroof = float_in_range(value, 0, 1, 'vegroof')
 
     @property
     def albwall(self):
-        """Get or set number for average building albedo."""
+        """Get or set average building albedo."""
         return self._albwall
 
     @albwall.setter
     def albwall(self, value):
         if value is None:
-            self._shgc = value
+            self._albwall = value
         else:
             self._albwall = float_in_range(value, 0, 1, 'albwall')
 
@@ -794,64 +981,9 @@ class UWG(object):
     @flr_h.setter
     def flr_h(self, value):
         if value is None:
-            self._shgc = value
+            self._flr_h = value
         else:
             self._flr_h = float_positive(value, 'flr_h')
-
-    def read_input(self):
-        """Read the parameter input file (.uwg file) and set as UWG attributes."""
-
-        assert os.path.exists(self.param_path), 'Parameter file "{}" does not ' \
-            'exist.'.format(self.param_path)
-
-        # Open .UWG file and feed csv data to initializeDataFile
-        param_data = utilities.read_csv(self.param_path)
-
-        # The initialize.UWG is read with a dictionary so that users changing
-        # line endings or line numbers doesn't make reading input incorrect
-        count = 0
-        self._init_param_dict = {}
-        while count < len(param_data):
-            row = param_data[count]
-            row = [row[i].replace(' ', '').lower() for i in range(len(row))]
-
-            # optional parameters might be empty so handle separately
-            is_optional_parameter = \
-                row[0] in self.OPTIONAL_PARAMETERS_SET if len(row) > 0 else False
-
-            try:
-                if row == [] or '#' in row[0]:
-                    count += 1
-                    continue
-                elif row[0] == 'schtraffic':
-                    # SchTraffic: 3 x 24 matrix
-                    trafficrows = param_data[count+1:count+4]
-                    self._init_param_dict[row[0]] = \
-                        [utilities.str2fl(r[:24]) for r in trafficrows]
-                    count += 4
-                elif row[0] == 'bld':
-                    # bld: 17 x 3 matrix
-                    bldrows = param_data[count+1:count+17]
-                    self._init_param_dict[row[0]] = \
-                        [utilities.str2fl(r[:3]) for r in bldrows]
-                    count += 17
-                elif is_optional_parameter:
-                    self._init_param_dict[row[0]] = \
-                        None if row[1] == '' else float(row[1])
-                    count += 1
-                else:
-                    self._init_param_dict[row[0]] = float(row[1])
-                    count += 1
-            except ValueError:
-                print('Error while reading parameter at row {}. Got: {}.'.format(
-                    count, row))
-
-        # Define simulation and weather parameters if not already defined
-        for attr in self.ATTRIBUTE_LIST:
-            assert attr in self._init_param_dict, 'The {} attribute is not defined in ' \
-                'the .UWG parameter file.'.format(attr)
-
-            setattr(self, attr, self._init_param_dict[attr])
 
     def generate(self):
         """Generate all UWG objects after input parameters are set."""
@@ -963,44 +1095,44 @@ class UWG(object):
                 # Set temperature
 
                 # add from temperature schedule for cooling
-                self.BEM[i].building.coolSetpointDay = self.Sch[i].Cool[di][hi] + 273.15
+                self.BEM[i].building.coolSetpointDay = self.Sch[i].cool[di][hi] + 273.15
                 self.BEM[i].building.coolSetpointNight = \
                     self.BEM[i].building.coolSetpointDay
                 # add from temperature schedule for heating
-                self.BEM[i].building.heatSetpointDay = self.Sch[i].Heat[di][hi] + 273.15
+                self.BEM[i].building.heatSetpointDay = self.Sch[i].heat[di][hi] + 273.15
                 self.BEM[i].building.heatSetpointNight = \
                     self.BEM[i].building.heatSetpointDay
 
                 # Internal Heat Load Schedule (W/m^2 of floor area for Q)
 
                 # Qelec x elec fraction for day
-                self.BEM[i].Elec = self.Sch[i].Qelec * self.Sch[i].Elec[di][hi]
+                self.BEM[i].elec = self.Sch[i].Qelec * self.Sch[i].elec[di][hi]
                 # Qlight x light fraction for day
-                self.BEM[i].Light = self.Sch[i].Qlight * self.Sch[i].Light[di][hi]
+                self.BEM[i].light = self.Sch[i].Qlight * self.Sch[i].light[di][hi]
                 # Number of occupants x occ fraction for day
-                self.BEM[i].Nocc = self.Sch[i].Nocc * self.Sch[i].Occ[di][hi]
+                self.BEM[i].Nocc = self.Sch[i].Nocc * self.Sch[i].occ[di][hi]
                 # Sensible Q occ * fraction occ sensible Q * number of occ
                 self.BEM[i].Qocc = self.sensocc * (1 - self.latfocc) * self.BEM[i].Nocc
 
                 # SWH and ventilation schedule
 
                 # litres per hour x SWH fraction for day
-                self.BEM[i].SWH = self.Sch[i].Vswh * self.Sch[i].SWH[di][hi]
+                self.BEM[i].swh = self.Sch[i].Vswh * self.Sch[i].swh[di][hi]
                 # m^3/s/m^2 of floor
                 self.BEM[i].building.vent = self.Sch[i].Vent
                 # Gas Equip Schedule, per m^2 of floor
-                self.BEM[i].Gas = self.Sch[i].Qgas * self.Sch[i].Gas[di][hi]
+                self.BEM[i].gas = self.Sch[i].Qgas * self.Sch[i].gas[di][hi]
 
                 # This is quite messy, should update
                 # Update internal heat and corresponding fractional loads
-                intHeat = self.BEM[i].Light + self.BEM[i].Elec + self.BEM[i].Qocc
+                intHeat = self.BEM[i].light + self.BEM[i].elec + self.BEM[i].Qocc
                 # W/m2 from light, electricity, occupants
                 self.BEM[i].building.intHeatDay = intHeat
                 self.BEM[i].building.intHeatNight = intHeat
                 # fraction of radiant heat from light/equipment of whole internal heat
                 self.BEM[i].building.intHeatFRad = \
-                    (self.radflight * self.BEM[i].Light + self.radfequip *
-                     self.BEM[i].Elec) / intHeat
+                    (self.radflight * self.BEM[i].light + self.radfequip *
+                     self.BEM[i].elec) / intHeat
 
                 # fraction of latent heat (from occupants) of whole internal heat
                 self.BEM[i].building.intHeatFLat = \
@@ -1106,8 +1238,62 @@ class UWG(object):
 
         epw_new_id.close()
 
-        print('New climate file "{}" is generated at {}.'.format(
-              self.new_epw_name, self.new_epw_dir))
+        print('New climate file is generated at {}.'.format(
+              self.new_epw_path))
+
+    def _read_input(self, param_path):
+        """Read the parameter input file (.uwg file) and set as UWG attributes."""
+
+        assert os.path.exists(param_path), 'Parameter file "{}" does not ' \
+            'exist.'.format(param_path)
+
+        # Open .UWG file and feed csv data to initializeDataFile
+        param_data = utilities.read_csv(param_path)
+
+        # The initialize.UWG is read with a dictionary so that users changing
+        # line endings or line numbers doesn't make reading input incorrect
+        count = 0
+        self._init_param_dict = {}
+        while count < len(param_data):
+            row = param_data[count]
+            row = [row[i].replace(' ', '').lower() for i in range(len(row))]
+
+            # optional parameters might be empty so handle separately
+            is_optional_parameter = \
+                row[0] in self.OPTIONAL_PARAMETER_SET if len(row) > 0 else False
+
+            try:
+                if row == [] or '#' in row[0]:
+                    count += 1
+                    continue
+                elif row[0] == 'schtraffic':
+                    # SchTraffic: 3 x 24 matrix
+                    trafficrows = param_data[count+1:count+4]
+                    self._init_param_dict[row[0]] = \
+                        [utilities.str2fl(r[:24]) for r in trafficrows]
+                    count += 4
+                elif row[0] == 'bld':
+                    # bld: 17 x 3 matrix
+                    bldrows = param_data[count+1:count+17]
+                    self._init_param_dict[row[0]] = \
+                        [utilities.str2fl(r[:3]) for r in bldrows]
+                    count += 17
+                elif is_optional_parameter:
+                    self._init_param_dict[row[0]] = \
+                        None if row[1] == '' else float(row[1])
+                    count += 1
+                else:
+                    self._init_param_dict[row[0]] = float(row[1])
+                    count += 1
+            except ValueError:
+                print('Error while reading parameter at row {}. Got: {}.'.format(
+                    count, row))
+
+        # Set UWG parameters
+        for attr in self.PARAMETER_LIST:
+            assert attr in self._init_param_dict, 'The {} attribute is not defined in ' \
+                'the .UWG parameter file.'.format(attr)
+            setattr(self, attr, self._init_param_dict[attr])
 
     def _read_epw(self):
         """Read EPW file and sets corresponding UWG weather and site properties.
@@ -1147,21 +1333,18 @@ class UWG(object):
         # Number of ground temperature depths
         self.nSoil = int(soilData[1])
         # nSoil x 12 matrix for soil temperture (K)
-        self.Tsoil = utilities.zeros(self.nSoil, 12)
+        self.Tsoil = [[0 for c in range(12)] for r in range(self.nSoil)]
         # nSoil x 1 matrix for soil depth (m)
-        self.depth_soil = utilities.zeros(self.nSoil, 1)
+        self.depth_soil = [[0] for r in range(self.nSoil)]
 
         # Read monthly data for each layer of soil from EPW file
         for i in range(self.nSoil):
             # get soil depth for each nSoil
-            self.depth_soil[i][0] = float(soilData[2 + (i*16)])
+            self.depth_soil[i][0] = float(soilData[2 + (i * 16)])
             # monthly data
             for j in range(12):
                 # 12 months of soil T for specific depth
-                self.Tsoil[i][j] = float(soilData[6 + (i*16) + j]) + 273.15
-
-        # set new directory path for the morphed EPW file
-        self.new_epw_path = os.path.join(self.new_epw_dir, self.new_epw_name)
+                self.Tsoil[i][j] = float(soilData[6 + (i * 16) + j]) + 273.15
 
     def _compute_BEM(self):
         """Define BEMDef objects for each archetype defined in the bld matrix.
@@ -1174,17 +1357,6 @@ class UWG(object):
         * BEM - list of BEMDef objects extracted from readDOE
         * Sch - list of Schedule objects extracted from readDOE
         """
-
-        if not os.path.exists(self.readDOE_file_path):
-            raise Exception('readDOE.pkl file: "{}" does not exist.'.format(
-                self.readDOE_file_path))
-
-        # open pickle file in binary form
-        readDOE_file = open(self.readDOE_file_path, 'rb')
-        _ = pickle.load(readDOE_file)
-        refBEM = pickle.load(readDOE_file)
-        refSchedule = pickle.load(readDOE_file)
-        readDOE_file.close()
 
         # Define building energy models
         k = 0
@@ -1202,11 +1374,11 @@ class UWG(object):
         # Modify zone to be used as python index
         zone_idx = self.zone - 1
 
-        for i in range(16):    # 16 building types
+        for i in range(len(self.refBEM)):  # ~16 building types
             for j in range(3):  # 3 built eras
                 if self.bld[i][j] > 0.:
                     # Add to BEM list
-                    self.BEM.append(refBEM[i][j][zone_idx])
+                    self.BEM.append(self.refBEM[i][j][zone_idx])
                     self.BEM[k].frac = self.bld[i][j]
                     self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
 
@@ -1230,7 +1402,7 @@ class UWG(object):
                     self.SHGC_total += self.BEM[k].frac * self.BEM[k].building.shgc
                     self.alb_wall_total += self.BEM[k].frac * self.BEM[k].wall.albedo
                     # Add to schedule list
-                    self.Sch.append(refSchedule[i][j][zone_idx])
+                    self.Sch.append(self.refSchedule[i][j][zone_idx])
                     k += 1
 
     def _compute_input(self):
@@ -1297,15 +1469,15 @@ class UWG(object):
 
         self.rural = copy.deepcopy(self.road)
         self.rural.vegcoverage = self.rurvegcover
-        self.rural._name = 'rural_road'
+        self.rural.name = 'rural_road'
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(
             self.lat, self.lon, self.GMT, self.h_obs, self.weather.staTemp[0],
-            self.weather.staPres[0], self.geoParam, self.z_meso_dir)
+            self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
         self.USM = RSMDef(
             self.lat, self.lon, self.GMT, self.bldheight / 10., self.weather.staTemp[0],
-            self.weather.staPres[0], self.geoParam, self.z_meso_dir)
+            self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
 
         T_init = self.weather.staTemp[0]
         H_init = self.weather.staHum[0]
@@ -1339,7 +1511,7 @@ class UWG(object):
         self.road = Element(
             self.road.albedo, self.road.emissivity, newthickness, roadMat,
             self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal,
-            self.road._name)
+            self.road.name)
 
         # Define Rural Element
         ruralMat, newthickness = \
@@ -1363,7 +1535,7 @@ class UWG(object):
         self.rural = Element(
             self.rural.albedo, self.rural.emissivity, newthickness, ruralMat,
             self.rural.vegcoverage, self.rural.layerTemp[0], self.rural.horizontal,
-            self.rural._name)
+            self.rural.name)
 
     def _hvac_autosize(self):
         """HVAC autosizing (unlimited cooling & heating) in BEM objects."""
@@ -1372,6 +1544,16 @@ class UWG(object):
             if self.autosize:
                 self.BEM[i].building.coolCap = 9999.
                 self.BEM[i].building.heatCap = 9999.
+
+    def _load_readDOE(self, readDOE_path):
+        # Serialized DOE reference data
+        assert os.path.exists(readDOE_path), \
+            'File: {} does not exist.'.format(readDOE_path)
+
+        # open pickle file in binary form
+        with open(readDOE_path, 'rb') as readDOE_file:
+            self._refBEM = pickle.load(readDOE_file)
+            self._refSchedule = pickle.load(readDOE_file)
 
     @staticmethod
     def _procmat(materials, max_thickness, min_thickness):
@@ -1392,15 +1574,15 @@ class UWG(object):
                 if materials.layerThickness[j] > max_thickness:
                     nlayers = math.ceil(materials.layerThickness[j]/float(max_thickness))
                     for i in range(int(nlayers)):
-                        newmat.append(Material(k[j], Vhc[j], name=materials._name))
+                        newmat.append(Material(k[j], Vhc[j], name=materials.name))
                         newthickness.append(materials.layerThickness[j]/float(nlayers))
                 # Material that's less then min_thickness is not added.
                 elif materials.layerThickness[j] < min_thickness:
                     print('WARNING: Material layer too thin (less then 2 cm) to process.'
                           'Material {} is {:.2f} cm.'.format(
-                              materials._name, min_thickness * 100))
+                              materials.name, min_thickness * 100))
                 else:
-                    newmat.append(Material(k[j], Vhc[j], name=materials._name))
+                    newmat.append(Material(k[j], Vhc[j], name=materials.name))
                     newthickness.append(materials.layerThickness[j])
 
         else:
@@ -1409,22 +1591,22 @@ class UWG(object):
             if materials.layerThickness[0] > max_thickness:
                 nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
                 for i in range(int(nlayers)):
-                    newmat.append(Material(k[0], Vhc[0], name=materials._name))
+                    newmat.append(Material(k[0], Vhc[0], name=materials.name))
                     newthickness.append(materials.layerThickness[0]/float(nlayers))
             # Material should be at least 1cm thick, so if we're here,
             # should give warning and stop. Only warning given for now.
             elif materials.layerThickness[0] < min_thickness*2:
                 newthickness = [min_thickness/2., min_thickness/2.]
-                newmat = [Material(k[0], Vhc[0], name=materials._name),
-                          Material(k[0], Vhc[0], name=materials._name)]
+                newmat = [Material(k[0], Vhc[0], name=materials.name),
+                          Material(k[0], Vhc[0], name=materials.name)]
                 print('WARNING: Material layer less then 2 cm is found.'
                       'Material {} is {:.2f} cm. May cause error.'.format(
-                          materials._name, min_thickness * 100))
+                          materials.name, min_thickness * 100))
             else:
                 newthickness = [materials.layerThickness[0] / 2.,
                                 materials.layerThickness[0] / 2.]
-                newmat = [Material(k[0], Vhc[0], name=materials._name),
-                          Material(k[0], Vhc[0], name=materials._name)]
+                newmat = [Material(k[0], Vhc[0], name=materials.name),
+                          Material(k[0], Vhc[0], name=materials.name)]
 
         return newmat, newthickness
 

@@ -378,37 +378,37 @@ def test_Schedule():
                         tol = calculate_tolerance(matlab_ref_value, 15.0)
 
                     if schid == 'Elec': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Elec)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].elec)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Light': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Light)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].light)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Gas': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Gas)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].gas)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Occ': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Occ)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].occ)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Cool': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Cool)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].cool)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Heat': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].Heat)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].heat)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'SWH': #3x24 matrix of schedule for SWH (WD,Sat,Sun)
-                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].SWH)
+                        flatten_sch = reduce(lambda x,y: x+y, Schedule[bldType][bldEra][climateZone].swh)
                         assert flatten_sch == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 

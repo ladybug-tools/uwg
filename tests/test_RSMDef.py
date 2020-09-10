@@ -29,10 +29,7 @@ def test_rsm_init():
     """
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # check date
     assert testuwg.simTime.month == 1
@@ -99,23 +96,19 @@ def test_rsm_vdm():
     """ test RSM VDM against matlab references."""
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1
     testuwg.day = 1
     testuwg.nday = 1
 
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # In order to avoid integration effects. Test only first time step
     # Subtract timestep to stop at 300 sec
     testuwg.simTime.nt -= (23 * 12 + 11)
 
     # Run simulation
-    testuwg._hvac_autosize()
     testuwg.simulate()
 
     # check date
@@ -155,18 +148,13 @@ def test_rsm_dissipation_bougeault():
 
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_toronto.uwg')
-    testuwg = setup_uwg_integration(epw_path, param_path)
-    testuwg._read_epw()
-    testuwg.read_input()
-
+    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=param_path)
     testuwg.month = 6
     testuwg.day = 1
     testuwg.nday = 30
 
     # run simulation
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
+    testuwg.generate()
     testuwg.simulate()
 
     # check date

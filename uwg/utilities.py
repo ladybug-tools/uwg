@@ -9,16 +9,6 @@ except NameError:
     pass
 
 
-def zeros(h, w):
-    """create a (h x w) matrix of zeros.
-
-    Args:
-        h: Height of the matrix.
-        w: Width of the matrix.
-    """
-    return [[0 for x in range(w)] for y in range(h)]
-
-
 def is_near_zero(num, eps=1e-10):
     return abs(float(num)) < eps
 

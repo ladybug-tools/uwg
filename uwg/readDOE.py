@@ -20,12 +20,6 @@ from .BEMDef import BEMDef
 from .schdef import SchDef
 from .utilities import read_csv, str2fl
 
-# For debugging only
-#import pprint
-#import decimal
-#pp = pprint.pprint
-#dd = decimal.Decimal.from_float
-
 DIR_CURR = os.path.abspath(os.path.dirname(__file__))
 DIR_DOE_PATH = os.path.join(DIR_CURR,"..","resources","DOERefBuildings")
 
@@ -112,13 +106,13 @@ def readDOE(serialize_output=True):
 
     """
 
-    #Nested, nested lists of Building, SchDef, BEMDef objects
-    refDOE   = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #refDOE(16,3,16) = Building
-    Schedule = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #Schedule (16,3,16) = SchDef
-    refBEM   = [[[None]*16 for k_ in range(3)] for j_ in range(16)]                #refBEM (16,3,16) = BEMDef
+    # 16 x 3 x 16 matrix of Building, SchDef, BEMDef objects
+    refDOE = [[[None] * 16 for k_ in range(3)] for j_ in range(16)]  # refDOE: Building
+    Schedule = [[[None] * 16 for k_ in range(3)] for j_ in range(16)]  # Schedule: SchDef
+    refBEM = [[[None] * 16 for k_ in range(3)] for j_ in range(16)]  # refBEM: BEMDef
 
-    #Purpose: Loop through every DOE reference csv and extract building data
-    #Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
+    # Purpose: Loop through every DOE reference csv and extract building data
+    # Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768
     for i in range(16):
 
         #i = 16 types of buildings
@@ -211,21 +205,18 @@ def readDOE(serialize_output=True):
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
 
-                #Not defined in the constructor
+                # Not defined in the constructor
                 B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
-                B.Type = BLDTYPE[i]
-                B.Era = BUILTERA[j]
-                B.Zone = ZONETYPE[k]
                 refDOE[i][j][k] = B
 
                 # Define wall, mass(floor), roof
                 # Reference from E+ for conductivity, thickness (reference below)
 
                 # Material: (thermalCond, volHeat = specific heat * density)
-                Concrete = Material (1.311, 836.8 * 2240,"Concrete")
-                Insulation = Material (0.049, 836.8 * 265.0, "Insulation")
-                Gypsum = Material (0.16, 830.0 * 784.9, "Gypsum")
-                Wood = Material (0.11, 1210.0 * 544.62, "Wood")
+                Concrete = Material(1.311, 836.8 * 2240,"Concrete")
+                Insulation = Material(0.049, 836.8 * 265.0, "Insulation")
+                Gypsum = Material(0.16, 830.0 * 784.9, "Gypsum")
+                Wood = Material(0.11, 1210.0 * 544.62, "Wood")
                 Stucco = Material(0.6918,  837.0 * 1858.0, "Stucco")
 
                 # Wall (1 in stucco, concrete, insulation, gypsum)
@@ -336,17 +327,13 @@ def readDOE(serialize_output=True):
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
+                refBEM[i][j][k].Type = BLDTYPE[i]
+                refBEM[i][j][k].Era = BUILTERA[j]
+                refBEM[i][j][k].Zone = ZONETYPE[k]
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k] # max fan flow rate (m^3/s) per DOE
 
-                Schedule[i][j][k] = SchDef()
-
-                Schedule[i][j][k].Elec = SchEquip   # 3x24 matrix of schedule for fraction electricity (WD,Sat,Sun)
-                Schedule[i][j][k].Light = SchLight  # 3x24 matrix of schedule for fraction light (WD,Sat,Sun)
-                Schedule[i][j][k].Gas = SchGas      # 3x24 matrix of schedule for fraction gas (WD,Sat,Sun)
-                Schedule[i][j][k].Occ = SchOcc      # 3x24 matrix of schedule for fraction occupancy (WD,Sat,Sun)
-                Schedule[i][j][k].Cool = SetCool    # 3x24 matrix of schedule for fraction cooling temp (WD,Sat,Sun)
-                Schedule[i][j][k].Heat = SetHeat    # 3x24 matrix of schedule for fraction heating temp (WD,Sat,Sun)
-                Schedule[i][j][k].SWH = SchSWH      # 3x24 matrix of schedule for fraction SWH (WD,Sat,Sun
+                Schedule[i][j][k] = SchDef(elec=SchEquip, gas=SchGas, light=SchLight, occ=SchOcc, cool=SetCool,
+                                           heat=SetHeat, swh=SchSWH)
 
                 Schedule[i][j][k].Qelec = Elec[j]                   # W/m^2 (max) for electrical plug process
                 Schedule[i][j][k].Qlight = Light[j]                 # W/m^2 (max) for light
@@ -365,7 +352,7 @@ def readDOE(serialize_output=True):
 
         # dump in ../resources
         # Pickle objects, protocol 1 b/c binary file
-        pickle.dump(refDOE, pickle_readDOE,1)
+        # pickle.dump(refDOE, pickle_readDOE,1)  # Not used. Commented out.
         pickle.dump(refBEM, pickle_readDOE,1)
         pickle.dump(Schedule, pickle_readDOE,1)
 

@@ -52,17 +52,13 @@ def test_uwg_output_heatdemand_1_1_0000():
     """
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
     testuwg = setup_uwg_integration(epw_path=epw_path)
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test all year
     testuwg.month = 1
     testuwg.day = 1
     testuwg.nday = 365
 
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
+    testuwg.generate()
     testuwg.simulate()
     testuwg.write_epw()
 
@@ -159,18 +155,13 @@ def test_uwg_output_beijing():
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_beijing.uwg')
     testuwg = setup_uwg_integration(epw_path=epw_path, param_path=param_path)
 
-    testuwg._read_epw()
-    testuwg.read_input()
-
     # Test all year
     testuwg.month = 1
     testuwg.day = 1
     testuwg.nday = 365
 
     # main
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
+    testuwg.generate()
     testuwg.simulate()
     testuwg.write_epw()
 
@@ -187,8 +178,6 @@ def test_uwg_output_cooldemand_6_1_0000():
     # set up the logger
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
     testuwg = setup_uwg_integration(epw_path=epw_path)
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test 30 days in summer
     testuwg.month = 6
@@ -196,9 +185,7 @@ def test_uwg_output_cooldemand_6_1_0000():
     testuwg.nday = 30
 
     # main
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
+    testuwg.generate()
     testuwg.simulate()
     testuwg.write_epw()
 
@@ -212,7 +199,6 @@ def test_uwg_output_cooldemand_1_1_0000():
         - sensCoolDemand
     """
     testuwg = setup_uwg_integration()
-    testuwg.read_input()
 
     # Test all year
     testuwg.month = 1
@@ -220,11 +206,7 @@ def test_uwg_output_cooldemand_1_1_0000():
     testuwg.nday = 365
 
     # main
-    testuwg._read_epw()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
-    testuwg._hvac_autosize()
-
+    testuwg.generate()
     testuwg.simulate()
     testuwg.write_epw()
 

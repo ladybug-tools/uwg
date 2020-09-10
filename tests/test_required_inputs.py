@@ -14,7 +14,6 @@ def test_required_inputs_wrong_type():
     """Test that we can catch wrong types, list lengths etc."""
 
     testuwg = setup_uwg_integration(DEFAULT_EPW_PATH, DEFAULT_PARAM_PATH)
-    testuwg.read_input()
 
     with pytest.raises(AssertionError):
         testuwg.h_temp = -6

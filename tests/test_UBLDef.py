@@ -9,10 +9,7 @@ def test_ubl_init():
     """Test ubl constructor."""
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # Get uwg_python values
     uwg_python_val = [
@@ -50,8 +47,6 @@ def test_ublmodel():
     """Test ubl constructor."""
 
     testuwg = setup_uwg_integration()
-    testuwg._read_epw()
-    testuwg.read_input()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1
@@ -59,15 +54,13 @@ def test_ublmodel():
     testuwg.nday = 1
 
     # set_input
-    testuwg._compute_BEM()
-    testuwg._compute_input()
+    testuwg.generate()
 
     # In order to avoid integration effects. Test only first time step
     # Subtract timestep to stop at 300 sec
-    testuwg.simTime.nt -= (23*12 + 11)
+    testuwg.simTime.nt -= (23 * 12 + 11)
 
     # Run simulation
-    testuwg._hvac_autosize()
     testuwg.simulate()
 
     # check date
