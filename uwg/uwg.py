@@ -43,6 +43,7 @@ from .solarcalcs import SolarCalcs
 from .psychrometrics import psychrometrics
 from .urbflux import urbflux
 from .schdef import SchDef
+from .BEMDef import BEMDef
 from . import utilities
 
 
@@ -323,37 +324,68 @@ class UWG(object):
 
         uwg_model = UWG(data['epw_path'], data['new_epw_dir'], data['new_epw_name'])
 
-        # Set UWG parameters
+        # set UWG parameters
         for attr in cls.PARAMETER_LIST:
             setattr(uwg_model, attr, data[attr])
 
-        if 'ref_sch_vector' in data:
-            zi = uwg_model.zone - 1
-            for sch in data['ref_sch_vector']:
-                # Initializes and overwrites refBEM, refSch
-                ti, ei = sch['bldtype'], sch['builtera']
-                try:
-                    uwg_model.refSchedule[ti][ei][zi] = SchDef.from_dict(sch)
-                except IndexError:
-                    # Add new rows based on type index in object
-                    new_rows_num = ti + 1 - len(uwg_model.refSchedule)
-                    for i in range(new_rows_num):
-                        uwg_model.refSchedule.append(
-                            [[None for c in range(3)] for r in range(16)])
-                    uwg_model.refSchedule[ti][ei][zi] = SchDef.from_dict(sch)
+        # check and add reference data
+        refcheck = int('ref_sch_vector' in data) + int('ref_bem_vector' in data)
+        assert refcheck == 2 or refcheck == 0, 'The ref_sch_vector and ref_bem_vector ' \
+            'properties must both be defined in order to modify the UWG reference ' \
+            'data. Only {} is defined.'.format(
+                'ref_sch_vector' if 'ref_sch_vector' in data else 'ref_bem_vector')
+
+        if refcheck == 2:
+            ref_sch_vector = [SchDef.from_dict(schdict)
+                              for schdict in data['ref_sch_vector']]
+            ref_bem_vector = [BEMDef.from_dict(bemdict)
+                              for bemdict in data['ref_bem_vector']]
+            uwg_model.customize_reference_data(
+                ref_bem_vector, ref_sch_vector, uwg_model.zone - 1)
 
         return uwg_model
+
+    def customize_reference_data(self, ref_bem_vector, ref_sch_vector, zone_index):
+        """Customize refBEM and refSchedule data by extending or overriding data.
+
+        # TODO:
+        - mention must be computed before _compute_BEM (or generate)
+        - add check in _compute_BEM to check lenghts of refSchedle/reFBEM w/ bld
+        This value is used to reference the fraction of urban area the BEMDef object
+        defines in the UWG bld matrix.
+
+        Args:
+            # TODO
+        """
+        assert len(ref_sch_vector) == len(ref_bem_vector), 'The ref_sch_vector ' \
+            'and ref_bem_vector properties must be lists of equal length. Got ' \
+            'lengths {} and {}, respectively.'.format(
+                len(ref_sch_vector), len(ref_bem_vector))
+
+        zi = zone_index
+
+        for sch in ref_sch_vector:
+            # Initializes and overwrites refBEM, refSch
+            ti, ei = sch.bldtype, sch.builtera
+            try:
+                self.refSchedule[ti][ei][zi] = sch
+            except IndexError:
+                # Add new rows based on type index in object
+                new_rows_num = ti + 1 - len(self.refSchedule)
+                for i in range(new_rows_num):
+                    self.refSchedule.append(
+                        [[None for c in range(16)] for r in range(3)])
+                self.refSchedule[ti][ei][zi] = sch
 
     def to_dict(self, include_refDOE=False):
         """UWG dictionary representation.
 
         Args:
-            add_refDOE: Optional boolean to include reference BEM and Sch objects
-                from the refBEM and refSch matrices. Only the reference data for
-                built types and eras that constitute a nonzero fraction of the urban
-                area, as defined in the bld matrix, will be included. Set this value
-                to True if custom reference data has been added to the UWG object.
-                (Default: False).
+            add_refDOE: Optional boolean to include reference BEMDef and SchDef objects
+                from the refBEM and refSch matrices. Only BEMDef and SchDef objects
+                with a bldtype and builtera value referenced in the bld matrix will be
+                included. Set this value to True if custom reference data has been
+                added to the UWG object. (Default: False).
         """
 
         base = {'type': 'UWG'}
@@ -376,7 +408,6 @@ class UWG(object):
                         continue
                     base['ref_sch_vector'].append(
                         self.refSchedule[ti][ei][zi].to_dict())
-
         return base
 
     @property
@@ -1622,7 +1653,7 @@ class UWG(object):
             return _split_string(s.__repr__().split(':'))
 
         def _list_2_tabbed(b):
-            return reduce(lambda a, b: a+'\n'+b, [_tabbed(_b) for _b in b])
+            return reduce(lambda a, b: a + '\n' + b, [_tabbed(_b) for _b in b])
 
         simtime_str = _tabbed(self.simTime) + '\n' \
             if hasattr(self, 'simTime') else 'No simTime attr.\n'
@@ -1638,9 +1669,9 @@ class UWG(object):
             if hasattr(self, 'USM') else 'No Urban RSM attr.\n'
         ucm_str = _tabbed(self.UCM) + '\n' \
             if hasattr(self, 'UCM') else 'No UCM attr.\n'
-        bem_str = _list_2_tabbed(self.BEM) \
+        bem_str = reduce(lambda a, b: a.__repr__() + '\n' + b.__repr__(), self.BEM) \
             if hasattr(self, 'BEM') else 'No BEM attr.'
 
         return 'UWG for {}:\n\n{}{}{}{}{}{}{}{}'.format(
-            self.epwFileName, simtime_str, weather_str, param_str, ubl_str, rsm_str,
-            ucm_str, bem_str)
+            self.epw_path, simtime_str, weather_str, param_str, ubl_str, rsm_str,
+            usm_str, ucm_str, bem_str)

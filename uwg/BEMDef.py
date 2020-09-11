@@ -16,15 +16,12 @@ class BEMDef(object):
             PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
             SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
             SuperMarket (14), Warehouse (15). Additional building types can be defined
-            with a number greater then 15. Default is None.
+            with a number greater then 15. This value is used to reference the fraction
+            of urban area the BEMDef object defines in the UWG bld matrix.
         builtera: Number between 0 and 2 corresponding to the following built eras:
-            Pre-1980s (0), Post1980s (1), New construction (2). Default is None.
-        zonetype: Number between 0 and 15 corresponding to the following zone types:
-            1A-Miami (0), 2A-Houston (1), 2B-Phoenix (2), 3A-Atlanta (3),
-            3B-CA-Los Angeles (4), 3B-Las Vegas (5), 3C (San Francisco) (6),
-            4A (Baltimore) (7), 4B (Albuquerque) (8), 4C (Seattle) (9),
-            5A (Chicago) (10), 5B (Boulder) (11), 6A (Minneapolis) (12),
-            6B (Helena) (13), 7 (Duluth) (14), 8 (Fairbanks) (15). Default is None.
+            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
+            reference the fraction of urban area the BEMDef object defines in the UWG
+            bld matrix.
 
     Properties:
         building
@@ -49,8 +46,7 @@ class BEMDef(object):
         T_roofin
     """
 
-    def __init__(self, building, mass, wall, roof, frac, bldtype=None, builtera=None,
-                 zonetype=None):
+    def __init__(self, building, mass, wall, roof, frac, bldtype, builtera):
 
         # Initialization
         self.building = building
@@ -62,7 +58,7 @@ class BEMDef(object):
         # Properties to be set in readDOE
         self.bldtype = bldtype  # DOE reference building type
         self.builtera = builtera  # pre80, pst80, new
-        self.zonetype = zonetype  # climate zone number
+        self.zonetype = None  # climate zone number (only used in testing).
 
         # Properties to be computed during UWG simulation
         self.fl_area = 0  # building typology urban floor area [m2]
@@ -94,7 +90,6 @@ class BEMDef(object):
             "frac": 0.4,  # fraction of urban floor space of this type
             "bldtype": 0,  # building type index
             "builtera": 1,  # built era index
-            "zonetype": 15  # zone type index
             }
         """
         pass
@@ -109,11 +104,10 @@ class BEMDef(object):
         base['frac'] = self.frac
         base['bldtype'] = self.bldtype
         base['builtera'] = self.builtera
-        base['zonetype'] = self.zonetype
         return base
 
     def __repr__(self):
-        return 'BEMDef, bldtype: {}\n zonetype: {}\n builtera: {}\n mass: {}\n ' \
+        return 'BEMDef,\n bldtype: {}\n builtera: {}\n mass: {}\n ' \
             'wall: {}\n roof: {}\n frac: {}'.format(
-                self.bldtype, self.zonetype, self.builtera, self.mass.name,
+                self.bldtype, self.builtera, self.mass.name,
                 self.wall.name, self.roof.name, self.frac)

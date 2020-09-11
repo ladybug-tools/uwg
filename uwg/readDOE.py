@@ -325,14 +325,14 @@ def readDOE(serialize_output=True):
                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"MetalRoof")
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
-                refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
-                refBEM[i][j][k].bldtype = i
-                refBEM[i][j][k].builtera = j
-                refBEM[i][j][k].zonetype = k
+                refBEM[i][j][k] = BEMDef(building=B, mass=mass, wall=wall, roof=roof,
+                                         frac=0.0, bldtype=i, builtera=j)
+                refBEM[i][j][k].zonetype = k  # for testing
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k] # max fan flow rate (m^3/s) per DOE
 
                 Schedule[i][j][k] = SchDef(elec=SchEquip, gas=SchGas, light=SchLight, occ=SchOcc, cool=SetCool,
-                                           heat=SetHeat, swh=SchSWH)
+                                           heat=SetHeat, swh=SchSWH, bldtype=i, builtera=j)
+                Schedule[i][j][k].zonetype = k  # for testing only.
 
                 Schedule[i][j][k].Qelec = Elec[j]                   # W/m^2 (max) for electrical plug process
                 Schedule[i][j][k].Qlight = Light[j]                 # W/m^2 (max) for light
@@ -341,10 +341,6 @@ def readDOE(serialize_output=True):
                 Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
                 Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
-                # Define reference indices for type, era and zone
-                Schedule[i][j][k].bldtype = i
-                Schedule[i][j][k].builtera = j
-                Schedule[i][j][k].zonetype = k
 
     # if not test serialize refDOE,refBEM,Schedule and store in resources
     if serialize_output:

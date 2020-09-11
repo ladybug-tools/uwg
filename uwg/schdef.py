@@ -25,15 +25,12 @@ class SchDef(object):
             PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
             SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
             SuperMarket (14), Warehouse (15). Additional building types can be defined
-            with a number greater then 15. Default is None.
+            with a number greater then 15. This value is used to reference the fraction
+            of urban area the SchDef object defines in the UWG bld matrix.
         builtera: Number between 0 and 2 corresponding to the following built eras:
-            Pre-1980s (0), Post1980s (1), New construction (2). Default is None.
-        zonetype: Number between 0 and 15 corresponding to the following zone types:
-            1A-Miami (0), 2A-Houston (1), 2B-Phoenix (2), 3A-Atlanta (3),
-            3B-CA-Los Angeles (4), 3B-Las Vegas (5), 3C (San Francisco) (6),
-            4A (Baltimore) (7), 4B (Albuquerque) (8), 4C (Seattle) (9),
-            5A (Chicago) (10), 5B (Boulder) (11), 6A (Minneapolis) (12),
-            6B (Helena) (13), 7 (Duluth) (14), 8 (Fairbanks) (15). Default is None.
+            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
+            reference the fraction of urban area the SchDef object defines in the UWG
+            bld matrix.
 
     Properties:
         * elec
@@ -48,8 +45,7 @@ class SchDef(object):
         * zonetype
     """
 
-    def __init__(self, elec, gas, light, occ, cool, heat, swh, bldtype=None,
-                 builtera=None, zonetype=None):
+    def __init__(self, elec, gas, light, occ, cool, heat, swh, bldtype, builtera):
         self.elec = SchDef.check_week_validity(elec, 'elec')
         self.gas = SchDef.check_week_validity(gas, 'gas')
         self.light = SchDef.check_week_validity(light, 'light')
@@ -61,7 +57,7 @@ class SchDef(object):
         # Properties to be set in readDOE
         self.bldtype = bldtype  # DOE reference building type
         self.builtera = builtera  # pre80, pst80, new
-        self.zonetype = zonetype  # climate zone number
+        self.zonetype = None  # climate zone number (only used in testing).
 
     @classmethod
     def from_dict(cls, data):
@@ -90,19 +86,14 @@ class SchDef(object):
             "swh": _example_week,  # 3 x 24 matrix of hourly values
             "bldtype": 0,  # building type index
             "builtera": 1,  # built era index
-            "zonetype": 15  # zone type index
             }
         """
         assert data['type'] == 'SchDef', 'Expected ' \
             'SchDef dictionary. Got {}.'.format(data['type'])
 
-        sch = cls(elec=data['elec'], gas=data['gas'], light=data['light'],
-                  occ=data['occ'], cool=data['cool'], heat=data['heat'],
-                  swh=data['swh'])
-
-        sch.bldtype = data['bldtype']
-        sch.zonetype = data['zonetype']
-        sch.builtera = data['builtera']
+        return cls(elec=data['elec'], gas=data['gas'], light=data['light'],
+                   occ=data['occ'], cool=data['cool'], heat=data['heat'],
+                   swh=data['swh'], bldtype=data['bldtype'], builtera=data['builtera'])
 
     def to_dict(self):
         """SchDef dictionary representation."""
@@ -115,7 +106,6 @@ class SchDef(object):
         base['heat'] = self.heat
         base['swh'] = self.swh
         base['bldtype'] = self.bldtype
-        base['zonetype'] = self.zonetype
         base['builtera'] = self.builtera
         return base
 
@@ -136,9 +126,9 @@ class SchDef(object):
         return week
 
     def __repr__(self):
-        return 'Schedule, bldtype: {}\n zonetype: {}\n builtera: {}\n '\
+        return 'Schedule,\n bldtype: {}\n builtera: {}\n '\
             'Setpoint schedules:(weekday from 8:00 - 18:00)\n Heating: {}\n ' \
             'Cooling: {}'.format(
-                self.bldtype, self.zonetype, self.builtera,
+                self.bldtype, self.builtera,
                 'Null' if self.heat is None else self.heat[0][7:17],
                 'Null' if self.cool is None else self.cool[0][7:17])

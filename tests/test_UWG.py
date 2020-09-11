@@ -4,6 +4,7 @@ import pytest
 from .test_base import setup_uwg_integration, set_input_manually
 from uwg import SchDef
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
+from uwg.utilities import is_near_zero
 
 
 def test_read_epw():
@@ -115,6 +116,10 @@ def test_optional_inputted_parameters():
 
     testuwg = setup_uwg_integration(param_path=None)
     testuwg = set_input_manually(testuwg)
+
+    # test __repr__
+    testuwg.generate()
+    testuwg.__repr__()
 
     # Test setting values
     with pytest.raises(AssertionError):
@@ -303,7 +308,7 @@ def test_sch_refDOE():
     testweek = [[0.1 for i in range(24)] for j in range(3)]
     testuwg1.refSchedule[1][2][0] = \
         SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
-               heat=testweek, swh=testweek)
+               heat=testweek, swh=testweek, bldtype=1, builtera=2)
 
     testuwg1.generate()  # initialize BEM, Sch objects
 
@@ -332,15 +337,13 @@ def test_sch_refDOE():
 
     testweek = [[0.2 for i in range(24)] for j in range(3)]
     newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                    cool=testweek, heat=testweek, swh=testweek)
-    newsch.bldtype = 17
-    newsch.builtera = 2
-    newsch.zonetype = 0
+                    cool=testweek, heat=testweek, swh=testweek, bldtype=17, builtera=2)
 
     # extend reference matrices
     testuwg1.refBEM.extend([[None for i in range(3)] for j in range(2)])
-    testuwg1.refSch.extend([[None for i in range(3)] for j in range(2)])
-    testuwg1.refSch[17][2][0] = newsch
+    testuwg1.refSchedule.extend([[[None for k in range(16)]
+                                 for i in range(3)] for j in range(2)])
+    testuwg1.refSchedule[17][2][0] = newsch
 
     uwgdict = testuwg1.to_dict(include_refDOE=True)
     testuwg2 = testuwg1.from_dict(uwgdict)
@@ -358,9 +361,45 @@ def test_sch_refDOE():
             assert testsch.swh[i][j] == pytest.approx(0.2, abs=1e-10)
 
 
-def test_add_refDOE():
+def test_customize_reference_data():
     """Test adding reference DOE data to UWG."""
-    # add newsch to
-    # testuwg1.add_refDOE_data()
 
-    pass
+    testuwg = setup_uwg_integration()
+
+    # set bld matrix and zone
+    testuwg.bld = [[0 for i in range(3)] for j in range(20)]
+    testuwg.bld[5][0] = 0.5  # test insertion
+    testuwg.bld[19][2] = 0.5  # test extention
+    testuwg.zone = 15
+    zi = testuwg.zone - 1
+
+    # make new sched and bem
+    testweek = [[2000.0 for i in range(24)] for j in range(3)]
+    newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                     cool=testweek, heat=testweek, swh=testweek,
+                     bldtype=5, builtera=0)
+    testweek = [[1000.0 for i in range(24)] for j in range(3)]
+    newsch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                     cool=testweek, heat=testweek, swh=testweek,
+                     bldtype=19, builtera=2)
+
+    # Test default lengths
+    assert len(testuwg.refSchedule) == 16
+    for day in testuwg.refSchedule[5][0][zi].heat:
+        for hr in day:
+            assert not is_near_zero(hr - 2000.0, 1e-10)
+
+    # TODO add bem
+    ref_sch_vec = [newsch1, newsch2]
+    ref_bem_vec = [None, None]
+    testuwg.customize_reference_data(ref_bem_vec, ref_sch_vec, zi)
+
+    # Test lengths
+    assert len(testuwg.refSchedule) == 20
+    for day in testuwg.refSchedule[5][0][zi].heat:
+        for hr in day:
+            assert is_near_zero(hr - 2000.0, 1e-10)
+
+
+
+
