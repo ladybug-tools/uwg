@@ -13,7 +13,7 @@ class Material(object):
         * thermalCond
         * volHeat
     """
-    def __init__(self, thermalCond, volHeat, name=''):
+    def __init__(self, thermalCond, volHeat, name):
         self.name = name
         self.thermalCond = thermalCond
         self.volHeat = volHeat

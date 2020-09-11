@@ -1,5 +1,8 @@
 """Building Energy Model (BEM) class definition."""
 
+from .building import Building
+from .element import Element
+
 
 class BEMDef(object):
     """Building Energy Model (BEM) definition.
@@ -92,7 +95,17 @@ class BEMDef(object):
             "builtera": 1,  # built era index
             }
         """
-        pass
+        assert data['type'] == 'BEMDef', 'Expected ' \
+            'BEMDef dictionary. Got {}.'.format(data['type'])
+
+        building = Building.from_dict(data['building'])
+        mass = Element.from_dict(data['mass'])
+        wall = Element.from_dict(data['wall'])
+        roof = Element.from_dict(data['roof'])
+        frac = data['frac']
+        bldtype, builtera = data['bldtype'], data['builtera']
+
+        return cls(building, mass, wall, roof, frac, bldtype, builtera)
 
     def to_dict(self):
         """BEMDef dictionary representation."""

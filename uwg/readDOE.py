@@ -212,7 +212,7 @@ def readDOE(serialize_output=True):
                 # Reference from E+ for conductivity, thickness (reference below)
 
                 # Material: (thermalCond, volHeat = specific heat * density)
-                Concrete = Material(1.311, 836.8 * 2240,"Concrete")
+                Concrete = Material(1.311, 836.8 * 2240, "Concrete")
                 Insulation = Material(0.049, 836.8 * 265.0, "Insulation")
                 Gypsum = Material(0.16, 830.0 * 784.9, "Gypsum")
                 Wood = Material(0.11, 1210.0 * 544.62, "Wood")
@@ -241,7 +241,7 @@ def readDOE(serialize_output=True):
                     alb = 0.2
                     emis = 0.9
                     thickness = [0.054,0.054]
-                    concrete = Material (1.31, 2240.0*836.8)
+                    concrete = Material(1.31, 2240.0*836.8, 'Concrete')
                     mass = Element(alb,emis,thickness,[concrete,concrete],0,293,1,"MassFloor")
 
                 elif TypeWall[j][k] == "WoodFrame":
@@ -263,7 +263,7 @@ def readDOE(serialize_output=True):
                     alb = 0.2
                     emis = 0.9
                     thickness = [0.05,0.05]
-                    wood = Material(1.31, 2240.0*836.8)
+                    wood = Material(1.31, 2240.0*836.8, 'Wood')
                     mass = Element(alb,emis,thickness,[wood,wood],0.,293.,1.,"WoodFloor")
 
                 elif TypeWall[j][k] == "SteelFrame":
@@ -284,7 +284,7 @@ def readDOE(serialize_output=True):
                     alb = 0.2
                     emis = 0.93
                     thickness = [0.05,0.05]
-                    mass = Element(alb,emis,thickness,[Concrete,Concrete],0.,293.,1.,"MassFloor")
+                    mass = Element(alb,emis,thickness,[Concrete,Concrete],0.,293.,1., "MassFloor")
 
                 elif TypeWall[j][k] == "MetalWall":
                     # metal siding, insulation, 1/2" gypsum
@@ -299,7 +299,7 @@ def readDOE(serialize_output=True):
                     alb = 0.2
                     emis = 0.9
                     thickness = [0.05, 0.05]
-                    concrete = Material(1.31, 2240.0*836.8)
+                    concrete = Material(1.31, 2240.0*836.8, 'Concrete')
                     mass = Element(alb,emis,thickness,[concrete,concrete],0.,293.,1.,"MassFloor")
 
                 # Roof

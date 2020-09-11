@@ -46,32 +46,24 @@ class Weather(object):
 
         self.location = self._climate_data[0][1]
         cd = self._climate_data[HI:HF + 1]
-        # drybulb [C]
-        self.staTemp = str2fl([cd[i][6] for i in range(len(cd))])
-        # dewpoint [C]
-        self.staTdp = str2fl([cd[i][7] for i in range(len(cd))])
-        # air RH (%)
-        self.staRhum = str2fl([cd[i][8] for i in range(len(cd))])
-        # air pressure (Pa)
-        self.staPres = str2fl([cd[i][9] for i in range(len(cd))])
-        # horizontal Infrared Radiation Intensity (W m-2)
+        self.staTemp = str2fl([cd[i][6] for i in range(len(cd))])  # drybulb [C]
+        self.staTdp = str2fl([cd[i][7] for i in range(len(cd))])  # dewpoint [C]
+        self.staRhum = str2fl([cd[i][8] for i in range(len(cd))])  # air RH (%)
+        self.staPres = str2fl([cd[i][9] for i in range(len(cd))])  # air pressure (Pa)
+        # staInfra: horizontal Infrared Radiation Intensity (W m-2)
         self.staInfra = str2fl([cd[i][12] for i in range(len(cd))])
-        # horizontal radiation [W m-2]
+        # staHor: horizontal radiation [W m-2]
         self.staHor = str2fl([cd[i][13] for i in range(len(cd))])
-        # normal solar direct radiation (W m-2)
+        # staDir: normal solar direct radiation (W m-2)
         self.staDir = str2fl([cd[i][14] for i in range(len(cd))])
-        # horizontal solar diffuse radiation (W m-2)
+        # staDif: horizontal solar diffuse radiation (W m-2)
         self.staDif = str2fl([cd[i][15] for i in range(len(cd))])
-        # wind direction
-        self.staUdir = str2fl([cd[i][20] for i in range(len(cd))])
-        # wind speed (m s-1)
-        self.staUmod = str2fl([cd[i][21] for i in range(len(cd))])
-        # specific humidty (kgH20 kgN202-1)
-        self.staHum = [0.0] * len(self.staTemp)
+        self.staUdir = str2fl([cd[i][20] for i in range(len(cd))])  # wind direction
+        self.staUmod = str2fl([cd[i][21] for i in range(len(cd))])  # wind speed (m s-1)
+        self.staHum = [0.0] * len(self.staTemp)  # specific humidty (kgH20 kgN202-1)
         for i in range(len(self.staTemp)):
             self.staHum[i] = \
                 HumFromRHumTemp(self.staRhum[i], self.staTemp[i], self.staPres[i])
-
         self.staTemp = [s + 273.15 for s in self.staTemp]  # air temperature (K)
 
         # Set precipitation to array of zeros. This is done to avoid errors
@@ -83,6 +75,6 @@ class Weather(object):
         self.staRobs = [0.0] * len(self.staTemp)  # Precipitation (mm h-1)
 
     def __repr__(self):
-        return "Weather: City = {}, Max Tdb = {}C, Min Tdb = {}C".format(
+        return 'Weather,\n City: {}\n, Max Tdb: {}C\n, Min Tdb: {}C\n'.format(
             self.location, round(max(self.staTemp) - 273.15, 2),
             round(min(self.staTemp) - 273.15, 2))

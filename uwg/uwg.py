@@ -364,8 +364,8 @@ class UWG(object):
 
         zi = zone_index
 
+        # Insert or extend refSchedule matrix
         for sch in ref_sch_vector:
-            # Initializes and overwrites refBEM, refSch
             ti, ei = sch.bldtype, sch.builtera
             try:
                 self.refSchedule[ti][ei][zi] = sch
@@ -376,6 +376,19 @@ class UWG(object):
                     self.refSchedule.append(
                         [[None for c in range(16)] for r in range(3)])
                 self.refSchedule[ti][ei][zi] = sch
+
+        # Insert or extend refBEM matrix
+        for bem in ref_bem_vector:
+            ti, ei = bem.bldtype, bem.builtera
+            try:
+                self.refBEM[ti][ei][zi] = sch
+            except IndexError:
+                # Add new rows based on type index in object
+                new_rows_num = ti + 1 - len(self.refBEM)
+                for i in range(new_rows_num):
+                    self.refBEM.append(
+                        [[None for c in range(16)] for r in range(3)])
+                self.refBEM[ti][ei][zi] = sch
 
     def to_dict(self, include_refDOE=False):
         """UWG dictionary representation.
@@ -399,15 +412,22 @@ class UWG(object):
 
         # Add reference data
         if include_refDOE:
-            base['ref_sch_vector'] = []
+
             zi = self.zone - 1
             type_num = len(self.bld)
+            ref_sch_vec, ref_bem_vec = [], []
             for ti in range(type_num):
                 for ei in range(3):
-                    if utilities.is_near_zero(self.bld[ti][ei], 1e-10):
+                    if utilities.is_near_zero(self.bld[ti][ei], 1e-5):
                         continue
-                    base['ref_sch_vector'].append(
+                    ref_sch_vec.append(
                         self.refSchedule[ti][ei][zi].to_dict())
+                    ref_bem_vec.append(
+                        self.refBEM[ti][ei][zi].to_dict())
+
+            base['ref_sch_vector'] = ref_sch_vec
+            base['ref_bem_vector'] = ref_bem_vec
+
         return base
 
     @property

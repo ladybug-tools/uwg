@@ -8,6 +8,7 @@ except NameError:
 
 import math
 from .utilities import is_near_zero
+from .material import Material
 
 
 class Element(object):
@@ -101,8 +102,9 @@ class Element(object):
         assert data['type'] == 'Element', 'Expected ' \
             'Element dictionary. Got {}.'.format(data['type'])
 
+        materials = [Material.from_dict(m) for m in data['materialLst']]
         return cls(data['albedo'], data['emissivity'], data['layerThickness'],
-                   data['materialLst'], data['vegCoverage'], data['T_init'],
+                   materials, data['vegCoverage'], data['T_init'],
                    data['horizontal'], data['name'])
 
     def to_dict(self):
@@ -111,7 +113,7 @@ class Element(object):
         base['albedo'] = self.albedo
         base['emissivity'] = self.emissivity
         base['layerThickness'] = self.layerThickness
-        base['materialLst'] = [m.dict() for m in self.materialLst]
+        base['materialLst'] = [m.to_dict() for m in self.materialLst]
         base['vegCoverage'] = self.vegCoverage
         base['T_init'] = self.T_init
         base['horizontal'] = self.horizontal
