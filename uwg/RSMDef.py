@@ -423,4 +423,5 @@ class RSMDef(object):
 
     def __repr__(self):
         return 'RSM: obstacle ht = {}m, surface roughness length = {}m, ' \
-            'displacement length = {}m'.format(self.height, self.z0r, self.disp)
+            'displacement length = {}m'.format(
+                self.height, round(self.z0r, 2), self.disp)

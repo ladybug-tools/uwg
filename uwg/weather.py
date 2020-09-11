@@ -84,4 +84,5 @@ class Weather(object):
 
     def __repr__(self):
         return "Weather: City = {}, Max Tdb = {}C, Min Tdb = {}C".format(
-            self.location, max(self.staTemp) - 273.15, min(self.staTemp) - 273.15)
+            self.location, round(max(self.staTemp) - 273.15, 2),
+            round(min(self.staTemp) - 273.15, 2))
