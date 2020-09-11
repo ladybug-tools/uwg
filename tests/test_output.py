@@ -3,7 +3,7 @@
 import pytest
 import os
 
-from .test_base import setup_uwg_integration, calculate_tolerance, set_input_manually, \
+from .test_base import auto_setup_uwg, calculate_tolerance, set_input_manually, \
     MATLAB_DIR, TEST_DIR
 import uwg
 
@@ -51,7 +51,7 @@ def test_uwg_output_heatdemand_1_1_0000():
         - sensHeatDemand
     """
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
-    testuwg = setup_uwg_integration(epw_path=epw_path)
+    testuwg = auto_setup_uwg(epw_path=epw_path)
 
     # Test all year
     testuwg.month = 1
@@ -68,7 +68,7 @@ def test_uwg_output_heatdemand_1_1_0000():
 def test_program_input():
 
     epw_path = os.path.join(TEST_DIR, 'epw', 'SGP_Singapore.486980_IWEC.epw')
-    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=None)
+    testuwg = auto_setup_uwg(epw_path=epw_path, param_path=None)
 
     # Assign manually
     testuwg = set_input_manually(testuwg)
@@ -101,7 +101,7 @@ def test_program_input():
 def test_program_hybrid_input():
     """Testing inputting with api and with .uwg file."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Assign manually
     testuwg = set_input_manually(testuwg)
@@ -153,7 +153,7 @@ def test_uwg_output_beijing():
 
     epw_path = os.path.join(TEST_DIR, 'epw', 'CHN_Beijing.Beijing.545110_IWEC.epw')
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_beijing.uwg')
-    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=param_path)
+    testuwg = auto_setup_uwg(epw_path=epw_path, param_path=param_path)
 
     # Test all year
     testuwg.month = 1
@@ -177,7 +177,7 @@ def test_uwg_output_cooldemand_6_1_0000():
 
     # set up the logger
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
-    testuwg = setup_uwg_integration(epw_path=epw_path)
+    testuwg = auto_setup_uwg(epw_path=epw_path)
 
     # Test 30 days in summer
     testuwg.month = 6
@@ -198,7 +198,7 @@ def test_uwg_output_cooldemand_1_1_0000():
         - before vegstart
         - sensCoolDemand
     """
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Test all year
     testuwg.month = 1

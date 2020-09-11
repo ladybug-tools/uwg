@@ -7,13 +7,13 @@ except NameError:
 
 import pytest
 import math
-from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
 
 
 def test_ucm_init():
     """Test ucm constructor."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # Because we are not using latAnthrop, this value can be None in uwg.
@@ -66,7 +66,7 @@ def test_ucm_init():
 def test_ucm_ucmodel():
     """Test ucm ucmodel."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1

@@ -1,13 +1,13 @@
 """Tests for urbflux functions."""
 
 import pytest
-from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
 
 
 def test_urbflux_unit():
     """Test for urbflux."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1

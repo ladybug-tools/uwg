@@ -1,7 +1,7 @@
 """Test for uwg.py"""
 import os
 import pytest
-from .test_base import setup_uwg_integration
+from .test_base import auto_setup_uwg
 
 DIR_CURR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_EPW_PATH = os.path.join(
@@ -13,7 +13,7 @@ DEFAULT_PARAM_PATH = os.path.join(
 def test_required_inputs_wrong_type():
     """Test that we can catch wrong types, list lengths etc."""
 
-    testuwg = setup_uwg_integration(DEFAULT_EPW_PATH, DEFAULT_PARAM_PATH)
+    testuwg = auto_setup_uwg(DEFAULT_EPW_PATH, DEFAULT_PARAM_PATH)
 
     with pytest.raises(AssertionError):
         testuwg.h_temp = -6

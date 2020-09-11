@@ -20,8 +20,8 @@ def calculate_tolerance(x, p):
     return tol
 
 
-def setup_uwg_integration(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PATH,
-                          log_file_name=None, log_level=None, uwg_param_dir=None):
+def auto_setup_uwg(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PATH,
+                   log_file_name=None, log_level=None, uwg_param_dir=None):
     """Set up uwg object from initialize.uwg."""
     if log_file_name and log_level:
         setup_log_file(log_file_name, log_level)

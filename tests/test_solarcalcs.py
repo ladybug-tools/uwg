@@ -1,14 +1,14 @@
 """Tests for SolarCalcs object."""
 
 import pytest
-from .test_base import setup_uwg_integration, setup_open_matlab_ref
+from .test_base import auto_setup_uwg, setup_open_matlab_ref
 from uwg import SolarCalcs
 
 
 def test_solarangles():
     """Test solar angles."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     solar = SolarCalcs(testuwg.UCM, testuwg.BEM, testuwg.simTime, testuwg.RSM,
@@ -59,7 +59,7 @@ def test_solarangles():
 def test_solarcalcs():
     """Test solar calculation."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # We subtract 11 hours from total timestep so

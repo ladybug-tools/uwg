@@ -1,7 +1,58 @@
 """Test Element class."""
 
 import pytest
-from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
+from uwg import Element, Material
+
+
+def test_element_init():
+    """Test Element init method."""
+    # Material: (thermalCond, volHeat = specific heat * density)
+    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
+    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
+    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
+
+    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
+    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
+    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
+    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0, T_init=293,
+                   horizontal=False, name='MassWall')
+
+    # test repr
+    wall.__repr__()
+
+
+def test_element_dict():
+    """Test Element dict method."""
+
+    # Init
+    # Material: (thermalCond, volHeat = specific heat * density)
+    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
+    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
+    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
+
+    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
+    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
+    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
+    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0, T_init=293,
+                   horizontal=False, name='MassWall')
+
+    # make dict
+    eldict = wall.to_dict()
+    wall2 = Element.from_dict(eldict)
+
+    assert wall.albedo == pytest.approx(wall2.albedo, abs=1e-10)
+    assert wall.materialLst[0].thermalCond == \
+        pytest.approx(wall2.materialLst[0].thermalCond, abs=1e-10)
+    assert wall.emissivity == pytest.approx(wall2.emissivity, abs=1e-10)
+    assert wall.layerThickness[1] == \
+        pytest.approx(wall2.layerThickness[1], abs=1e-10)
+
+    with pytest.raises(AssertionError):
+        eldict['type'] = 'BemDef'
+        Element.from_dict(eldict)
 
 
 def test_SurfFlux_with_waterStorage_start():
@@ -11,7 +62,7 @@ def test_SurfFlux_with_waterStorage_start():
     otherwise.
     """
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # We subtract 30 days and 11 hours
@@ -39,7 +90,7 @@ def test_SurfFlux_with_waterStorage_middle():
 
     When waterStorage > 0.0. This has to be hardcoded b/c doesn't get used otherwise.
     """
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # We subtract 30 days and 11 hours
@@ -65,7 +116,7 @@ def test_SurfFlux_with_waterStorage_middle():
 def test_SurfFlux_unit():
     """Test element SurfFlux against matlab references at the start of timestep."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     testuwg._read_epw()
     testuwg.generate()
@@ -113,7 +164,7 @@ def test_SurfFlux_integration():
     correctly.
     """
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Change time and vegCoverage parameters so we can get
     # effect of vegetation on surface heat flux

@@ -1,14 +1,88 @@
 """Tests for BEM object."""
 
 import pytest
-from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
+from uwg import BEMDef, Building, Element, Material
 
 
-def test_bem_building_init_largeoffice():
+def _bem_init_manual():
+    """Manually create BEMDef: LargeOffce, Pst80, Zone 1A (Miami)."""
+
+    # Material: (thermalCond, volHeat = specific heat * density)
+    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
+    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
+    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
+    insulation = Material(0.049, 836.8 * 265.0, "Insulation")
+
+    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
+    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
+    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
+    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0, T_init=293,
+                   horizontal=False, name='MassWall')
+
+    # IEAD roof
+    thicknessLst = [0.058, 0.058]
+    materialLst = [insulation, insulation]
+    roof = Element(alb=0.2, emis=0.93, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0.5, T_init=293,
+                   horizontal=True, name='IEAD')
+
+    # Mass floor
+    thicknessLst = [0.054, 0.054]
+    materialLst = [concrete, concrete]
+    floor = Element(alb=0.2, emis=0.9, thicknessLst=thicknessLst,
+                    materialLst=materialLst, vegCoverage=0.0, T_init=293,
+                    horizontal=True, name='MassFloor')
+
+    bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
+                   intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
+                   uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
+                   coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
+                   coolCap=76, heatEff=0.7, initialTemp=293)
+
+    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
+
+
+def test_bem_init_manual():
+    """Test BEMDef init methods."""
+
+    # test init
+    bem = _bem_init_manual()
+
+    # test repr
+    bem.__repr__()
+
+
+def test_bemdef_dict():
+    """Test BEMDef dict methods."""
+
+    bem = _bem_init_manual()
+
+    # make dict
+    bemdict = bem.to_dict()
+
+    # test if dict and from_dict
+    assert isinstance(bemdict, dict)
+
+    bem2 = BEMDef.from_dict(bemdict)
+
+    assert bem.wall.albedo == pytest.approx(bem2.wall.albedo, abs=1e-10)
+    assert bem.frac == pytest.approx(bem2.frac, abs=1e-10)
+    assert bem.building.cop == pytest.approx(bem2.building.cop, abs=1e-10)
+    assert bem.mass.layerThermalCond[0] == \
+        pytest.approx(bem2.mass.layerThermalCond[0], abs=1e-10)
+
+    with pytest.raises(AssertionError):
+        bemdict['type'] = 'BemDef'
+        BEMDef.from_dict(bemdict)
+
+
+def test_bem_building_init_largeoffice_readDOE():
     """Test for BEM.building init"""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # check __repr__
@@ -39,9 +113,9 @@ def test_bem_building_init_largeoffice():
         testuwg.BEM[0].building.indoorTemp,
         testuwg.BEM[0].building.indoorHum,
         testuwg.BEM[0].building.FanMax,
-        BLDTYPE[testuwg.BEM[0].type],
-        BUILTERA[testuwg.BEM[0].era],
-        ZONETYPE[testuwg.BEM[0].zone]]
+        BLDTYPE[testuwg.BEM[0].bldtype],
+        BUILTERA[testuwg.BEM[0].builtera],
+        ZONETYPE[testuwg.BEM[0].zonetype]]
 
     uwg_matlab_val = setup_open_matlab_ref(
         'matlab_bem', 'matlab_ref_bem_building_init_largeoffice.txt')
@@ -59,10 +133,10 @@ def test_bem_building_init_largeoffice():
                 pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
 
 
-def test_bem_building_bemcalc_largeoffice_cooling():
+def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
     """Test for bem.building bemcalc during cooling period."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1

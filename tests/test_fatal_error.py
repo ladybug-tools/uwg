@@ -8,7 +8,7 @@ except ImportError:
 
 import os
 import pytest
-from .test_base import setup_uwg_integration
+from .test_base import auto_setup_uwg
 
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -51,7 +51,7 @@ def uwg_from_df():
 
     # spelling mistake
     # lathAnth = in DF = latAnth
-    testuwg = setup_uwg_integration(EPW_PATH, PARAM_PATH)
+    testuwg = auto_setup_uwg(EPW_PATH, PARAM_PATH)
     # Error on Aug 22 if dt at 300
     testuwg.month = 8
     testuwg.day = 1
@@ -71,7 +71,7 @@ def uwg_from_df():
 def uwg_manual():
     # spelling mistake
     # lathAnth = in DF = latAnth
-    testuwg = setup_uwg_integration(EPW_PATH, PARAM_PATH)
+    testuwg = auto_setup_uwg(EPW_PATH, PARAM_PATH)
     testuwg._compute_BEM()
 
     # # Add custom typology parameters from DF

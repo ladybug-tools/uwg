@@ -2,7 +2,7 @@
 
 import os
 import pytest
-from .test_base import setup_uwg_integration, setup_open_matlab_ref, TEST_DIR
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, TEST_DIR
 from uwg import SimParam
 
 
@@ -18,7 +18,7 @@ def test_uwg_simparam_matlab_init():
     # dtSim,300,      # simulation time step (s)
     # dtWeather,3600, # weather time step (s)
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # open matlab ref file
@@ -62,7 +62,7 @@ def test_uwg_simparam_matlab_update_date():
     # dtWeather,3600, # weather time step (s)
 
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_simparam.uwg')
-    testuwg = setup_uwg_integration(param_path=param_path)
+    testuwg = auto_setup_uwg(param_path=param_path)
 
     testuwg.generate()
     testuwg.simulate()

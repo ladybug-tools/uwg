@@ -1,7 +1,7 @@
 """Test for uwg.py"""
 
 import pytest
-from .test_base import setup_uwg_integration, set_input_manually
+from .test_base import auto_setup_uwg, set_input_manually
 from uwg import SchDef
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg.utilities import is_near_zero
@@ -9,7 +9,7 @@ from uwg.utilities import is_near_zero
 
 def test_read_epw():
     """Test read epw"""
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg._read_epw()
 
     # test header
@@ -35,7 +35,7 @@ def test_read_epw():
 
 def test_read_input():
     """Test read input."""
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # test uwg param dictionary first and last
@@ -100,7 +100,7 @@ def test_read_input():
 
 def test_optional_blank_parameters():
 
-    testuwg = setup_uwg_integration(param_path=None)
+    testuwg = auto_setup_uwg(param_path=None)
     testuwg = set_input_manually(testuwg)
     testuwg.generate()
 
@@ -114,7 +114,7 @@ def test_optional_blank_parameters():
 
 def test_optional_inputted_parameters():
 
-    testuwg = setup_uwg_integration(param_path=None)
+    testuwg = auto_setup_uwg(param_path=None)
     testuwg = set_input_manually(testuwg)
 
     # test __repr__
@@ -161,7 +161,7 @@ def test_procMat():
     thicknesses (to account for too deep elements with inaccurate heat transfer).
     """
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # test a 0.5m road split into 10 slices of 0.05m
@@ -199,7 +199,7 @@ def test_procMat():
 
 def test_hvac_autosize():
     """Test hvace autosize"""
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # Test setting values
@@ -227,7 +227,7 @@ def test_hvac_autosize():
 
 def test_simulate():
     """Test UWG simulation."""
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     testuwg.simulate()
@@ -260,7 +260,7 @@ def test_simulate():
 def test_dict():
     """Test uwg from dict method."""
 
-    testuwg1 = setup_uwg_integration()
+    testuwg1 = auto_setup_uwg()
 
     # Set some optional values
     testuwg1.shgc = 0.3
@@ -297,7 +297,7 @@ def test_dict():
 def test_sch_refDOE():
     """Test uwg from dict method with refDOE override."""
 
-    testuwg1 = setup_uwg_integration()
+    testuwg1 = auto_setup_uwg()
 
     # Set bld matrix and zone
     testuwg1.bld = [[0 for i in range(3)] for j in range(16)]
@@ -328,7 +328,7 @@ def test_sch_refDOE():
             assert testsch.swh[i][j] == pytest.approx(0.1, abs=1e-10)
 
     # Test adding 1 extra type to bld on second row
-    testuwg1 = setup_uwg_integration()
+    testuwg1 = auto_setup_uwg()
 
     # Set bld matrix and zone
     testuwg1.bld = [[0 for i in range(3)] for j in range(18)]
@@ -364,7 +364,7 @@ def test_sch_refDOE():
 def test_customize_reference_data():
     """Test adding reference DOE data to UWG."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # set bld matrix and zone
     testuwg.bld = [[0 for i in range(3)] for j in range(20)]
@@ -373,7 +373,7 @@ def test_customize_reference_data():
     testuwg.zone = 15
     zi = testuwg.zone - 1
 
-    # make new sched and bem
+    # make new sched
     testweek = [[2000.0 for i in range(24)] for j in range(3)]
     newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
                      cool=testweek, heat=testweek, swh=testweek,

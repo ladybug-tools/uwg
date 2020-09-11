@@ -2,7 +2,7 @@
 
 import os
 import pytest
-from .test_base import setup_uwg_integration, calculate_tolerance, setup_open_matlab_ref
+from .test_base import auto_setup_uwg, calculate_tolerance, setup_open_matlab_ref
 from functools import reduce
 
 
@@ -28,7 +28,7 @@ def test_rsm_init():
         lat, lon, GMT, rural_height, T_init, P_init, geo_param, self.RESOURCE_PATH)
     """
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
     testuwg.generate()
 
     # check date
@@ -95,7 +95,7 @@ def test_rsm_init():
 def test_rsm_vdm():
     """ test RSM VDM against matlab references."""
 
-    testuwg = setup_uwg_integration()
+    testuwg = auto_setup_uwg()
 
     # Test Jan 1 (winter, no vegetation coverage)
     testuwg.month = 1
@@ -148,7 +148,7 @@ def test_rsm_dissipation_bougeault():
 
     epw_path = os.path.join(TEST_DIR, 'epw', 'CAN_ON_Toronto.716240_CWEC.epw')
     param_path = os.path.join(TEST_DIR, 'parameters', 'initialize_toronto.uwg')
-    testuwg = setup_uwg_integration(epw_path=epw_path, param_path=param_path)
+    testuwg = auto_setup_uwg(epw_path=epw_path, param_path=param_path)
     testuwg.month = 6
     testuwg.day = 1
     testuwg.nday = 30
