@@ -3,6 +3,8 @@
 import pytest
 from .test_base import setup_uwg_integration, set_input_manually
 from uwg import SchDef
+from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
+
 
 def test_read_epw():
     """Test read epw"""
@@ -63,15 +65,15 @@ def test_read_input():
     # test BEMs
     assert len(testuwg.BEM) == 2
     # test BEM office (BLD4 in DOE)
-    assert testuwg.BEM[0].Type == 'LargeOffice'
-    assert testuwg.BEM[0].Zone == '1A (Miami)'
-    assert testuwg.BEM[0].Era == 'Pst80'
+    assert BLDTYPE[testuwg.BEM[0].bldtype] == 'LargeOffice'
+    assert ZONETYPE[testuwg.BEM[0].zonetype] == '1A (Miami)'
+    assert BUILTERA[testuwg.BEM[0].builtera] == 'Pst80'
     assert testuwg.BEM[0].frac == 0.4
 
     # test BEM apartment
-    assert testuwg.BEM[1].Type == 'MidRiseApartment'
-    assert testuwg.BEM[1].Zone == '1A (Miami)'
-    assert testuwg.BEM[1].Era == 'Pst80'
+    assert BLDTYPE[testuwg.BEM[1].bldtype] == 'MidRiseApartment'
+    assert ZONETYPE[testuwg.BEM[1].zonetype] == '1A (Miami)'
+    assert BUILTERA[testuwg.BEM[1].builtera] == 'Pst80'
     assert testuwg.BEM[1].frac == 0.6
 
     # Check that schedules are called correctly
@@ -222,36 +224,32 @@ def test_simulate():
     """Test UWG simulation."""
     testuwg = setup_uwg_integration()
     testuwg.generate()
-    from pprint import pprint as pp
-    bem = testuwg.BEM[0]
-    pp(bem.wall.materialLst)
 
-    assert False
-    # testuwg.simulate()
-    # testuwg.write_epw()
+    testuwg.simulate()
+    testuwg.write_epw()
 
-    # # Parameters from initialize.uwg
-    # # Month = 1;              % starting month (1-12)
-    # # Day = 1;                % starting day (1-31)
-    # # nDay = 31;              % number of days
-    # # dtSim = 300;            % simulation time step (s)
-    # # dtWeather = 3600;       % weather time step (s)
+    # Parameters from initialize.uwg
+    # Month = 1;              % starting month (1-12)
+    # Day = 1;                % starting day (1-31)
+    # nDay = 31;              % number of days
+    # dtSim = 300;            % simulation time step (s)
+    # dtWeather = 3600;       % weather time step (s)
 
-    # assert testuwg.N == pytest.approx(744., abs=1e-6)       # total hours in simulation
-    # assert testuwg.ph == pytest.approx(0.083333, abs=1e-6)  # dt (sim time step) hours
+    assert testuwg.N == pytest.approx(744., abs=1e-6)       # total hours in simulation
+    assert testuwg.ph == pytest.approx(0.083333, abs=1e-6)  # dt (sim time step) hours
 
-    # # test the weather data time series is equal to time step
-    # assert len(testuwg.forcIP.infra) == \
-    #     pytest.approx((testuwg.simTime.nt - 1) / 12., abs=1e-3)
-    # # check that simulation time is happening every 5 minutes 8928
-    # assert testuwg.simTime.nt-1 == pytest.approx(31*24*3600/300., abs=1e-3)
-    # # check that weather step time is happening every 1 hour = 744
-    # assert len(testuwg.forcIP.dif) == pytest.approx(31 * 24, abs=1e-3)
+    # test the weather data time series is equal to time step
+    assert len(testuwg.forcIP.infra) == \
+        pytest.approx((testuwg.simTime.nt - 1) / 12., abs=1e-3)
+    # check that simulation time is happening every 5 minutes 8928
+    assert testuwg.simTime.nt-1 == pytest.approx(31*24*3600/300., abs=1e-3)
+    # check that weather step time is happening every 1 hour = 744
+    assert len(testuwg.forcIP.dif) == pytest.approx(31 * 24, abs=1e-3)
 
-    # # check that final day of timestep is at correct dayType
-    # assert testuwg.dayType == pytest.approx(1., abs=1e-3)
-    # assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
-    #     pytest.approx(0.2, abs=1e-6)
+    # check that final day of timestep is at correct dayType
+    assert testuwg.dayType == pytest.approx(1., abs=1e-3)
+    assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
+        pytest.approx(0.2, abs=1e-6)
 
 
 def test_dict():
@@ -291,14 +289,19 @@ def test_dict():
         testuwg1.from_dict(uwgdict)
 
 
-def test_dict_sch_refDOE():
+def test_sch_refDOE():
     """Test uwg from dict method with refDOE override."""
 
     testuwg1 = setup_uwg_integration()
 
+    # Set bld matrix and zone
+    testuwg1.bld = [[0 for i in range(3)] for j in range(16)]
+    testuwg1.bld[1][2] = 1
+    testuwg1.zone = 1
+
     # add schedule to type=2, era=3
-    testweek = [[0.1] * 24] * 3
-    testuwg1.refSchedule[0][1][2] = \
+    testweek = [[0.1 for i in range(24)] for j in range(3)]
+    testuwg1.refSchedule[1][2][0] = \
         SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
                heat=testweek, swh=testweek)
 
@@ -306,40 +309,58 @@ def test_dict_sch_refDOE():
 
     # make dict
     uwgdict = testuwg1.to_dict(include_refDOE=True)
-    assert 'refSchedule' in uwgdict
-    assert len(uwgdict['refSchedule']) == 16  # types
-    assert len(uwgdict['refSchedule'][0]) == 3  # eras
-    assert len(uwgdict['refSchedule'][0][0]) == 16  # zones
+    assert 'ref_sch_vector' in uwgdict
+    assert len(uwgdict['ref_sch_vector']) == 1
 
     testuwg2 = testuwg1.from_dict(uwgdict)
 
     # Check values
-    testsch = testuwg2.refSchedule[0][1][2]
+    assert testuwg2.bld[1][2] == pytest.approx(1, abs=1e-10)
+    testsch = testuwg2.refSchedule[1][2][0]
     for i in range(3):
         for j in range(24):
-            assert testsch.elec[i][j] == pytest.approx(testweek[i][j], abs=1e-10)
-            assert testsch.swh[i][j] == pytest.approx(testweek[i][j], abs=1e-10)
+            assert testsch.elec[i][j] == pytest.approx(0.1, abs=1e-10)
+            assert testsch.swh[i][j] == pytest.approx(0.1, abs=1e-10)
 
-    # Add 1 extra type to bld
-    testuwg1.bld = [[0 for c in range(3)] for r in range(18)]
-    testuwg1.bld[17][2] = 0.9
+    # Test adding 1 extra type to bld on second row
+    testuwg1 = setup_uwg_integration()
 
+    # Set bld matrix and zone
+    testuwg1.bld = [[0 for i in range(3)] for j in range(18)]
+    testuwg1.bld[17][2] = 1
+    testuwg1.zone = 1
+
+    testweek = [[0.2 for i in range(24)] for j in range(3)]
     newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
                     cool=testweek, heat=testweek, swh=testweek)
+    newsch.bldtype = 17
+    newsch.builtera = 2
+    newsch.zonetype = 0
 
-    uwg_dict['ref_sch_vector'] = [newsch]
-    testuwg2 = testuwg1.from_dict(uwg_dict)
+    # extend reference matrices
+    testuwg1.refBEM.extend([[None for i in range(3)] for j in range(2)])
+    testuwg1.refSch.extend([[None for i in range(3)] for j in range(2)])
+    testuwg1.refSch[17][2][0] = newsch
+
+    uwgdict = testuwg1.to_dict(include_refDOE=True)
+    testuwg2 = testuwg1.from_dict(uwgdict)
+
+    # check lengths
+    assert len(uwgdict['ref_sch_vector']) == 1
+    assert len(testuwg2.refSchedule) == 18
+    assert len(testuwg2.bld) == 18
 
     # Check values
-    testsch = testuwg2.refSchedule[0][1][2]
+    testsch = testuwg2.refSchedule[17][2][0]
     for i in range(3):
         for j in range(24):
-            assert testsch.elec[i][j] == pytest.approx(testweek[i][j], abs=1e-10)
-            assert testsch.swh[i][j] == pytest.approx(testweek[i][j], abs=1e-10)
+            assert testsch.elec[i][j] == pytest.approx(0.2, abs=1e-10)
+            assert testsch.swh[i][j] == pytest.approx(0.2, abs=1e-10)
 
 
 def test_add_refDOE():
     """Test adding reference DOE data to UWG."""
     # add newsch to
-    #testuwg1.add_refDOE_data()
+    # testuwg1.add_refDOE_data()
+
     pass

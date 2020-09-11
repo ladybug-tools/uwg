@@ -10,6 +10,21 @@ class BEMDef(object):
         wall: Element object representing building wall.
         roof: Element object representing building roof.
         frac: Fraction of the urban floor space of this building typology.
+        bldtype: Number between 0 and 15 corresponding to the following building
+            types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
+            LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
+            PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
+            SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
+            SuperMarket (14), Warehouse (15). Additional building types can be defined
+            with a number greater then 15. Default is None.
+        builtera: Number between 0 and 2 corresponding to the following built eras:
+            Pre-1980s (0), Post1980s (1), New construction (2). Default is None.
+        zonetype: Number between 0 and 15 corresponding to the following zone types:
+            1A-Miami (0), 2A-Houston (1), 2B-Phoenix (2), 3A-Atlanta (3),
+            3B-CA-Los Angeles (4), 3B-Las Vegas (5), 3C (San Francisco) (6),
+            4A (Baltimore) (7), 4B (Albuquerque) (8), 4C (Seattle) (9),
+            5A (Chicago) (10), 5B (Boulder) (11), 6A (Minneapolis) (12),
+            6B (Helena) (13), 7 (Duluth) (14), 8 (Fairbanks) (15). Default is None.
 
     Properties:
         building
@@ -34,7 +49,8 @@ class BEMDef(object):
         T_roofin
     """
 
-    def __init__(self, building, mass, wall, roof, frac):
+    def __init__(self, building, mass, wall, roof, frac, bldtype=None, builtera=None,
+                 zonetype=None):
 
         # Initialization
         self.building = building
@@ -44,9 +60,9 @@ class BEMDef(object):
         self.frac = frac
 
         # Properties to be set in readDOE
-        self.Type = ''  # DOE reference building type
-        self.Era = ''  # pre80, pst80, new
-        self.Zone = ''  # climate zone number
+        self.bldtype = bldtype  # DOE reference building type
+        self.builtera = builtera  # pre80, pst80, new
+        self.zonetype = zonetype  # climate zone number
 
         # Properties to be computed during UWG simulation
         self.fl_area = 0  # building typology urban floor area [m2]
@@ -56,7 +72,7 @@ class BEMDef(object):
         self.Qocc = 0  # actual heat load from occupant [W/m2]
         self.swh = 0  # actual hot water usage
         self.Nocc = 0  # number of occupants
-        self.ElecTotal = 0  #  actual total electricity [W/m2]
+        self.ElecTotal = 0  # actual total electricity [W/m2]
         self.T_wallex = 293  # wall surface temp (ext) [K]
         self.T_wallin = 293  # wall surface temp (int) [K]
         self.T_roofex = 293  # roof surface temp (ext) [K]
@@ -75,7 +91,10 @@ class BEMDef(object):
             "mass": mass.to_dict()  # dictionary representation of mass Element.
             "wall": wall.to_dict()  # dictionary representation of wall Element.
             "roof": roof.to_dict()  # dictionary representation of roof Element.
-            "frac": 0.4  # fraction of urban floor space of this type
+            "frac": 0.4,  # fraction of urban floor space of this type
+            "bldtype": 0,  # building type index
+            "builtera": 1,  # built era index
+            "zonetype": 15  # zone type index
             }
         """
         pass
@@ -88,8 +107,13 @@ class BEMDef(object):
         base['wall'] = self.wall.to_dict()
         base['roof'] = self.roof.to_dict()
         base['frac'] = self.frac
+        base['bldtype'] = self.bldtype
+        base['builtera'] = self.builtera
+        base['zonetype'] = self.zonetype
         return base
 
     def __repr__(self):
-        return "BEMDef: Type = {}, Zone = {}, Era = {}, Construction = {}".format(
-            self.building.Type, self.building.Zone, self.building.Era, self.wall._name)
+        return 'BEMDef, bldtype: {}\n zonetype: {}\n builtera: {}\n mass: {}\n ' \
+            'wall: {}\n roof: {}\n frac: {}'.format(
+                self.bldtype, self.zonetype, self.builtera, self.mass.name,
+                self.wall.name, self.roof.name, self.frac)

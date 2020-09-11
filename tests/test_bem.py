@@ -2,6 +2,7 @@
 
 import pytest
 from .test_base import setup_uwg_integration, setup_open_matlab_ref, calculate_tolerance
+from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 
 
 def test_bem_building_init_largeoffice():
@@ -9,6 +10,9 @@ def test_bem_building_init_largeoffice():
 
     testuwg = setup_uwg_integration()
     testuwg.generate()
+
+    # check __repr__
+    testuwg.BEM[0].__repr__()
 
     uwg_python_val = [
         testuwg.BEM[0].building.floorHeight,
@@ -35,9 +39,9 @@ def test_bem_building_init_largeoffice():
         testuwg.BEM[0].building.indoorTemp,
         testuwg.BEM[0].building.indoorHum,
         testuwg.BEM[0].building.FanMax,
-        testuwg.BEM[0].Type,
-        testuwg.BEM[0].Era,
-        testuwg.BEM[0].Zone]
+        BLDTYPE[testuwg.BEM[0].type],
+        BUILTERA[testuwg.BEM[0].era],
+        ZONETYPE[testuwg.BEM[0].zone]]
 
     uwg_matlab_val = setup_open_matlab_ref(
         'matlab_bem', 'matlab_ref_bem_building_init_largeoffice.txt')

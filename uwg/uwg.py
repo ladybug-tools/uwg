@@ -328,10 +328,10 @@ class UWG(object):
             setattr(uwg_model, attr, data[attr])
 
         if 'ref_sch_vector' in data:
+            zi = uwg_model.zone - 1
             for sch in data['ref_sch_vector']:
-                ti, ei, zi = sch['building_type'], sch['built_era'], sch['zone_type']
-
                 # Initializes and overwrites refBEM, refSch
+                ti, ei = sch['bldtype'], sch['builtera']
                 try:
                     uwg_model.refSchedule[ti][ei][zi] = SchDef.from_dict(sch)
                 except IndexError:
@@ -348,9 +348,11 @@ class UWG(object):
         """UWG dictionary representation.
 
         Args:
-            add_refDOE: Optional boolean to include reference DOE data
-                collections: bld, refBEM, and refSch. Set to True if
-                custom reference data has been added to this UWG object.
+            add_refDOE: Optional boolean to include reference BEM and Sch objects
+                from the refBEM and refSch matrices. Only the reference data for
+                built types and eras that constitute a nonzero fraction of the urban
+                area, as defined in the bld matrix, will be included. Set this value
+                to True if custom reference data has been added to the UWG object.
                 (Default: False).
         """
 
@@ -365,18 +367,16 @@ class UWG(object):
 
         # Add reference data
         if include_refDOE:
-            # TODO: only after _init_BEM, change refBEM, refSch
-            type_num = len(self.refBEM)
-            base['ref_sch_vector'] = [None for i in range(3 * 16 * type_num)]
-            #    [[[0 for c in range(16)] for r in range(3)] for d in range(type_num)]
-
-            c = 0
+            base['ref_sch_vector'] = []
+            zi = self.zone - 1
+            type_num = len(self.bld)
             for ti in range(type_num):
                 for ei in range(3):
-                    for zi in range(16):
-                        base['ref_sch_vector'][c] = \
-                            self.refSchedule[ti][ei][zi].to_dict()
-                        c += 1
+                    if utilities.is_near_zero(self.bld[ti][ei], 1e-10):
+                        continue
+                    base['ref_sch_vector'].append(
+                        self.refSchedule[ti][ei][zi].to_dict())
+
         return base
 
     @property

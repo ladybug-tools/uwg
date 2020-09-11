@@ -47,8 +47,8 @@ BLDTYPE = [
 BUILTERA = [
     'Pre80',                    # 1
     'Pst80',                    # 2
-    'New'                       # 3
-    ]
+    'New']                      # 3
+
 
 ZONETYPE = [
     '1A (Miami)',               # 1
@@ -66,8 +66,7 @@ ZONETYPE = [
     '6A (Minneapolis)',         # 13
     '6B (Helena)',              # 14
     '7 (Duluth)',               # 15
-    '8 (Fairbanks)'             # 16
-    ]
+    '8 (Fairbanks)']            # 16
 
 
 def readDOE(serialize_output=True):
@@ -327,9 +326,9 @@ def readDOE(serialize_output=True):
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(B, mass, wall, roof, 0.0)
-                refBEM[i][j][k].Type = BLDTYPE[i]
-                refBEM[i][j][k].Era = BUILTERA[j]
-                refBEM[i][j][k].Zone = ZONETYPE[k]
+                refBEM[i][j][k].bldtype = i
+                refBEM[i][j][k].builtera = j
+                refBEM[i][j][k].zonetype = k
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k] # max fan flow rate (m^3/s) per DOE
 
                 Schedule[i][j][k] = SchDef(elec=SchEquip, gas=SchGas, light=SchLight, occ=SchOcc, cool=SetCool,
@@ -342,6 +341,10 @@ def readDOE(serialize_output=True):
                 Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
                 Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
+                # Define reference indices for type, era and zone
+                Schedule[i][j][k].bldtype = i
+                Schedule[i][j][k].builtera = j
+                Schedule[i][j][k].zonetype = k
 
     # if not test serialize refDOE,refBEM,Schedule and store in resources
     if serialize_output:

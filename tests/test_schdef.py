@@ -38,8 +38,11 @@ def test_schdef_init():
                cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK)
 
     # init
-    SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
+    sch = SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
            cool=DEFAULT_WEEK, heat=DEFAULT_WEEK, swh=DEFAULT_WEEK)
+
+    # test __repr__
+    sch.__repr__()
 
 
 def test_schdef_dict():
