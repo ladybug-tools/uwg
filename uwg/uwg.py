@@ -340,29 +340,31 @@ class UWG(object):
                               for schdict in data['ref_sch_vector']]
             ref_bem_vector = [BEMDef.from_dict(bemdict)
                               for bemdict in data['ref_bem_vector']]
-            uwg_model.customize_reference_data(
-                ref_bem_vector, ref_sch_vector, uwg_model.zone - 1)
+            uwg_model.customize_reference_data(ref_bem_vector, ref_sch_vector)
 
         return uwg_model
 
-    def customize_reference_data(self, ref_bem_vector, ref_sch_vector, zone_index):
-        """Customize refBEM and refSchedule data by extending or overriding data.
+    def customize_reference_data(self, ref_bem_vector, ref_sch_vector):
+        """Customize refBEM and refSchedule data by extending or overriding DOE reference data.
 
-        # TODO:
-        - mention must be computed before _compute_BEM (or generate)
-        - add check in _compute_BEM to check lenghts of refSchedle/reFBEM w/ bld
-        This value is used to reference the fraction of urban area the BEMDef object
-        defines in the UWG bld matrix.
+        The custom BEMDef and SchDef objects must contain bldtype and builtera values
+        referencing a nonzero fraction of urban area in the UWG bld matrix to be used in
+        the UWG model. Also note that this method should be used before calling the
+        generate method, in order to ensure the reference data gets transferred over to
+        the UWG object BEM and Schedule properties.
 
         Args:
-            # TODO
+            ref_bem_vector: List of custom SchDef objects to add to the refSch matrix
+                property.
+            ref_sch_vector: List of custom BEMDef objects to add to the refBEM matrix
+                property.
         """
         assert len(ref_sch_vector) == len(ref_bem_vector), 'The ref_sch_vector ' \
             'and ref_bem_vector properties must be lists of equal length. Got ' \
             'lengths {} and {}, respectively.'.format(
                 len(ref_sch_vector), len(ref_bem_vector))
 
-        zi = zone_index
+        zi = self.zone - 1
 
         # Insert or extend refSchedule matrix
         for sch in ref_sch_vector:
@@ -381,14 +383,14 @@ class UWG(object):
         for bem in ref_bem_vector:
             ti, ei = bem.bldtype, bem.builtera
             try:
-                self.refBEM[ti][ei][zi] = sch
+                self.refBEM[ti][ei][zi] = bem
             except IndexError:
                 # Add new rows based on type index in object
                 new_rows_num = ti + 1 - len(self.refBEM)
                 for i in range(new_rows_num):
                     self.refBEM.append(
                         [[None for c in range(16)] for r in range(3)])
-                self.refBEM[ti][ei][zi] = sch
+                self.refBEM[ti][ei][zi] = bem
 
     def to_dict(self, include_refDOE=False):
         """UWG dictionary representation.
@@ -1408,6 +1410,9 @@ class UWG(object):
         * BEM - list of BEMDef objects extracted from readDOE
         * Sch - list of Schedule objects extracted from readDOE
         """
+
+        # TODO add check in _compute_BEM to check lenghts of refSchedle/reFBEM w/ bld matrix
+
 
         # Define building energy models
         k = 0

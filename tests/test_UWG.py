@@ -1,10 +1,270 @@
 """Test for uwg.py"""
 
 import pytest
+from copy import deepcopy
 from .test_base import auto_setup_uwg, set_input_manually
-from uwg import SchDef
+from uwg import SchDef, BEMDef, Building, Element, Material
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg.utilities import is_near_zero
+
+
+def _bemdef():
+    """Create BEMDef: LargeOffce, Pst80, Zone 1A (Miami)."""
+
+    # Material: (thermalCond, volHeat = specific heat * density)
+    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
+    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
+    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
+    insulation = Material(0.049, 836.8 * 265.0, "Insulation")
+
+    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
+    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
+    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
+    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0, T_init=293,
+                   horizontal=False, name='MassWall')
+
+    # IEAD roof
+    thicknessLst = [0.058, 0.058]
+    materialLst = [insulation, insulation]
+    roof = Element(alb=0.2, emis=0.93, thicknessLst=thicknessLst,
+                   materialLst=materialLst, vegCoverage=0.5, T_init=293,
+                   horizontal=True, name='IEAD')
+
+    # Mass floor
+    thicknessLst = [0.054, 0.054]
+    materialLst = [concrete, concrete]
+    floor = Element(alb=0.2, emis=0.9, thicknessLst=thicknessLst,
+                    materialLst=materialLst, vegCoverage=0.0, T_init=293,
+                    horizontal=True, name='MassFloor')
+
+    bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
+                   intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
+                   uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
+                   coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
+                   coolCap=76, heatEff=0.7, initialTemp=293)
+
+    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
+
+
+def test_dict():
+    """Test uwg to/from dict method."""
+
+    testuwg1 = auto_setup_uwg()
+
+    # Set some optional values
+    testuwg1.shgc = 0.3
+    testuwg1.glzr = 0.5
+    testuwg1.bld = [[0 for c in range(3)] for r in range(16)]
+    testuwg1.bld[6][0] = 0.1
+    testuwg1.bld[6][2] = 0.9
+
+    # make dict
+    uwgdict = testuwg1.to_dict()
+
+    # test if dict and from_dict
+    assert isinstance(uwgdict, dict)
+
+    testuwg2 = testuwg1.from_dict(uwgdict)
+
+    # Test attributes (including optional)
+    testuwg1.flr_h is testuwg2.flr_h
+    testuwg1.blddensity == pytest.approx(testuwg2.blddensity, abs=1e-10)
+    testuwg1.c_circ == pytest.approx(testuwg2.c_circ, abs=1e-10)
+    testuwg1.shgc == pytest.approx(testuwg2.shgc, abs=1e-10)
+    testuwg1.glzr == pytest.approx(testuwg2.glzr, abs=1e-10)
+
+    # bld matrix
+    testuwg2.bld[6][0] == pytest.approx(0.1, abs=1e-10)
+    testuwg2.bld[6][2] == pytest.approx(0.9, abs=1e-10)
+
+    # Test error
+    with pytest.raises(AssertionError):
+        uwgdict['type'] = 'Error'
+        testuwg1.from_dict(uwgdict)
+
+
+def test_sch_refDOE():
+    """Test uwg from dict method with refDOE override for Schs."""
+
+    testuwg1 = auto_setup_uwg()
+
+    # Set bld matrix and zone
+    testuwg1.bld = [[0 for i in range(3)] for j in range(16)]
+    testuwg1.bld[1][2] = 1
+    testuwg1.zone = 1
+
+    # add schedule to type=2, era=3
+    testweek = [[0.1 for i in range(24)] for j in range(3)]
+    testuwg1.refSchedule[1][2][0] = \
+        SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
+               heat=testweek, swh=testweek, bldtype=1, builtera=2)
+
+    testuwg1.generate()  # initialize BEM, Sch objects
+
+    # make dict
+    uwgdict = testuwg1.to_dict(include_refDOE=True)
+    assert 'ref_sch_vector' in uwgdict
+    assert len(uwgdict['ref_sch_vector']) == 1
+
+    testuwg2 = testuwg1.from_dict(uwgdict)
+
+    # Check values
+    assert testuwg2.bld[1][2] == pytest.approx(1, abs=1e-10)
+    testsch = testuwg2.refSchedule[1][2][0]
+    for i in range(3):
+        for j in range(24):
+            assert testsch.elec[i][j] == pytest.approx(0.1, abs=1e-10)
+            assert testsch.swh[i][j] == pytest.approx(0.1, abs=1e-10)
+
+    # Test adding 1 extra type to bld on second row
+    testuwg1 = auto_setup_uwg()
+
+    # Set bld matrix and zone
+    testuwg1.bld = [[0 for i in range(3)] for j in range(18)]
+    testuwg1.bld[17][2] = 1
+    testuwg1.zone = 1
+
+    testweek = [[0.2 for i in range(24)] for j in range(3)]
+    newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                    cool=testweek, heat=testweek, swh=testweek, bldtype=17, builtera=2)
+
+    # extend reference matrices
+    testuwg1.refBEM.extend([[[None for k in range(16)]
+                             for i in range(3)] for j in range(2)])
+    testuwg1.refSchedule.extend([[[None for k in range(16)]
+                                 for i in range(3)] for j in range(2)])
+    testuwg1.refSchedule[17][2][0] = newsch
+    testuwg1.refBEM[17][2][0] = _bemdef()
+
+    uwgdict = testuwg1.to_dict(include_refDOE=True)
+    testuwg2 = testuwg1.from_dict(uwgdict)
+
+    # check lengths
+    assert len(uwgdict['ref_sch_vector']) == 1
+    assert len(testuwg2.refSchedule) == 18
+    assert len(testuwg2.bld) == 18
+
+    # Check values
+    testsch = testuwg2.refSchedule[17][2][0]
+    for i in range(3):
+        for j in range(24):
+            assert testsch.elec[i][j] == pytest.approx(0.2, abs=1e-10)
+            assert testsch.swh[i][j] == pytest.approx(0.2, abs=1e-10)
+
+
+def test_bem_refDOE():
+    """Test uwg from dict method with refDOE override for BEMs."""
+
+    testuwg1 = auto_setup_uwg()
+
+    # Set bld matrix and zone
+    testuwg1.bld = [[0 for i in range(3)] for j in range(16)]
+    testuwg1.bld[1][2] = 0.814
+    testuwg1.zone = 1
+
+    # add schedule to type=1, era=2
+    bem = _bemdef()
+    bem.bldtype = 1
+    bem.builtera = 2
+    bem.frac = 0.714
+    bem.building.cop = 4000.0
+    bem.roof.emissivity = 0.001
+    testuwg1.refBEM[1][2][0] = bem
+
+    # make dict
+    uwgdict = testuwg1.to_dict(include_refDOE=True)
+    assert 'ref_bem_vector' in uwgdict
+    assert len(uwgdict['ref_bem_vector']) == 1
+
+    testuwg2 = testuwg1.from_dict(uwgdict)
+
+    # Test default values being overwritten with compute_BEM
+    assert testuwg2.refBEM[1][2][0].frac == pytest.approx(0.714, abs=1e-10)
+    testuwg2.generate()
+    # Object will be linked therefore modified
+    assert testuwg2.refBEM[1][2][0].frac == pytest.approx(0.814, abs=1e-10)
+
+    # Check values
+    assert len(testuwg2.BEM) == 1
+    testbem = testuwg2.refBEM[1][2][0]
+
+    assert testbem.building.cop == pytest.approx(4000.0, 1e-10)
+    assert testbem.roof.emissivity == pytest.approx(0.001, abs=1e-10)
+
+
+def test_customize_reference_data():
+    """Test adding reference DOE data to UWG."""
+
+    testuwg = auto_setup_uwg()
+
+    # set bld matrix and zone
+    testuwg.bld = [[0 for i in range(3)] for j in range(20)]
+    testuwg.bld[5][0] = 0.5  # test insertion
+    testuwg.bld[19][2] = 0.5  # test extention
+    testuwg.zone = 15
+    zi = testuwg.zone - 1
+
+    # make new sched and unrealistic values
+    testweek = [[2000.0 for i in range(24)] for j in range(3)]
+    newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                     cool=testweek, heat=testweek, swh=testweek,
+                     bldtype=5, builtera=0)
+    testweek = [[1000.0 for i in range(24)] for j in range(3)]
+    newsch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                     cool=testweek, heat=testweek, swh=testweek,
+                     bldtype=19, builtera=2)
+
+    # make new blds and add unrealistic values
+    bem1 = _bemdef()
+    bem1.bldtype = 5
+    bem1.builtera = 0
+    bem1.frac = 0.314
+    bem1.building.cop = 3000.0
+    bem1.roof.emissivity = 0.0
+
+    bem2 = deepcopy(_bemdef())
+    bem2.bldtype = 19
+    bem2.builtera = 2
+    bem2.frac = 0.714
+    bem2.building.cop = 4000.0
+    bem2.roof.emissivity = 0.001
+
+    # test default lengths
+    assert len(testuwg.refSchedule) == 16
+    assert len(testuwg.refBEM) == 16
+
+    for day in testuwg.refSchedule[5][0][zi].heat:
+        for hr in day:
+            assert not is_near_zero(hr - 2000.0, 1e-10)
+
+    assert not is_near_zero(testuwg.refBEM[5][0][zi].frac - 0.314, 1e-10)
+    assert not is_near_zero(testuwg.refBEM[5][0][zi].building.cop - 3000.0, 1e-10)
+    assert not is_near_zero(testuwg.refBEM[5][0][zi].roof.emissivity - 0.0, 1e-10)
+
+    # run method
+    ref_sch_vec = [newsch1, newsch2]
+    ref_bem_vec = [bem1, bem2]
+    testuwg.customize_reference_data(ref_bem_vec, ref_sch_vec)
+
+    # Test customized schedules
+    assert len(testuwg.refSchedule) == 20
+    for day in testuwg.refSchedule[5][0][zi].heat:
+        for hr in day:
+            assert is_near_zero(hr - 2000.0, 1e-10)
+    for day in testuwg.refSchedule[19][2][zi].heat:
+        for hr in day:
+            assert is_near_zero(hr - 1000.0, 1e-10)
+
+    # Test customised bemdefs
+    assert len(testuwg.refBEM) == 20
+    assert is_near_zero(testuwg.refBEM[5][0][zi].frac - 0.314, 1e-10)
+    assert is_near_zero(testuwg.refBEM[5][0][zi].building.cop - 3000.0, 1e-10)
+    assert is_near_zero(testuwg.refBEM[5][0][zi].roof.emissivity - 0.0, 1e-10)
+
+    assert is_near_zero(testuwg.refBEM[19][2][zi].frac - 0.714, 1e-10)
+    assert is_near_zero(testuwg.refBEM[19][2][zi].building.cop - 4000.0, 1e-10)
+    assert is_near_zero(testuwg.refBEM[19][2][zi].roof.emissivity - 0.001, 1e-10)
 
 
 def test_read_epw():
@@ -255,151 +515,3 @@ def test_simulate():
     assert testuwg.dayType == pytest.approx(1., abs=1e-3)
     assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
         pytest.approx(0.2, abs=1e-6)
-
-
-def test_dict():
-    """Test uwg from dict method."""
-
-    testuwg1 = auto_setup_uwg()
-
-    # Set some optional values
-    testuwg1.shgc = 0.3
-    testuwg1.glzr = 0.5
-    testuwg1.bld = [[0 for c in range(3)] for r in range(16)]
-    testuwg1.bld[6][0] = 0.1
-    testuwg1.bld[6][2] = 0.9
-
-    # make dict
-    uwgdict = testuwg1.to_dict()
-
-    # test if dict and from_dict
-    assert isinstance(uwgdict, dict)
-
-    testuwg2 = testuwg1.from_dict(uwgdict)
-
-    # Test attributes (including optional)
-    testuwg1.flr_h is testuwg2.flr_h
-    testuwg1.blddensity == pytest.approx(testuwg2.blddensity, abs=1e-10)
-    testuwg1.c_circ == pytest.approx(testuwg2.c_circ, abs=1e-10)
-    testuwg1.shgc == pytest.approx(testuwg2.shgc, abs=1e-10)
-    testuwg1.glzr == pytest.approx(testuwg2.glzr, abs=1e-10)
-
-    # bld matrix
-    testuwg2.bld[6][0] == pytest.approx(0.1, abs=1e-10)
-    testuwg2.bld[6][2] == pytest.approx(0.9, abs=1e-10)
-
-    # Test error
-    with pytest.raises(AssertionError):
-        uwgdict['type'] = 'Error'
-        testuwg1.from_dict(uwgdict)
-
-
-def test_sch_refDOE():
-    """Test uwg from dict method with refDOE override."""
-
-    testuwg1 = auto_setup_uwg()
-
-    # Set bld matrix and zone
-    testuwg1.bld = [[0 for i in range(3)] for j in range(16)]
-    testuwg1.bld[1][2] = 1
-    testuwg1.zone = 1
-
-    # add schedule to type=2, era=3
-    testweek = [[0.1 for i in range(24)] for j in range(3)]
-    testuwg1.refSchedule[1][2][0] = \
-        SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
-               heat=testweek, swh=testweek, bldtype=1, builtera=2)
-
-    testuwg1.generate()  # initialize BEM, Sch objects
-
-    # make dict
-    uwgdict = testuwg1.to_dict(include_refDOE=True)
-    assert 'ref_sch_vector' in uwgdict
-    assert len(uwgdict['ref_sch_vector']) == 1
-
-    testuwg2 = testuwg1.from_dict(uwgdict)
-
-    # Check values
-    assert testuwg2.bld[1][2] == pytest.approx(1, abs=1e-10)
-    testsch = testuwg2.refSchedule[1][2][0]
-    for i in range(3):
-        for j in range(24):
-            assert testsch.elec[i][j] == pytest.approx(0.1, abs=1e-10)
-            assert testsch.swh[i][j] == pytest.approx(0.1, abs=1e-10)
-
-    # Test adding 1 extra type to bld on second row
-    testuwg1 = auto_setup_uwg()
-
-    # Set bld matrix and zone
-    testuwg1.bld = [[0 for i in range(3)] for j in range(18)]
-    testuwg1.bld[17][2] = 1
-    testuwg1.zone = 1
-
-    testweek = [[0.2 for i in range(24)] for j in range(3)]
-    newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                    cool=testweek, heat=testweek, swh=testweek, bldtype=17, builtera=2)
-
-    # extend reference matrices
-    testuwg1.refBEM.extend([[None for i in range(3)] for j in range(2)])
-    testuwg1.refSchedule.extend([[[None for k in range(16)]
-                                 for i in range(3)] for j in range(2)])
-    testuwg1.refSchedule[17][2][0] = newsch
-
-    uwgdict = testuwg1.to_dict(include_refDOE=True)
-    testuwg2 = testuwg1.from_dict(uwgdict)
-
-    # check lengths
-    assert len(uwgdict['ref_sch_vector']) == 1
-    assert len(testuwg2.refSchedule) == 18
-    assert len(testuwg2.bld) == 18
-
-    # Check values
-    testsch = testuwg2.refSchedule[17][2][0]
-    for i in range(3):
-        for j in range(24):
-            assert testsch.elec[i][j] == pytest.approx(0.2, abs=1e-10)
-            assert testsch.swh[i][j] == pytest.approx(0.2, abs=1e-10)
-
-
-def test_customize_reference_data():
-    """Test adding reference DOE data to UWG."""
-
-    testuwg = auto_setup_uwg()
-
-    # set bld matrix and zone
-    testuwg.bld = [[0 for i in range(3)] for j in range(20)]
-    testuwg.bld[5][0] = 0.5  # test insertion
-    testuwg.bld[19][2] = 0.5  # test extention
-    testuwg.zone = 15
-    zi = testuwg.zone - 1
-
-    # make new sched
-    testweek = [[2000.0 for i in range(24)] for j in range(3)]
-    newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                     cool=testweek, heat=testweek, swh=testweek,
-                     bldtype=5, builtera=0)
-    testweek = [[1000.0 for i in range(24)] for j in range(3)]
-    newsch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                     cool=testweek, heat=testweek, swh=testweek,
-                     bldtype=19, builtera=2)
-
-    # Test default lengths
-    assert len(testuwg.refSchedule) == 16
-    for day in testuwg.refSchedule[5][0][zi].heat:
-        for hr in day:
-            assert not is_near_zero(hr - 2000.0, 1e-10)
-
-    # TODO add bem
-    ref_sch_vec = [newsch1, newsch2]
-    ref_bem_vec = [None, None]
-    testuwg.customize_reference_data(ref_bem_vec, ref_sch_vec, zi)
-
-    # Test lengths
-    assert len(testuwg.refSchedule) == 20
-    for day in testuwg.refSchedule[5][0][zi].heat:
-        for hr in day:
-            assert is_near_zero(hr - 2000.0, 1e-10)
-
-
-
-
