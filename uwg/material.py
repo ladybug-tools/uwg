@@ -1,22 +1,48 @@
 """Material class"""
 
+from honeybee.typing import float_in_range_excl_incl
+
 
 class Material(object):
-    """Material
+    """Material class.
 
     Args:
-        thermalCond: Number for material thermal conductivity (W/m K)
-        volHeat: NUmber for volumetric heat capacity (J/m^3 K)
-        name: Text string for name of the material.
+        thermalcond: Number for thermal conductivity [W m-1 K-1].
+        volheat: Number for volumetric heat capacity [J m-3 K-1].
+        name: Text string for name of the Material.
 
     Properties:
         * thermalCond
         * volHeat
     """
-    def __init__(self, thermalCond, volHeat, name):
-        self.name = name
-        self.thermalCond = thermalCond
-        self.volHeat = volHeat
+    def __init__(self, thermalcond, volheat, name):
+        self._name = name
+        self.thermalcond = thermalcond
+        self.volheat = volheat
+
+    @property
+    def name(self):
+        """Get or set text string for name of Material."""
+        return self._name
+
+    @property
+    def thermalcond(self):
+        """Get or set number for thermal conductivity [W/(m-K)]."""
+        return self._thermalcond
+
+    @thermalcond.setter
+    def thermalcond(self, value):
+        self._thermalcond = \
+            float_in_range_excl_incl(value, mi=0, input_name='thermalcond')
+
+    @property
+    def volheat(self):
+        """Get or set number for volumetric capacity [J/(m3-K)]."""
+        return self._volheat
+
+    @volheat.setter
+    def volheat(self, value):
+        self._volheat = float_in_range_excl_incl(value, mi=0, input_name='volheat')
 
     @classmethod
     def from_dict(cls, data):
@@ -43,10 +69,10 @@ class Material(object):
         """Material dictionary representation."""
         base = {'type': 'Material'}
         base['name'] = self.name
-        base['thermalCond'] = self.thermalCond
-        base['volHeat'] = self.volHeat
+        base['thermalCond'] = self.thermalcond
+        base['volHeat'] = self.volheat
         return base
 
     def __repr__(self):
         return "Material, name: {}\n thermalCond: {}\n volHeat: {}".format(
-            self.name, self.thermalCond, self.volHeat)
+            self.name, self.thermalcond, self.volheat)

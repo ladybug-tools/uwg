@@ -9,18 +9,19 @@ except NameError:
 import math
 from .utilities import is_near_zero
 from .material import Material
+from honeybee.typing import float_in_range, float_positive
 
 
 class Element(object):
     """Element object defines wall, and roof constructions.
 
     Args:
-        alb: Number for outer surface albedo.
-        emis: Number for outer surface emissivity.
-        thicknessLst: List of layer thickness in meters.
-        materialLst: List of Material objects in Element.
-        vegCoverage: Number for fraction of surface vegetation coverage.
-        T_init: Element initial temperature [K].
+        albedo: Number for outer surface albedo.
+        emissivity: Number for outer surface emissivity.
+        layer_thickness_lst: List of layer thickness in meters.
+        material_lst: List of Material objects in Element.
+        vegcoverage: Number for fraction of surface vegetation coverage.
+        t_init: Element initial temperature [K].
         horizontal: Boolean indicating if Element is horizontal or not (vertical).
         name: Text string for name of Element.
 
@@ -45,28 +46,28 @@ class Element(object):
         * flux
     """
 
-    def __init__(self, alb, emis, thicknessLst, materialLst, vegCoverage, T_init,
-                 horizontal, name):
+    def __init__(self, albedo, emissivity, layer_thickness_lst, material_lst,
+                 vegcoverage, t_init, horizontal, name):
 
-        assert len(thicknessLst) == len(materialLst), 'The number of layer thickness ' \
+        assert len(layer_thickness_lst) == len(material_lst), 'The number of layer thickness ' \
             'must match the number of layer materials. Got {} and {}, ' \
-            'respectively.'.format(len(thicknessLst), len(materialLst))
+            'respectively.'.format(len(layer_thickness_lst), len(material_lst))
 
-        self.albedo = alb  # outer surface albedo
-        self.emissivity = emis  # outer surface emissivity.
-        self.layerThickness = thicknessLst  # list of layer thickness in meters
-        self.materialLst = materialLst  # material objects in Element.
-        self.vegCoverage = vegCoverage  # surface vegetation coverage
-        self.T_init = T_init  # element initial temperature [K].
+        self.albedo = albedo  # outer surface albedo
+        self.emissivity = emissivity  # outer surface emissivity.
+        self.layer_thickness_lst = layer_thickness_lst  # list of layer thickness in meters
+        self.material_lst = material_lst  # material objects in Element.
+        self.vegcoverage = vegcoverage  # surface vegetation coverage
+        self.t_init = t_init  # element initial temperature [K].
         self.horizontal = int(horizontal)  # 1-horizontal, 0-vertical
-        self.name = name
+        self._name = name
 
         # layerThermaCond: vector of layer thermal conductivities [W m-1 K-1]
-        self.layerThermalCond = [material.thermalCond for material in materialLst]
+        self.layerThermalCond = [material.thermalcond for material in material_lst]
         # layerVolHeat: vector of layer volumetric heat [J m-3 K-1]
-        self.layerVolHeat = [material.volHeat for material in materialLst]
+        self.layerVolHeat = [material.volheat for material in material_lst]
         # layerTemp: # vector of layer temperatures [K]
-        self.layerTemp = [T_init] * len(thicknessLst)
+        self.layerTemp = [t_init] * len(layer_thickness_lst)
         # waterStorage: # thickness of water film [m] for horizontal surfaces only
         self.waterStorage = 0
         self.infra = 0  # net longwave radiation [W m-2]
@@ -78,6 +79,87 @@ class Element(object):
         self.T_ext = 293  # external surface temperature
         self.T_int = 293  # internal surface temperature
         self.flux = 0  # external surface heat flux
+
+    @property
+    def albedo(self):
+        """Get or set a value between 0 and 1 for outer surface albedo."""
+        return self._albedo
+
+    @albedo.setter
+    def albedo(self, value):
+        self._albedo = float_positive(value, 'albedo')
+
+    @property
+    def emissivity(self):
+        """Get or set a value between 0 and 1 for outer surface emissivity."""
+        return self._emissivity
+
+    @emissivity.setter
+    def emissivity(self, value):
+        self._emissivity = float_positive(value, 'emissivity')
+
+    @property
+    def layer_thickness_lst(self):
+        """Get or set list of thickness in meters of each Material in Element.
+
+        The order of thickness should correspond to the order of the Material objects in
+        material_lst.
+        """
+        return self._layer_thickness_lst
+
+    @layer_thickness_lst.setter
+    def layer_thickness_lst(self, value):
+        assert all(v > 0 for v in value), 'Every value in layer_thickness_lst '
+        'must be greater than 0.'
+        self._layer_thickness_lst = value
+
+    @property
+    def material_lst(self):
+        """Get or set list of Material objects in the element.
+
+        The order of Material objects should correspond to the order of the thickness in
+        layer_thickness_lst.
+        """
+        return self._material_lst
+
+    @material_lst.setter
+    def material_lst(self, value):
+        assert all(isinstance(v, Material) for v in value), 'Every item in '
+        'in material_lst must be a Material object.'
+        self._material_lst = value
+
+    @property
+    def vegcoverage(self):
+        """Get or set fraction of vegetation coverage on Element."""
+        return self._vegcoverage
+
+    @vegcoverage.setter
+    def vegcoverage(self, value):
+        self._vegcoverage = float_in_range(value, 0, 1, 'vegcoverage')
+
+
+    @property
+    def t_init(self):
+        """Get or set initial temperature of Element [K]."""
+        return self._t_init
+
+    @t_init.setter
+    def t_init(self, value):
+        self._t_init = float_in_range(value, mi=0, input_name='t_init')
+
+    @property
+    def horizontal(self):
+        """Get or set boolean value indicating if Element is horizontal or not."""
+        return self._horizontal
+
+    @horizontal.setter
+    def horizontal(self, value):
+        self._horizontal = bool(value)
+
+    @property
+    def name(self):
+        """Get or set text string for name of Element."""
+        return self._name
 
     @classmethod
     def from_dict(cls, data):
@@ -112,10 +194,10 @@ class Element(object):
         base = {'type': 'Element'}
         base['albedo'] = self.albedo
         base['emissivity'] = self.emissivity
-        base['layerThickness'] = self.layerThickness
-        base['materialLst'] = [m.to_dict() for m in self.materialLst]
-        base['vegCoverage'] = self.vegCoverage
-        base['T_init'] = self.T_init
+        base['layerThickness'] = self.layer_thickness_lst
+        base['materialLst'] = [m.to_dict() for m in self.material_lst]
+        base['vegCoverage'] = self.vegcoverage
+        base['T_init'] = self.t_init
         base['horizontal'] = self.horizontal
         base['name'] = self.name
         return base
@@ -157,13 +239,13 @@ class Element(object):
                 vegSens = 0.
             else:
                 # Summer, veg
-                self.solAbs = ((1.0 - self.vegCoverage) * (1. - self.albedo) +
-                               self.vegCoverage * (1.0 - parameter.vegAlbedo)) * \
-                                   self.solRec
-                vegLat = self.vegCoverage * parameter.grassFLat * \
-                    (1. - parameter.vegAlbedo) * self.solRec
-                vegSens = self.vegCoverage * (1. - parameter.grassFLat) * \
-                    (1. - parameter.vegAlbedo) * self.solRec
+                self.solAbs = ((1.0 - self.vegcoverage) * (1. - self.albedo) +
+                               self.vegcoverage * (1.0 - parameter.vegAlbedo)) * \
+                              self.solRec
+                vegLat = self.vegcoverage * parameter.grassFLat * \
+                         (1. - parameter.vegAlbedo) * self.solRec
+                vegSens = self.vegcoverage * (1. - parameter.grassFLat) * \
+                          (1. - parameter.vegAlbedo) * self.solRec
             self.lat = soilLat + vegLat
 
             # Sensible & net heat flux
@@ -199,7 +281,7 @@ class Element(object):
         t = self.layerTemp          # vector of layer temperatures (K)
         hc = self.layerVolHeat      # vector of layer volumetric heat (J m-3 K-1)
         tc = self.layerThermalCond  # vector of layer thermal conductivities (W m-1 K-1)
-        d = self.layerThickness     # vector of layer thicknesses (m)
+        d = self.layer_thickness_lst     # vector of layer thicknesses (m)
 
         fimp = 0.5                  # implicit coefficient
         fexp = 0.5                  # explicit coefficient
@@ -327,5 +409,5 @@ class Element(object):
         return 'Element,\n name: {}\n emissivity: {}\n albedo: {}\n R value: ' \
             '{}\n vegCoverage: {}\n horizontal: {}\n layerThickness: {}\n ' \
             'layerTemp: {}'.format(
-                self.name, self.emissivity, self.albedo, rval, self.vegCoverage,
-                bool(self.horizontal), self.layerThickness, self.layerTemp)
+                self.name, self.emissivity, self.albedo, rval, self.vegcoverage,
+                bool(self.horizontal), self.layer_thickness_lst, self.layerTemp)

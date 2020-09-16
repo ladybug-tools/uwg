@@ -1523,9 +1523,9 @@ class UWG(object):
             self.albroad, emis, thickness_vector, material_vector, road_veg_coverage,
             road_T_init, road_horizontal, name='urban_road')
 
-        self.rural = copy.deepcopy(self.road)
-        self.rural.vegcoverage = self.rurvegcover
-        self.rural.name = 'rural_road'
+        self.rural = Element(
+            self.albroad, emis, thickness_vector, material_vector, self.rurvegcover,
+            road_T_init, road_horizontal, name='rural_road')
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(

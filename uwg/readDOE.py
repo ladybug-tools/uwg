@@ -357,7 +357,7 @@ def readDOE(serialize_output=True):
 
         pickle_readDOE.close()
 
-    return refDOE, refBEM, Schedule
+    return refBEM, Schedule
 
 if __name__ == "__main__":
 
