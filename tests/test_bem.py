@@ -18,22 +18,22 @@ def _bemdef():
     # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
     thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
     materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
-    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0, T_init=293,
+    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0, t_init=293,
                    horizontal=False, name='MassWall')
 
     # IEAD roof
     thicknessLst = [0.058, 0.058]
     materialLst = [insulation, insulation]
-    roof = Element(alb=0.2, emis=0.93, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0.5, T_init=293,
+    roof = Element(albedo=0.2, emissivity=0.93, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0.5, t_init=293,
                    horizontal=True, name='IEAD')
 
     # Mass floor
     thicknessLst = [0.054, 0.054]
     materialLst = [concrete, concrete]
-    floor = Element(alb=0.2, emis=0.9, thicknessLst=thicknessLst,
-                    materialLst=materialLst, vegCoverage=0.0, T_init=293,
+    floor = Element(albedo=0.2, emissivity=0.9, layer_thickness_lst=thicknessLst,
+                    material_lst=materialLst, vegcoverage=0.0, t_init=293,
                     horizontal=True, name='MassFloor')
 
     bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
@@ -119,15 +119,14 @@ def test_bem_building_init_largeoffice_readDOE():
 
     # matlab ref checking
     assert len(uwg_matlab_val) == len(uwg_python_val)
-    # TODO: fix fail for 2.7
-    # for i in range(len(uwg_matlab_val)):
-    #     if isinstance(uwg_python_val[i], str):
-    #         assert ''.join(uwg_python_val[i].split()) == \
-    #             ''.join(uwg_matlab_val[i].split()), 'error at index={}'.format(i)
-    #     else:
-    #         tol = calculate_tolerance(uwg_python_val[i], 14.0)
-    #         assert uwg_python_val[i] == \
-    #             pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
+    for i in range(len(uwg_matlab_val)):
+        if isinstance(uwg_python_val[i], (str, unicode)):
+            assert ''.join(uwg_python_val[i].split()) == \
+                ''.join(uwg_matlab_val[i].split()), 'error at index={}'.format(i)
+        else:
+            tol = calculate_tolerance(uwg_python_val[i], 14.0)
+            assert uwg_python_val[i] == \
+                pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
 
 
 def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
@@ -202,3 +201,4 @@ def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
         tol = calculate_tolerance(uwg_python_val[i], 15.0)
         assert uwg_python_val[i] == \
             pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
+

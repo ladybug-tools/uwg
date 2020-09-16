@@ -15,8 +15,8 @@ def test_element_init():
     # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
     thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
     materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
-    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0, T_init=293,
+    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0, t_init=293,
                    horizontal=False, name='MassWall')
 
     # test repr
@@ -35,8 +35,8 @@ def test_element_dict():
     # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
     thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
     materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
-    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0, T_init=293,
+    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0, t_init=293,
                    horizontal=False, name='MassWall')
 
     # make dict
@@ -44,11 +44,11 @@ def test_element_dict():
     wall2 = Element.from_dict(eldict)
 
     assert wall.albedo == pytest.approx(wall2.albedo, abs=1e-10)
-    assert wall.materialLst[0].thermalCond == \
-        pytest.approx(wall2.materialLst[0].thermalCond, abs=1e-10)
+    assert wall.material_lst[0].thermalcond == \
+           pytest.approx(wall2.material_lst[0].thermalcond, abs=1e-10)
     assert wall.emissivity == pytest.approx(wall2.emissivity, abs=1e-10)
-    assert wall.layerThickness[1] == \
-        pytest.approx(wall2.layerThickness[1], abs=1e-10)
+    assert wall.layer_thickness_lst[1] == \
+           pytest.approx(wall2.layer_thickness_lst[1], abs=1e-10)
 
     with pytest.raises(AssertionError):
         eldict['type'] = 'BemDef'

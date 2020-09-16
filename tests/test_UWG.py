@@ -20,22 +20,22 @@ def _bemdef():
     # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
     thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
     materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
-    wall = Element(alb=0.08, emis=0.92, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0, T_init=293,
+    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0, t_init=293,
                    horizontal=False, name='MassWall')
 
     # IEAD roof
     thicknessLst = [0.058, 0.058]
     materialLst = [insulation, insulation]
-    roof = Element(alb=0.2, emis=0.93, thicknessLst=thicknessLst,
-                   materialLst=materialLst, vegCoverage=0.5, T_init=293,
+    roof = Element(albedo=0.2, emissivity=0.93, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0.5, t_init=293,
                    horizontal=True, name='IEAD')
 
     # Mass floor
     thicknessLst = [0.054, 0.054]
     materialLst = [concrete, concrete]
-    floor = Element(alb=0.2, emis=0.9, thicknessLst=thicknessLst,
-                    materialLst=materialLst, vegCoverage=0.0, T_init=293,
+    floor = Element(albedo=0.2, emissivity=0.9, layer_thickness_lst=thicknessLst,
+                    material_lst=materialLst, vegcoverage=0.0, t_init=293,
                     horizontal=True, name='MassFloor')
 
     bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
@@ -350,12 +350,12 @@ def test_read_input():
     assert testuwg.depth_soil[testuwg._soilindex2][0] == pytest.approx(0.5, abs=1e-6)
 
     # Check the road layer splitting
-    assert len(testuwg.road.layerThickness) == pytest.approx(11., abs=1e-15)
-    assert testuwg.road.layerThickness[0] == pytest.approx(0.05, abs=1e-15)
+    assert len(testuwg.road.layer_thickness_lst) == pytest.approx(11., abs=1e-15)
+    assert testuwg.road.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-15)
 
     # Check the road layer splitting for rural
-    assert len(testuwg.rural.layerThickness) == pytest.approx(11., abs=1e-15)
-    assert testuwg.rural.layerThickness[0] == pytest.approx(0.05, abs=1e-6)
+    assert len(testuwg.rural.layer_thickness_lst) == pytest.approx(11., abs=1e-15)
+    assert testuwg.rural.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-6)
 
 
 def test_optional_blank_parameters():
@@ -366,10 +366,10 @@ def test_optional_blank_parameters():
 
     assert testuwg.BEM[0].building.glazingRatio == pytest.approx(0.38, abs=1e-15)
     assert testuwg.BEM[0].roof.albedo == pytest.approx(0.2, abs=1e-15)
-    assert testuwg.BEM[0].roof.vegCoverage == pytest.approx(0.0, abs=1e-15)
+    assert testuwg.BEM[0].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
     assert testuwg.BEM[1].roof.albedo == pytest.approx(0.2, abs=1e-15)
     assert testuwg.BEM[1].building.glazingRatio == pytest.approx(0.1499, abs=1e-15)
-    assert testuwg.BEM[1].roof.vegCoverage == pytest.approx(0.0, abs=1e-15)
+    assert testuwg.BEM[1].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
 
 
 def test_optional_inputted_parameters():
@@ -406,10 +406,10 @@ def test_optional_inputted_parameters():
 
     assert testuwg.BEM[0].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[0].roof.albedo == pytest.approx(0.5, abs=1e-15)
-    assert testuwg.BEM[0].roof.vegCoverage == pytest.approx(0.1, abs=1e-15)
+    assert testuwg.BEM[0].roof.vegcoverage == pytest.approx(0.1, abs=1e-15)
     assert testuwg.BEM[1].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[1].roof.albedo == pytest.approx(0.5, abs=1e-15)
-    assert testuwg.BEM[1].roof.vegCoverage == pytest.approx(0.1, abs=1e-15)
+    assert testuwg.BEM[1].roof.vegcoverage == pytest.approx(0.1, abs=1e-15)
     assert testuwg.BEM[0].wall.albedo == pytest.approx(0.91, abs=1e-15)
     assert testuwg.BEM[1].building.shgc == pytest.approx(0.65, abs=1e-15)
     assert testuwg.BEM[0].building.floorHeight == pytest.approx(4.5, abs=1e-15)
@@ -432,7 +432,7 @@ def test_procMat():
     assert sum(newthickness) == pytest.approx(0.05*11, abs=1e-6)
 
     # modify to one layer for tests
-    testuwg.road.layerThickness = [0.05]
+    testuwg.road.layer_thickness_lst = [0.05]
     testuwg.road.layerThermalCond = testuwg.road.layerThermalCond[:1]
     testuwg.road.layerVolHeat = testuwg.road.layerVolHeat[:1]
 
@@ -443,14 +443,14 @@ def test_procMat():
     assert sum(newthickness) == pytest.approx(0.025*2, abs=1e-6)
 
     # 0.015 layer, will split in min thickness in two
-    testuwg.road.layerThickness = [0.015]
+    testuwg.road.layer_thickness_lst = [0.015]
     roadMat, newthickness = testuwg._procmat(testuwg.road, 0.05, 0.01)
     assert len(roadMat) == pytest.approx(2, abs=1e-6)
     assert len(newthickness) == pytest.approx(2, abs=1e-6)
     assert sum(newthickness) == pytest.approx(0.005*2, abs=1e-6)
 
     # 0.12 layer, will split into 3 layers b/c > max_thickness
-    testuwg.road.layerThickness = [0.12]
+    testuwg.road.layer_thickness_lst = [0.12]
     roadMat, newthickness = testuwg._procmat(testuwg.road, 0.05, 0.01)
     assert len(roadMat) == pytest.approx(3, abs=1e-6)
     assert len(newthickness) == pytest.approx(3, abs=1e-6)

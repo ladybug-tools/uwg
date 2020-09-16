@@ -225,7 +225,7 @@ def readDOE(serialize_output=True):
                     # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
                     Rbase = 0.271087 # R val based on stucco, concrete, gypsum
                     Rins = RvalWall[j][k] - Rbase #find insulation value
-                    D_ins = Rins * Insulation.thermalCond # depth of ins from m2*K/W * W/m*K = m
+                    D_ins = Rins * Insulation.thermalcond # depth of ins from m2*K/W * W/m*K = m
                     if D_ins > 0.01:
                         thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,D_ins,0.0127]
                         layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Insulation,Gypsum]
@@ -248,7 +248,7 @@ def readDOE(serialize_output=True):
                     # 0.01m wood siding, tbd insulation, 1/2" gypsum
                     Rbase = 0.170284091    # based on wood siding, gypsum
                     Rins = RvalWall[j][k] - Rbase
-                    D_ins = Rins * Insulation.thermalCond #depth of insulatino
+                    D_ins = Rins * Insulation.thermalcond #depth of insulatino
 
                     if D_ins > 0.01:
                         thickness = [0.01,D_ins,0.0127]
@@ -270,7 +270,7 @@ def readDOE(serialize_output=True):
                     # 1" stucco, 8" concrete, tbd insulation, 1/2" gypsum
                     Rbase = 0.271087 # based on stucco, concrete, gypsum
                     Rins = RvalWall[j][k] - Rbase
-                    D_ins = Rins * Insulation.thermalCond
+                    D_ins = Rins * Insulation.thermalcond
                     if D_ins > 0.01:
                         thickness = [0.0254,0.0508,0.0508,0.0508,0.0508,D_ins,0.0127]
                         layers = [Stucco,Concrete,Concrete,Concrete,Concrete,Insulation,Gypsum]
@@ -290,7 +290,7 @@ def readDOE(serialize_output=True):
                     # metal siding, insulation, 1/2" gypsum
                     alb = 0.2
                     emis = 0.9
-                    D_ins = max((RvalWall[j][k] * Insulation.thermalCond)/2, 0.01) #use derived insul thickness or 0.01 based on max
+                    D_ins = max((RvalWall[j][k] * Insulation.thermalcond) / 2, 0.01) #use derived insul thickness or 0.01 based on max
                     thickness = [D_ins,D_ins,0.0127]
                     materials = [Insulation,Insulation,Gypsum]
                     wall = Element(alb,emis,thickness,materials,0,293,0,"MetalWall")
@@ -307,21 +307,21 @@ def readDOE(serialize_output=True):
                     # IEAD-> membrane, insulation, decking
                      alb = 0.2
                      emis = 0.93
-                     D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01);
+                     D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01);
                      roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"IEAD")
 
                 elif TypeRoof[j][k] == "Attic":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
-                    D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
+                    D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01)
                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"Attic")
 
                 elif TypeRoof[j][k] == "MetalRoof":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
-                    D_ins = max(RvalRoof[j][k] * Insulation.thermalCond/2.,0.01)
+                    D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01)
                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"MetalRoof")
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
@@ -364,9 +364,9 @@ if __name__ == "__main__":
     # Set to True only if you want create new .pkls of DOE refs
     # Use --serialize switch to serialize the readDOE data
     if len(sys.argv)> 1 and sys.argv[1]=="--serialize":
-        refDOE, refBEM, Schedule = readDOE(True)
+        refBEM, Schedule = readDOE(True)
     else:
-        refDOE, refBEM, Schedule = readDOE(False)
+        refBEM, Schedule = readDOE(False)
 
 
 # Material ref from E+

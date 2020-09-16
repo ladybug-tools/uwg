@@ -2,7 +2,7 @@
 
 
 class SchDef(object):
-    """Schedule class
+    """Schedule definition class.
 
     Args:
         elec: Matrix of numbers for weekly schedule for electricity (WD, Sat, Sun).

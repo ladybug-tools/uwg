@@ -1444,7 +1444,7 @@ class UWG(object):
                     if self.albroof:
                         self.BEM[k].roof.albedo = self.albroof
                     if self.vegroof:
-                        self.BEM[k].roof.vegCoverage = self.vegroof
+                        self.BEM[k].roof.vegcoverage = self.vegroof
                     if self.shgc:
                         self.BEM[k].building.shgc = self.shgc
                     if self.albwall:
@@ -1566,7 +1566,7 @@ class UWG(object):
 
         self.road = Element(
             self.road.albedo, self.road.emissivity, newthickness, roadMat,
-            self.road.vegCoverage, self.road.layerTemp[0], self.road.horizontal,
+            self.road.vegcoverage, self.road.layerTemp[0], self.road.horizontal,
             self.road.name)
 
         # Define Rural Element
@@ -1623,35 +1623,35 @@ class UWG(object):
         k = materials.layerThermalCond
         Vhc = materials.layerVolHeat
 
-        if len(materials.layerThickness) > 1:
+        if len(materials.layer_thickness_lst) > 1:
 
-            for j in range(len(materials.layerThickness)):
+            for j in range(len(materials.layer_thickness_lst)):
                 # Break up each layer that's more than max thickness (0.05m)
-                if materials.layerThickness[j] > max_thickness:
-                    nlayers = math.ceil(materials.layerThickness[j]/float(max_thickness))
+                if materials.layer_thickness_lst[j] > max_thickness:
+                    nlayers = math.ceil(materials.layer_thickness_lst[j] / float(max_thickness))
                     for i in range(int(nlayers)):
                         newmat.append(Material(k[j], Vhc[j], name=materials.name))
-                        newthickness.append(materials.layerThickness[j]/float(nlayers))
+                        newthickness.append(materials.layer_thickness_lst[j] / float(nlayers))
                 # Material that's less then min_thickness is not added.
-                elif materials.layerThickness[j] < min_thickness:
+                elif materials.layer_thickness_lst[j] < min_thickness:
                     print('WARNING: Material layer too thin (less then 2 cm) to process.'
                           'Material {} is {:.2f} cm.'.format(
                               materials.name, min_thickness * 100))
                 else:
                     newmat.append(Material(k[j], Vhc[j], name=materials.name))
-                    newthickness.append(materials.layerThickness[j])
+                    newthickness.append(materials.layer_thickness_lst[j])
 
         else:
 
             # Divide single layer into two (UWG assumes at least 2 layers)
-            if materials.layerThickness[0] > max_thickness:
-                nlayers = math.ceil(materials.layerThickness[0]/float(max_thickness))
+            if materials.layer_thickness_lst[0] > max_thickness:
+                nlayers = math.ceil(materials.layer_thickness_lst[0] / float(max_thickness))
                 for i in range(int(nlayers)):
                     newmat.append(Material(k[0], Vhc[0], name=materials.name))
-                    newthickness.append(materials.layerThickness[0]/float(nlayers))
+                    newthickness.append(materials.layer_thickness_lst[0] / float(nlayers))
             # Material should be at least 1cm thick, so if we're here,
             # should give warning and stop. Only warning given for now.
-            elif materials.layerThickness[0] < min_thickness*2:
+            elif materials.layer_thickness_lst[0] < min_thickness*2:
                 newthickness = [min_thickness/2., min_thickness/2.]
                 newmat = [Material(k[0], Vhc[0], name=materials.name),
                           Material(k[0], Vhc[0], name=materials.name)]
@@ -1659,8 +1659,8 @@ class UWG(object):
                       'Material {} is {:.2f} cm. May cause error.'.format(
                           materials.name, min_thickness * 100))
             else:
-                newthickness = [materials.layerThickness[0] / 2.,
-                                materials.layerThickness[0] / 2.]
+                newthickness = [materials.layer_thickness_lst[0] / 2.,
+                                materials.layer_thickness_lst[0] / 2.]
                 newmat = [Material(k[0], Vhc[0], name=materials.name),
                           Material(k[0], Vhc[0], name=materials.name)]
 

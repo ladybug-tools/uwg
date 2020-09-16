@@ -238,7 +238,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'mass_layerThickness':
-                            assert refBEM[bldType][bldEra][climateZone].mass.layerThickness[0] == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].mass.layer_thickness_lst[0] == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'mass_layerThermalCond':
@@ -250,7 +250,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'mass_vegCoverage':
-                            assert refBEM[bldType][bldEra][climateZone].mass.vegCoverage == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].mass.vegcoverage == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'mass_layerTemp':
@@ -270,7 +270,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'wall_layerThickness':
-                            assert refBEM[bldType][bldEra][climateZone].wall.layerThickness[0] == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].wall.layer_thickness_lst[0] == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'wall_layerThermalCond':
@@ -282,7 +282,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'wall_vegCoverage':
-                            assert refBEM[bldType][bldEra][climateZone].wall.vegCoverage == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].wall.vegcoverage == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'wall_layerTemp':
@@ -302,7 +302,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'roof_layerThickness':
-                            assert refBEM[bldType][bldEra][climateZone].roof.layerThickness[0] == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].roof.layer_thickness_lst[0] == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'roof_layerThermalCond':
@@ -314,7 +314,7 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'roof_vegCoverage':
-                            assert refBEM[bldType][bldEra][climateZone].roof.vegCoverage == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].roof.vegcoverage == pytest.approx(matlab_ref_value, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'roof_layerTemp':
