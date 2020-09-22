@@ -44,6 +44,8 @@ except ImportError:
         'click module is not installed. Try `pip install uwg[cli]` command.'
     )
 
+from .simulate import simulate
+from .validate import validate
 
 @click.group()
 @click.version_option()
@@ -56,6 +58,10 @@ def viz():
     """Check if uwg is flying!"""
     click.echo('viiiiiiiiiiiiizzzzzzzzz!')
 
+
+# add sub-commands to main
+main.add_command(simulate)
+main.add_command(validate)
 
 if __name__ == "__main__":
     main()
