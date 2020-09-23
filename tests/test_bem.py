@@ -1,5 +1,11 @@
 """Tests for BEM object."""
 
+# Fix for Python 2.X
+try:
+    unicode
+except NameError:
+    unicode = str
+
 import pytest
 from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
@@ -36,11 +42,11 @@ def _bemdef():
                     material_lst=materialLst, vegcoverage=0.0, t_init=293,
                     horizontal=True, name='MassFloor')
 
-    bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
-                   intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
-                   uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
-                   coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
-                   coolCap=76, heatEff=0.7, initialTemp=293)
+    bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
+                   int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
+                   cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                   coolcap=76, heateff=0.7, initial_temp=293)
 
     return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
 
@@ -86,29 +92,29 @@ def test_bem_building_init_largeoffice_readDOE():
     testuwg.generate()
 
     uwg_python_val = [
-        testuwg.BEM[0].building.floorHeight,
-        testuwg.BEM[0].building.intHeat,
-        testuwg.BEM[0].building.intHeatNight,
-        testuwg.BEM[0].building.intHeatDay,
-        testuwg.BEM[0].building.intHeatFRad,
-        testuwg.BEM[0].building.intHeatFLat,
+        testuwg.BEM[0].building.floor_height,
+        testuwg.BEM[0].building.int_heat,
+        testuwg.BEM[0].building.int_heat_night,
+        testuwg.BEM[0].building.int_heat_day,
+        testuwg.BEM[0].building.int_heat_frad,
+        testuwg.BEM[0].building.int_heat_flat,
         testuwg.BEM[0].building.infil,
         testuwg.BEM[0].building.vent,
-        testuwg.BEM[0].building.glazingRatio,
-        testuwg.BEM[0].building.uValue,
+        testuwg.BEM[0].building.glazing_ratio,
+        testuwg.BEM[0].building.u_value,
         testuwg.BEM[0].building.shgc,
-        testuwg.BEM[0].building.condType,
+        testuwg.BEM[0].building.condtype,
         testuwg.BEM[0].building.cop,
-        testuwg.BEM[0].building.coolSetpointDay,
-        testuwg.BEM[0].building.coolSetpointNight,
-        testuwg.BEM[0].building.heatSetpointDay,
-        testuwg.BEM[0].building.heatSetpointNight,
-        testuwg.BEM[0].building.coolCap,
-        testuwg.BEM[0].building.heatCap,
-        testuwg.BEM[0].building.heatEff,
-        testuwg.BEM[0].building.mSys,
-        testuwg.BEM[0].building.indoorTemp,
-        testuwg.BEM[0].building.indoorHum,
+        testuwg.BEM[0].building.cool_setpoint_day,
+        testuwg.BEM[0].building.cool_setpoint_night,
+        testuwg.BEM[0].building.heat_setpoint_day,
+        testuwg.BEM[0].building.heat_setpoint_night,
+        testuwg.BEM[0].building.coolcap,
+        testuwg.BEM[0].building.heat_cap,
+        testuwg.BEM[0].building.heateff,
+        testuwg.BEM[0].building.msys,
+        testuwg.BEM[0].building.indoor_temp,
+        testuwg.BEM[0].building.indoor_hum,
         testuwg.BEM[0].building.FanMax,
         BLDTYPE[testuwg.BEM[0].bldtype],
         BUILTERA[testuwg.BEM[0].builtera],
@@ -156,16 +162,16 @@ def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
 
     # Calculated values
     uwg_python_val = [
-        testuwg.BEM[0].building.intHeat,
-        testuwg.BEM[0].building.intHeatNight,
-        testuwg.BEM[0].building.intHeatDay,
-        testuwg.BEM[0].building.indoorTemp,
-        testuwg.BEM[0].building.indoorHum,
+        testuwg.BEM[0].building.int_heat,
+        testuwg.BEM[0].building.int_heat_night,
+        testuwg.BEM[0].building.int_heat_day,
+        testuwg.BEM[0].building.indoor_temp,
+        testuwg.BEM[0].building.indoor_hum,
         testuwg.BEM[0].building.indoorRhum,
         testuwg.BEM[0].building.nFloor,
         testuwg.BEM[0].building.sensCoolDemand,
         testuwg.BEM[0].building.sensHeatDemand,
-        testuwg.BEM[0].building.copAdj,
+        testuwg.BEM[0].building.cop_adj,
         testuwg.BEM[0].building.dehumDemand,
         testuwg.BEM[0].building.coolConsump,
         testuwg.BEM[0].building.heatConsump,

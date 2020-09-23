@@ -205,7 +205,7 @@ def readDOE(serialize_output=True):
                     293)                                # initialTemp at 20 C
 
                 # Not defined in the constructor
-                B.heatCap = (HEAT[j][k]*1000.0)/AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
+                B.heat_cap = (HEAT[j][k] * 1000.0) / AreaFloor[j]         # heating Capacity converted to W/m2 by era, climate type
                 refDOE[i][j][k] = B
 
                 # Define wall, mass(floor), roof
@@ -330,16 +330,19 @@ def readDOE(serialize_output=True):
                 refBEM[i][j][k].zonetype = k  # for testing
                 refBEM[i][j][k].building.FanMax = FanFlow[j][k] # max fan flow rate (m^3/s) per DOE
 
+                # Calculate internal heat loads for schedule
+                q_elec = Elec[j]                   # W/m^2 (max) for electrical plug process
+                q_light = Light[j]                 # W/m^2 (max) for light
+                n_occ = Occupant[j]/AreaFloor[j]   # Person/m^2
+                q_gas = Gas[j]                     # W/m^2 (max) for gas
+                vent = Vent[j]/1000.0             # m^3/s/m^2
+                v_swh = SHW[j]/AreaFloor[j]        # L/hr/m2
+
                 Schedule[i][j][k] = SchDef(elec=SchEquip, gas=SchGas, light=SchLight, occ=SchOcc, cool=SetCool,
-                                           heat=SetHeat, swh=SchSWH, bldtype=i, builtera=j)
+                                           heat=SetHeat, swh=SchSWH, q_elec=q_elec, q_gas=q_gas, q_light=q_light,
+                                           n_occ=n_occ, vent=vent, v_swh=v_swh, bldtype=i, builtera=j)
                 Schedule[i][j][k].zonetype = k  # for testing only.
 
-                Schedule[i][j][k].Qelec = Elec[j]                   # W/m^2 (max) for electrical plug process
-                Schedule[i][j][k].Qlight = Light[j]                 # W/m^2 (max) for light
-                Schedule[i][j][k].Nocc = Occupant[j]/AreaFloor[j]   # Person/m^2
-                Schedule[i][j][k].Qgas = Gas[j]                     # W/m^2 (max) for gas
-                Schedule[i][j][k].Vent = Vent[j]/1000.0             # m^3/m^2 per person
-                Schedule[i][j][k].Vswh = SHW[j]/AreaFloor[j]        # litres per hour per m^2 of floor
 
 
     # if not test serialize refDOE,refBEM,Schedule and store in resources

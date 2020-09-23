@@ -1,6 +1,6 @@
 """Material class"""
 
-from honeybee.typing import float_in_range_excl_incl
+from .utilities import float_in_range_excl_incl
 
 
 class Material(object):
@@ -12,8 +12,8 @@ class Material(object):
         name: Text string for name of the Material.
 
     Properties:
-        * thermalCond
-        * volHeat
+        * thermalcond
+        * volheat
     """
     def __init__(self, thermalcond, volheat, name):
         self._name = name
@@ -56,23 +56,23 @@ class Material(object):
             {
             "type": "Material",
             "name": "Concrete",
-            "thermalCond": 1.311,  # thermal conductivity [W m-1 K-1]
-            "volHeat": 1874432.0  # volumetric heat capacity [J m-3 K-1]
+            "thermalcond": 1.311,  # thermal conductivity [W m-1 K-1]
+            "volheat": 1874432.0  # volumetric heat capacity [J m-3 K-1]
             }
         """
         assert data['type'] == 'Material', 'Expected ' \
             'Material dictionary. Got {}.'.format(data['type'])
 
-        return cls(data['thermalCond'], data['volHeat'], data['name'])
+        return cls(data['thermalcond'], data['volheat'], data['name'])
 
     def to_dict(self):
         """Material dictionary representation."""
         base = {'type': 'Material'}
         base['name'] = self.name
-        base['thermalCond'] = self.thermalcond
-        base['volHeat'] = self.volheat
+        base['thermalcond'] = self.thermalcond
+        base['volheat'] = self.volheat
         return base
 
     def __repr__(self):
-        return "Material, name: {}\n thermalCond: {}\n volHeat: {}".format(
+        return "Material, name: {}\n thermalcond: {}\n volheat: {}".format(
             self.name, self.thermalcond, self.volheat)

@@ -7,9 +7,8 @@ except NameError:
     pass
 
 import math
-from .utilities import is_near_zero
+from .utilities import is_near_zero, float_in_range, float_positive
 from .material import Material
-from honeybee.typing import float_in_range, float_positive
 
 
 class Element(object):
@@ -28,10 +27,10 @@ class Element(object):
     Properties:
         * albedo
         * emissivity
-        * layerThickness
+        * layer_thickness_lst
         * layerThermalCond
         * layerVolHeat
-        * vegCoverage
+        * vegcoverage
         * layerTemp
         * waterStorage
         * horizontal
@@ -173,10 +172,10 @@ class Element(object):
             {
             "albedo": 0.08,
             "emissivity": 0.92,
-            "layerThickness": [0.0254, 0.0508, 0.0254],
-            "materialLst": material_dict_lst,  # List of material dictionaries
-            "vegCoverage": 0.5,
-            "T_init": 293,
+            "layer_thickness_lst": [0.0254, 0.0508, 0.0254],
+            "material_lst": material_dict_lst,  # List of material dictionaries
+            "vegcoverage": 0.5,
+            "t_init": 293,
             "horizontal": False,
             "name": MassWall
             }
@@ -184,9 +183,9 @@ class Element(object):
         assert data['type'] == 'Element', 'Expected ' \
             'Element dictionary. Got {}.'.format(data['type'])
 
-        materials = [Material.from_dict(m) for m in data['materialLst']]
-        return cls(data['albedo'], data['emissivity'], data['layerThickness'],
-                   materials, data['vegCoverage'], data['T_init'],
+        materials = [Material.from_dict(m) for m in data['material_lst']]
+        return cls(data['albedo'], data['emissivity'], data['layer_thickness_lst'],
+                   materials, data['vegcoverage'], data['t_init'],
                    data['horizontal'], data['name'])
 
     def to_dict(self):
@@ -194,10 +193,10 @@ class Element(object):
         base = {'type': 'Element'}
         base['albedo'] = self.albedo
         base['emissivity'] = self.emissivity
-        base['layerThickness'] = self.layer_thickness_lst
-        base['materialLst'] = [m.to_dict() for m in self.material_lst]
-        base['vegCoverage'] = self.vegcoverage
-        base['T_init'] = self.t_init
+        base['layer_thickness_lst'] = self.layer_thickness_lst
+        base['material_lst'] = [m.to_dict() for m in self.material_lst]
+        base['vegcoverage'] = self.vegcoverage
+        base['t_init'] = self.t_init
         base['horizontal'] = self.horizontal
         base['name'] = self.name
         return base
@@ -407,7 +406,7 @@ class Element(object):
     def __repr__(self):
         rval = round(sum([1.0 / t for t in self.layerThermalCond]), 2)
         return 'Element,\n name: {}\n emissivity: {}\n albedo: {}\n R value: ' \
-            '{}\n vegCoverage: {}\n horizontal: {}\n layerThickness: {}\n ' \
+            '{}\n vegcoverage: {}\n horizontal: {}\n layer_thickness_lst: {}\n ' \
             'layerTemp: {}'.format(
                 self.name, self.emissivity, self.albedo, rval, self.vegcoverage,
                 bool(self.horizontal), self.layer_thickness_lst, self.layerTemp)

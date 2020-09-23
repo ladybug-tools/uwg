@@ -16,11 +16,11 @@ EPW_PATH = os.path.join(TEST_DIR, 'epw', 'SGP_Singapore.486980_IWEC.epw')
 PARAM_DIR = os.path.join(TEST_DIR, 'parameters')
 PARAM_PATH = os.path.join(PARAM_DIR, 'initialize_fatal_error.uwg')
 BUILDINGPARAMS = [
-    'floorHeight', 'intHeat', 'intHeatNight', 'intHeatDay', 'intHeatFRad', 'intHeatFLat',
-    'infil', 'vent', 'glazingRatio', 'uValue', 'shgc', 'condType', 'cop',
-    'coolSetpointDay', 'coolSetpointNight', 'heatSetpointDay', 'heatSetpointNight',
-    'coolCap', 'heatEff', 'mSys', 'indoorTemp', 'indoorHum', 'heatCap', 'copAdj',
-    'canyon_fraction']
+    'floor_height', 'int_heat', 'int_heat_night', 'int_heat_day', 'int_heat_frad',
+    'int_heat_flat', 'infil', 'vent', 'glazing_ratio', 'u_value', 'shgc',
+    'condtype', 'cop', 'cool_setpoint_day', 'cool_setpoint_night', 'heat_setpoint_day',
+    'heat_setpoint_night', 'coolcap', 'heateff', 'msys', 'indoor_temp', 'indoor_hum',
+    'heat_cap', 'cop_adj', 'canyon_fraction']
 
 
 def check_obj_attr(obj1, obj2, attr_lst):
@@ -87,9 +87,9 @@ def uwg_manual():
     #   Type = WareHouse, Zone = 1A (Miami), Era = Pst80, Construction = MassWall
 
     for i in range(len(testuwg.BEM)):
-        testuwg.BEM[i].building.floorHeight = df_typology_params[i][0]
+        testuwg.BEM[i].building.floor_height = df_typology_params[i][0]
         testuwg.BEM[i].building.canyon_fraction = df_typology_params[i][1]
-        testuwg.BEM[i].building.glazingRatio = df_typology_params[i][2]
+        testuwg.BEM[i].building.glazing_ratio = df_typology_params[i][2]
         testuwg.BEM[i].building.shgc = df_typology_params[i][3]
         testuwg.BEM[i].wall.albedo = df_typology_params[i][4]
         testuwg.BEM[i].roof.albedo = df_typology_params[i][5]

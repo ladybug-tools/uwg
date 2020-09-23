@@ -18,29 +18,38 @@ def test_schdef_init():
 
     with pytest.raises(AssertionError):
         SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
-               cool=DEFAULT_WEEK, heat=DEFAULT_WEEK, swh={}, bldtype=0, builtera=0)
+               cool=DEFAULT_WEEK, heat=DEFAULT_WEEK, swh={}, q_elec=18.9, q_gas=3.2,
+               q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=0,
+               builtera=0)
 
     with pytest.raises(AssertionError):
         testweek = [[0.1] * 24] * 2
         SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
-               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, bldtype=0, builtera=0)
+               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, q_elec=18.9,
+               q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=0,
+               builtera=0)
 
     with pytest.raises(AssertionError):
         testweek = [[0.1] * 24] * 2
         testweek += [0.1] * 23
         SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
-               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, bldtype=0, builtera=0)
+               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, q_elec=18.9,
+               q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=0,
+               builtera=0)
 
     with pytest.raises(AssertionError):
         testweek = [[0.1] * 24] * 3
         testweek[2][23] = 'a'
         SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
-               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, bldtype=0, builtera=0)
+               cool=DEFAULT_WEEK, heat=testweek, swh=DEFAULT_WEEK, q_elec=18.9,
+               q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=0,
+               builtera=0)
 
     # init
     sch = SchDef(elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK,
                  occ=DEFAULT_WEEK, cool=DEFAULT_WEEK, heat=DEFAULT_WEEK,
-                 swh=DEFAULT_WEEK, bldtype=0, builtera=0)
+                 swh=DEFAULT_WEEK, q_elec=18.9, q_gas=3.2, q_light=18.9, n_occ=0.12,
+                 vent=0.0013, v_swh=0.2846, bldtype=0, builtera=0)
 
     # test __repr__
     sch.__repr__()
@@ -52,7 +61,9 @@ def test_schdef_dict():
     # init
     testsch = SchDef(
         elec=DEFAULT_WEEK, gas=DEFAULT_WEEK, light=DEFAULT_WEEK, occ=DEFAULT_WEEK,
-        cool=DEFAULT_WEEK, heat=DEFAULT_WEEK, swh=DEFAULT_WEEK, bldtype=0, builtera=0)
+        cool=DEFAULT_WEEK, heat=DEFAULT_WEEK, swh=DEFAULT_WEEK, q_elec=18.9,
+        q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
+        bldtype=0, builtera=0)
 
     # make dict
     schdict = testsch.to_dict()

@@ -13,7 +13,6 @@ Note:
 
 from __future__ import division, print_function
 from functools import reduce
-from honeybee.typing import int_in_range, float_in_range, int_positive, float_positive
 
 try:
     range = xrange
@@ -45,22 +44,20 @@ from .urbflux import urbflux
 from .schdef import SchDef
 from .BEMDef import BEMDef
 from . import utilities
+from .utilities import int_in_range, float_in_range, int_positive, float_positive
 
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions based on defined urban parameters.
 
     Args:
-        epw_path: Text string for the name of the rural epw file that will be morphed.
-        param_path: Optional text string for the UWG parameter file (.UWG) path.
-            If None the UWG input parameters must be manually set in the UWG object.
-            (Default: None).
-        new_epw_dir: Optional text string destination directory for the morphed
-            EPW file. If None the morphed file will be written into the same directory
-            as the rural EPW file (the epwDir). (Default: None).
-        new_epw_name: Optional destination file name for the morphed EPW file.
-            If None the morphed file will append '_UWG' to the original file name.
-            (Default: None).
+        epw_path: Text string for full path of the rural .epw file that will be morphed.
+        new_epw_dir: Optional text string for the destination directory into which the
+            morphed .epw file is written. If None the morphed file will be written into
+            the same directory as the rural .epw file. (Default: None).
+        new_epw_name: Optional text string for the destination file name of the morphed
+            .epw file. If None the morphed file will append '_UWG' to the original file
+            name. (Default: None).
 
     Properties:
         * epw_path
@@ -116,6 +113,8 @@ class UWG(object):
         * albwall
         * shgc
         * flr_h
+        * ref_bem_vector
+        * ref_sch_vector
     """
 
     # Definitions for constants / other parameters
@@ -188,21 +187,23 @@ class UWG(object):
     # Constant file paths
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
     Z_MESO_PATH = os.path.join(CURRENT_PATH, 'refdata', 'z_meso.txt')
-    READDOE_PATH = os.path.join(CURRENT_PATH, 'refdata', 'readDOE.pkl')
+    REFDOE_PATH = os.path.join(CURRENT_PATH, 'refdata', 'readDOE.pkl')
 
     def __init__(self, epw_path, new_epw_dir=None, new_epw_name=None):
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
 
-        # set filepath data
-        self.epw_path = epw_path
+        assert os.path.exists(epw_path), 'File: "{}" does not exist.'.format(epw_path)
+        self._epw_path = epw_path
         self._new_epw_dir, self._new_epw_name = new_epw_dir, new_epw_name
         self._new_epw_path = None
 
         # set defaults for reference data
         self._refBEM = None
         self._refSchedule = None
+        self._ref_bem_vector = None
+        self._ref_sch_vector = None
 
         # Parameters for UWG computation
         self.epw_precision = 1
@@ -220,9 +221,53 @@ class UWG(object):
         self.latanth = None
 
     @classmethod
+    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None,
+                        ref_bem_vector=None, ref_sch_vector=None):
+        """Create a UWG object from the .uwg parmaeter file.
+
+        Args:
+            epw_path: Text string for full path of the rural .epw file that will be
+                morphed.
+            param_path: Optional text string for full path of the the .uwg parameter file
+                path.
+            new_epw_dir: Optional text string destination directory for the morphed
+                .epw file. If None the morphed file will be written into the same
+                directory as the rural .epw file. (Default: None).
+            new_epw_name: Optional destination file name for the morphed .epw file.
+                If None the morphed file will append '_UWG' to the original file name.
+                (Default: None).
+            ref_bem_vector: Optional list of custom BEMDef objects to override or add to
+                the refBEM matrix according to the BEMDef bldtype and builtera values.
+                If value is None, all SchDef objects are referenced from the DOE
+                typologies defined by default in the refSch matrix. (Default: None).
+            ref_sch_vector: Optional list of custom SchDef objects to override or add to
+                the refSchedule matrix according to the SchDef bldtype and builtera
+                values. If value is None, all BEMDef objects are referenced from the DOE
+                typologies defined by default in the refBEM matrix. (Default: None).
+        """
+
+        assert os.path.exists(param_path), 'Parameter file "{}" does not ' \
+            'exist.'.format(param_path)
+
+        uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
+        uwg_model._read_input(param_path)
+
+        # check and add reference data
+        refcheck = int(ref_sch_vector is not None) + int(ref_bem_vector is not None)
+        assert refcheck != 1, 'The ref_sch_vector and ref_bem_vector must both be ' \
+            'defined in order to modify the UWG reference data. Only {} is ' \
+            'defined.'.format(
+                'ref_sch_vector' if ref_bem_vector is None else 'ref_bem_vector')
+
+        if refcheck == 2:
+            uwg_model._customize_reference_data(ref_bem_vector, ref_sch_vector)
+
+        return uwg_model
+
+    @classmethod
     def from_param_args(cls, epw_path, bldheight, blddensity, vertohor, zone, month=1,
                         day=1, nday=31, dtsim=300, dtweather=3600, autosize=False,
-                        h_mix=1, sensOcc=100, latfocc=0.3, radfocc=0.2, radfequip=0.5,
+                        h_mix=1, sensocc=100, latfocc=0.3, radfocc=0.2, radfequip=0.5,
                         radflight=0.7, bld=DEFAULT_BLD, charlength=1000, albroad=0.1,
                         droad=0.5, sensanth=20, kroad=1, croad=1600000, vegcover=0.2,
                         treecoverage=0.1, vegstart=4, vegend=10, albveg=0.25,
@@ -230,11 +275,11 @@ class UWG(object):
                         schtraffic=DEFAULT_SCHTRAFFIC, h_ubl1=1000, h_ubl2=80, h_ref=150,
                         h_temp=2, h_wind=10, c_circ=1.2, c_exch=1, maxday=150,
                         maxnight=20, windmin=1, h_obs=0.1, new_epw_dir=None,
-                        new_epw_name=None):
+                        new_epw_name=None, ref_bem_vector=None, ref_sch_vector=None):
+        """Create a UWG object based on method arguments."""
 
         uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
 
-        # Set defaults of parameters
         uwg_model.bldheight = bldheight
         uwg_model.blddensity = blddensity
         uwg_model.vertohor = vertohor
@@ -246,7 +291,7 @@ class UWG(object):
         uwg_model.dtweather = dtweather
         uwg_model.autosize = autosize
         uwg_model.h_mix = h_mix
-        uwg_model.sensOcc = sensOcc
+        uwg_model.sensocc = sensocc
         uwg_model.latfocc = latfocc
         uwg_model.radfocc = radfocc
         uwg_model.radfequip = radfequip
@@ -279,14 +324,16 @@ class UWG(object):
         uwg_model.windmin = windmin
         uwg_model.h_obs = h_obs
 
-        return uwg_model
+        # check and add reference data
+        refcheck = int(ref_sch_vector is not None) + int(ref_bem_vector is not None)
+        assert refcheck != 1, 'The ref_sch_vector and ref_bem_vector must both be ' \
+            'defined in order to modify the UWG reference data. Only {} is ' \
+            'defined.'.format(
+                'ref_sch_vector' if ref_bem_vector is None else 'ref_bem_vector')
 
-    @classmethod
-    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None):
-        """Morph a rural EPW file to urban conditions based on .uwg file."""
+        if refcheck == 2:
+            uwg_model._customize_reference_data(ref_bem_vector, ref_sch_vector)
 
-        uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
-        uwg_model._read_input(param_path)
         return uwg_model
 
     @classmethod
@@ -329,8 +376,10 @@ class UWG(object):
             setattr(uwg_model, attr, data[attr])
 
         # check and add reference data
-        refcheck = int('ref_sch_vector' in data) + int('ref_bem_vector' in data)
-        assert refcheck == 2 or refcheck == 0, 'The ref_sch_vector and ref_bem_vector ' \
+        check_sch = 'ref_sch_vector' in data and data['ref_sch_vector'] is not None
+        check_bem = 'ref_bem_vector' in data and data['ref_bem_vector'] is not None
+        refcheck = int(check_sch) + int(check_bem)
+        assert refcheck != 1, 'The ref_sch_vector and ref_bem_vector ' \
             'properties must both be defined in order to modify the UWG reference ' \
             'data. Only {} is defined.'.format(
                 'ref_sch_vector' if 'ref_sch_vector' in data else 'ref_bem_vector')
@@ -340,97 +389,16 @@ class UWG(object):
                               for schdict in data['ref_sch_vector']]
             ref_bem_vector = [BEMDef.from_dict(bemdict)
                               for bemdict in data['ref_bem_vector']]
-            uwg_model.customize_reference_data(ref_bem_vector, ref_sch_vector)
+
+        if refcheck == 2:
+            uwg_model._customize_reference_data(ref_bem_vector, ref_sch_vector)
 
         return uwg_model
 
-    def customize_reference_data(self, ref_bem_vector, ref_sch_vector):
-        """Customize refBEM and refSchedule data by extending or overriding DOE reference data.
-
-        The custom BEMDef and SchDef objects must contain bldtype and builtera values
-        referencing a nonzero fraction of urban area in the UWG bld matrix to be used in
-        the UWG model. Also note that this method should be used before calling the
-        generate method, in order to ensure the reference data gets transferred over to
-        the UWG object BEM and Schedule properties.
-
-        Args:
-            ref_bem_vector: List of custom SchDef objects to add to the refSch matrix
-                property.
-            ref_sch_vector: List of custom BEMDef objects to add to the refBEM matrix
-                property.
-        """
-        assert len(ref_sch_vector) == len(ref_bem_vector), 'The ref_sch_vector ' \
-            'and ref_bem_vector properties must be lists of equal length. Got ' \
-            'lengths {} and {}, respectively.'.format(
-                len(ref_sch_vector), len(ref_bem_vector))
-
-        zi = self.zone - 1
-
-        # Insert or extend refSchedule matrix
-        for sch in ref_sch_vector:
-            ti, ei = sch.bldtype, sch.builtera
-            try:
-                self.refSchedule[ti][ei][zi] = sch
-            except IndexError:
-                # Add new rows based on type index in object
-                new_rows_num = ti + 1 - len(self.refSchedule)
-                for i in range(new_rows_num):
-                    self.refSchedule.append(
-                        [[None for c in range(16)] for r in range(3)])
-                self.refSchedule[ti][ei][zi] = sch
-
-        # Insert or extend refBEM matrix
-        for bem in ref_bem_vector:
-            ti, ei = bem.bldtype, bem.builtera
-            try:
-                self.refBEM[ti][ei][zi] = bem
-            except IndexError:
-                # Add new rows based on type index in object
-                new_rows_num = ti + 1 - len(self.refBEM)
-                for i in range(new_rows_num):
-                    self.refBEM.append(
-                        [[None for c in range(16)] for r in range(3)])
-                self.refBEM[ti][ei][zi] = bem
-
-    def to_dict(self, include_refDOE=False):
-        """UWG dictionary representation.
-
-        Args:
-            add_refDOE: Optional boolean to include reference BEMDef and SchDef objects
-                from the refBEM and refSch matrices. Only BEMDef and SchDef objects
-                with a bldtype and builtera value referenced in the bld matrix will be
-                included. Set this value to True if custom reference data has been
-                added to the UWG object. (Default: False).
-        """
-
-        base = {'type': 'UWG'}
-        base['epw_path'] = self.epw_path
-        base['new_epw_dir'] = self._new_epw_dir
-        base['new_epw_name'] = self._new_epw_path
-
-        # Add UWG parameters
-        for attr in self.PARAMETER_LIST:
-            base[attr] = getattr(self, attr)
-
-        # Add reference data
-        if include_refDOE:
-
-            zi = self.zone - 1
-            type_num = len(self.bld)
-            ref_sch_vec, ref_bem_vec = [], []
-            for ti in range(type_num):
-                for ei in range(3):
-                    if utilities.is_near_zero(self.bld[ti][ei], 1e-5):
-                        continue
-                    ref_sch_vec.append(
-                        self.refSchedule[ti][ei][zi].to_dict())
-                    ref_bem_vec.append(
-                        self.refBEM[ti][ei][zi].to_dict())
-
-            base['ref_sch_vector'] = ref_sch_vec
-            base['ref_bem_vector'] = ref_bem_vec
-
-        return base
+    @property
+    def epw_path(self):
+        """Get full path to rural .epw file to be morphed."""
+        return self._epw_path
 
     @property
     def new_epw_path(self):
@@ -447,15 +415,35 @@ class UWG(object):
 
     @property
     def refBEM(self):
+        """Get 3d refBEM matrix arranged by build type, built era, and climate."""
         if self._refBEM is None:
-            self._load_readDOE(self.READDOE_PATH)
+            self._refBEM, self._refSchedule = UWG._load_refDOE()
         return self._refBEM
 
     @property
     def refSchedule(self):
+        """Get 3d refSchedule matrix arranged by built type, built era, and climate."""
         if self._refSchedule is None:
-            self._load_readDOE(self.READDOE_PATH)
+            self._refBEM, self._refSchedule = UWG._load_refDOE()
         return self._refSchedule
+
+    @property
+    def ref_bem_vector(self):
+        """Get list of custom BEMDef objects to add to refBEM.
+
+        If value is None, all BEMDef objects are referenced from the DOE typologies
+        defined by default in the refBEM matrix. (Default: None).
+        """
+        return self._ref_bem_vector
+
+    @property
+    def ref_sch_vector(self):
+        """Get list of custom SchDef objects to add to refSchedule.
+
+        If value is None, all SchDef objects are referenced from the DOE typologies
+        defined by default in the refSch matrix. (Default: None).
+        """
+        return self._ref_sch_vector
 
     @property
     def month(self):
@@ -624,29 +612,21 @@ class UWG(object):
 
     @property
     def maxday(self):
-        """Get or set microclimate maximum day threshold."""
+        """Get or set maximum heat flux threshold for daytime conditions [W/m2]."""
         return self._maxday
 
     @maxday.setter
     def maxday(self, value):
-        try:
-            self._maxday = float(value)
-        except TypeError:
-            raise TypeError('Input maxday must be an integer or float. Got: '
-                            '{}.'.format(value))
+        self._maxday = float_positive(value, 'maxday')
 
     @property
     def maxnight(self):
-        """Get or set microclimate maximum night threshold."""
+        """Get or set maximum heat flux threshold for nighttime conditions [W/m2]."""
         return self._maxnight
 
     @maxnight.setter
     def maxnight(self, value):
-        try:
-            self._maxnight = float(value)
-        except TypeError:
-            raise TypeError('Input maxnight must be an integer or float. Got: '
-                            '{}.'.format(value))
+        self._maxnight = float_positive(value, 'maxnight')
 
     @property
     def windmin(self):
@@ -689,7 +669,7 @@ class UWG(object):
 
     @property
     def blddensity(self):
-        """Get or set building footprint density relative to urban area."""
+        """Get or set building footprint density as fraction of urban area."""
         return self._blddensity
 
     @blddensity.setter
@@ -742,7 +722,7 @@ class UWG(object):
 
     @property
     def sensanth(self):
-        """Get or set street level anthropogenic sensible heat [W/m^2].
+        """Get or set street level anthropogenic sensible heat [W/m2].
 
         Street level anthropogenic heat is non-building heat like heat emitted from cars,
         pedestrians, and street cooking.
@@ -760,9 +740,10 @@ class UWG(object):
         This property consists of a 16 x 3 matrix referencing the fraction of the urban
         building stock from 16 building types and 3 built eras representing, in
         combination with 16 climate zones, 768 building archetypes generated from the
-        Commercial Building Energy Survey. The sum of the fractional values in the bld
-        matrix must sum to one. Each column represent a pre-1980's, post-1980's, or new
-        construction era, and rows represent building types, for example:
+        Commercial Building Energy Consumption Survey. Each column represent a pre-1980s,
+        post-1980s, or new construction era, and rows represent building types. Custom
+        build types can be added by adding new rows. The sum of the fractional values in
+        the bld matrix must sum to one. For example:
 
         .. code-block:: python
 
@@ -772,7 +753,7 @@ class UWG(object):
             bld = [[0, 0, 0],  # FullServiceRestaurant
                    [0, 0, 0],  # Hospital
                    [0, 0, 0],  # LargeHotel
-                   [0, 0. 4,0],  # LargeOffice
+                   [0, 0, 0.4],  # LargeOffice
                    [0, 0, 0],  # MediumOffice
                    [0, 0, 0.6],  # MidRiseApartment
                    [0, 0, 0],  # OutPatient
@@ -808,7 +789,7 @@ class UWG(object):
 
     @property
     def lattree(self):
-        """Get or set fraction of latent heat absorbed by tree."""
+        """Get or set fraction of latent heat absorbed by urban trees."""
         return self._lattree
 
     @lattree.setter
@@ -817,7 +798,7 @@ class UWG(object):
 
     @property
     def latgrss(self):
-        """Get or set fraction of latent heat absorbed by grass."""
+        """Get or set fraction of latent heat absorbed by urban grass."""
         return self._latgrss
 
     @latgrss.setter
@@ -855,7 +836,7 @@ class UWG(object):
 
     @property
     def vegstart(self):
-        """Get or set number for the month in which vegetation starts to evapotranspire.
+        """Get or set value from 1 to 12 for month at which vegetation starts to evapotranspire.
 
         This month corresponds to when the leaves of vegetation are assumed to be out.
         """
@@ -867,7 +848,7 @@ class UWG(object):
 
     @property
     def vegend(self):
-        """Get or set number for the month in which vegetation stops evapotranspiration.
+        """Get or set value from 1 to 12 for month at which vegetation stops evapotranspiration.
 
         This month corresponds to when the leaves of vegetation are assumed to fall.
         """
@@ -968,7 +949,11 @@ class UWG(object):
 
     @property
     def shgc(self):
-        """Get or set average building glazing Solar Heat Gain Coefficient."""
+        """Get or set average building glazing Solar Heat Gain Coefficient.
+
+        If value is None, a unique shgc is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._shgc
 
     @shgc.setter
@@ -980,7 +965,11 @@ class UWG(object):
 
     @property
     def albroof(self):
-        """Get or set average building roof albedo."""
+        """Get or set average building roof albedo.
+
+        If value is None, a unique albroof is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._albroof
 
     @albroof.setter
@@ -992,7 +981,11 @@ class UWG(object):
 
     @property
     def glzr(self):
-        """Get or set average building glazing ratio."""
+        """Get or set average building glazing ratio.
+
+        If value is None, a unique glzr is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._glzr
 
     @glzr.setter
@@ -1004,7 +997,11 @@ class UWG(object):
 
     @property
     def vegroof(self):
-        """Get or set fraction of roofs covered in grass/shrubs."""
+        """Get or set fraction of roofs covered in grass/shrubs.
+
+        If value is None, a unique vegroof is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._vegroof
 
     @vegroof.setter
@@ -1016,7 +1013,11 @@ class UWG(object):
 
     @property
     def albwall(self):
-        """Get or set average building albedo."""
+        """Get or set average building albedo.
+
+        If value is None, a unique albwall is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._albwall
 
     @albwall.setter
@@ -1028,7 +1029,11 @@ class UWG(object):
 
     @property
     def flr_h(self):
-        """Get or set average building floor height in meters."""
+        """Get or set average building floor height in meters.
+
+        If value is None, a unique flr_h is set for each building from the refBEM.
+        (Default: None).
+        """
         return self._flr_h
 
     @flr_h.setter
@@ -1038,9 +1043,33 @@ class UWG(object):
         else:
             self._flr_h = float_positive(value, 'flr_h')
 
+    def to_dict(self, include_refDOE=False):
+        """UWG dictionary representation.
+
+        Args:
+            add_refDOE: Optional boolean to include custom reference BEMDef and SchDef
+                objects from the ref_bem_vector and ref_sch_vector attributes.
+                (Default: False).
+        """
+
+        base = {'type': 'UWG'}
+        base['epw_path'] = self.epw_path
+        base['new_epw_dir'] = self._new_epw_dir
+        base['new_epw_name'] = self._new_epw_path
+
+        # Add UWG parameters
+        for attr in self.PARAMETER_LIST:
+            base[attr] = getattr(self, attr)
+
+        # Add reference data
+        if include_refDOE and self.ref_bem_vector and self.ref_sch_vector:
+            base['ref_sch_vector'] = [s.to_dict() for s in self.ref_sch_vector]
+            base['ref_bem_vector'] = [b.to_dict() for b in self.ref_bem_vector]
+
+        return base
+
     def generate(self):
         """Generate all UWG objects after input parameters are set."""
-
         self._read_epw()
         self._compute_BEM()
         self._compute_input()
@@ -1148,47 +1177,47 @@ class UWG(object):
                 # Set temperature
 
                 # add from temperature schedule for cooling
-                self.BEM[i].building.coolSetpointDay = self.Sch[i].cool[di][hi] + 273.15
-                self.BEM[i].building.coolSetpointNight = \
-                    self.BEM[i].building.coolSetpointDay
+                self.BEM[i].building.cool_setpoint_day = self.Sch[i].cool[di][hi] + 273.15
+                self.BEM[i].building.cool_setpoint_night = \
+                    self.BEM[i].building.cool_setpoint_day
                 # add from temperature schedule for heating
-                self.BEM[i].building.heatSetpointDay = self.Sch[i].heat[di][hi] + 273.15
-                self.BEM[i].building.heatSetpointNight = \
-                    self.BEM[i].building.heatSetpointDay
+                self.BEM[i].building.heat_setpoint_day = self.Sch[i].heat[di][hi] + 273.15
+                self.BEM[i].building.heat_setpoint_night = \
+                    self.BEM[i].building.heat_setpoint_day
 
                 # Internal Heat Load Schedule (W/m^2 of floor area for Q)
 
                 # Qelec x elec fraction for day
-                self.BEM[i].elec = self.Sch[i].Qelec * self.Sch[i].elec[di][hi]
+                self.BEM[i].elec = self.Sch[i].q_elec * self.Sch[i].elec[di][hi]
                 # Qlight x light fraction for day
-                self.BEM[i].light = self.Sch[i].Qlight * self.Sch[i].light[di][hi]
+                self.BEM[i].light = self.Sch[i].q_light * self.Sch[i].light[di][hi]
                 # Number of occupants x occ fraction for day
-                self.BEM[i].Nocc = self.Sch[i].Nocc * self.Sch[i].occ[di][hi]
+                self.BEM[i].Nocc = self.Sch[i].n_occ * self.Sch[i].occ[di][hi]
                 # Sensible Q occ * fraction occ sensible Q * number of occ
                 self.BEM[i].Qocc = self.sensocc * (1 - self.latfocc) * self.BEM[i].Nocc
 
                 # SWH and ventilation schedule
 
-                # litres per hour x SWH fraction for day
-                self.BEM[i].swh = self.Sch[i].Vswh * self.Sch[i].swh[di][hi]
-                # m^3/s/m^2 of floor
-                self.BEM[i].building.vent = self.Sch[i].Vent
+                # L/hr/m2 x SWH fraction for day
+                self.BEM[i].swh = self.Sch[i].v_swh * self.Sch[i].swh[di][hi]
+                # m^3/s/m^2 x Vent fraction for day
+                self.BEM[i].building.vent = self.Sch[i].vent
                 # Gas Equip Schedule, per m^2 of floor
-                self.BEM[i].gas = self.Sch[i].Qgas * self.Sch[i].gas[di][hi]
+                self.BEM[i].gas = self.Sch[i].q_gas * self.Sch[i].gas[di][hi]
 
                 # This is quite messy, should update
                 # Update internal heat and corresponding fractional loads
                 intHeat = self.BEM[i].light + self.BEM[i].elec + self.BEM[i].Qocc
                 # W/m2 from light, electricity, occupants
-                self.BEM[i].building.intHeatDay = intHeat
-                self.BEM[i].building.intHeatNight = intHeat
+                self.BEM[i].building.int_heat_day = intHeat
+                self.BEM[i].building.int_heat_night = intHeat
                 # fraction of radiant heat from light/equipment of whole internal heat
-                self.BEM[i].building.intHeatFRad = \
+                self.BEM[i].building.int_heat_f_rad = \
                     (self.radflight * self.BEM[i].light + self.radfequip *
                      self.BEM[i].elec) / intHeat
 
                 # fraction of latent heat (from occupants) of whole internal heat
-                self.BEM[i].building.intHeatFLat = \
+                self.BEM[i].building.int_heat_flat = \
                     self.latfocc * self.sensocc * self.BEM[i].Nocc / intHeat
 
                 # Update envelope temperature layers
@@ -1296,9 +1325,6 @@ class UWG(object):
 
     def _read_input(self, param_path):
         """Read the parameter input file (.uwg file) and set as UWG attributes."""
-
-        assert os.path.exists(param_path), 'Parameter file "{}" does not ' \
-            'exist.'.format(param_path)
 
         # Open .UWG file and feed csv data to initializeDataFile
         param_data = utilities.read_csv(param_path)
@@ -1411,9 +1437,6 @@ class UWG(object):
         * Sch - list of Schedule objects extracted from readDOE
         """
 
-        # TODO add check in _compute_BEM to check lenghts of refSchedle/reFBEM w/ bld matrix
-
-
         # Define building energy models
         k = 0
         self.r_glaze_total = 0.
@@ -1440,7 +1463,7 @@ class UWG(object):
 
                     # Overwrite with optional parameters if provided
                     if self.glzr:
-                        self.BEM[k].building.glazingRatio = self.glzr
+                        self.BEM[k].building.glazing_ratio = self.glzr
                     if self.albroof:
                         self.BEM[k].roof.albedo = self.albroof
                     if self.vegroof:
@@ -1450,11 +1473,11 @@ class UWG(object):
                     if self.albwall:
                         self.BEM[k].wall.albedo = self.albwall
                     if self.flr_h:
-                        self.BEM[k].building.floorHeight = self.flr_h
+                        self.BEM[k].building.floor_height = self.flr_h
 
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
                     self.r_glaze_total += \
-                        self.BEM[k].frac * self.BEM[k].building.glazingRatio
+                        self.BEM[k].frac * self.BEM[k].building.glazing_ratio
                     self.SHGC_total += self.BEM[k].frac * self.BEM[k].building.shgc
                     self.alb_wall_total += self.BEM[k].frac * self.BEM[k].wall.albedo
                     # Add to schedule list
@@ -1598,18 +1621,97 @@ class UWG(object):
 
         for i in range(len(self.BEM)):
             if self.autosize:
-                self.BEM[i].building.coolCap = 9999.
-                self.BEM[i].building.heatCap = 9999.
+                self.BEM[i].building.coolcap = 9999.
+                self.BEM[i].building.heat_cap = 9999.
 
-    def _load_readDOE(self, readDOE_path):
-        # Serialized DOE reference data
-        assert os.path.exists(readDOE_path), \
-            'File: {} does not exist.'.format(readDOE_path)
+    def _customize_reference_data(self, ref_bem_vector, ref_sch_vector):
+        """Customize refBEM and refSchedule data by extending or overriding DOE reference data.
+
+        The custom BEMDef and SchDef objects must contain bldtype and builtera values
+        referencing a nonzero fraction of urban area in the UWG bld matrix to be used in
+        the UWG model. Also note that this method should be used before calling the
+        generate method, in order to ensure the reference data gets transferred over to
+        the UWG object BEM and Schedule properties.
+
+        Args:
+            ref_bem_vector: List of custom BEMDef objects to override or add to
+                the refBEM matrix according to the BEMDef bldtype and builtera values.
+            ref_sch_vector: List of custom SchDef objects to override or add to
+                the refSchedule matrix according to the SchDef bldtype and builtera
+                values.
+        """
+
+        # efficient check for null vector
+        try:
+            reftypeidx = max([ref_bem.bldtype for ref_bem in ref_bem_vector])
+        except ValueError:
+            return
+
+        assert len(ref_sch_vector) == len(ref_bem_vector), 'The ' \
+            'ref_sch_vector and ref_bem_vector properties must be lists of equal ' \
+            'length. Got lengths {} and {}, respectively.'.format(
+                len(ref_sch_vector), len(ref_bem_vector))
+
+        assert reftypeidx <= (len(self.bld) - 1), 'The bld matrix should be ' \
+            'extended with additional rows if new bldtypes are being added to the ' \
+            'UWG reference matrices. Currently the bldtype indices in the custom ' \
+            'objects defined in ref_bem_vector and ref_sch_vector are greater ' \
+            'than the number of rows in the bld matrix.'
+
+        assert all(isinstance(v, SchDef) for v in ref_sch_vector), 'All items in the ' \
+            'ref_sch_vector must be a SchDef object.'
+        assert all(isinstance(v, BEMDef) for v in ref_bem_vector), 'All items in the ' \
+            'ref_bem_vector must be a BEMDef object.'
+
+        self._ref_bem_vector, self._ref_sch_vector = ref_bem_vector, ref_sch_vector
+        zi = self.zone - 1
+
+        # Insert or extend refSchedule matrix
+        for sch in self.ref_sch_vector:
+            ti, ei = sch.bldtype, sch.builtera
+            try:
+                self.refSchedule[ti][ei][zi] = sch
+            except IndexError:
+                # Add new rows based on type index in object
+                new_rows_num = ti + 1 - len(self.refSchedule)
+                for i in range(new_rows_num):
+                    self.refSchedule.append(
+                        [[None for c in range(16)] for r in range(3)])
+                self.refSchedule[ti][ei][zi] = sch
+
+        # Insert or extend refBEM matrix
+        for bem in self.ref_bem_vector:
+            ti, ei = bem.bldtype, bem.builtera
+            try:
+                self.refBEM[ti][ei][zi] = bem
+            except IndexError:
+                # Add new rows based on type index in object
+                new_rows_num = ti + 1 - len(self.refBEM)
+                for i in range(new_rows_num):
+                    self.refBEM.append(
+                        [[None for c in range(16)] for r in range(3)])
+                self.refBEM[ti][ei][zi] = bem
+
+    @staticmethod
+    def _load_refDOE(refDOE_path=REFDOE_PATH):
+        """Static method to deserialize DOE reference data.
+
+        Args:
+            readDOE_path: Text string for full path to the refDOE pickle.
+            (Default: the filepath specified in the UWG.REFDOE_PATH constant).
+
+        Returns:
+            Two 16 x 3 x 16 matrices of reference BEMDef and SchDef objects,
+            respectively.
+        """
+        assert os.path.exists(refDOE_path), \
+            'File: {} does not exist.'.format(refDOE_path)
 
         # open pickle file in binary form
-        with open(readDOE_path, 'rb') as readDOE_file:
-            self._refBEM = pickle.load(readDOE_file)
-            self._refSchedule = pickle.load(readDOE_file)
+        with open(refDOE_path, 'rb') as refDOE_file:
+            refBEM = pickle.load(refDOE_file)
+            refSchedule = pickle.load(refDOE_file)
+        return refBEM, refSchedule
 
     @staticmethod
     def _procmat(materials, max_thickness, min_thickness):

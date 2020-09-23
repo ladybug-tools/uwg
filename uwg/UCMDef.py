@@ -181,12 +181,12 @@ class UCMDef(object):
             # Re-naming variable for readability
             building = BEM[j].building
             wall = BEM[j].wall
-            T_indoor = building.indoorTemp
+            T_indoor = building.indoor_temp
             T_wall = wall.layerTemp[0]
-            R_glazing = building.glazingRatio
+            R_glazing = building.glazing_ratio
             A_wall = (1.-R_glazing)*self.facArea
             A_window = R_glazing*self.facArea
-            U_window = building.uValue
+            U_window = building.u_value
 
             H1 = H1 + BEM[j].frac*(                 # fraction of the urban floor space of this typology
                 T_indoor*A_window*U_window +        # window U
@@ -222,9 +222,9 @@ class UCMDef(object):
         for j in range(len(BEM)):
             V_vent = BEM[j].building.vent*BEM[j].building.nFloor  # ventilation volume per m^2 of building
             V_infil = BEM[j].building.infil*self.bldHeight/3600.0
-            T_indoor = BEM[j].building.indoorTemp
-            U_window = BEM[j].building.uValue                     # Added by Jiachen Mao in March 2017
-            R_glazing = BEM[j].building.glazingRatio              # Changed by Jiachen Mao in March 2017
+            T_indoor = BEM[j].building.indoor_temp
+            U_window = BEM[j].building.u_value                     # Added by Jiachen Mao in March 2017
+            R_glazing = BEM[j].building.glazing_ratio              # Changed by Jiachen Mao in March 2017
 
             self.Q_window = self.Q_window + BEM[j].frac*self.verToHor*R_glazing*U_window*(T_indoor-T_can)
             self.Q_window = self.Q_window + BEM[j].frac*self.verToHor*R_glazing*BEM[j].wall.solRec*(1.-BEM[j].building.shgc)

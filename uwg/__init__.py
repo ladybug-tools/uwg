@@ -18,3 +18,5 @@ from .solarcalcs import SolarCalcs
 from .infracalcs import infracalcs
 from .urbflux import urbflux
 from .uwg import UWG
+
+import uwg.cli

@@ -43,14 +43,13 @@ def test_refDOE():
     """Tests for refDOE (Building class)"""
 
     # Run readDOE.py
-    refDOE, refBEM, Schedule = readDOE(serialize_output=False)
+    refBEM, Schedule = readDOE(serialize_output=False)
 
-    bldlst = [
-        'floorHeight', 'intHeat', 'intHeatNight', 'intHeatDay', 'intHeatFRad',
-        'intHeatFLat', 'infil', 'vent', 'glazingRatio', 'uValue', 'shgc', 'condType',
-        'cop', 'coolSetpointDay', 'coolSetpointNight', 'heatSetpointDay',
-        'heatSetpointNight', 'coolCap', 'heatEff', 'mSys', 'indoorTemp', 'indoorHum',
-        'heatCap', 'copAdj', 'fanMax']
+    bldlst = ['floorHeight', 'intHeat', 'intHeatNight', 'intHeatDay', 'intHeatFRad',
+              'intHeatFLat', 'infil', 'vent', 'glazingRatio', 'uValue', 'shgc',
+              'condType', 'cop', 'coolSetpointDay', 'coolSetpointNight',
+              'heatSetpointDay', 'heatSetpointNight', 'coolCap', 'heatEff', 'mSys',
+              'indoorTemp', 'indoorHum', 'heatCap', 'copAdj', 'fanMax']
 
     for bi in range(len(bldlst)):
         bldid = bldlst[bi]
@@ -61,6 +60,8 @@ def test_refDOE():
             raise Exception('Failed to open {}!'.format(matlab_path))
 
         matlab_file = open(matlab_path, 'r')
+
+        refDOE = refBEM
 
         assert len(refDOE) == pytest.approx(16.0, abs=1e-3)
 
@@ -80,105 +81,107 @@ def test_refDOE():
                     else:
                         matlab_ref_value = 'AIR'
 
+                    bldg = refDOE[bldType][bldEra][climateZone].building
+
                     # run tests
                     if bldid == 'floorHeight':
-                        assert refDOE[bldType][bldEra][climateZone].floorHeight == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.floor_height == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'intHeat':
-                        assert refDOE[bldType][bldEra][climateZone].intHeat == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.int_heat == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'intHeatNight':
-                        assert refDOE[bldType][bldEra][climateZone].intHeatNight == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.int_heat_night == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'intHeatDay':
-                        assert refDOE[bldType][bldEra][climateZone].intHeatDay == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.int_heat_day == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'intHeatFRad':
-                        assert refDOE[bldType][bldEra][climateZone].intHeatFRad == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.int_heat_frad == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'intHeatFLat':
-                        assert refDOE[bldType][bldEra][climateZone].intHeatFLat == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.int_heat_flat == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'infil':
-                        assert refDOE[bldType][bldEra][climateZone].infil == pytest.approx(matlab_ref_value,  abs=tol),  \
+                        assert bldg.infil == pytest.approx(matlab_ref_value,  abs=tol),  \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'vent':
-                        assert refDOE[bldType][bldEra][climateZone].vent == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.vent == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'glazingRatio':
-                        assert refDOE[bldType][bldEra][climateZone].glazingRatio == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.glazing_ratio == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'uValue':
-                        assert refDOE[bldType][bldEra][climateZone].uValue == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.u_value == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'shgc':
-                        assert refDOE[bldType][bldEra][climateZone].shgc == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.shgc == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'condType':
-                        assert refDOE[bldType][bldEra][climateZone].condType == matlab_ref_value,  \
+                        assert bldg.condtype == matlab_ref_value,  \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'cop':
-                        assert refDOE[bldType][bldEra][climateZone].cop == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.cop == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'coolSetpointDay':
-                        assert refDOE[bldType][bldEra][climateZone].coolSetpointDay == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.cool_setpoint_day == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'coolSetpointNight':
-                        assert refDOE[bldType][bldEra][climateZone].coolSetpointNight == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.cool_setpoint_night == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'heatSetpointDay':
-                        assert refDOE[bldType][bldEra][climateZone].heatSetpointDay == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.heat_setpoint_day == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'heatSetpointNight':
-                        assert refDOE[bldType][bldEra][climateZone].heatSetpointNight == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.heat_setpoint_night == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'coolCap': # knocking the testing tolerance one order of magnitude down due to excel extraction problem
-                        assert refDOE[bldType][bldEra][climateZone].coolCap == pytest.approx(matlab_ref_value,  abs=10**(math.log10(tol)+1)), \
+                        assert bldg.coolcap == pytest.approx(matlab_ref_value, abs=10 ** (math.log10(tol) + 1)), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'heatEff':
-                        assert refDOE[bldType][bldEra][climateZone].heatEff == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.heateff == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'mSys':
-                        assert refDOE[bldType][bldEra][climateZone].mSys == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.msys == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'indoorTemp':
-                        assert refDOE[bldType][bldEra][climateZone].indoorTemp == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.indoor_temp == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'indoorHum':
-                        assert refDOE[bldType][bldEra][climateZone].indoorHum == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.indoor_hum == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'heatCap': # knocking the testing tolerance one order of magnitude down due to excel extraction problem
-                        assert refDOE[bldType][bldEra][climateZone].heatCap == pytest.approx(matlab_ref_value,  abs=10**(math.log10(tol)+1)), \
+                        assert bldg.heat_cap == pytest.approx(matlab_ref_value, abs=10 ** (math.log10(tol) + 1)), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'copAdj':
-                        assert refDOE[bldType][bldEra][climateZone].copAdj == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.cop_adj == pytest.approx(matlab_ref_value, abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'canyon_fraction':
-                        assert refDOE[bldType][bldEra][climateZone].canyon_fraction == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert bldg.canyon_fraction == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif bldid == 'fanMax':
@@ -191,7 +194,7 @@ def test_refDOE():
 def test_refBEM():
     """Tests for refBEM (BEMDef class)."""
 
-    refDOE, refBEM, Schedule = readDOE(serialize_output=False)
+    refBEM, Schedule = readDOE(serialize_output=False)
 
     elementlst = [
         'albedo', 'emissivity', 'layerThickness', 'layerThermalCond', 'layerVolHeat',
@@ -335,7 +338,7 @@ def test_refBEM():
 def test_Schedule():
     """Tests for Schedule (Schdef class)."""
 
-    refDOE, refBEM, Schedule = readDOE(serialize_output=False)
+    refBEM, Schedule = readDOE(serialize_output=False)
 
     schlst = ['Elec', 'Light', 'Gas', 'Occ', 'Cool', 'Heat', 'SWH', 'Qelec', 'Qlight',
               'Nocc', 'Qgas', 'Vent', 'Vswh']
@@ -413,27 +416,27 @@ def test_Schedule():
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Qelec':
-                        assert Schedule[bldType][bldEra][climateZone].Qelec == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].q_elec == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Qlight':
-                        assert Schedule[bldType][bldEra][climateZone].Qlight == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].q_light == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Nocc':
-                        assert Schedule[bldType][bldEra][climateZone].Nocc == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].n_occ == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Qgas':
-                        assert Schedule[bldType][bldEra][climateZone].Qgas == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].q_gas == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Vent':
-                        assert Schedule[bldType][bldEra][climateZone].Vent == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].vent == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                     elif schid == 'Vswh':
-                        assert Schedule[bldType][bldEra][climateZone].Vswh == pytest.approx(matlab_ref_value,  abs=tol), \
+                        assert Schedule[bldType][bldEra][climateZone].v_swh == pytest.approx(matlab_ref_value,  abs=tol), \
                             'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
     matlab_file.close()

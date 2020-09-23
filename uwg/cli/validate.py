@@ -33,10 +33,10 @@ def validate():
 @validate.command('model')
 @click.argument('model-json')
 def validate_model(model_json):
-    """Validate a Model JSON file against the UWG schema.
+    """Validate a UWG model JSON file against the UWG schema.
     \n
     Args:
-        model_json: Full path to a Model JSON file.
+        model_json: Full path to a UWG model JSON file.
     """
     try:
         assert os.path.isfile(model_json), 'No JSON file found at {}.'.format(model_json)
@@ -47,10 +47,12 @@ def validate_model(model_json):
         click.echo('Pydantic validation passed.')
         with open(model_json) as json_file:
             data = json.load(json_file)
-        # TODO: what to do about file paths?
+        # overwrite epw_path so that it's not checked for validity.
+        # since users may choose to override the path with cli
+        data['epw_path'] = '.'
         UWG.from_dict(data)
         click.echo('Python re-serialization passed.')
-        click.echo('Congratulations! Your Model JSON is valid!')
+        click.echo('Congratulations! Your UWG model JSON is valid!')
     except Exception as e:
         _logger.exception('Model validation failed.\n{}'.format(e))
         sys.exit(1)

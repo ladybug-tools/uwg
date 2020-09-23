@@ -9,11 +9,11 @@ def test_building_init():
 
     # LargeOffce, Pst80, Zone 1A (Miami)
     # coolCap for UTM ~ 200 W/m2, U ~ 2.0
-    bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
-                   intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
-                   uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
-                   coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
-                   coolCap=76, heatEff=0.7, initialTemp=293)
+    bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
+                   int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
+                   cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                   coolcap=76, heateff=0.7, initial_temp=293)
     # test repr
     bld.__repr__()
 
@@ -22,11 +22,11 @@ def test_building_dict():
     """Test building dict methods."""
 
     # init
-    bld1 = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
-                    intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
-                    uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
-                    coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
-                    coolCap=76, heatEff=0.7, initialTemp=293)
+    bld1 = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
+                    int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
+                    u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
+                    cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                    coolcap=76, heateff=0.7, initial_temp=293)
 
     # make dict
     blddict = bld1.to_dict()
@@ -36,9 +36,9 @@ def test_building_dict():
 
     bld2 = Building.from_dict(blddict)
 
-    assert bld1.floorHeight == pytest.approx(bld2.floorHeight, abs=1e-10)
-    assert bld1.uValue == pytest.approx(bld2.uValue, abs=1e-10)
-    assert bld1.coolCap == pytest.approx(bld2.coolCap, abs=1e-10)
+    assert bld1.floor_height == pytest.approx(bld2.floor_height, abs=1e-10)
+    assert bld1.u_value == pytest.approx(bld2.u_value, abs=1e-10)
+    assert bld1.coolcap == pytest.approx(bld2.coolcap, abs=1e-10)
     assert bld1.vent == pytest.approx(bld2.vent, abs=1e-10)
 
     with pytest.raises(AssertionError):

@@ -56,6 +56,7 @@ def test_custom_uwg_simulate():
     input_uwg = './tests/json/custom_uwg.json'
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
     result = runner.invoke(simulate, ['model', input_uwg, '--epw-path', epw_path])
+    print(result.output)
     assert result.exit_code == 0
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
@@ -73,5 +74,6 @@ def test_uwg_validate():
 
     input_uwg = './tests/json/custom_uwg.json'
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
-    result = runner.invoke(validate, ['model', input_uwg, '--epw-path', epw_path])
+    result = runner.invoke(validate, ['model', input_uwg])
+    print(result.output)
     assert result.exit_code == 0

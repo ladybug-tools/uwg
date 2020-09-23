@@ -19,6 +19,12 @@ class SchDef(object):
             (WD, Sat, Sun). (Default: None).
         swh: Matrix of numbers for weekly hot water schedule (WD, Sat, Sun).
             (Default: None).
+        q_elec: Numerical value for maximum electrical plug process load [W/m2].
+        q_gas: Numerical value for maximum gas process load per unit area [W/m2].
+        q_light: Numerical value for maximum light process load per unit area [W/m2].
+        n_occ: Numerical value for maximum number of occupants per unit area [person/m2].
+        vent: Numerical value for maximum ventilation rate per unit area [m3/s/m2].
+        v_swh: Numerical value for maximum hot water rate per unit area [L/hr/m2].
         bldtype: Number between 0 and 15 corresponding to the following building
             types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
             LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
@@ -40,12 +46,19 @@ class SchDef(object):
         * cool
         * heat
         * swh
+        * q_elec
+        * q_gas
+        * q_light
+        * n_occ
+        * vent
+        * v_swh
         * bldtype
         * builtera
         * zonetype
     """
 
-    def __init__(self, elec, gas, light, occ, cool, heat, swh, bldtype, builtera):
+    def __init__(self, elec, gas, light, occ, cool, heat, swh, q_elec, q_gas, q_light,
+                 n_occ, vent, v_swh, bldtype, builtera):
         self.elec = SchDef.check_week_validity(elec, 'elec')
         self.gas = SchDef.check_week_validity(gas, 'gas')
         self.light = SchDef.check_week_validity(light, 'light')
@@ -53,7 +66,12 @@ class SchDef(object):
         self.cool = SchDef.check_week_validity(cool, 'cool')
         self.heat = SchDef.check_week_validity(heat, 'heat')
         self.swh = SchDef.check_week_validity(swh, 'swh')
-
+        self.q_elec = q_elec
+        self.q_gas = q_gas
+        self.q_light = q_light
+        self.n_occ = n_occ
+        self.vent = vent
+        self.v_swh = v_swh
         # Properties to be set in readDOE
         self.bldtype = bldtype  # DOE reference building type
         self.builtera = builtera  # pre80, pst80, new
@@ -77,15 +95,21 @@ class SchDef(object):
                  0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2]]  # Sunday
 
             {
-            "elec": _example_week,  # 3 x 24 matrix of hourly values
-            "gas": _example_week,  # 3 x 24 matrix of hourly values
-            "light": _example_week,  # 3 x 24 matrix of hourly values
-            "occ": _example_week,  # 3 x 24 matrix of hourly values
-            "cool": _example_week,  # 3 x 24 matrix of hourly values
-            "heat": _example_week,  # 3 x 24 matrix of hourly values
-            "swh": _example_week,  # 3 x 24 matrix of hourly values
-            "bldtype": 0,  # building type index
-            "builtera": 1,  # built era index
+            "elec": _example_week,
+            "gas": _example_week,
+            "light": _example_week,
+            "occ": _example_week,
+            "cool": _example_week,
+            "heat": _example_week,
+            "swh": _example_week,
+            "q_elec" = q_elec,
+            "q_gas" = q_gas,
+            "q_light" = q_light,
+            "n_occ" = n_occ,
+            "vent" = vent,
+            "v_swh" = v_swh,
+            "bldtype": 0,
+            "builtera": 1
             }
         """
         assert data['type'] == 'SchDef', 'Expected ' \
@@ -93,7 +117,10 @@ class SchDef(object):
 
         return cls(elec=data['elec'], gas=data['gas'], light=data['light'],
                    occ=data['occ'], cool=data['cool'], heat=data['heat'],
-                   swh=data['swh'], bldtype=data['bldtype'], builtera=data['builtera'])
+                   swh=data['swh'], q_elec=data['q_elec'], q_gas=data['q_gas'],
+                   q_light=data['q_light'], n_occ=data['n_occ'], vent=data['vent'],
+                   v_swh=data['v_swh'], bldtype=data['bldtype'],
+                   builtera=data['builtera'])
 
     def to_dict(self):
         """SchDef dictionary representation."""
@@ -105,6 +132,12 @@ class SchDef(object):
         base['cool'] = self.cool
         base['heat'] = self.heat
         base['swh'] = self.swh
+        base['q_elec'] = self.q_elec
+        base['q_gas'] = self.q_gas
+        base['q_light'] = self.q_light
+        base['n_occ'] = self.n_occ
+        base['vent'] = self.vent
+        base['v_swh'] = self.v_swh
         base['bldtype'] = self.bldtype
         base['builtera'] = self.builtera
         return base
@@ -122,13 +155,13 @@ class SchDef(object):
                 'matrix. Got {} columns for row {}.'.format(name, len(day), i)
             for val in day:
                 assert isinstance(val, (float, int)), 'The {} property ' \
-                    'must be a 3 x 23 matrix of numbers. Got: {}.'.format(name, day)
+                    'must contain 3 lists of numbers. Got : {}.'.format(name, val)
         return week
 
     def __repr__(self):
-        return 'Schedule,\n bldtype: {}\n builtera: {}\n '\
-            'Setpoint schedules:(weekday from 8:00 - 18:00)\n Heating: {}\n ' \
-            'Cooling: {}'.format(
-                self.bldtype, self.builtera,
-                'Null' if self.heat is None else self.heat[0][7:17],
-                'Null' if self.cool is None else self.cool[0][7:17])
+        return 'Schedule, bldtype: {}\n builtera: {}\n q_elec: {}\n q_gas: {}\n ' \
+            'q_light: {}\n n_occ: {}\n vent: {}\n v_swh: {}\n elec: {}\n ' \
+            'gas: {}\n light: {}\n occ: {}\n cool: {}\n heat: {}\n swh: {}\n'.format(
+                self.bldtype, self.builtera, self.q_elec, self.q_gas, self.q_light,
+                self.n_occ, self.vent, self.v_swh, self.elec, self.gas, self.light,
+                self.occ, self.cool, self.heat, self.swh)

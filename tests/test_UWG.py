@@ -1,9 +1,10 @@
 """Test for uwg.py"""
 
+import os
 import pytest
 from copy import deepcopy
 from .test_base import auto_setup_uwg, set_input_manually
-from uwg import SchDef, BEMDef, Building, Element, Material
+from uwg import SchDef, BEMDef, Building, Element, Material, UWG
 from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg.utilities import is_near_zero
 
@@ -38,13 +39,68 @@ def _bemdef():
                     material_lst=materialLst, vegcoverage=0.0, t_init=293,
                     horizontal=True, name='MassFloor')
 
-    bld = Building(floorHeight=3.5, intHeatNight=1, intHeatDay=1, intHeatFRad=0.1,
-                   intHeatFLat=0.1, infil=0.26, vent=0.0005, glazingRatio=0.4,
-                   uValue=5.8, shgc=0.2, condType='AIR', cop=5.2, coolSetpointDay=297,
-                   coolSetpointNight=297, heatSetpointDay=293, heatSetpointNight=293,
-                   coolCap=76, heatEff=0.7, initialTemp=293)
+    bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
+                   int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
+                   cool_setpoint_night=297, heat_setpoint_day=293,
+                   heat_setpoint_night=293, coolcap=76, heateff=0.7, initial_temp=293)
 
     return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
+
+
+def test_init():
+    """Test initialization methods."""
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    param_path = os.path.join(test_dir, 'parameters', 'initialize_singapore.uwg')
+    epw_path = os.path.join(test_dir, 'epw', 'SGP_Singapore.486980_IWEC.epw')
+
+    refBEM, refSch = UWG._load_refDOE()
+    refBEM[0][2][0].frac = 0.9
+    ref_bem_vec = [refBEM[0][2][0], refBEM[2][2][0]]
+    ref_sch_vec = [refSch[0][2][0], refSch[2][2][0]]
+
+    # base init
+    UWG(epw_path)
+
+    # from param_file
+    UWG.from_param_file(epw_path, param_path)
+    testuwg = \
+        UWG.from_param_file(epw_path, param_path, ref_bem_vector=[], ref_sch_vector=[])
+    testuwg.generate()
+    assert testuwg.ref_bem_vector is None
+    assert testuwg.ref_sch_vector is None
+
+    UWG.from_param_file(epw_path, param_path, ref_bem_vector=ref_bem_vec,
+                        ref_sch_vector=ref_sch_vec)
+    with pytest.raises(AssertionError):
+        UWG.from_param_file(epw_path, param_path, ref_bem_vector=ref_bem_vec,
+                            ref_sch_vector=ref_sch_vec[:1])
+    with pytest.raises(AssertionError):
+        UWG.from_param_file(epw_path, param_path, ref_bem_vector=None,
+                            ref_sch_vector=ref_sch_vec)
+
+    # from args
+    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1)
+    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
+                        ref_sch_vector=ref_sch_vec)
+    with pytest.raises(AssertionError):
+        UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
+                            ref_sch_vector=ref_sch_vec[:1])
+    with pytest.raises(AssertionError):
+        UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=None,
+                            ref_sch_vector=ref_sch_vec)
+
+    # from dict
+    data = UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1).to_dict(include_refDOE=False)
+    UWG.from_dict(data)
+    testuwg1 = UWG.from_param_args(
+        epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
+        ref_sch_vector=ref_sch_vec)
+    data = testuwg1.to_dict(include_refDOE=True)
+    testuwg2 = UWG.from_dict(data)
+    assert testuwg2.ref_bem_vector[0].frac == pytest.approx(0.9, abs=1e-10)
+    assert testuwg2.refBEM[0][2][0].frac == pytest.approx(0.9, abs=1e-10)
 
 
 def test_dict():
@@ -96,9 +152,11 @@ def test_sch_refDOE():
 
     # add schedule to type=2, era=3
     testweek = [[0.1 for i in range(24)] for j in range(3)]
-    testuwg1.refSchedule[1][2][0] = \
-        SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
-               heat=testweek, swh=testweek, bldtype=1, builtera=2)
+    testuwg1._ref_bem_vector = [testuwg1.refBEM[0][0][0]]
+    testuwg1._ref_sch_vector = \
+        [SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
+                heat=testweek, swh=testweek, q_elec=18.9, q_gas=3.2, q_light=18.9,
+                n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=1, builtera=2)]
 
     testuwg1.generate()  # initialize BEM, Sch objects
 
@@ -127,15 +185,13 @@ def test_sch_refDOE():
 
     testweek = [[0.2 for i in range(24)] for j in range(3)]
     newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                    cool=testweek, heat=testweek, swh=testweek, bldtype=17, builtera=2)
+                    cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
+                    q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
+                    bldtype=17, builtera=2)
 
-    # extend reference matrices
-    testuwg1.refBEM.extend([[[None for k in range(16)]
-                             for i in range(3)] for j in range(2)])
-    testuwg1.refSchedule.extend([[[None for k in range(16)]
-                                 for i in range(3)] for j in range(2)])
-    testuwg1.refSchedule[17][2][0] = newsch
-    testuwg1.refBEM[17][2][0] = _bemdef()
+    newbem = _bemdef()
+    testuwg1._ref_bem_vector = [newbem]
+    testuwg1._ref_sch_vector = [newsch]
 
     uwgdict = testuwg1.to_dict(include_refDOE=True)
     testuwg2 = testuwg1.from_dict(uwgdict)
@@ -170,7 +226,8 @@ def test_bem_refDOE():
     bem.frac = 0.714
     bem.building.cop = 4000.0
     bem.roof.emissivity = 0.001
-    testuwg1.refBEM[1][2][0] = bem
+    testuwg1._ref_bem_vector = [bem]
+    testuwg1._ref_sch_vector = [testuwg1.refSchedule[0][0][0]]
 
     # make dict
     uwgdict = testuwg1.to_dict(include_refDOE=True)
@@ -197,22 +254,19 @@ def test_customize_reference_data():
     """Test adding reference DOE data to UWG."""
 
     testuwg = auto_setup_uwg()
-
-    # set bld matrix and zone
-    testuwg.bld = [[0 for i in range(3)] for j in range(20)]
-    testuwg.bld[5][0] = 0.5  # test insertion
-    testuwg.bld[19][2] = 0.5  # test extention
     testuwg.zone = 15
     zi = testuwg.zone - 1
 
     # make new sched and unrealistic values
     testweek = [[2000.0 for i in range(24)] for j in range(3)]
     newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                     cool=testweek, heat=testweek, swh=testweek,
+                     cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
+                     q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
                      bldtype=5, builtera=0)
     testweek = [[1000.0 for i in range(24)] for j in range(3)]
     newsch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
-                     cool=testweek, heat=testweek, swh=testweek,
+                     cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
+                     q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
                      bldtype=19, builtera=2)
 
     # make new blds and add unrealistic values
@@ -245,7 +299,20 @@ def test_customize_reference_data():
     # run method
     ref_sch_vec = [newsch1, newsch2]
     ref_bem_vec = [bem1, bem2]
-    testuwg.customize_reference_data(ref_bem_vec, ref_sch_vec)
+
+    # test bld matrix error
+    with pytest.raises(AssertionError):
+        testuwg._customize_reference_data(ref_bem_vec, ref_sch_vec)
+
+    # test vector length error
+    with pytest.raises(AssertionError):
+        testuwg._customize_reference_data(ref_bem_vec[:1], ref_sch_vec)
+
+    # set bld matrix and zone
+    testuwg.bld = [[0 for i in range(3)] for j in range(20)]
+    testuwg.bld[5][0] = 0.5  # test insertion
+    testuwg.bld[19][2] = 0.5  # test extention
+    testuwg._customize_reference_data(ref_bem_vec, ref_sch_vec)
 
     # Test customized schedules
     assert len(testuwg.refSchedule) == 20
@@ -364,11 +431,11 @@ def test_optional_blank_parameters():
     testuwg = set_input_manually(testuwg)
     testuwg.generate()
 
-    assert testuwg.BEM[0].building.glazingRatio == pytest.approx(0.38, abs=1e-15)
+    assert testuwg.BEM[0].building.glazing_ratio == pytest.approx(0.38, abs=1e-15)
     assert testuwg.BEM[0].roof.albedo == pytest.approx(0.2, abs=1e-15)
     assert testuwg.BEM[0].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
     assert testuwg.BEM[1].roof.albedo == pytest.approx(0.2, abs=1e-15)
-    assert testuwg.BEM[1].building.glazingRatio == pytest.approx(0.1499, abs=1e-15)
+    assert testuwg.BEM[1].building.glazing_ratio == pytest.approx(0.1499, abs=1e-15)
     assert testuwg.BEM[1].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
 
 
@@ -404,15 +471,15 @@ def test_optional_inputted_parameters():
     # From blank inputs will be from DOE
     testuwg.generate()
 
-    assert testuwg.BEM[0].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
+    assert testuwg.BEM[0].building.glazing_ratio == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[0].roof.albedo == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[0].roof.vegcoverage == pytest.approx(0.1, abs=1e-15)
-    assert testuwg.BEM[1].building.glazingRatio == pytest.approx(0.5, abs=1e-15)
+    assert testuwg.BEM[1].building.glazing_ratio == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[1].roof.albedo == pytest.approx(0.5, abs=1e-15)
     assert testuwg.BEM[1].roof.vegcoverage == pytest.approx(0.1, abs=1e-15)
     assert testuwg.BEM[0].wall.albedo == pytest.approx(0.91, abs=1e-15)
     assert testuwg.BEM[1].building.shgc == pytest.approx(0.65, abs=1e-15)
-    assert testuwg.BEM[0].building.floorHeight == pytest.approx(4.5, abs=1e-15)
+    assert testuwg.BEM[0].building.floor_height == pytest.approx(4.5, abs=1e-15)
 
 
 def test_procMat():
@@ -472,13 +539,13 @@ def test_hvac_autosize():
 
     # coolCap and heatCap don't retain high accuracy when extracted from the
     # DOE reference csv, so we will reduce the tolerance here
-    assert testuwg.BEM[0].building.coolCap == \
-        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[0].building.heatCap == \
-        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[1].building.coolCap \
+    assert testuwg.BEM[0].building.coolcap == \
+           pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[0].building.heat_cap == \
+           pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[1].building.coolcap \
         == pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
-    assert testuwg.BEM[1].building.heatCap \
+    assert testuwg.BEM[1].building.heat_cap \
         == pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
 
     testuwg.autosize = True

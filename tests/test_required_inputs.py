@@ -24,8 +24,8 @@ def test_required_inputs_wrong_type():
     testuwg.windmin = 2.0
 
     # assert type(self.Day) == float or type(self.Day) == int
-    with pytest.raises(TypeError):
-        testuwg.day = "a"
+    with pytest.raises(ValueError):
+        testuwg.day = 'a'
 
     testuwg.day = 2
     testuwg.day = 4.0

@@ -81,14 +81,14 @@ def test_program_input():
     # Check some of the inputs
 
     # Check building parameters
-    assert testuwg.BEM[0].building.coolCap == \
-        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[0].building.heatCap == \
-        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[1].building.coolCap == \
-        pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
-    assert testuwg.BEM[1].building.heatCap == \
-        pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
+    assert testuwg.BEM[0].building.coolcap == \
+           pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[0].building.heat_cap == \
+           pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[1].building.coolcap == \
+           pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
+    assert testuwg.BEM[1].building.heat_cap == \
+           pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
 
     # Check that final day of timestep is at correct dayType
     assert testuwg.dayType == 1
@@ -127,14 +127,14 @@ def test_program_hybrid_input():
     # Check some of the inputs
 
     # Check building parameters
-    assert testuwg.BEM[0].building.coolCap == \
-        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[0].building.heatCap == \
-        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
-    assert testuwg.BEM[1].building.coolCap \
+    assert testuwg.BEM[0].building.coolcap == \
+           pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[0].building.heat_cap == \
+           pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+    assert testuwg.BEM[1].building.coolcap \
         == pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
-    assert testuwg.BEM[1].building.heatCap == \
-        pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
+    assert testuwg.BEM[1].building.heat_cap == \
+           pytest.approx((132.396 * 1000.0) / 3135., abs=1e-2)
 
     # Check that final day of timestep is at correct dayType
     assert testuwg.dayType == 1

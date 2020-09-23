@@ -15,6 +15,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 @click.group(help='Commands for simulating UWG JSON files.')
 def simulate():
     pass
@@ -25,23 +26,23 @@ def simulate():
     exists=True, file_okay=True, dir_okay=False, resolve_path=True))
 @click.option('--epw-path', help='Optional argument for the full path of the rural '
               '.epw file that will be morphed. The argument passed here will overwrite '
-              'the epw_path specified in the UWG JSON model file.',
+              'the epw_path specified in the UWG model JSON file.',
               default=None, show_default=True,
               type=click.Path(exists=True, file_okay=True, dir_okay=False,
                               resolve_path=True))
 @click.option('--new-epw-dir', help='Optional argument for the destination directory '
               'into which the morphed .epw file is written. The argument passed here '
-              'will ovewrite the new_epw_dir specified in the UWG JSON model file.',
+              'will ovewrite the new_epw_dir specified in the UWG model JSON file.',
               default=None, show_default=True)
 @click.option('--new-epw-name', help='Optional argumetn for The destination file name '
               'of the morphed .epw file. The argument passed here will overwrite the '
-              'new_epw_name specified in the UWG JSON model file.',
+              'new_epw_name specified in the UWG model JSON file.',
               default=None, show_default=True)
 def simulate_model(model_json, epw_path, new_epw_dir, new_epw_name):
     """Simulate a JSON UWG model file.
     \n
     Args:
-        model_json: Full path to a UWG JSON model file.
+        model_json: Full path to a UWG model JSON file.
         epw_path: Optional argument for the full path of the rural .epw file that will
             be morphed.
         new_epw_dir: Optional argument for the destination directory into which the

@@ -3,7 +3,7 @@ from uwg import UWG
 import math
 import logging
 
-TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.dirname(__file__)
 DEFAULT_EPW_PATH = os.path.join(
     TEST_DIR, 'epw', 'SGP_Singapore.486980_IWEC.epw')
 DEFAULT_PARAM_PATH = os.path.join(
