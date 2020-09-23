@@ -9,45 +9,6 @@ from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg.utilities import is_near_zero
 
 
-def _bemdef():
-    """Create BEMDef: LargeOffce, Pst80, Zone 1A (Miami)."""
-
-    # Material: (thermalCond, volHeat = specific heat * density)
-    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
-    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
-    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
-    insulation = Material(0.049, 836.8 * 265.0, "Insulation")
-
-    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
-    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
-    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
-    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
-                   material_lst=materialLst, vegcoverage=0, t_init=293,
-                   horizontal=False, name='MassWall')
-
-    # IEAD roof
-    thicknessLst = [0.058, 0.058]
-    materialLst = [insulation, insulation]
-    roof = Element(albedo=0.2, emissivity=0.93, layer_thickness_lst=thicknessLst,
-                   material_lst=materialLst, vegcoverage=0.5, t_init=293,
-                   horizontal=True, name='IEAD')
-
-    # Mass floor
-    thicknessLst = [0.054, 0.054]
-    materialLst = [concrete, concrete]
-    floor = Element(albedo=0.2, emissivity=0.9, layer_thickness_lst=thicknessLst,
-                    material_lst=materialLst, vegcoverage=0.0, t_init=293,
-                    horizontal=True, name='MassFloor')
-
-    bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
-                   int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
-                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
-                   cool_setpoint_night=297, heat_setpoint_day=293,
-                   heat_setpoint_night=293, coolcap=76, heateff=0.7, initial_temp=293)
-
-    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
-
-
 def test_init():
     """Test initialization methods."""
 
@@ -189,7 +150,7 @@ def test_sch_refDOE():
                     q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
                     bldtype=17, builtera=2)
 
-    newbem = _bemdef()
+    newbem = _generate_bemdef()
     testuwg1._ref_bem_vector = [newbem]
     testuwg1._ref_sch_vector = [newsch]
 
@@ -220,7 +181,7 @@ def test_bem_refDOE():
     testuwg1.zone = 1
 
     # add schedule to type=1, era=2
-    bem = _bemdef()
+    bem = _generate_bemdef()
     bem.bldtype = 1
     bem.builtera = 2
     bem.frac = 0.714
@@ -270,14 +231,14 @@ def test_customize_reference_data():
                      bldtype=19, builtera=2)
 
     # make new blds and add unrealistic values
-    bem1 = _bemdef()
+    bem1 = _generate_bemdef()
     bem1.bldtype = 5
     bem1.builtera = 0
     bem1.frac = 0.314
     bem1.building.cop = 3000.0
     bem1.roof.emissivity = 0.0
 
-    bem2 = deepcopy(_bemdef())
+    bem2 = deepcopy(_generate_bemdef())
     bem2.bldtype = 19
     bem2.builtera = 2
     bem2.frac = 0.714
@@ -344,7 +305,7 @@ def test_read_epw():
     assert testuwg._header[0][1] == 'SINGAPORE'
     assert testuwg.lat == pytest.approx(1.37, abs=1e-3)
     assert testuwg.lon == pytest.approx(103.98, abs=1e-3)
-    assert testuwg.GMT == pytest.approx(8, abs=1e-3)
+    assert testuwg.gmt == pytest.approx(8, abs=1e-3)
     # test soil data
     assert testuwg.nSoil == pytest.approx(3, abs=1e-2)
     # test soil depths
@@ -582,3 +543,42 @@ def test_simulate():
     assert testuwg.dayType == pytest.approx(1., abs=1e-3)
     assert testuwg.schtraffic[testuwg.dayType - 1][testuwg.simTime.hourDay] == \
         pytest.approx(0.2, abs=1e-6)
+
+
+def _generate_bemdef():
+    """Create BEMDef: LargeOffce, Pst80, Zone 1A (Miami)."""
+
+    # Material: (thermalCond, volHeat = specific heat * density)
+    concrete = Material(1.311, 836.8 * 2240, 'Concrete')
+    gypsum = Material(0.16, 830.0 * 784.9, 'Gypsum')
+    stucco = Material(0.6918, 837.0 * 1858.0, 'Stucco')
+    insulation = Material(0.049, 836.8 * 265.0, "Insulation")
+
+    # Mass wall for LargeOffce, Pst80, Zone 1A (Miami)
+    thicknessLst = [0.0254, 0.0508, 0.0508, 0.0508, 0.0508, 0.0127]
+    materialLst = [stucco, concrete, concrete, concrete, concrete, gypsum]
+    wall = Element(albedo=0.08, emissivity=0.92, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0, t_init=293,
+                   horizontal=False, name='MassWall')
+
+    # IEAD roof
+    thicknessLst = [0.058, 0.058]
+    materialLst = [insulation, insulation]
+    roof = Element(albedo=0.2, emissivity=0.93, layer_thickness_lst=thicknessLst,
+                   material_lst=materialLst, vegcoverage=0.5, t_init=293,
+                   horizontal=True, name='IEAD')
+
+    # Mass floor
+    thicknessLst = [0.054, 0.054]
+    materialLst = [concrete, concrete]
+    floor = Element(albedo=0.2, emissivity=0.9, layer_thickness_lst=thicknessLst,
+                    material_lst=materialLst, vegcoverage=0.0, t_init=293,
+                    horizontal=True, name='MassFloor')
+
+    bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
+                   int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
+                   cool_setpoint_night=297, heat_setpoint_day=293,
+                   heat_setpoint_night=293, coolcap=76, heateff=0.7, initial_temp=293)
+
+    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)

@@ -27,26 +27,25 @@ class BEMDef(object):
             bld matrix.
 
     Properties:
-        building
-        mass
-        wall
-        roof
-        frac
-        Type
-        Era
-        Zone
-        fl_area
-        elec
-        gas
-        light
-        Qocc
-        swh
-        Nocc
-        ElecTotal
-        T_wallex
-        T_wallin
-        T_roofex
-        T_roofin
+        * building
+        * mass
+        * wall
+        * roof
+        * frac
+        * bldtype
+        * builtera
+        * fl_area
+        * elec
+        * gas
+        * light
+        * Qocc
+        * swh
+        * Nocc
+        * ElecTotal
+        * T_wallex
+        * T_wallin
+        * T_roofex
+        * T_roofin
     """
 
     def __init__(self, building, mass, wall, roof, frac, bldtype, builtera):

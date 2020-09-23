@@ -30,6 +30,7 @@ def test_rsm_init():
 
     testuwg = auto_setup_uwg()
     testuwg.generate()
+    testuwg.RSM.__repr__()
 
     # check date
     assert testuwg.simTime.month == 1

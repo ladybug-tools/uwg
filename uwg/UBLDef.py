@@ -14,63 +14,46 @@ class UBLDef(object):
     """Urban Boundary Layer (UBL) calculations.
 
     Args:
-        location:
-        charLength:
-        initialTemp
-        maxdx
-        dayBLHeight:
-        nightBLHeight:
+        location: Text string for relative location within a city. Choose from "N", "NE", "E",
+            "SE", "S", "SW", "W", "NW", or "C".
+        charLength: Value for characteristic length of the urban area [m].
+        initialTemp: Value for initial temperature [K].
+        maxdx: Value for maximum discretization length for the UBL model [m].
+        dayBLHeight: Value for daytime mixing height [m].
+        nightBLHeight: Value for nighttime boundary-layer height [m].
 
     Properties:
-        * location
-        * charLength
-        * perimeter
-        * urbArea
-        * orthLength
-        * paralLength
-        * ublTemp
-        * ublTempdx
-        * advHeat
-        * sensHeat
-        * dayBLHeight
-        * nightBLHeight
+        * location -- relative location within a city (N, NE, E, SE, S, SW, W, NW, C).
+        * charLength -- characteristic length of the urban area (m)
+        * perimeter -- horizontal urban area (m2)
+        * urbArea -- length of the side of the urban area orthogonal
+        * orthLength -- length to the side of the urban area orthogonal to the wind direction (m)
+        * paralLength -- length of the side of the urban area parallel to the wind direction (m)
+        * ublTemp -- urban boundary layer temperature (K)
+        * ublTempdx -- urban boundary layer temperature discretization (K)
+        * dayBLHeight -- daytime mixing height, orig = 700
+        * nightBLHeight -- nighttime boundary-layer height (m), Sing: 80, Bub-Cap: 50, orig 80
     """
 
     def __init__(self, location, charLength, initialTemp, maxdx, dayBLHeight,
                  nightBLHeight):
-        # location: relative location within a city (N,NE,E,SE,S,SW,W,NW,C)
         self.location = location
-        # charLength: characteristic length of the urban area (m)
         self.charLength = charLength
-        # perimeter: horizontal urban area (m2)
         self.perimeter = 4. * charLength
-        # urbArea: length of the side of the urban area orthogonal
         self.urbArea = charLength ** 2
-        # orthLength: to the wind direction (m)
         self.orthLength = charLength
 
         numdx = round(charLength / min(charLength, maxdx))
-        # paralLength: length of the side of the urban area parallel to the wind
-        # direction (m)
         self.paralLength = charLength / numdx
-
-        # ublTemp: urban boundary layer temperature (K)
         self.ublTemp = initialTemp
-        # ublTempdx: urban boundary layer temperature discretization (K)
         self.ublTempdx = [initialTemp for x in range(int(numdx))]
-        # dayBLHeight: daytime mixing height, orig = 700
         self.dayBLHeight = dayBLHeight
-        # nightBLHeight: Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m);
-        # orig 80
         self.nightBLHeight = nightBLHeight
 
         # Logger will be disabled by default unless explicitly called in tests
         self.logger = logging.getLogger(__name__)
 
-    def __repr__(self):
-        return "UBL: urbArea {}m2, charLength {}m".format(self.urbArea, self.charLength)
-
-    def UBLModel(self, UCM, RSM, rural, forc, parameter, simTime):
+    def ublmodel(self, UCM, RSM, rural, forc, parameter, simTime):
         # Note that only one urban canyon area is considered
         self.sensHeat = UCM.sensHeat
         heatDif = max(self.sensHeat - rural.sens, 0)
@@ -131,13 +114,13 @@ class UBLDef(object):
             h_UBL = self.nightBLHeight  # Night boundary layer height
             Csurf = UCM.Q_ubl * simTime.dt / (h_UBL * refDens * Cp)
             self.ublTemp, self.ublTempdx = \
-                UBLDef.NightForc(self.ublTempdx, simTime.dt, h_UBL, self.paralLength,
+                UBLDef.nightforc(self.ublTempdx, simTime.dt, h_UBL, self.paralLength,
                                  self.charLength, RSM, Csurf)
 
         self.logger.debug("ublTemp = {}".format(self.ublTemp))
 
     @staticmethod
-    def NightForc(ublTempdx, dt, h_UBL, paralLength, charLength, RSM, Csurf):
+    def nightforc(ublTempdx, dt, h_UBL, paralLength, charLength, RSM, Csurf):
         # Night forcing (RSM.nzfor = number of layers of forcing)
         # Average potential temperature & wind speed of the profile
         intAdv1 = 0.
@@ -160,7 +143,14 @@ class UBLDef(object):
             ublTempdx[i] = (Csurf + advCoef2*eqTemp + ublTempdx[i]) / (1 + advCoef2)
             ublTemp = ublTemp + ublTempdx[i]
 
-        # ublTemp/charLength*paralLength;
         ublTemp = ublTemp / float(charLength) * float(paralLength)
 
         return ublTemp, ublTempdx
+
+    def __repr__(self):
+        return 'UBL,\n location: {}\n charLength: {}\n perimeter: {}\n urbArea: {}\n ' \
+            'orthLength: {}\n paralLength: {}\n ublTemp: {}\n dayBLHeight: {}\n ' \
+            'nightBLHeight: {}'.format(
+                self.location, self.charLength, self.perimeter, self.urbArea,
+                self.orthLength, self.paralLength, self.ublTemp, self.dayBLHeight,
+                self.nightBLHeight)

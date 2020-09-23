@@ -1,4 +1,4 @@
-"""Class for rural site and Vertical Diffusion Model."""
+"""Class for Rural Site Model (RSM) and Vertical Diffusion Model (VDM)."""
 from __future__ import division, print_function
 
 try:
@@ -12,7 +12,7 @@ from .utilities import is_near_zero
 
 
 class RSMDef(object):
-    """Rural Site & Vertical Diffusion Model (VDM).
+    """Rural Site Model (RSM) and Vertical Diffusion Model (VDM).
 
     This class calculates the vertical profiles of air temperature above the weather
     station[1].
@@ -23,7 +23,7 @@ class RSMDef(object):
     Args:
         lat: Number for latitude in degrees.
         lon: Number for longitude in degrees.
-        GMT: Number for GMT hour correction.
+        gmt: Number for GMT hour correction.
         height: Number for rural average obstacle height in meters.
         T_init: Number for initial dry bulb temperature.
         P_init: Number for initial pressure.
@@ -34,7 +34,7 @@ class RSMDef(object):
     Properties
         * lat
         * lon
-        * GMT
+        * gmt
         * height
         * z0r
         * disp
@@ -54,13 +54,13 @@ class RSMDef(object):
         * ublPres
     """
 
-    def __init__(self, lat, lon, GMT, height, T_init, P_init, parameter, z_meso_path):
+    def __init__(self, lat, lon, gmt, height, T_init, P_init, parameter, z_meso_path):
 
         # z_meso: list of mesoscale heights
         self.z_meso = RSMDef.load_z_meso(z_meso_path)
         self.lat = lat  # latitude [deg]
         self.lon = lon  # longitude [deg]
-        self.GMT = GMT  # GMT hour correction
+        self.gmt = gmt  # GMT hour correction
         self.height = height  # average obstacle height [m]
         self.z0r = 0.1 * height  # rural roughness length [m]
         self.disp = 0.5 * height  # rural displacement lenght [m]
@@ -106,30 +106,30 @@ class RSMDef(object):
         for iz in range(len(self.z_meso)-1):
             # self.nz0: self.z index >= reference height for weather station
             eq_th = is_near_zero(self.z[iz] - parameter.tempHeight)
-            if (eq_th is True or self.z[iz] > parameter.tempHeight) and ll is True:
+            if (eq_th or self.z[iz] > parameter.tempHeight) and ll:
                 self.nz0 = iz + 1  # layer number at zmt (m)
                 ll = False
 
             # self.nzref: self.z index >= reference inversion height
             eq_rh = is_near_zero(self.z[iz] - parameter.refHeight)
-            if (eq_rh is True or self.z[iz] > parameter.refHeight) and mm is True:
+            if (eq_rh or self.z[iz] > parameter.refHeight) and mm:
                 self.nzref = iz + 1  # layer number at zref (m)
                 mm = False
 
             # self.nzfor: self.z index >= nighttime boundary layer height
             eq_nh = is_near_zero(self.z[iz] - parameter.nightBLHeight)
-            if (eq_nh is True or self.z[iz] > parameter.nightBLHeight) and nn is True:
+            if (eq_nh or self.z[iz] > parameter.nightBLHeight) and nn:
                 self.nzfor = iz + 1   # layer number at zfor (m)
                 nn = False
 
             # self.nz10: self.z index >= wind height
             eq_wh = is_near_zero(self.z[iz] - parameter.windHeight)
-            if (eq_wh is True or self.z[iz] > parameter.windHeight) and oo is True:
+            if (eq_wh or self.z[iz] > parameter.windHeight) and oo:
                 self.nz10 = iz + 1  # layer number at zmu (m)
                 oo = False
 
             eq_dh = is_near_zero(self.z[iz] - parameter.dayBLHeight)
-            if (eq_dh is True or self.z[iz] > parameter.dayBLHeight) and pp is True:
+            if (eq_dh or self.z[iz] > parameter.dayBLHeight) and pp:
                 self.nzi = iz + 1  # layer number at zi_d (m)
                 pp = False
 
@@ -165,8 +165,12 @@ class RSMDef(object):
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
         self.windProf = [1 for x in range(self.nzref)]
 
-    def VDM(self, forc, rural, parameter, simTime):
-        """# Ref: The uwg (2012), Eq. (4)"""
+    def vdm(self, forc, rural, parameter, simTime):
+        """Vertical Diffusion Model[1].
+
+        Note:
+        [1] 'The uwg' (2012), Eq. (4)
+        """
 
         self.tempProf[0] = forc.temp    # Lower boundary condition
 
@@ -199,12 +203,12 @@ class RSMDef(object):
 
         # Ref: The uwg (2012), Eq. (5)
         # compute diffusion coefficient
-        cd, ustarRur = self.DiffusionCoefficient(
+        cd, ustarRur = self.diffusion_coefficient(
             self.densityProfC[0], self.z, self.dz, self.z0r, self.disp, self.tempProf[0],
             rural.sens, self.nzref, forc.wind, self.tempProf, parameter)
 
         # solve diffusion equation
-        self.tempProf = RSMDef.DiffusionEquation(
+        self.tempProf = RSMDef.diffusion_equation(
             self.nzref, simTime.dt, self.tempProf, self.densityProfC, self.densityProfS,
             cd, self.dz)
 
@@ -224,8 +228,8 @@ class RSMDef(object):
                 self.ublPres + self.presProf[iz] * self.dz[iz] / \
                 (self.z[self.nzref-1] + self.dz[self.nzref-1] / 2.)
 
-    def DiffusionCoefficient(self, rho, z, dz, z0, disp, tempRur, heatRur, nz, uref, th,
-                             parameter):
+    def diffusion_coefficient(self, rho, z, dz, z0, disp, tempRur, heatRur, nz, uref, th,
+                              parameter):
         # Initialization
         Kt = [0 for x in range(nz+1)]
         ws = [0 for x in range(nz)]
@@ -260,8 +264,8 @@ class RSMDef(object):
                 te[iz] = max(ustar ** 2., 0.01)
 
         # lenght scales (l_up, l_down, l_k, l_eps)
-        self.dlu, self.dld = RSMDef.DissipationBougeault(parameter.g, nz, z, dz, te, th)
-        self.dld, dls, dlk = RSMDef.LengthBougeault(nz, self.dld, self.dlu, z)
+        self.dlu, self.dld = RSMDef.dissipation_bougeault(parameter.g, nz, z, dz, te, th)
+        self.dld, dls, dlk = RSMDef.length_bougeault(nz, self.dld, self.dlu, z)
 
         # Boundary-layer diffusion coefficient
         for iz in range(nz):
@@ -272,7 +276,7 @@ class RSMDef(object):
         return Kt, ustar
 
     @staticmethod
-    def DiffusionEquation(nz, dt, co, da, daz, cd, dz):
+    def diffusion_equation(nz, dt, co, da, daz, cd, dz):
 
         cddz = [0 for i in range(nz + 2)]
         a = [[0 for j in range(3)] for i in range(nz)]
@@ -303,7 +307,7 @@ class RSMDef(object):
         return RSMDef.invert(nz, a, c)
 
     @staticmethod
-    def DissipationBougeault(g, nz, z, dz, te, pt):
+    def dissipation_bougeault(g, nz, z, dz, te, pt):
         # N.B on translation from UWG_Matlab
         # list length (i.e nz) != list indexing (i.e dlu[0] in python
         # wherease in matlab it is
@@ -312,10 +316,10 @@ class RSMDef(object):
         dld = [0 for x in range(nz)]
 
         for iz in range(nz):
-            zup = 0.
+            zup = 0.0
             dlu[iz] = z[nz] - z[iz] - (dz[iz] / 2.)
-            zzz = 0.
-            zup_inf = 0.
+            zzz = 0.0
+            zup_inf = 0.0
             beta = g / pt[iz]
 
             for izz in range(iz, nz - 1):
@@ -365,7 +369,7 @@ class RSMDef(object):
         return dlu, dld
 
     @staticmethod
-    def LengthBougeault(nz, dld, dlu, z):
+    def length_bougeault(nz, dld, dlu, z):
 
         dlg = [0 for x in range(nz)]
         dls = [0 for x in range(nz)]
@@ -422,6 +426,6 @@ class RSMDef(object):
         return z_meso
 
     def __repr__(self):
-        return 'RSM: obstacle ht = {}m, surface roughness length = {}m, ' \
-            'displacement length = {}m'.format(
-                self.height, round(self.z0r, 2), self.disp)
+        return 'RSM,\n lat: {}\n lon: {}\n gmt: {}\n height: {}\n z0r: {}\n ' \
+            'disp: {}'.format(self.lat, self.lon, self.gmt, self.height, self.z0r,
+                              self.disp)

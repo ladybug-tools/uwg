@@ -1232,14 +1232,14 @@ class UWG(object):
 
             self.rural.SurfFlux(self.forc, self.geoParam, self.simTime,
                                 self.forc.hum, self.forc.temp, self.forc.wind, 2., 0.)
-            self.RSM.VDM(self.forc, self.rural, self.geoParam, self.simTime)
+            self.RSM.vdm(self.forc, self.rural, self.geoParam, self.simTime)
 
             # Calculate urban heat fluxes, update UCM & UBL
             self.UCM, self.UBL, self.BEM = urbflux(
                 self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime,
                 self.RSM)
             self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
-            self.UBL.UBLModel(
+            self.UBL.ublmodel(
                 self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
             # Experimental code to run diffusion model in the urban area
@@ -1382,7 +1382,7 @@ class UWG(object):
         * epwinput - EPW weather data as list
         * lat - latitude from EPW header
         * lon - longitude from EPW header
-        * GMT - Greenwich Mean Time from EPW header
+        * gmt - Greenwich Mean Time from EPW header
         * nSoil - Number of soil depths from EPW header
         * Tsoil - nSoil x 12 matrix for soil temperture from EPW header[1]
         * depth_soil - nSoil x 1 matrix for soil depth from EPW header[1]
@@ -1405,7 +1405,7 @@ class UWG(object):
         # Read Lat, Long (line 1 of EPW)
         self.lat = float(self._header[0][6])
         self.lon = float(self._header[0][7])
-        self.GMT = float(self._header[0][8])
+        self.gmt = float(self._header[0][8])
 
         # Read in soil temperature data (assumes this is always there)
         soilData = self._header[3]
@@ -1552,10 +1552,10 @@ class UWG(object):
 
         # Reference site class (also include VDM)
         self.RSM = RSMDef(
-            self.lat, self.lon, self.GMT, self.h_obs, self.weather.staTemp[0],
+            self.lat, self.lon, self.gmt, self.h_obs, self.weather.staTemp[0],
             self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
         self.USM = RSMDef(
-            self.lat, self.lon, self.GMT, self.bldheight / 10., self.weather.staTemp[0],
+            self.lat, self.lon, self.gmt, self.bldheight / 10., self.weather.staTemp[0],
             self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
 
         T_init = self.weather.staTemp[0]

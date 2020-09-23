@@ -10,6 +10,7 @@ def test_ubl_init():
 
     testuwg = auto_setup_uwg()
     testuwg.generate()
+    testuwg.UBL.__repr__()
 
     # Get uwg_python values
     uwg_python_val = [
