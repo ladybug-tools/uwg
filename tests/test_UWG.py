@@ -26,23 +26,15 @@ def test_init():
 
     # from param_file
     UWG.from_param_file(epw_path, param_path)
-    testuwg = \
-        UWG.from_param_file(epw_path, param_path, ref_bem_vector=[], ref_sch_vector=[])
+
+    # from args
+    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1)
+    testuwg = UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=[],
+                                  ref_sch_vector=[])
     testuwg.generate()
     assert testuwg.ref_bem_vector is None
     assert testuwg.ref_sch_vector is None
 
-    UWG.from_param_file(epw_path, param_path, ref_bem_vector=ref_bem_vec,
-                        ref_sch_vector=ref_sch_vec)
-    with pytest.raises(AssertionError):
-        UWG.from_param_file(epw_path, param_path, ref_bem_vector=ref_bem_vec,
-                            ref_sch_vector=ref_sch_vec[:1])
-    with pytest.raises(AssertionError):
-        UWG.from_param_file(epw_path, param_path, ref_bem_vector=None,
-                            ref_sch_vector=ref_sch_vec)
-
-    # from args
-    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1)
     UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
                         ref_sch_vector=ref_sch_vec)
     with pytest.raises(AssertionError):

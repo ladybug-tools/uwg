@@ -221,9 +221,11 @@ class UWG(object):
         self.latanth = None
 
     @classmethod
-    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None,
-                        ref_bem_vector=None, ref_sch_vector=None):
-        """Create a UWG object from the .uwg parmaeter file.
+    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None):
+        """Create a UWG object from the .uwg parameter file.
+
+        This method of initializating the UWG object doesn't permit adding custom
+        reference data.
 
         Args:
             epw_path: Text string for full path of the rural .epw file that will be
@@ -236,14 +238,6 @@ class UWG(object):
             new_epw_name: Optional destination file name for the morphed .epw file.
                 If None the morphed file will append '_UWG' to the original file name.
                 (Default: None).
-            ref_bem_vector: Optional list of custom BEMDef objects to override or add to
-                the refBEM matrix according to the BEMDef bldtype and builtera values.
-                If value is None, all SchDef objects are referenced from the DOE
-                typologies defined by default in the refSch matrix. (Default: None).
-            ref_sch_vector: Optional list of custom SchDef objects to override or add to
-                the refSchedule matrix according to the SchDef bldtype and builtera
-                values. If value is None, all BEMDef objects are referenced from the DOE
-                typologies defined by default in the refBEM matrix. (Default: None).
         """
 
         assert os.path.exists(param_path), 'Parameter file "{}" does not ' \
@@ -251,17 +245,6 @@ class UWG(object):
 
         uwg_model = UWG(epw_path, new_epw_dir, new_epw_name)
         uwg_model._read_input(param_path)
-
-        # check and add reference data
-        refcheck = int(ref_sch_vector is not None) + int(ref_bem_vector is not None)
-        assert refcheck != 1, 'The ref_sch_vector and ref_bem_vector must both be ' \
-            'defined in order to modify the UWG reference data. Only {} is ' \
-            'defined.'.format(
-                'ref_sch_vector' if ref_bem_vector is None else 'ref_bem_vector')
-
-        if refcheck == 2:
-            uwg_model._customize_reference_data(ref_bem_vector, ref_sch_vector)
-
         return uwg_model
 
     @classmethod
