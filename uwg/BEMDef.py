@@ -2,6 +2,7 @@
 
 from .building import Building
 from .element import Element
+from .utilities import float_in_range
 
 
 class BEMDef(object):
@@ -105,6 +106,59 @@ class BEMDef(object):
         bldtype, builtera = data['bldtype'], data['builtera']
 
         return cls(building, mass, wall, roof, frac, bldtype, builtera)
+
+    @property
+    def building(self):
+        """Get or set Building object."""
+        return self._building
+
+    @building.setter
+    def building(self, value):
+        assert isinstance(value, Building), 'building must be a Building ' \
+            'object. Got: {}.'.format(value)
+        self._building = value
+
+    @property
+    def mass(self):
+        """Get or set Element as representative building internal mass."""
+        return self._mass
+
+    @mass.setter
+    def mass(self, value):
+        assert isinstance(value, Element), 'mass must be an Element object. ' \
+            'Got: {}.'.format(value)
+        self._mass = value
+
+    @property
+    def roof(self):
+        """Get or set Element as representative building roof."""
+        return self._roof
+
+    @roof.setter
+    def roof(self, value):
+        assert isinstance(value, Element), 'roof must be an Element object. ' \
+            'Got: {}.'.format(value)
+        self._roof = value
+
+    @property
+    def wall(self):
+        """Get or set Element as representative building wall."""
+        return self._wall
+
+    @wall.setter
+    def wall(self, value):
+        assert isinstance(value, Element), 'wall must be an Element object. ' \
+            'Got: {}.'.format(value)
+        self._wall = value
+
+    @property
+    def frac(self):
+        """Get or set fraction of the urban floor space of this building typology."""
+        return self._frac
+
+    @frac.setter
+    def frac(self, value):
+        self._frac = float_in_range(value, 0, 1, 'frac')
 
     def to_dict(self):
         """BEMDef dictionary representation."""

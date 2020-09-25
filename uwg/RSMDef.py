@@ -138,17 +138,17 @@ class RSMDef(object):
         self.presProf = [P_init for x in range(self.nzref)]
 
         for iz in range(1, self.nzref):
-            self.presProf[iz] = \
+            self.presProf[iz] = (
                 (self.presProf[iz-1] ** (parameter.r / parameter.cp) - parameter.g /
                  parameter.cp * (P_init ** (parameter.r / parameter.cp)) *
                  (1. / self.tempProf[iz] + 1. / self.tempProf[iz-1]) * 0.5 *
-                 self.dz[iz]) ** (1. / (parameter.r / parameter.cp))
+                 self.dz[iz]) ** (1. / (parameter.r / parameter.cp)))
 
         self.tempRealProf = [T_init for x in range(self.nzref)]
         for iz in range(self.nzref):
-            self.tempRealProf[iz] = \
-                self.tempProf[iz] * (self.presProf[iz] / P_init) ** \
-                (parameter.r / parameter.cp)
+            self.tempRealProf[iz] = (
+                self.tempProf[iz] * (self.presProf[iz] / P_init) **
+                (parameter.r / parameter.cp))
 
         self.densityProfC = [None for x in range(self.nzref)]
         for iz in range(self.nzref):
@@ -158,9 +158,9 @@ class RSMDef(object):
         self.densityProfS = [self.densityProfC[0] for x in range(self.nzref + 1)]
 
         for iz in range(1, self.nzref):
-            self.densityProfS[iz] = \
+            self.densityProfS[iz] = (
                 (self.densityProfC[iz] * self.dz[iz-1] + self.densityProfC[iz-1] *
-                 self.dz[iz]) / (self.dz[iz-1]+self.dz[iz])
+                 self.dz[iz]) / (self.dz[iz-1]+self.dz[iz]))
 
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
         self.windProf = [1 for x in range(self.nzref)]
@@ -176,28 +176,29 @@ class RSMDef(object):
 
         # compute pressure profile
         for iz in reversed(list(range(self.nzref))[1:]):
-            self.presProf[iz-1] = \
+            self.presProf[iz-1] = (
                 (pow(self.presProf[iz], parameter.r / parameter.cp) +
                  parameter.g / parameter.cp *
                  (pow(forc.pres, parameter.r / parameter.cp)) *
                  (1./self.tempProf[iz] + 1./self.tempProf[iz-1]) *
-                 0.5 * self.dz[iz]) ** (1. / (parameter.r / parameter.cp))
+                 0.5 * self.dz[iz]) ** (1. / (parameter.r / parameter.cp)))
 
         # compute the real temperature profile
         for iz in range(self.nzref):
-            self.tempRealProf[iz] = self.tempProf[iz] * \
-                (self.presProf[iz] / forc.pres) ** (parameter.r / parameter.cp)
+            self.tempRealProf[iz] = (
+                self.tempProf[iz] * (self.presProf[iz] / forc.pres) **
+                (parameter.r / parameter.cp))
 
         # compute the density profile
         for iz in range(self.nzref):
-            self.densityProfC[iz] = self.presProf[iz] / parameter.r / \
-                self.tempRealProf[iz]
+            self.densityProfC[iz] = \
+                self.presProf[iz] / parameter.r / self.tempRealProf[iz]
         self.densityProfS[0] = self.densityProfC[0]
 
         for iz in range(1, self.nzref):
-            self.densityProfS[iz] = \
+            self.densityProfS[iz] = (
                 (self.densityProfC[iz] * self.dz[iz-1] + self.densityProfC[iz-1] *
-                 self.dz[iz]) / (self.dz[iz-1] + self.dz[iz])
+                 self.dz[iz]) / (self.dz[iz-1] + self.dz[iz]))
 
         self.densityProfS[self.nzref] = self.densityProfC[self.nzref-1]
 
@@ -224,9 +225,9 @@ class RSMDef(object):
         # Average pressure
         self.ublPres = 0.
         for iz in range(self.nzfor):
-            self.ublPres = \
-                self.ublPres + self.presProf[iz] * self.dz[iz] / \
-                (self.z[self.nzref-1] + self.dz[self.nzref-1] / 2.)
+            self.ublPres = (
+                self.ublPres + self.presProf[iz] * self.dz[iz] /
+                (self.z[self.nzref-1] + self.dz[self.nzref-1] / 2.))
 
     def diffusion_coefficient(self, rho, z, dz, z0, disp, tempRur, heatRur, nz, uref, th,
                               parameter):
@@ -245,15 +246,18 @@ class RSMDef(object):
             # Unstable conditions
 
             # Convective velocity scale
-            wstar = (parameter.g * heatRur * parameter.dayBLHeight / rho /
-                     parameter.cp / tempRur) ** (1 / 3.)
+            wstar = (
+                (parameter.g * heatRur * parameter.dayBLHeight / rho / parameter.cp /
+                    tempRur) ** (1 / 3.))
             # Wind profile function
             phi_m = (1-8. * 0.1 * parameter.dayBLHeight / lengthRur) ** (-1. / 3.)
 
             for iz in range(nz):
                 # Mixed-layer velocity scale
-                ws[iz] = (ustar ** 3 + phi_m * parameter.vk * wstar ** 3 * z[iz] /
-                          parameter.dayBLHeight) ** (1 / 3.)
+                ws[iz] = (
+                    (ustar ** 3 + phi_m * parameter.vk * wstar ** 3 * z[iz] /
+                        parameter.dayBLHeight) ** (1 / 3.))
+
                 # TKE approximation
                 te[iz] = max(ws[iz] ** 2., 0.01)
 
@@ -333,8 +337,9 @@ class RSMDef(object):
                     bbb = (pt[izz+1] - pt[izz]) / dzt
 
                     if not is_near_zero(bbb - 0.):
-                        _t1 = sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. +
-                                   2. * bbb * beta * (te[iz] - zup_inf)))
+                        _t1 = (
+                            sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. +
+                                 2. * bbb * beta * (te[iz] - zup_inf))))
                         tl = (-beta * (pt[izz] - pt[iz]) + _t1) / bbb / beta
                     else:
                         tl = (te[iz] - zup_inf) / (beta * (pt[izz] - pt[iz]))
@@ -358,9 +363,10 @@ class RSMDef(object):
                     bbb = (pt[izz] - pt[izz-1]) / dzt
 
                     if not is_near_zero(bbb - 0.):
-                        tl = (beta * (pt[izz] - pt[iz]) +
-                              sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. + 2. *
-                                   bbb * beta * (te[iz] - zdo_sup)))) / bbb / beta
+                        tl = (
+                            (beta * (pt[izz] - pt[iz]) +
+                             sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. +
+                                  2. * bbb * beta * (te[iz] - zdo_sup)))) / bbb / beta)
                     else:
                         tl = (te[iz] - zdo_sup) / (beta * (pt[izz] - pt[iz]))
                     dld[iz] = max(1., zzz - dzt + tl)
