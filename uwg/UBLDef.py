@@ -14,8 +14,8 @@ class UBLDef(object):
     """Urban Boundary Layer (UBL) calculations.
 
     Args:
-        location: Text string for relative location within a city. Choose from "N", "NE", "E",
-            "SE", "S", "SW", "W", "NW", or "C".
+        location: Text string for relative location within a city. Choose from "N", "NE",
+            "E", "SE", "S", "SW", "W", "NW", or "C".
         charLength: Value for characteristic length of the urban area [m].
         initialTemp: Value for initial temperature [K].
         maxdx: Value for maximum discretization length for the UBL model [m].
@@ -27,12 +27,12 @@ class UBLDef(object):
         * charLength -- characteristic length of the urban area (m)
         * perimeter -- horizontal urban area (m2)
         * urbArea -- length of the side of the urban area orthogonal
-        * orthLength -- length to the side of the urban area orthogonal to the wind direction (m)
-        * paralLength -- length of the side of the urban area parallel to the wind direction (m)
+        * orthLength -- length to side of urban area orthogonal to wind direction (m)
+        * paralLength -- length of side of urban area parallel to wind direction (m)
         * ublTemp -- urban boundary layer temperature (K)
         * ublTempdx -- urban boundary layer temperature discretization (K)
         * dayBLHeight -- daytime mixing height, orig = 700
-        * nightBLHeight -- nighttime boundary-layer height (m), Sing: 80, Bub-Cap: 50, orig 80
+        * nightBLHeight -- nighttime boundary-layer ht (m), Sing: 80, Bub-Cap: 50, orig 80
     """
 
     def __init__(self, location, charLength, initialTemp, maxdx, dayBLHeight,

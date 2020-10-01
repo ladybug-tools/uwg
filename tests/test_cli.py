@@ -21,6 +21,7 @@ def test_model_validate():
     runner = CliRunner()
     input_uwg = './tests/json/uwg.json'
     result = runner.invoke(validate, ['model', input_uwg])
+    print(result.output)
     assert result.exit_code == 0
 
     input_uwg = './tests/json/custom_uwg.json'

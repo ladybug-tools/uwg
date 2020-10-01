@@ -1,3 +1,4 @@
+"""Class for solar calculations."""
 from __future__ import division
 
 try:
@@ -10,25 +11,36 @@ import logging
 
 
 class SolarCalcs(object):
-    """
-    SolarCalcs
-    args:
-        UCM         # Urban Canopy - Building Energy Model object
-        BEM         # Building Energy Model object
-        simTime     # Simulation time bbject
-        RSM         # Rural Site & Vertical Diffusion Model Object
-        forc        # Forcing object
-        parameter   # Geo Param Object
-        rural       # Rural road Element object
+    """Solar calculations.
 
-    returns:
-        rural
-        UCM
-        BEM
+    Args:
+        UCM: Urban Canopy - Building Energy Model object.
+        BEM: Building Energy Model object.
+        simTime: Simulation time object
+        RSM: Rural Site & Vertical Diffusion Model Object.
+        forc: Forcing object.
+        parameter: Param Object.
+        rural: Rural road Element object.
+
+    Properties:
+        * # Properties added from solarcalcs
+        * dir -- direct sunlight (perpendicular to the sun's ray)
+        * dif -- diffuse sunlight
+        * tanzen -- tangente of solar zenithal angle
+        * critOrient -- critical canyon angle for which solar radiation reaches the road
+        * horSol -- direct horizontal radiation
+        * Kw_term -- fractional terms for wall
+        * Kr_term -- fractional terms for road
+        * mr -- fractional terms for wall
+        * mw -- fractional terms for road
+        * ut -- elapsed hours on current day
+        * ad -- fractional year in radians
+        * eqtime
+        * decsol -- solar declination angle
+        * zenith -- Angle between normal to earth's surface and sun position
     """
 
-    def __init__(self,UCM,BEM,simTime,RSM,forc,parameter,rural):
-        """ init solar calc inputs """
+    def __init__(self, UCM, BEM, simTime, RSM, forc, parameter, rural):
         self.UCM = UCM
         self.BEM = BEM
         self.simTime = simTime
@@ -41,31 +53,21 @@ class SolarCalcs(object):
         self.logger = logging.getLogger(__name__)
 
     def solarcalcs(self):
-        """ Solar Calculation
+        """ Solar Calculation.
+
         Mutates RSM, BEM, and UCM objects based on following parameters:
-            UCM         # Urban Canopy - Building Energy Model object
-            BEM         # Building Energy Model object
-            simTime     # Simulation time bbject
-            RSM         # Rural Site & Vertical Diffusion Model Object
-            forc        # Forcing object
-            parameter   # Geo Param Object
-            rural       # Rural road Element object
 
-        Properties
-            self.dir   # Direct sunlight
-            self.dif # Diffuse sunlight
-            self.tanzen
-            self.critOrient
-            self.horSol
-            self.Kw_term
-            self.Kr_term
-            self.mr
-            self.mw
-
+        * UCM -- Urban Canopy - Building Energy Model object
+        * BEM -- Building Energy Model object
+        * simTime -- Simulation time object
+        * RSM -- Rural Site & Vertical Diffusion Model Object
+        * forc -- Forcing object
+        * parameter -- Geo Param Object
+        * rural -- Rural road Element object
         """
 
-        self.dir = self.forc.dir     # Direct sunlight (perpendicular to the sun's ray)
-        self.dif = self.forc.dif     # Diffuse sunlight
+        self.dir = self.forc.dir  # Direct sunlight (perpendicular to the sun's ray)
+        self.dif = self.forc.dif  # Diffuse sunlight
 
         if self.dir + self.dif > 0.:
 
@@ -74,7 +76,8 @@ class SolarCalcs(object):
             # calculate zenith tangent, and critOrient solar angles
             self.solarangles()
 
-            self.horSol = max(math.cos(self.zenith)*self.dir, 0.0)            # Direct horizontal radiation
+            # Direct horizontal radiation
+            self.horSol = max(math.cos(self.zenith)*self.dir, 0.0)
             # Fractional terms for wall & road
             self.Kw_term = min(abs(1./self.UCM.canAspect*(0.5-self.critOrient/math.pi) \
                 + 1/math.pi*self.tanzen*(1-math.cos(self.critOrient))),1.)
@@ -98,30 +101,63 @@ class SolarCalcs(object):
             rw = self.UCM.alb_wall * self.bldSol
 
             # bounces
-            fr = (1. - (1. - 2.*self.UCM.wallConf) * self.UCM.alb_wall + (1. - self.UCM.roadConf) \
-            * self.UCM.wallConf * alb_road * self.UCM.alb_wall)
+            fr = (
+                1. - (1. - 2. * self.UCM.wallConf) * self.UCM.alb_wall +
+                (1. - self.UCM.roadConf) * self.UCM.wallConf * alb_road *
+                self.UCM.alb_wall)
 
             # (1.0-self.UCM.roadConf) road to wall view
             self.mr = (rr + (1.0-self.UCM.roadConf) * alb_road * (rw + self.UCM.wallConf * self.UCM.alb_wall * rr)) / fr
             self.mw = (rw + self.UCM.wallConf * self.UCM.alb_wall * rr) / fr
 
             # Receiving solar, including bounces (W m-2)
+            # Includes road covered by vegetation.
             self.UCM.road.solRec = self.roadSol + (1 - self.UCM.roadConf)*self.mw
 
             for j in range(len(self.BEM)):
                 self.BEM[j].roof.solRec = self.horSol + self.dif
                 self.BEM[j].wall.solRec = self.bldSol + (1 - 2*self.UCM.wallConf) * self.mw + self.UCM.wallConf * self.mr
 
-            self.rural.solRec = self.horSol + self.dif            # Solar received by rural
-            self.UCM.SolRecRoof = self.horSol + self.dif          # Solar received by roof
-            self.UCM.SolRecRoad = self.UCM.road.solRec            # Solar received by road
-            self.UCM.SolRecWall = self.bldSol+(1-2*self.UCM.wallConf)*self.UCM.road.albedo*self.roadSol    # Solar received by wall
+            self.rural.solRec = self.horSol + self.dif  # Solar received by rural
+            self.UCM.SolRecRoof = self.horSol + self.dif  # Solar received by roof
+            self.UCM.SolRecRoad = self.UCM.road.solRec  # Solar received by road
+            # Solar received by wall
+            self.UCM.SolRecWall = (self.bldSol + (1 - 2 * self.UCM.wallConf) *
+                                   self.UCM.road.albedo * self.roadSol)
 
-            # Vegetation heat (per m^2 of veg)
-            self.UCM.treeSensHeat = (1-self.parameter.vegAlbedo)*(1-self.parameter.treeFLat)*self.UCM.SolRecRoad
-            self.UCM.treeLatHeat = (1-self.parameter.vegAlbedo)*self.parameter.treeFLat*self.UCM.SolRecRoad
+            # Modification from UWG_Matlab on 09/20:
+            # Consolidate and incorporate the treeCoverage fraction into the tree
+            # sensible and latent heat (W-m2) calculation. Previously this was
+            # factored (inconsistently) at the urbflux and UCMDef.UCModel functions.
 
-        else:    # No Sun
+            # Vegetation heat (tree) (per m^2 of veg)
+            self.UCM.treeSensHeat = (
+                (1 - self.parameter.vegAlbedo) * (1 - self.parameter.treeFLat) *
+                self.UCM.SolRecRoad * self.UCM.treeCoverage)
+            self.UCM.treeLatHeat = (
+                (1 - self.parameter.vegAlbedo) * self.parameter.treeFLat *
+                self.UCM.SolRecRoad * self.UCM.treeCoverage)
+
+            # Modification from UWG_Matlab on 09/20:
+            # Add the sensible and latent heat fraction of grass (vegetation not
+            # accounted for by tree fraction). Note that the self.UCM.road.sens property
+            # also contains a calculation of sensible heat from vegetation and surface
+            # convection, but was not used here because the UCModel function in the
+            # UCMDef module already accounts for the entire road convective heat transfer
+            # so using the UCM.road.sens property would double-count convection. This
+            # sensible heat therefore just accounts for the absorbed solar radiation
+            # split into it's sensible heat fraction.
+
+            # Vegetation heat (grass) (per m^2 of veg)
+            grasscover = self.UCM.vegcover - self.UCM.treeCoverage
+            self.UCM.treeSensHeat += (
+                (1 - self.parameter.vegAlbedo) * (1 - self.parameter.grassFLat) *
+                self.UCM.SolRecRoad * grasscover)
+            self.UCM.treeLatHeat += (
+                (1 - self.parameter.vegAlbedo) * self.parameter.grassFLat *
+                self.UCM.SolRecRoad * grasscover)
+
+        else:  # No Sun
 
             self.logger.debug("{} Solar radiation = 0".format(__name__))
 
@@ -132,35 +168,25 @@ class SolarCalcs(object):
                 self.BEM[j].roof.solRec = 0.
                 self.BEM[j].wall.solRec = 0.
 
-            self.UCM.SolRecRoad = 0.         # Solar received by road
-            self.UCM.SolRecRoof = 0.         # Solar received by roof
-            self.UCM.SolRecWall = 0.         # Solar received by wall
+            self.UCM.SolRecRoad = 0.  # Solar received by road
+            self.UCM.SolRecRoof = 0.  # Solar received by roof
+            self.UCM.SolRecWall = 0.  # Solar received by wall
             self.UCM.treeSensHeat = 0.
             self.UCM.treeLatHeat = 0.
 
         return self.rural, self.UCM, self.BEM
 
-    def solarangles (self):
-        """
-        Calculation based on NOAA. Solves for zenith angle, tangent of zenithal angle,
-        and critical canyon angle based on following parameters:
-            canAspect       # aspect Ratio of canyon
-            simTime         # simulation parameters
-            RSM.lon         # longitude (deg)
-            RSM.lat         # latitude (deg)
-            RSM.GMT         # GMT hour correction
+    def solarangles(self):
+        """Solves for zenith angle, tangent of zenithal angle, and critical canyon angle.
 
-        Properties
-            self.ut         # elapsed hours on current day
-            self.ad         # fractional year in radians
-            self.eqtime
-            self.decsol     # solar declination angle
-            self.zenith     # Angle between normal to earth's surface and sun position
-            self.tanzen     # tangente of solar zenithal angle
-            self.critOrient # critical canyon angle for which solar radiation reaches the road
-        """
+        Calculation based on NOAA from:
 
-        ln = self.RSM.lon
+        * canAspect -- aspect Ratio of canyon
+        * simTime -- simulation time parameters
+        * RSM.lon -- longitude (deg)
+        * RSM.lat -- latitude (deg)
+        * RSM.GMT -- GMT hour correction
+        """
 
         month = self.simTime.month
         day = self.simTime.day

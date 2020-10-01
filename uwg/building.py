@@ -329,11 +329,12 @@ class Building(object):
             'Building dictionary. Got {}.'.format(data['type'])
 
         return cls(data['floor_height'], data['int_heat_night'], data['int_heat_day'],
-                   data['int_heat_frad'], data['int_heat_flat'], data['infil'], data['vent'],
-                   data['glazing_ratio'], data['u_value'], data['shgc'], data['condtype'],
-                   data['cop'], data['cool_setpoint_day'], data['cool_setpoint_night'],
-                   data['heat_setpoint_day'], data['heat_setpoint_night'], data['coolcap'],
-                   data['heateff'], data['initial_temp'])
+                   data['int_heat_frad'], data['int_heat_flat'], data['infil'],
+                   data['vent'], data['glazing_ratio'], data['u_value'], data['shgc'],
+                   data['condtype'], data['cop'], data['cool_setpoint_day'],
+                   data['cool_setpoint_night'], data['heat_setpoint_day'],
+                   data['heat_setpoint_night'], data['coolcap'], data['heateff'],
+                   data['initial_temp'])
 
     def to_dict(self):
         """Building dictionary representation."""

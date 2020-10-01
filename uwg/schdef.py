@@ -5,26 +5,23 @@ class SchDef(object):
     """Schedule definition class.
 
     Args:
-        elec: Matrix of numbers for weekly schedule for electricity (WD, Sat, Sun).
-            (Default: None).
+        elec: Weekly schedule of fractional electricity plug process load. Weekly
+            schedule consists of three lists of 24 values representing hours in
+            weekday, Saturday, and Sunday.
         gas: Matrix of numbers for weekly schedule for gas (WD, Sat, Sun).
-            (Default: None)
         light: Matrix of numbers for weekly schedule for light (WD, Sat, Sun).
-            (Default: None).
         occ: Matrix of numbers for weekly schedule for occupant (WD, Sat, Sun).
-            (Default: None).
         cool: Matrix of numbers for weekly temperature schedule for cooling
-            (WD, Sat, Sun). (Default: None).
+            (WD, Sat, Sun).
         heat: Matrix of numbers for weekly temperature schedule for heating
-            (WD, Sat, Sun). (Default: None).
+            (WD, Sat, Sun).
         swh: Matrix of numbers for weekly hot water schedule (WD, Sat, Sun).
-            (Default: None).
-        q_elec: Numerical value for maximum electrical plug process load [W/m2].
-        q_gas: Numerical value for maximum gas process load per unit area [W/m2].
-        q_light: Numerical value for maximum light process load per unit area [W/m2].
-        n_occ: Numerical value for maximum number of occupants per unit area [person/m2].
-        vent: Numerical value for maximum ventilation rate per unit area [m3/s/m2].
-        v_swh: Numerical value for maximum hot water rate per unit area [L/hr/m2].
+        q_elec: Number for maximum electrical plug process load [W/m2].
+        q_gas: Number for maximum gas process load per unit area [W/m2].
+        q_light: Number for maximum light process load per unit area [W/m2].
+        n_occ: Number for maximum number of occupants per unit area [person/m2].
+        vent: Number for maximum ventilation rate per unit area [m3/s/m2].
+        v_swh: Number for maximum hot water rate per unit area [L/hr/m2].
         bldtype: Number between 0 and 15 corresponding to the following building
             types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
             LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
@@ -76,6 +73,64 @@ class SchDef(object):
         self.bldtype = bldtype  # DOE reference building type
         self.builtera = builtera  # pre80, pst80, new
         self.zonetype = None  # climate zone number (only used in testing).
+
+    # @property
+    # def elec(self):
+    #     """Get or set weekly schedule of fractional electricity plug process load.
+
+    #     Weekly schedule consists of three lists of 24 values representing hours in
+    #     weekday, Saturday, and Sunday.
+    #     """
+    #     return self._elec
+
+    # @elec.setter
+    # def elec(self, value):
+    #     self._elec = SchDef.check_week_validity(value, 'elec')
+
+    # @property
+    # def gas(self):
+    #     """Get or set weekly schedule of fractional gas process load.
+
+    #     Weekly schedule consists of three lists of 24 values representing hours in
+    #     weekday, Saturday, and Sunday.
+    #     """
+    #     return self._gas
+
+    # @gas.setter
+    # def gas(self, value):
+    #     self._gas = SchDef.check_week_validity(value, 'gas')
+
+
+        """
+        light: Matrix of numbers for weekly schedule for light (WD, Sat, Sun).
+            (Default: None).
+        occ: Matrix of numbers for weekly schedule for occupant (WD, Sat, Sun).
+            (Default: None).
+        cool: Matrix of numbers for weekly temperature schedule for cooling
+            (WD, Sat, Sun). (Default: None).
+        heat: Matrix of numbers for weekly temperature schedule for heating
+            (WD, Sat, Sun). (Default: None).
+        swh: Matrix of numbers for weekly hot water schedule (WD, Sat, Sun).
+            (Default: None).
+        q_elec: Number for maximum electrical plug process load [W/m2].
+        q_gas: Number for maximum gas process load per unit area [W/m2].
+        q_light: Number for maximum light process load per unit area [W/m2].
+        n_occ: Number for maximum number of occupants per unit area [person/m2].
+        vent: Number for maximum ventilation rate per unit area [m3/s/m2].
+        v_swh: Number for maximum hot water rate per unit area [L/hr/m2].
+        bldtype: Number between 0 and 15 corresponding to the following building
+            types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
+            LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
+            PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
+            SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
+            SuperMarket (14), Warehouse (15). Additional building types can be defined
+            with a number greater then 15. This value is used to reference the fraction
+            of urban area the SchDef object defines in the UWG bld matrix.
+        builtera: Number between 0 and 2 corresponding to the following built eras:
+            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
+            reference the fraction of urban area the SchDef object defines in the UWG
+            bld matrix.
+    """
 
     @classmethod
     def from_dict(cls, data):

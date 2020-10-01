@@ -27,60 +27,60 @@ def auto_setup_uwg(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PATH,
         setup_log_file(log_file_name, log_level)
 
     if param_path:
-        testuwg = UWG.from_param_file(epw_path, param_path, new_epw_dir=NEW_DIR)
+        model = UWG.from_param_file(epw_path, param_path, new_epw_dir=NEW_DIR)
     else:
-        testuwg = UWG(epw_path, new_epw_dir=NEW_DIR)
+        model = UWG(epw_path, new_epw_dir=NEW_DIR)
 
     # Increase precision for testing
-    testuwg.epw_precision = 16
+    model.epw_precision = 16
 
-    return testuwg
+    return model
 
 
-def set_input_manually(testuwg):
+def set_input_manually(model):
 
     """Assign everything manually from ../resources/initialize_singapore.uwg"""
 
     # Define Simulation and Weather parameters
-    testuwg.month = 1.
-    testuwg.day = 1.
-    testuwg.nday = 31.
-    testuwg.dtsim = 300.
-    testuwg.dtweather = 3600.
+    model.month = 1.
+    model.day = 1.
+    model.nday = 31.
+    model.dtsim = 300.
+    model.dtweather = 3600.
 
     # HVAC system and internal laod
-    testuwg.autosize = 0.
-    testuwg.sensocc = 100.
-    testuwg.latfocc = 0.3
-    testuwg.radfocc = 0.2
-    testuwg.radfequip = 0.5
-    testuwg.radflight = 0.7
+    model.autosize = 0.
+    model.sensocc = 100.
+    model.latfocc = 0.3
+    model.radfocc = 0.2
+    model.radfequip = 0.5
+    model.radflight = 0.7
 
     # Define Urban microclimate parameters
-    testuwg.h_ubl1 = 1000.
-    testuwg.h_ubl2 = 80.
-    testuwg.h_ref = 150.
-    testuwg.h_temp = 2.
-    testuwg.h_wind = 10.
-    testuwg.c_circ = 1.2
-    testuwg.c_exch = 1.
-    testuwg.maxday = 150.
-    testuwg.maxnight = 20.
-    testuwg.windmin = 1.
-    testuwg.h_obs = 0.1
+    model.h_ubl1 = 1000.
+    model.h_ubl2 = 80.
+    model.h_ref = 150.
+    model.h_temp = 2.
+    model.h_wind = 10.
+    model.c_circ = 1.2
+    model.c_exch = 1.
+    model.maxday = 150.
+    model.maxnight = 20.
+    model.windmin = 1.
+    model.h_obs = 0.1
 
     # Urban characteristics
-    testuwg.bldheight = 10.
-    testuwg.h_mix = 1.
-    testuwg.blddensity = 0.5
-    testuwg.vertohor = 0.8
-    testuwg.charlength = 1000.
-    testuwg.albroad = 0.1
-    testuwg.droad = 0.5
-    testuwg.sensanth = 20.
+    model.bldheight = 10.
+    model.h_mix = 1.
+    model.blddensity = 0.5
+    model.vertohor = 0.8
+    model.charlength = 1000.
+    model.albroad = 0.1
+    model.droad = 0.5
+    model.sensanth = 20.
 
     # Define optional Building characteristics
-    testuwg.bld = [
+    model.bld = [
         [0, 0, 0],    # FullServiceRestaurant
         [0, 0, 0],    # Hospital
         [0, 0, 0],    # LargeHotel
@@ -100,20 +100,20 @@ def set_input_manually(testuwg):
     ]
 
     # climate Zone
-    testuwg.zone = 1.0
+    model.zone = 1.0
 
     # Vegetation parameters
-    testuwg.vegcover = 0.2
-    testuwg.vegstart = 4.0
-    testuwg.treecoverage = 0.1
-    testuwg.vegend = 10.0
-    testuwg.albveg = 0.25
-    testuwg.rurvegcover = 0.9
-    testuwg.latgrss = 0.4
-    testuwg.lattree = 0.6
+    model.vegstart = 4.0
+    model.vegend = 10.0
+    model.grasscover = 0.1
+    model.treecover = 0.1
+    model.albveg = 0.25
+    model.rurvegcover = 0.9
+    model.latgrss = 0.4
+    model.lattree = 0.6
 
     # Define Traffic schedule
-    testuwg.schtraffic = [
+    model.schtraffic = [
         [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.7, 0.9, 0.9, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.8,
          0.9, 0.9, 0.8, 0.8, 0.7, 0.3, 0.2, 0.2],  # Weekday
         [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.6, 0.7,
@@ -122,12 +122,12 @@ def set_input_manually(testuwg):
          0.4, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2]]  # Sunday
 
     # Define Road (Assume 0.5m of asphalt)
-    testuwg.kroad = 1.
-    testuwg.croad = 1600000.
+    model.kroad = 1.
+    model.croad = 1600000.
 
     # Optional parameters are not defined as they are already
     # initialized as None
-    return testuwg
+    return model
 
 
 def setup_open_matlab_ref(matlab_class_dir, matlab_ref_file_path):

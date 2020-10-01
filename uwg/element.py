@@ -48,15 +48,15 @@ class Element(object):
     def __init__(self, albedo, emissivity, layer_thickness_lst, material_lst,
                  vegcoverage, t_init, horizontal, name):
 
-        assert len(layer_thickness_lst) == len(material_lst), 'The number of layer thickness ' \
-            'must match the number of layer materials. Got {} and {}, ' \
+        assert len(layer_thickness_lst) == len(material_lst), 'The number of layer ' \
+            'thickness must match the number of layer materials. Got {} and {}, ' \
             'respectively.'.format(len(layer_thickness_lst), len(material_lst))
 
         self.albedo = albedo  # outer surface albedo
         self.emissivity = emissivity  # outer surface emissivity.
-        self.layer_thickness_lst = layer_thickness_lst  # list of layer thickness in meters
+        self.layer_thickness_lst = layer_thickness_lst  # list of layer thickness [m]
         self.material_lst = material_lst  # material objects in Element.
-        self.vegcoverage = vegcoverage  # surface vegetation coverage
+        self.vegcoverage = vegcoverage  # surface grass coverage
         self.t_init = t_init  # element initial temperature [K].
         self.horizontal = int(horizontal)  # 1-horizontal, 0-vertical
         self._name = name
@@ -203,7 +203,7 @@ class Element(object):
 
     def SurfFlux(self, forc, parameter, simTime, humRef, tempRef, windRef, boundCond,
                  intFlux):
-        """ Calculate net heat flux, and update element layer temperatures."""
+        """Calculate net heat flux, and update element layer temperatures."""
 
         # Calculated per unit area [m^2]
 
@@ -235,21 +235,40 @@ class Element(object):
                 # Winter, no veg
                 self.solAbs = (1.0 - self.albedo) * self.solRec  # (W m-2)
                 vegLat = 0.
-                vegSens = 0.
+                vegSen = 0.
             else:
                 # Summer, veg
-                self.solAbs = ((1.0 - self.vegcoverage) * (1. - self.albedo) +
-                               self.vegcoverage * (1.0 - parameter.vegAlbedo)) * \
-                              self.solRec
-                vegLat = self.vegcoverage * parameter.grassFLat * \
-                         (1. - parameter.vegAlbedo) * self.solRec
-                vegSens = self.vegcoverage * (1. - parameter.grassFLat) * \
-                          (1. - parameter.vegAlbedo) * self.solRec
+                self.solAbs = (
+                    ((1.0 - self.vegcoverage) * (1. - self.albedo) + self.vegcoverage *
+                     (1.0 - parameter.vegAlbedo)) * self.solRec)
+                try:
+                    # if road compute grass/tree fractions seperately
+                    vegLat = (
+                        self.grasscoverage * (1.0 - parameter.vegAlbedo) *
+                        parameter.grassFLat * self.solRec)
+                    vegLat += (
+                        self.treecoverage * (1.0 - parameter.vegAlbedo) *
+                        parameter.treeFLat * self.solRec)
+                    vegSen = (
+                        self.grasscoverage * (1.0 - parameter.vegAlbedo) *
+                        (1.0 - parameter.grassFLat) * self.solRec)
+                    vegSen += (
+                        self.treecoverage * (1.0 - parameter.vegAlbedo) *
+                        (1.0 - parameter.treeFLat) * self.solRec)
+                except AttributeError:
+                    # for all other Elements use veg fraction w/ grassFLat
+                    vegLat = (
+                        self.vegcoverage * (1.0 - parameter.vegAlbedo) *
+                        parameter.grassFLat * self.solRec)
+                    vegSen = (
+                        self.vegcoverage * (1.0 - parameter.vegAlbedo) *
+                        (1.0 - parameter.grassFLat) * self.solRec)
+
             self.lat = soilLat + vegLat
 
             # Sensible & net heat flux
-            self.sens = vegSens + self.aeroCond * (self.layerTemp[0] - tempRef)
-            self.flux = -self.sens + self.solAbs + self.infra - self.lat  # [W m-2]
+            self.sens = vegSen + self.aeroCond * (self.layerTemp[0] - tempRef)
+            self.flux = self.solAbs + self.infra - self.lat - self.sens  # [W m-2]
 
         else:
             # For vertical surfaces (wall)
@@ -258,7 +277,7 @@ class Element(object):
 
             # Sensible & net heat flux
             self.sens = self.aeroCond * (self.layerTemp[0] - tempRef)
-            self.flux = -self.sens + self.solAbs + self.infra - self.lat  # (W m-2)
+            self.flux = self.solAbs + self.infra - self.lat - self.sens  # [W m-2]
 
         self.layerTemp = \
             self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
@@ -269,10 +288,11 @@ class Element(object):
         """Solve the conductance of heat based on of the element layers.
 
         Args:
-            flx1: net heat flux on surface [W m-2]
-            bc: boundary condition parameter (1 or 2)
-            temp2: deep soil temperature (ave of air temperature) [K]
-            flx2: surface flux (sum of absorbed, emitted, etc.) [W m-2]
+            dt: Simulation time step in seconds.
+            flx1: Net heat flux on surface [W m-2]
+            bc: Boundary condition parameter (1 or 2)
+            temp2: Deep soil temperature (ave of air temperature) [K]
+            flx2: Surface flux (sum of absorbed, emitted, etc.) [W m-2]
 
         Returns:
             A 1d vector of element layer temperatures.

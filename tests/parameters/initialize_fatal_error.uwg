@@ -41,7 +41,7 @@ zone,1,
 
 # Vegetation parameters
 vegCover,0.0351485672949,
-treeCoverage,0.0522429901946,
+treeCover,0.0522429901946,
 vegStart,1,
 vegEnd,12,
 albVeg,0.35,

@@ -308,21 +308,21 @@ def readDOE(serialize_output=True):
                      alb = 0.2
                      emis = 0.93
                      D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01);
-                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"IEAD")
+                     roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,1,"IEAD")
 
                 elif TypeRoof[j][k] == "Attic":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
                     D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01)
-                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"Attic")
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,1,"Attic")
 
                 elif TypeRoof[j][k] == "MetalRoof":
                     # IEAD-> membrane, insulation, decking
                     alb = 0.2
                     emis = 0.9
                     D_ins = max(RvalRoof[j][k] * Insulation.thermalcond / 2., 0.01)
-                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,0.,"MetalRoof")
+                    roof = Element(alb,emis,[D_ins,D_ins],[Insulation,Insulation],0.,293.,1,"MetalRoof")
 
                 # Define bulding energy model, set fraction of the urban floor space of this typology to zero
                 refBEM[i][j][k] = BEMDef(building=B, mass=mass, wall=wall, roof=roof,
