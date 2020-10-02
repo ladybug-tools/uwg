@@ -24,60 +24,43 @@ class SimParam(object):
         days: Number indicating number of days to simulate.
 
     Properties:
-        * dt
-        * timeForcing
-        * month
-        * day
-        * days
-        * timePrint
-        * timeDay
-        * timeSim
-        * timeMax
-        * nt
-        * inobis
-        * julian
-        * timeInitial
-        * timeFinal
-        * secDay
-        * hourDay
+        * dt -- uwg time simulation time step
+        * timeForcing -- weather data timestep
+        * month -- start month
+        * day -- start day
+        * days -- number of days in simulation
+        * timePrint -- weather data timestep
+        * timeDay -- number of times weather senses in a day
+        * timeSim -- number of steps in weather data simulation
+        * timeMax -- total seconds in simulation days
+        * nt -- total number of timesteps
+        * inobis -- list of julian dates for the start of the months
+        * julian -- simulation start julian date
+        * timeInitial -- epw sensor data for initial time based on julian day & timesteps
+        * timeFinal -- epw sensor data for final time based on julian day & timesteps
+        * secDay -- current seconds in day
+        * hourDay -- current hours in day
     """
     TIMESTEP_CONFLICT_MSG = "TIMESTEP ERROR! Timestep must be a factor of 3600."
 
     def __init__(self, dt, timefor, M, DAY, days):
-        # dt: uwg time simulation time step
         self.dt = dt
-        # timeForcing: weather data timestep
         self.timeForcing = timefor
-        # month: start month
         self.month = int(M)
-        # day: start day
         self.day = DAY
-        # days: number of days in simulation
         self.days = days
-        # timePrint: weather data timestep
         self.timePrint = timefor
-        # timeDay: how many times weather senses in a day
         self.timeDay = 24 * 3600 / timefor
-        # timeSim: how many steps in weather data simulation
         self.timeSim = self.timeDay * days
-        # timeMax: total seconds in simulation days
         self.timeMax = 24. * 3600. * days
-        # nt: total number of timesteps
         self.nt = int(round(self.timeMax / self.dt + 1))
-        # inobis: list of julian dates for the start of the months
         self.inobis = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
-        # julian: simulation start julian date
         self.julian = self.inobis[self.month - 1] + DAY - 1
         # H1: (julian day * number of timesteps in a day) == sensor data index in epw
         H1 = int((self.inobis[self.month - 1] + DAY - 1) * self.timeDay)
-        # timeInitial: sensor data in epw for initial time based on julian day
-        # & timesteps
         self.timeInitial = H1 + 8
-        # timeFinal: sensor data in epw for final time based on julian day & timesteps
         self.timeFinal = int(H1 + self.timeDay * self.days - 1 + 8)
-        # secDay: current seconds in day
         self.secDay = 0
-        # hourDay: current hours in day
         self.hourDay = 0
 
     def update_date(self):

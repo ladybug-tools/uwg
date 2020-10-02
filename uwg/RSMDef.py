@@ -32,64 +32,56 @@ class RSMDef(object):
             component.
 
     Properties
-        * lat
-        * lon
-        * gmt
-        * height
-        * z0r
-        * disp
-        * z
-        * dz
-        * nz0
-        * nzref
-        * nzfor
-        * nz10
-        * nzi
-        * tempProf
-        * presProf
-        * tempRealProf
-        * densityProfC
-        * densityProfS
-        * windProf
-        * ublPres
+        * z_meso -- list of mesoscale heights.
+        * lat -- latitude [deg]
+        * lon -- longitude [deg]
+        * gmt -- GMT hour correction
+        * height -- average obstacle height [m]
+        * z0r -- rural roughness length [m]
+        * disp -- rural displacement lenght [m]
+        * z -- vertical height [m]
+        * dz -- vertical discretization [m]
+        * nz0 -- layer number at zmt [m]
+        * nzref -- layer number at zref [m]
+        * nzfor -- layer number at zfor [m]
+        * nz10 -- layer number at zmu [m]
+        * nzi -- layer number at zi_d [m]
+        * tempProf -- potential temperature profile at the rural site [K]
+        * presProf -- pressure profile at the rural site [Pa]
+        * tempRealProf -- real temperature profile at the rural site [K]
+        * densityProfC -- density profile at the center of layers [kg m-3]
+        * densityProfS -- density profile at the sides of layers [kg m-3]
+        * windProf -- wind profile at the rural site [m s-1]
+        * ublPres -- average pressure at UBL [Pa]
     """
 
     def __init__(self, lat, lon, gmt, height, T_init, P_init, parameter, z_meso_path):
 
-        # z_meso: list of mesoscale heights
         self.z_meso = RSMDef.load_z_meso(z_meso_path)
-        self.lat = lat  # latitude [deg]
-        self.lon = lon  # longitude [deg]
-        self.gmt = gmt  # GMT hour correction
-        self.height = height  # average obstacle height [m]
-        self.z0r = 0.1 * height  # rural roughness length [m]
-        self.disp = 0.5 * height  # rural displacement lenght [m]
+        self.lat = lat
+        self.lon = lon
+        self.gmt = gmt
+        self.height = height
+        self.z0r = 0.1 * height
+        self.disp = 0.5 * height
 
         # vertical grid at the rural site
-        # z: vertical height [m]
         self.z = [0 for x in range(len(self.z_meso)-1)]
-        # dz: vertical discretization [m]
         self.dz = [0 for x in range(len(self.z_meso)-1)]
 
         # Initialize empty parameters to compute for RSMDef
-        self.nz0 = None  # layer number at zmt [m]
-        self.nzref = None  # layer number at zref [m]
-        self.nzfor = None  # layer number at zfor [m]
-        self.nz10 = None  # layer number at zmu [m]
-        self.nzi = None  # layer number at zi_d [m]
-        # tempProf: potential temperature profile at the rural site [K]
+        self.nz0 = None
+        self.nzref = None
+        self.nzfor = None
+        self.nz10 = None
+        self.nzi = None
         self.tempProf = None
-        # presProf: pressure profile at the rural site [Pa]
         self.presProf = None
-        # tempRealProf: real temperature profile at the rural site [K]
         self.tempRealProf = None
-        # densityProfC: density profile at the center of layers [kg m-3]
         self.densityProfC = None
-        # densityProfS: density profile at the sides of layers [kg m-3]
         self.densityProfS = None
-        # windProf: wind profile at the rural site [m s-1]
         self.windProf = None
-        self.ublPres = None  # Average pressure at UBL [Pa]
+        self.ublPres = None
 
         for zi in range(len(self.z_meso)-1):
             self.z[zi] = 0.5 * (self.z_meso[zi] + self.z_meso[zi+1])

@@ -25,24 +25,26 @@ class Element(object):
         name: Text string for name of Element.
 
     Properties:
-        * albedo
-        * emissivity
-        * layer_thickness_lst
-        * layerThermalCond
-        * layerVolHeat
-        * vegcoverage
-        * layerTemp
-        * waterStorage
-        * horizontal
-        * solRec
-        * infra
-        * lat
-        * sens
-        * solAbs
-        * aeroCond
-        * T_ext
-        * T_int
-        * flux
+        * albedo -- outer surface albedo
+        * emissivity -- outer surface emissivity.
+        * layer_thickness_lst -- list of layer thickness [m]
+        * material_lst -- material objects in Element.
+        * layerThermalCond -- vector of layer thermal conductivities [W m-1 K-1]
+        * layerVolHeat -- vector of layer volumetric heat [J m-3 K-1]
+        * vegcoverage -- surface grass coverage
+        * t_init -- element initial temperature [K].
+        * layerTemp -- vector of layer temperatures [K]
+        * waterStorage -- thickness of water film [m] for horizontal surfaces only
+        * horizontal -- 1-horizontal, 0-vertical
+        * solRec -- solar radiation received [W m-2]
+        * infra -- net longwave radiation [W m-2]
+        * lat -- surface latent heat flux [W m-2]
+        * sens -- surface sensible heat flux [W m-2]
+        * solAbs -- solar radiation absorbed [W m-2]
+        * aeroCond -- convective heat transfer coefficient [-]
+        * T_ext -- external surface temperature [K]
+        * T_int -- internal surface temperature [K]
+        * flux -- external surface heat flux [W m-2]
     """
 
     def __init__(self, albedo, emissivity, layer_thickness_lst, material_lst,
@@ -52,32 +54,32 @@ class Element(object):
             'thickness must match the number of layer materials. Got {} and {}, ' \
             'respectively.'.format(len(layer_thickness_lst), len(material_lst))
 
-        self.albedo = albedo  # outer surface albedo
+        self.albedo = albedo  #
         self.emissivity = emissivity  # outer surface emissivity.
         self.layer_thickness_lst = layer_thickness_lst  # list of layer thickness [m]
-        self.material_lst = material_lst  # material objects in Element.
-        self.vegcoverage = vegcoverage  # surface grass coverage
-        self.t_init = t_init  # element initial temperature [K].
-        self.horizontal = int(horizontal)  # 1-horizontal, 0-vertical
+        self.material_lst = material_lst  #
+        self.vegcoverage = vegcoverage  #
+        self.t_init = t_init  #
+        self.horizontal = int(horizontal)  #
         self._name = name
 
-        # layerThermaCond: vector of layer thermal conductivities [W m-1 K-1]
+        # layerThermaCond:
         self.layerThermalCond = [material.thermalcond for material in material_lst]
-        # layerVolHeat: vector of layer volumetric heat [J m-3 K-1]
+        # layerVolHeat:
         self.layerVolHeat = [material.volheat for material in material_lst]
-        # layerTemp: # vector of layer temperatures [K]
+        # layerTemp: #
         self.layerTemp = [t_init] * len(layer_thickness_lst)
-        # waterStorage: # thickness of water film [m] for horizontal surfaces only
+        # waterStorage: #
         self.waterStorage = 0
-        self.infra = 0  # net longwave radiation [W m-2]
-        self.sens = 0  # surface sensible heat flux [W m-2]
-        self.solRec = 0  # solar radiation received [W m-2]
-        self.lat = 0  # surface latent heat flux [W m-2]
-        self.solAbs = 0  # solar radiation absorbed [W m-2]
-        self.aeroCond = 0  # convective heat transfer
-        self.T_ext = 293  # external surface temperature
-        self.T_int = 293  # internal surface temperature
-        self.flux = 0  # external surface heat flux
+        self.infra = 0  #
+        self.sens = 0  #
+        self.solRec = 0  #
+        self.lat = 0  #
+        self.solAbs = 0  #
+        self.aeroCond = 0  #
+        self.T_ext = 293  #
+        self.T_int = 293  #
+        self.flux = 0  #
 
     @property
     def albedo(self):

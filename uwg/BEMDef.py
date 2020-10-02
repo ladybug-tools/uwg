@@ -28,13 +28,13 @@ class BEMDef(object):
             bld matrix.
 
     Properties:
-        * building
-        * mass
-        * wall
-        * roof
-        * frac
-        * bldtype
-        * builtera
+        * building -- Building object
+        * mass -- Element object representing building internal mass.
+        * wall -- Element object representing building wall.
+        * roof -- Element object representing building roof.
+        * frac -- fraction of the urban floor space of this building typology.
+        * bldtype -- number for building type
+        * builtera -- number for built era
         * fl_area -- building typology urban floor area [m2]
         * elec -- actual electricity consumption [W/m2]
         * gas -- actual gas consumption [W/m2]

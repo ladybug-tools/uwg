@@ -6,7 +6,7 @@ Modified by Joseph Yang (joeyang@mit.edu) - May, 2016
 Translated to Python by Saeran Vasanthakumar - February, 2018
 
 Note:
-    [1] Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2012).
+    [1] Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2012a).
     The urban weather generator, Journal of Building Performance Simulation. 6:4,269-281.
     doi: 10.1080/19401493.2012.718797
 """
@@ -60,61 +60,61 @@ class UWG(object):
             name. (Default: None).
 
     Properties:
-        * epw_path
-        * new_epw_path
-        * refBEM
-        * refSchedule
-        * month
-        * day
-        * nday
-        * dtsim
-        * dtweather
-        * autosize
-        * sensocc
-        * latfocc
-        * radfocc
-        * radfequip
-        * radflight
-        * h_ubl1
-        * h_ubl2
-        * h_ref
-        * h_temp
-        * h_wind
-        * c_circ
-        * c_exch
-        * maxday
-        * maxnight
-        * windmin
-        * h_obs
-        * bldheight
-        * h_mix
-        * blddensity
-        * vertohor
-        * charlength
-        * albroad
-        * droad
-        * sensanth
-        * zone
-        * vegcover
-        * treecover
-        * vegstart
-        * vegend
-        * albveg
-        * rurvegcover
-        * latgrss
-        * lattree
-        * schtraffic
-        * kroad
-        * croad
-        * bld
-        * albroof
-        * vegroof
-        * glzr
-        * albwall
-        * shgc
-        * flr_h
-        * ref_bem_vector
-        * ref_sch_vector
+        * epw_path -- Full path of the rural .epw file that will be morphed.
+        * new_epw_path -- Full path of the file name of the morphed .epw file.
+        * refBEM -- Reference BEMDef matrix defined by built type, era, and zone.
+        * refSchedule -- Reference SchDef matrix defined by built type, era, and zone.
+        * month -- Number (1-12) representing simulation start month.
+        * day -- Number (1-31) representing simulation start day.
+        * nday -- Number of days to simulate.
+        * dtsim -- Simlation time step in seconds.
+        * dtweather -- Number for weather data time-step in seconds.
+        * autosize -- Boolean to set HVAC autosize.
+        * sensocc -- Sensible heat from occupant [W].
+        * latfocc -- Latent heat fraction from occupant.
+        * radfocc -- Radiant heat fraction from occupant.
+        * radfequip -- Radiant heat fraction from equipment.
+        * radflight -- Radiant heat fraction from electric light.
+        * h_ubl1 -- Daytime urban boundary layer height in meters.
+        * h_ubl2 -- Nighttime urban boundary layer height in meters.
+        * h_ref -- Inversion height in meters.
+        * h_temp -- Temperature height in meters.
+        * h_wind -- Wind height in meters.
+        * c_circ -- Wind scaling coefficient.
+        * c_exch -- Exchange velocity coefficient.
+        * maxday -- Maximum heat flux threshold for daytime conditions [W/m2].
+        * maxnight -- Maximum heat flux threshold for nighttime conditions [W/m2].
+        * windmin -- Minimum wind speed in m/s.
+        * h_obs -- Rural average obstacle height in meters.
+        * bldheight -- Urban building height in meters.
+        * h_mix -- Fraction of HVAC waste heat released to street canyon.
+        * blddensity -- Building footprint density as fraction of urban area.
+        * vertohor -- Vertical-to-horizontal urban area ratio.
+        * charlength -- Urban characteristic length in meters.
+        * albroad -- Urban road albedo.
+        * droad -- Thickness of urban road pavement thickness in meters.
+        * sensanth -- Street level anthropogenic sensible heat [W/m2].
+        * zone -- Index representing an ASHRAE climate zone.
+        * grasscover -- Fraction of urban ground covered in grass only.
+        * treecover -- Fraction of urban ground covered in trees.
+        * vegstart -- Month in which vegetation starts to evapotranspire.
+        * vegend -- Month in which vegetation stops evapotranspiration.
+        * albveg -- Vegetation albedo.
+        * rurvegcover -- Fraction of rural ground covered by vegetation.
+        * latgrss -- Fraction of latent heat absorbed by urban grass.
+        * lattree -- Fraction latent heat absorbed by urban trees.
+        * schtraffic -- Schedule of fractional anthropogenic heat load.
+        * kroad -- Road pavement conductivity [W/m-K].
+        * croad -- Road pavement volumetric heat capacity [J/m^3K].
+        * bld -- Matrix of numbers representing fraction of urban building stock.
+        * albroof -- Average building roof albedo.
+        * vegroof -- Fraction of roof covered in grass/shrubs.
+        * glzr -- Building glazing ratio.
+        * albwall -- Building albedo.
+        * shgc -- Building glazing Solar Heat Gain Coefficient (SHGC).
+        * flr_h -- Building floor height in meters.
+        * ref_bem_vector -- List of custom BEMDef objects to override the refBEM.
+        * ref_sch_vector -- List of custom SchDef objects to override the refSchedule.
     """
 
     # Definitions for constants / other parameters
@@ -259,7 +259,17 @@ class UWG(object):
                         h_temp=2, h_wind=10, c_circ=1.2, c_exch=1, maxday=150,
                         maxnight=20, windmin=1, h_obs=0.1, new_epw_dir=None,
                         new_epw_name=None, ref_bem_vector=None, ref_sch_vector=None):
-        """Create a UWG object based on method arguments."""
+        """Create an UWG object based on default method arguments.
+
+        The default parameters are set from example parameters defined by Bueno et al.
+        (2012a)[1] for Singapore. The original file can be accessed here:
+        https://github.com/ladybug-tools/uwg/tree/master/resources/resources/initialize_singapore.uwg.
+
+        Note:
+            [1] Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2012a).
+            The urban weather generator, Journal of Building Performance Simulation. 6:4,
+            269-281. doi: 10.1080/19401493.2012.718797
+        """
 
         model = UWG(epw_path, new_epw_dir, new_epw_name)
 
@@ -400,14 +410,14 @@ class UWG(object):
 
     @property
     def refBEM(self):
-        """Get 3d refBEM matrix arranged by build type, built era, and climate."""
+        """Get matrix of DOE reference BEMDefs defined by built type, era, and zone."""
         if self._refBEM is None:
             self._refBEM, self._refSchedule = UWG.load_refDOE()
         return self._refBEM
 
     @property
     def refSchedule(self):
-        """Get 3d refSchedule matrix arranged by built type, built era, and climate."""
+        """Get matrix of DOE reference SchDefs defined by built type, era, and zone."""
         if self._refSchedule is None:
             self._refBEM, self._refSchedule = UWG.load_refDOE()
         return self._refSchedule
@@ -471,7 +481,7 @@ class UWG(object):
 
     @property
     def sensocc(self):
-        """Get or set sensible heat in Watts from occupant."""
+        """Get or set sensible heat from occupant [W]."""
         return self._sensocc
 
     @sensocc.setter
@@ -534,7 +544,7 @@ class UWG(object):
 
     @property
     def h_ref(self):
-        """Get or set microclimate inversion height in meters."""
+        """Get or set inversion height in meters."""
         return self._h_ref
 
     @h_ref.setter
@@ -543,7 +553,7 @@ class UWG(object):
 
     @property
     def h_temp(self):
-        """Get or set microclimate temperature height in meters."""
+        """Get or set temperature height in meters."""
         return self._h_temp
 
     @h_temp.setter
@@ -552,7 +562,7 @@ class UWG(object):
 
     @property
     def h_wind(self):
-        """Get or set microclimate wind height in meters."""
+        """Get or set wind height in meters."""
         return self._h_wind
 
     @h_wind.setter
@@ -561,7 +571,7 @@ class UWG(object):
 
     @property
     def c_circ(self):
-        """Get or set microclimate wind scaling coefficient."""
+        """Get or set wind scaling coefficient."""
         return self._c_circ
 
     @c_circ.setter
@@ -570,7 +580,7 @@ class UWG(object):
 
     @property
     def c_exch(self):
-        """Get or set microclimate exchange velocity coefficient."""
+        """Get or set exchange velocity coefficient."""
         return self._c_exch
 
     @c_exch.setter
@@ -597,7 +607,7 @@ class UWG(object):
 
     @property
     def windmin(self):
-        """Get or set microclimate minimum wind speed in m/s."""
+        """Get or set minimum wind speed in m/s."""
         return self._windmin
 
     @windmin.setter

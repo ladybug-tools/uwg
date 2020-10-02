@@ -99,7 +99,7 @@ def moist_air_density(P, Tdb, H):
     return P / (1000 * 0.287042 * Tdb * (1. + 1.607858 * H))
 
 
-def HumFromRHumTemp(RH, T, P):
+def hum_from_rhum_temp(RH, T, P):
     """Specific Humidity (kgh20/kgn202) from RH, T and Pa.
 
     Args:

@@ -35,7 +35,7 @@ class SolarCalcs(object):
         * mw -- fractional terms for road
         * ut -- elapsed hours on current day
         * ad -- fractional year in radians
-        * eqtime
+        * eqtime -- time variable
         * decsol -- solar declination angle
         * zenith -- Angle between normal to earth's surface and sun position
     """
