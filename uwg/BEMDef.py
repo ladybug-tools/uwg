@@ -35,18 +35,18 @@ class BEMDef(object):
         * frac
         * bldtype
         * builtera
-        * fl_area
-        * elec
-        * gas
-        * light
-        * Qocc
-        * swh
-        * Nocc
-        * ElecTotal
-        * T_wallex
-        * T_wallin
-        * T_roofex
-        * T_roofin
+        * fl_area -- building typology urban floor area [m2]
+        * elec -- actual electricity consumption [W/m2]
+        * gas -- actual gas consumption [W/m2]
+        * light -- actual light [W/m2]
+        * Qocc -- actual heat load from occupant [W/m2]
+        * swh -- actual hot water usage
+        * Nocc -- number of occupants
+        * ElecTotal -- actual total electricity [W/m2]
+        * T_wallex -- wall surface temp (ext) [K]
+        * T_wallin -- wall surface temp (int) [K]
+        * T_roofex -- roof surface temp (ext) [K]
+        * T_roofin -- roof surface temp (int) [K]
     """
 
     def __init__(self, building, mass, wall, roof, frac, bldtype, builtera):
@@ -64,18 +64,18 @@ class BEMDef(object):
         self.zonetype = None  # climate zone number (only used in testing).
 
         # Properties to be computed during UWG simulation
-        self.fl_area = 0  # building typology urban floor area [m2]
-        self.elec = 0  # actual electricity consumption [W/m2]
-        self.gas = 0  # actual gas consumption [W/m2]
-        self.light = 0  # actual light [W/m2]
-        self.Qocc = 0  # actual heat load from occupant [W/m2]
-        self.swh = 0  # actual hot water usage
-        self.Nocc = 0  # number of occupants
-        self.ElecTotal = 0  # actual total electricity [W/m2]
-        self.T_wallex = 293  # wall surface temp (ext) [K]
-        self.T_wallin = 293  # wall surface temp (int) [K]
-        self.T_roofex = 293  # roof surface temp (ext) [K]
-        self.T_roofin = 293  # roof surface temp (int) [K]
+        self.fl_area = 0
+        self.elec = 0
+        self.gas = 0
+        self.light = 0
+        self.Qocc = 0
+        self.swh = 0
+        self.Nocc = 0
+        self.ElecTotal = 0
+        self.T_wallex = 293
+        self.T_wallin = 293
+        self.T_roofex = 293
+        self.T_roofin = 293
 
     @classmethod
     def from_dict(cls, data):

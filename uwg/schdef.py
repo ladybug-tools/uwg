@@ -1,27 +1,28 @@
 """Class for Schedule Definition."""
 
+from .utilities import float_positive
+
 
 class SchDef(object):
     """Schedule definition class.
 
+    The internal load weekly schedules consists of three lists of 24 values representing hours in
+    weekday, Saturday, and Sunday.
+
     Args:
-        elec: Weekly schedule of fractional electricity plug process load. Weekly
-            schedule consists of three lists of 24 values representing hours in
-            weekday, Saturday, and Sunday.
-        gas: Matrix of numbers for weekly schedule for gas (WD, Sat, Sun).
-        light: Matrix of numbers for weekly schedule for light (WD, Sat, Sun).
-        occ: Matrix of numbers for weekly schedule for occupant (WD, Sat, Sun).
-        cool: Matrix of numbers for weekly temperature schedule for cooling
-            (WD, Sat, Sun).
-        heat: Matrix of numbers for weekly temperature schedule for heating
-            (WD, Sat, Sun).
-        swh: Matrix of numbers for weekly hot water schedule (WD, Sat, Sun).
-        q_elec: Number for maximum electrical plug process load [W/m2].
-        q_gas: Number for maximum gas process load per unit area [W/m2].
-        q_light: Number for maximum light process load per unit area [W/m2].
-        n_occ: Number for maximum number of occupants per unit area [person/m2].
-        vent: Number for maximum ventilation rate per unit area [m3/s/m2].
-        v_swh: Number for maximum hot water rate per unit area [L/hr/m2].
+        elec: Weekly schedule of fractional electricity plug process loads.
+        gas: Weekly schedule of fractional gas process loads.
+        light: Weekly schedule of fractional light process loads.
+        occ: Weekly schedule of fractional occupant number.
+        cool: Weekly schedule of cooling temperatures.
+        heat: Weekly schedule of heating temperatures.
+        swh: Weekly schedule of fractional hot water rate.
+        q_elec: Maximum electrical plug process load [W/m2].
+        q_gas: Maximum gas process load per unit area [W/m2].
+        q_light: Maximum light process load per unit area [W/m2].
+        n_occ: Maximum number of occupants per unit area [person/m2].
+        vent: Maximum ventilation rate per unit area [m3/s/m2].
+        v_swh: Maximum volumetric hot water rate per unit area [L/hr/m2].
         bldtype: Number between 0 and 15 corresponding to the following building
             types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
             LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
@@ -56,13 +57,13 @@ class SchDef(object):
 
     def __init__(self, elec, gas, light, occ, cool, heat, swh, q_elec, q_gas, q_light,
                  n_occ, vent, v_swh, bldtype, builtera):
-        self.elec = SchDef.check_week_validity(elec, 'elec')
-        self.gas = SchDef.check_week_validity(gas, 'gas')
-        self.light = SchDef.check_week_validity(light, 'light')
-        self.occ = SchDef.check_week_validity(occ, 'occ')
-        self.cool = SchDef.check_week_validity(cool, 'cool')
-        self.heat = SchDef.check_week_validity(heat, 'heat')
-        self.swh = SchDef.check_week_validity(swh, 'swh')
+        self.elec = elec
+        self.gas = gas
+        self.light = light
+        self.occ = occ
+        self.cool = cool
+        self.heat = heat
+        self.swh = swh
         self.q_elec = q_elec
         self.q_gas = q_gas
         self.q_light = q_light
@@ -74,63 +75,150 @@ class SchDef(object):
         self.builtera = builtera  # pre80, pst80, new
         self.zonetype = None  # climate zone number (only used in testing).
 
-    # @property
-    # def elec(self):
-    #     """Get or set weekly schedule of fractional electricity plug process load.
+    @property
+    def elec(self):
+        """Get or set weekly schedule of fractional electricity plug process loads.
 
-    #     Weekly schedule consists of three lists of 24 values representing hours in
-    #     weekday, Saturday, and Sunday.
-    #     """
-    #     return self._elec
-
-    # @elec.setter
-    # def elec(self, value):
-    #     self._elec = SchDef.check_week_validity(value, 'elec')
-
-    # @property
-    # def gas(self):
-    #     """Get or set weekly schedule of fractional gas process load.
-
-    #     Weekly schedule consists of three lists of 24 values representing hours in
-    #     weekday, Saturday, and Sunday.
-    #     """
-    #     return self._gas
-
-    # @gas.setter
-    # def gas(self, value):
-    #     self._gas = SchDef.check_week_validity(value, 'gas')
-
-
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
         """
-        light: Matrix of numbers for weekly schedule for light (WD, Sat, Sun).
-            (Default: None).
-        occ: Matrix of numbers for weekly schedule for occupant (WD, Sat, Sun).
-            (Default: None).
-        cool: Matrix of numbers for weekly temperature schedule for cooling
-            (WD, Sat, Sun). (Default: None).
-        heat: Matrix of numbers for weekly temperature schedule for heating
-            (WD, Sat, Sun). (Default: None).
-        swh: Matrix of numbers for weekly hot water schedule (WD, Sat, Sun).
-            (Default: None).
-        q_elec: Number for maximum electrical plug process load [W/m2].
-        q_gas: Number for maximum gas process load per unit area [W/m2].
-        q_light: Number for maximum light process load per unit area [W/m2].
-        n_occ: Number for maximum number of occupants per unit area [person/m2].
-        vent: Number for maximum ventilation rate per unit area [m3/s/m2].
-        v_swh: Number for maximum hot water rate per unit area [L/hr/m2].
-        bldtype: Number between 0 and 15 corresponding to the following building
-            types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
-            LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
-            PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
-            SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
-            SuperMarket (14), Warehouse (15). Additional building types can be defined
-            with a number greater then 15. This value is used to reference the fraction
-            of urban area the SchDef object defines in the UWG bld matrix.
-        builtera: Number between 0 and 2 corresponding to the following built eras:
-            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
-            reference the fraction of urban area the SchDef object defines in the UWG
-            bld matrix.
-    """
+        return self._elec
+
+    @elec.setter
+    def elec(self, value):
+        self._elec = SchDef.check_week_validity(value, 'elec')
+
+    @property
+    def gas(self):
+        """Get or set weekly schedule of fractional gas process loads.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._gas
+
+    @gas.setter
+    def gas(self, value):
+        self._gas = SchDef.check_week_validity(value, 'gas')
+
+    @property
+    def light(self):
+        """Get or set weekly schedule of fractional light process loads.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._gas
+
+    @light.setter
+    def light(self, value):
+        self._light = SchDef.check_week_validity(value, 'light')
+
+    @property
+    def occ(self, value):
+        """Get or set weekly schedule of occupant number.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._occ
+
+    @occ.setter
+    def occ(self, value):
+        self._occ = SchDef.check_week_validity(value, 'occ')
+
+    @property
+    def cool(self, value):
+        """Get or set weekly schedule of cooling temperatures.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._cool
+
+    @cool.setter
+    def cool(self, value):
+        self._cool = SchDef.check_week_validity(value, 'cool')
+
+    @property
+    def heat(self, value):
+        """Get or set weekly schedule of heating temperatures.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._heat
+
+    @heat.setter
+    def heat(self, value):
+        self._heat = SchDef.check_week_validity(value, 'heat')
+
+    @property
+    def swh(self, value):
+        """Get or set weekly schedule of fractional hot water rate.
+
+        Weekly schedule consists of three lists of 24 values representing hours in
+        weekday, Saturday, and Sunday.
+        """
+        return self._swh
+
+    @swh.setter
+    def swh(self, value):
+        self._swh = SchDef.check_week_validity(value, 'swh')
+
+    @property
+    def q_elec(self):
+        """Get or set maximum electrical plug process load [W/m2]."""
+        return self._q_elec
+
+    @q_elec.setter
+    def q_elec(self, value):
+        self._q_elec = float_positive(value, 'q_elec')
+
+    @property
+    def q_gas(self):
+        """Get or set maximum gas process load per unit area [W/m2]."""
+        return self._q_gas
+
+    @q_gas.setter
+    def q_gas(self, value):
+        self._q_gas = float_positive(value, 'q_gas')
+
+    @property
+    def q_light(self):
+        """Get or set maximum light process load per unit area [W/m2]."""
+        return self._q_light
+
+    @q_light.setter
+    def q_light(self, value):
+        self._q_light = float_positive(value, 'q_light')
+
+    @property
+    def n_occ(self):
+        """Get or set maximum number of occupants per unit area [person/m2]."""
+        return self._n_occ
+
+    @n_occ.setter
+    def n_occ(self, value):
+        self._n_occ = float_positive(value, 'n_occ')
+
+    @property
+    def vent(self):
+        """Get or set maximum ventilation rate per unit area [m3/s/m2]."""
+        return self._vent
+
+    @vent.setter
+    def vent(self, value):
+        self._vent = float_positive(value, 'vent')
+
+    @property
+    def v_swh(self):
+        """Get or set maximum volumetric hot water rate per unit area [L/hr/m2]."""
+        return self._v_swh
+
+    @v_swh.setter
+    def v_swh(self, value):
+        self._v_swh = float_positive(value, 'v_swh')
 
     @classmethod
     def from_dict(cls, data):
