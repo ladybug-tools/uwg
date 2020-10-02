@@ -108,14 +108,14 @@ class SchDef(object):
         Weekly schedule consists of three lists of 24 values representing hours in
         weekday, Saturday, and Sunday.
         """
-        return self._gas
+        return self._light
 
     @light.setter
     def light(self, value):
         self._light = SchDef.check_week_validity(value, 'light')
 
     @property
-    def occ(self, value):
+    def occ(self):
         """Get or set weekly schedule of occupant number.
 
         Weekly schedule consists of three lists of 24 values representing hours in
@@ -128,7 +128,7 @@ class SchDef(object):
         self._occ = SchDef.check_week_validity(value, 'occ')
 
     @property
-    def cool(self, value):
+    def cool(self):
         """Get or set weekly schedule of cooling temperatures.
 
         Weekly schedule consists of three lists of 24 values representing hours in
@@ -141,7 +141,7 @@ class SchDef(object):
         self._cool = SchDef.check_week_validity(value, 'cool')
 
     @property
-    def heat(self, value):
+    def heat(self):
         """Get or set weekly schedule of heating temperatures.
 
         Weekly schedule consists of three lists of 24 values representing hours in
@@ -154,7 +154,7 @@ class SchDef(object):
         self._heat = SchDef.check_week_validity(value, 'heat')
 
     @property
-    def swh(self, value):
+    def swh(self):
         """Get or set weekly schedule of fractional hot water rate.
 
         Weekly schedule consists of three lists of 24 values representing hours in
