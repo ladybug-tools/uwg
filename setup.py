@@ -20,7 +20,7 @@ setuptools.setup(
     include_package_data=True,
     install_requires=requirements,
     extras_require={
-        'cli': ['click==7.1.2']
+        'cli': ['click==7.1.2', "uwg-schema;python_version>='3.6'"]
     },
     entry_points={
         "console_scripts": ["uwg = uwg.cli:main"]
