@@ -325,10 +325,10 @@ def test_refBEM():
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
                         elif bemid == 'roof_horizontal':
-                            assert refBEM[bldType][bldEra][climateZone].roof.horizontal == pytest.approx(matlab_ref_value,  abs=tol), \
+                            assert refBEM[bldType][bldEra][climateZone].roof.horizontal == pytest.approx(1, abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 
-                        elif bemid == 'roof_horizontal':
+                        else:
                             assert refBEM[bldType][bldEra][climateZone].building.FanMax == pytest.approx(matlab_ref_value,  abs=tol), \
                                 'btype={},era={},czone={}'.format(bldType+1, bldEra+1, climateZone+1)
 

@@ -40,7 +40,7 @@ sensAnth,10.0,
 zone,1,
 
 # Vegetation parameters
-vegCover,0.0351485672949,
+grasscover,0.0351485672949,
 treeCover,0.0522429901946,
 vegStart,1,
 vegEnd,12,

@@ -40,7 +40,7 @@ sensAnth,20,      # non-building sensible heat at street level [aka. heat from c
 zone,1,
 
 # Vegetation parameters
-vegCover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
+grassover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
 treeCover,0.1, # Fraction of the urban ground covered in trees (0-1)
 vegStart,4,       # The month in which vegetation starts to evapotranspire (leaves are out)
 vegEnd,10,        # The month in which vegetation stops evapotranspiring (leaves fall)
