@@ -10,6 +10,9 @@ import os
 from math import sqrt, pow, log
 from .utilities import is_near_zero
 
+# TODO: Method and arg docstrings are incomplete. Should be completed by someone who
+# understands RSM and VSM dynamics.
+
 
 class RSMDef(object):
     """Rural Site Model (RSM) and Vertical Diffusion Model (VDM).
@@ -147,7 +150,8 @@ class RSMDef(object):
             self.densityProfC[iz] = \
                 self.presProf[iz] / parameter.r / self.tempRealProf[iz]
 
-        self.densityProfS = [self.densityProfC[0] for x in range(self.nzref + 1)]
+        self.densityProfS = [self.densityProfC[0]
+                             for x in range(self.nzref + 1)]
 
         for iz in range(1, self.nzref):
             self.densityProfS[iz] = (
@@ -212,7 +216,8 @@ class RSMDef(object):
         # VDM is run for average obstacle height ~ 4m.
         for iz in range(self.nzref):
             self.windProf[iz] = \
-                ustarRur / parameter.vk * log((self.z[iz] - self.disp) / self.z0r)
+                ustarRur / parameter.vk * \
+                log((self.z[iz] - self.disp) / self.z0r)
 
         # Average pressure
         self.ublPres = 0.
@@ -242,7 +247,8 @@ class RSMDef(object):
                 (parameter.g * heatRur * parameter.dayBLHeight / rho / parameter.cp /
                     tempRur) ** (1 / 3.))
             # Wind profile function
-            phi_m = (1-8. * 0.1 * parameter.dayBLHeight / lengthRur) ** (-1. / 3.)
+            phi_m = (1-8. * 0.1 * parameter.dayBLHeight /
+                     lengthRur) ** (-1. / 3.)
 
             for iz in range(nz):
                 # Mixed-layer velocity scale
@@ -260,7 +266,8 @@ class RSMDef(object):
                 te[iz] = max(ustar ** 2., 0.01)
 
         # lenght scales (l_up, l_down, l_k, l_eps)
-        self.dlu, self.dld = RSMDef.dissipation_bougeault(parameter.g, nz, z, dz, te, th)
+        self.dlu, self.dld = RSMDef.dissipation_bougeault(
+            parameter.g, nz, z, dz, te, th)
         self.dld, dls, dlk = RSMDef.length_bougeault(nz, self.dld, self.dlu, z)
 
         # Boundary-layer diffusion coefficient
@@ -331,7 +338,7 @@ class RSMDef(object):
                     if not is_near_zero(bbb - 0.):
                         _t1 = (
                             sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. +
-                                 2. * bbb * beta * (te[iz] - zup_inf))))
+                                     2. * bbb * beta * (te[iz] - zup_inf))))
                         tl = (-beta * (pt[izz] - pt[iz]) + _t1) / bbb / beta
                     else:
                         tl = (te[iz] - zup_inf) / (beta * (pt[izz] - pt[iz]))
@@ -358,7 +365,7 @@ class RSMDef(object):
                         tl = (
                             (beta * (pt[izz] - pt[iz]) +
                              sqrt(max(0., (beta * (pt[izz] - pt[iz])) ** 2. +
-                                  2. * bbb * beta * (te[iz] - zdo_sup)))) / bbb / beta)
+                                      2. * bbb * beta * (te[iz] - zdo_sup)))) / bbb / beta)
                     else:
                         tl = (te[iz] - zdo_sup) / (beta * (pt[izz] - pt[iz]))
                     dld[iz] = max(1., zzz - dzt + tl)
