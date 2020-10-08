@@ -16,13 +16,15 @@ class SchDef(object):
         occ: Weekly schedule of fractional occupant number.
         cool: Weekly schedule of cooling temperatures.
         heat: Weekly schedule of heating temperatures.
-        swh: Weekly schedule of fractional hot water rate.
         q_elec: Maximum electrical plug process load [W/m2].
         q_gas: Maximum gas process load per unit area [W/m2].
         q_light: Maximum light process load per unit area [W/m2].
         n_occ: Maximum number of occupants per unit area [person/m2].
         vent: Maximum ventilation rate per unit area [m3/s/m2].
-        v_swh: Maximum volumetric hot water rate per unit area [L/hr/m2].
+        swh: Optional property for weekly schedule of fractional hot water rate. This
+            property will be a weekly schedule of zero values, as default.
+        v_swh: Optional property for maximum volumetric hot water rate per unit area
+            [L/hr/m2]. (Default: 0).
         bldtype: Number between 0 and 15 corresponding to the following building
             types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
             LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
@@ -54,22 +56,23 @@ class SchDef(object):
         * builtera
         * zonetype
     """
+    DEFAULT_SWH = [[0 for j in range(24)] for i in range(3)]
 
-    def __init__(self, elec, gas, light, occ, cool, heat, swh, q_elec, q_gas, q_light,
-                 n_occ, vent, v_swh, bldtype, builtera):
+    def __init__(self, elec, gas, light, occ, cool, heat, q_elec, q_gas, q_light,
+                 n_occ, vent, bldtype, builtera, swh=DEFAULT_SWH, v_swh=0):
         self.elec = elec
         self.gas = gas
         self.light = light
         self.occ = occ
         self.cool = cool
         self.heat = heat
-        self.swh = swh
         self.q_elec = q_elec
         self.q_gas = q_gas
         self.q_light = q_light
         self.n_occ = n_occ
         self.vent = vent
         self.v_swh = v_swh
+        self.swh = swh
         # Properties to be set in readDOE
         self.bldtype = bldtype  # DOE reference building type
         self.builtera = builtera  # pre80, pst80, new

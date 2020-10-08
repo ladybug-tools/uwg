@@ -22,10 +22,6 @@ class Building(object):
         condtype: Text string for cooling condensation system type. Choose from AIR or
             WATER.
         cop: Coefficient of Performance (COP) of cooling system (nominal).
-        cool_setpoint_day: Daytime indoor cooling setpoint [K].
-        cool_setpoint_night: Nightime indoor cooling setpoint [K].
-        heat_setpoint_day: Daytime indoor heating setpoint [K].
-        heat_setpoint_night: Nightime indoor heating setpoint [K].
         coolcap: Rated cooling system capacity [W/m2].
         heateff: Heating system capacity.
         initial_temp: Initial indoor air temperature [K].
@@ -92,8 +88,7 @@ class Building(object):
 
     def __init__(self, floor_height, int_heat_night, int_heat_day, int_heat_frad,
                  int_heat_flat, infil, vent, glazing_ratio, u_value, shgc, condtype, cop,
-                 cool_setpoint_day, cool_setpoint_night, heat_setpoint_day,
-                 heat_setpoint_night, coolcap, heateff, initial_temp):
+                 coolcap, heateff, initial_temp):
 
         self.floor_height = floor_height
         self.int_heat = int_heat_night
@@ -108,20 +103,23 @@ class Building(object):
         self.shgc = shgc
         self.condtype = condtype
         self.cop = cop
-        self.cool_setpoint_day = cool_setpoint_day
-        self.cool_setpoint_night = cool_setpoint_night
-        self.heat_setpoint_day = heat_setpoint_day
-        self.heat_setpoint_night = heat_setpoint_night
         self.coolcap = coolcap
         self.heateff = heateff
-        self.msys = \
-            coolcap / 1004. / (min(cool_setpoint_day, cool_setpoint_night) - 14 - 273.15)
         self.initial_temp = initial_temp
         self.indoor_temp = initial_temp
+        self.cop_adj = cop
+
+        # set properties
         self.indoor_hum = 0.012
         self.heat_cap = 999
-        self.cop_adj = cop
         self.canyon_fraction = 1.0
+        self.cool_setpoint_day = 297  # 24 C
+        self.cool_setpoint_night = 297  # 24 C
+        self.heat_setpoint_day = 293  # 24 C
+        self.heat_setpoint_night = 293  # 24 C
+        self.msys = \
+            coolcap / 1004. / (min(self.cool_setpoint_day, self.cool_setpoint_night) - \
+                               14 - 273.15)
 
     @property
     def floor_height(self):
@@ -232,42 +230,6 @@ class Building(object):
         self._cop = float_positive(value, 'cop')
 
     @property
-    def cool_setpoint_day(self):
-        """Get or set daytime indoor cooling setpoint [K]."""
-        return self._cool_setpoint_day
-
-    @cool_setpoint_day.setter
-    def cool_setpoint_day(self, value):
-        self._cool_setpoint_day = float_positive(value, 'cool_setpoint_day')
-
-    @property
-    def cool_setpoint_night(self):
-        """Get or set nighttime indoor cooling setpoint [K]."""
-        return self._cool_setpoint_night
-
-    @cool_setpoint_night.setter
-    def cool_setpoint_night(self, value):
-        self._cool_setpoint_night = float_positive(value, 'cool_setpoint_night')
-
-    @property
-    def heat_setpoint_day(self):
-        """Get or set daytime indoor heating setpoint [K]."""
-        return self._heat_setpoint_day
-
-    @heat_setpoint_day.setter
-    def heat_setpoint_day(self, value):
-        self._heat_setpoint_day = float_positive(value, 'heat_setpoint_day')
-
-    @property
-    def heat_setpoint_night(self):
-        """Get or set nighttime indoor heating setpoint [K]."""
-        return self._heat_setpoint_night
-
-    @heat_setpoint_night.setter
-    def heat_setpoint_night(self, value):
-        self._heat_setpoint_night = float_positive(value, 'heat_setpoint_night')
-
-    @property
     def coolcap(self):
         """Get or set rated cooling system capacity [W/m2]."""
         return self._coolcap
@@ -316,10 +278,6 @@ class Building(object):
             "shgc": self.shgc,
             "condtype": self.condtype,
             "cop": self.cop,
-            "cool_setpoint_day": self.cool_setpoint_day,
-            "cool_setpoint_night": self.cool_setpoint_night,
-            "heat_setpoint_day": self.heat_setpoint_day,
-            "heat_setpoint_night": self.heat_setpoint_night,
             "coolcap": self.coolcap,
             "heateff": self.heateff,
             "initial_temp": self.initial_temp
@@ -331,9 +289,7 @@ class Building(object):
         return cls(data['floor_height'], data['int_heat_night'], data['int_heat_day'],
                    data['int_heat_frad'], data['int_heat_flat'], data['infil'],
                    data['vent'], data['glazing_ratio'], data['u_value'], data['shgc'],
-                   data['condtype'], data['cop'], data['cool_setpoint_day'],
-                   data['cool_setpoint_night'], data['heat_setpoint_day'],
-                   data['heat_setpoint_night'], data['coolcap'], data['heateff'],
+                   data['condtype'], data['cop'], data['coolcap'], data['heateff'],
                    data['initial_temp'])
 
     def to_dict(self):
@@ -351,10 +307,6 @@ class Building(object):
         base['shgc'] = self.shgc
         base['condtype'] = self.condtype
         base['cop'] = self.cop
-        base['cool_setpoint_day'] = self.cool_setpoint_day
-        base['cool_setpoint_night'] = self.cool_setpoint_night
-        base['heat_setpoint_day'] = self.heat_setpoint_day
-        base['heat_setpoint_night'] = self.heat_setpoint_night
         base['coolcap'] = self.coolcap
         base['heateff'] = self.heateff
         base['initial_temp'] = self.initial_temp

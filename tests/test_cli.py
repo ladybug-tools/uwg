@@ -21,10 +21,7 @@ def test_model_validate():
     runner = CliRunner()
     input_uwg = './tests/json/uwg.json'
     result = runner.invoke(validate, ['model', input_uwg])
-    #print(result.output)
-    assert result.output == 'test'
-    #assert result.exit_code == 0
-    #assert False
+    assert result.exit_code == 0
 
     input_uwg = './tests/json/custom_uwg.json'
     result = runner.invoke(validate, ['model', input_uwg])
@@ -84,7 +81,8 @@ def test_custom_uwg_simulate():
     # test with basic command
     input_uwg = './tests/json/custom_uwg.json'
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
-    result = runner.invoke(simulate, ['model', input_uwg, '--epw-path', epw_path])
+    result = runner.invoke(
+        simulate, ['model', input_uwg, '--epw-path', epw_path])
     assert result.exit_code == 0
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'

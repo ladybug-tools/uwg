@@ -11,8 +11,7 @@ def test_building_init():
     # coolCap for UTM ~ 200 W/m2, U ~ 2.0
     bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
                    int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
-                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
-                   cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2,
                    coolcap=76, heateff=0.7, initial_temp=293)
     # test repr
     bld.__repr__()
@@ -24,8 +23,7 @@ def test_building_dict():
     # init
     bld1 = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
                     int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
-                    u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
-                    cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                    u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2,
                     coolcap=76, heateff=0.7, initial_temp=293)
 
     # make dict

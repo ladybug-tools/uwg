@@ -44,8 +44,7 @@ def _bemdef():
 
     bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
                    int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
-                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, cool_setpoint_day=297,
-                   cool_setpoint_night=297, heat_setpoint_day=293, heat_setpoint_night=293,
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2,
                    coolcap=76, heateff=0.7, initial_temp=293)
 
     return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
@@ -128,11 +127,13 @@ def test_bem_building_init_largeoffice_readDOE():
     for i in range(len(uwg_matlab_val)):
         if isinstance(uwg_python_val[i], (str, unicode)):
             assert ''.join(uwg_python_val[i].split()) == \
-                ''.join(uwg_matlab_val[i].split()), 'error at index={}'.format(i)
+                ''.join(uwg_matlab_val[i].split()
+                        ), 'error at index={}'.format(i)
         else:
             tol = calculate_tolerance(uwg_python_val[i], 14.0)
             assert uwg_python_val[i] == \
-                pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
+                pytest.approx(
+                    uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
 
 
 def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
@@ -206,5 +207,5 @@ def test_bem_building_bemcalc_largeoffice_cooling_readDOE():
     for i in range(len(uwg_matlab_val)):
         tol = calculate_tolerance(uwg_python_val[i], 15.0)
         assert uwg_python_val[i] == \
-            pytest.approx(uwg_matlab_val[i], abs=tol), 'error at index={}'.format(i)
-
+            pytest.approx(uwg_matlab_val[i],
+                          abs=tol), 'error at index={}'.format(i)

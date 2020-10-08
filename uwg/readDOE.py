@@ -196,10 +196,6 @@ def readDOE(serialize_output=True):
                     SHGC[j][k],                         # SHGC, by era, by climate type
                     'AIR',                              # cooling condensation system type: AIR, WATER
                     COP[j][k],                          # cop by era, climate type
-                    297,                                # coolSetpointDay = 24 C
-                    297,                                # coolSetpointNight
-                    293,                                # heatSetpointDay = 20 C
-                    293,                                # heatSetpointNight
                     (HVAC[j][k]*1000.0)/AreaFloor[j],   # coolCap converted to W/m2 by era, climate type
                     EffHeat[j][k],                      # heatEff by era, climate type
                     293)                                # initialTemp at 20 C
