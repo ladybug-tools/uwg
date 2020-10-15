@@ -37,7 +37,7 @@ sensAnth,10.0,
 # 7(Duluth)                     15
 # 8(Fairbanks)                  16
 
-zone,1,
+zone,1A,
 
 # Vegetation parameters
 grasscover,0.0351485672949,
@@ -57,23 +57,32 @@ SchTraffic,
 
 # Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
 # Note that sum(bld) must be equal to 1
+# Choose from the following building types:
+# FullServiceRestaurant
+# Hospital
+# LargeHotel
+# LargeOffice
+# MediumOffice
+# MidRiseApartment
+# OutPatient
+# PrimarySchool
+# QuickServiceRestaurant
+# SecondarySchool
+# SmallHotel
+# SmallOffice
+# Stand-aloneRetail
+# StripMall
+# SuperMarket
+# Warehouse
+# Choose from the following built eras:
+# Pre80
+# Pst80
+# New
+
 bld,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0.64,0,
-0,0,0,
-0.221,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0.138,0,
+LargeOffice, Pst80, 0.64
+MidRiseApartment, Pst80, 0.221
+Warehouse, Pst80, 0.138
 
 # =================================================
 # OPTIONAL URBAN PARAMETERS

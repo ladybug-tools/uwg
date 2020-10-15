@@ -1,8 +1,5 @@
 {
     "type": "UWG",
-    "epw_path": "./tests/epw/SGP_Singapore.486980_IWEC.epw",
-    "new_epw_dir": null,
-    "new_epw_name": null,
     "month": 1,
     "day": 1,
     "nday": 31,
@@ -33,7 +30,7 @@
     "albroad": 0.1,
     "droad": 0.5,
     "sensanth": 20,
-    "zone": 1,
+    "zone": "1A",
     "grasscover": 0.1,
     "treecover": 0.1,
     "vegstart": 4,
@@ -126,84 +123,14 @@
     "croad": 1600000,
     "bld": [
         [
-            0,
-            0,
-            0
+            "largeoffice",
+            "pst80",
+            0.6
         ],
         [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0.4,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0.6,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
-        ],
-        [
-            0,
-            0,
-            0
+            "midriseapartment",
+            "pst80",
+            0.4
         ]
     ],
     "shgc": null,

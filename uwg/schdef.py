@@ -1,6 +1,6 @@
 """Class for Schedule Definition."""
 
-from .utilities import float_positive
+from .utilities import float_positive, REF_BUILTERA_SET, REF_BUILTERA
 
 
 class SchDef(object):
@@ -25,18 +25,18 @@ class SchDef(object):
             property will be a weekly schedule of zero values, as default.
         v_swh: Optional property for maximum volumetric hot water rate per unit area
             [L/hr/m2]. (Default: 0).
-        bldtype: Number between 0 and 15 corresponding to the following building
-            types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
-            LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
-            PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
-            SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
-            SuperMarket (14), Warehouse (15). Additional building types can be defined
-            with a number greater then 15. This value is used to reference the fraction
-            of urban area the SchDef object defines in the UWG bld matrix.
-        builtera: Number between 0 and 2 corresponding to the following built eras:
-            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
-            reference the fraction of urban area the SchDef object defines in the UWG
-            bld matrix.
+        bldtype: Text referring to a building type. To reference (or
+            overwrite) a DOE reference building, text must be one of the
+            following: 'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
+            'mediumoffice', 'midriseapartment', 'outpatient', 'primaryschool',
+            'quickservicerestaurant', 'secondaryschool', 'smallhotel', 'smalloffice',
+            'standaloneretail', 'stripmall', 'supermarket', or 'warehouse'.
+            This value along with the builtera is used to reference the fraction of
+            urban area the building defines in the UWG bld matrix.
+        builtera: Text defining building built era. Must be one of the following:
+            'pre80' (pre-1980s), 'pst80' (post-1980s), or 'new' (new constrution).
+            This value and the bldtype is used to reference the fraction of urban area
+            the building defines in the UWG bld matrix.
 
     Properties:
         * elec
@@ -223,6 +223,62 @@ class SchDef(object):
     def v_swh(self, value):
         self._v_swh = float_positive(value, 'v_swh')
 
+    @property
+    def bldtype(self):
+        """Get or set text for bldtype.
+
+        By default, 16 building types are defined in the UWG according to models from
+        the Department of Energy (DOE). Choose from the following to reference a
+        DOE building type:
+
+        * 'fullservicerestaurant'
+        * 'hospital'
+        * 'largehotel'
+        * 'largeoffice'
+        * 'medoffice'
+        * 'midriseapartment'
+        * 'outpatient'
+        * 'primaryschool'
+        * 'quickservicerestaurant'
+        * 'secondaryschool'
+        * 'smallhotel'
+        * 'smalloffice'
+        * 'standaloneretail'
+        * 'stripmall'
+        * 'supermarket'
+        * 'warehouse'
+
+        Custom building types can also be defined with a new name. If a custom SchDef is
+        defined with the same name as a reference DOE building type from the list above,
+        the reference SchDef will be overwritten by the custom SchDef.
+        """
+        return self._bldtype
+
+    @bldtype.setter
+    def bldtype(self, value):
+        assert isinstance(value, str), 'The bldtype must be a string. ' \
+            'Got: {}.'.format(value.lower())
+        self._bldtype = value
+
+    @property
+    def builtera(self):
+        """Get or set text for built era.
+
+        Choose from the following:
+
+        * 'pre80'
+        * 'pst80'
+        * 'new'
+        """
+        return self._builtera
+
+    @builtera.setter
+    def builtera(self, value):
+        assert isinstance(value, str) and value in REF_BUILTERA_SET, \
+            'The builtera must be one of {}.Got: {}.'.format(
+                REF_BUILTERA, value.lower())
+        self._builtera = value
+
     @classmethod
     def from_dict(cls, data):
         """Create a SchDef object from a dictionary.
@@ -301,7 +357,8 @@ class SchDef(object):
                 'matrix. Got {} columns for row {}.'.format(name, len(day), i)
             for val in day:
                 assert isinstance(val, (float, int)), 'The {} property ' \
-                    'must contain 3 lists of numbers. Got : {}.'.format(name, val)
+                    'must contain 3 lists of numbers. Got : {}.'.format(
+                        name, val)
         return week
 
     def __repr__(self):

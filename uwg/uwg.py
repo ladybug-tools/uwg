@@ -22,7 +22,6 @@ except NameError:
 import os
 import math
 import copy
-import logging
 
 try:
     import cPickle as pickle
@@ -45,13 +44,19 @@ from .schdef import SchDef
 from .BEMDef import BEMDef
 from . import utilities
 from .utilities import int_in_range, float_in_range, int_positive, float_positive
+from .utilities import REF_BLDTYPE, REF_BUILTERA, REF_ZONETYPE, REF_BLDTYPE_SET, \
+    REF_BUILTERA_SET, REF_ZONETYPE_SET
 
 
 class UWG(object):
     """Morph a rural EPW file to urban conditions based on defined urban parameters.
 
     Args:
-        epw_path: Text string for full path of the rural .epw file that will be morphed.
+        epw_path: Text string for full path of the rural .epw file that will be
+            morphed. If set to None, other input parameters can be assigned but the UWG
+            model cannot be generated from the inputs, which is useful in cases where a
+            UWG model needs to be serialized but the file path structure is not known.
+            (Default: None).
         new_epw_dir: Optional text string for the destination directory into which the
             morphed .epw file is written. If None the morphed file will be written into
             the same directory as the rural .epw file. (Default: None).
@@ -158,24 +163,10 @@ class UWG(object):
                       'vegstart', 'vegend', 'albveg', 'rurvegcover', 'latgrss',
                       'lattree', 'schtraffic', 'kroad', 'croad', 'bld', 'shgc',
                       'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h']
-    OPTIONAL_PARAMETER_SET = {'shgc', 'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h'}
-    DEFAULT_BLD = [
-        [0, 0, 0],  # FullServiceRestaurant
-        [0, 0, 0],  # Hospital
-        [0, 0, 0],  # LargeHotel
-        [0, 0.4, 0],  # LargeOffice
-        [0, 0, 0],  # MediumOffice
-        [0, 0.6, 0],  # MidRiseApartment
-        [0, 0, 0],  # OutPatient
-        [0, 0, 0],  # PrimarySchool
-        [0, 0, 0],  # QuickServiceRestaurant
-        [0, 0, 0],  # SecondarySchool
-        [0, 0, 0],  # SmallHotel
-        [0, 0, 0],  # SmallOffice
-        [0, 0, 0],  # Stand-aloneRetail
-        [0, 0, 0],  # StripMall
-        [0, 0, 0],  # SuperMarket
-        [0, 0, 0]]  # Warehouse
+    OPTIONAL_PARAMETER_SET = {'shgc', 'albroof',
+                              'glzr', 'vegroof', 'albwall', 'flr_h'}
+    DEFAULT_BLD = [('largeoffice', 'pst80', 0.4),
+                   ('midriseapartment', 'pst80', 0.6)]
     DEFAULT_SCHTRAFFIC = [
         [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.7, 0.9, 0.9, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.8,
          0.9, 0.9, 0.8, 0.8, 0.7, 0.3, 0.2, 0.2],  # Weekday
@@ -189,13 +180,9 @@ class UWG(object):
     Z_MESO_PATH = os.path.join(CURRENT_PATH, 'refdata', 'z_meso.txt')
     REFDOE_PATH = os.path.join(CURRENT_PATH, 'refdata', 'readDOE.pkl')
 
-    def __init__(self, epw_path, new_epw_dir=None, new_epw_name=None):
+    def __init__(self, epw_path=None, new_epw_dir=None, new_epw_name=None):
 
-        # Logger will be disabled by default unless explicitly called in tests
-        self.logger = logging.getLogger(__name__)
-
-        assert os.path.exists(epw_path), 'File: "{}" does not exist.'.format(epw_path)
-        self._epw_path = epw_path
+        self.epw_path = epw_path
         self._new_epw_dir, self._new_epw_name = new_epw_dir, new_epw_name
         self._new_epw_path = None
 
@@ -221,17 +208,21 @@ class UWG(object):
         self.latanth = None
 
     @classmethod
-    def from_param_file(cls, epw_path, param_path, new_epw_dir=None, new_epw_name=None):
+    def from_param_file(cls, param_path, epw_path=None, new_epw_dir=None,
+                        new_epw_name=None):
         """Create a UWG object from the .uwg parameter file.
 
-        This method of initializating the UWG object doesn't permit adding custom
+        Note: this method of initializating the UWG object doesn't permit adding custom
         reference data.
 
         Args:
-            epw_path: Text string for full path of the rural .epw file that will be
-                morphed.
             param_path: Optional text string for full path of the the .uwg parameter file
                 path.
+            epw_path: Text string for full path of the rural .epw file that will be
+                morphed. If set to None, other input parameters can be assigned but the
+                UWG model cannot be generated from the inputs, which is useful in cases
+                where a UWG model needs to be serialized but the file path structure is
+                not known. (Default: None).
             new_epw_dir: Optional text string destination directory for the morphed
                 .epw file. If None the morphed file will be written into the same
                 directory as the rural .epw file. (Default: None).
@@ -243,12 +234,15 @@ class UWG(object):
         assert os.path.exists(param_path), 'Parameter file "{}" does not ' \
             'exist.'.format(param_path)
 
+        assert param_path.endswith('.uwg'), 'Parameter file must be a ".uwg" ' \
+            'filetype. Got: {}.'.format(param_path)
+
         model = UWG(epw_path, new_epw_dir, new_epw_name)
         model._read_input(param_path)
         return model
 
     @classmethod
-    def from_param_args(cls, epw_path, bldheight, blddensity, vertohor, zone, month=1,
+    def from_param_args(cls, bldheight, blddensity, vertohor, zone, month=1,
                         day=1, nday=31, dtsim=300, dtweather=3600, autosize=False,
                         h_mix=1, sensocc=100, latfocc=0.3, radfocc=0.2, radfequip=0.5,
                         radflight=0.7, bld=DEFAULT_BLD, charlength=1000, albroad=0.1,
@@ -257,8 +251,9 @@ class UWG(object):
                         rurvegcover=0.9, latgrss=0.4, lattree=0.6,
                         schtraffic=DEFAULT_SCHTRAFFIC, h_ubl1=1000, h_ubl2=80, h_ref=150,
                         h_temp=2, h_wind=10, c_circ=1.2, c_exch=1, maxday=150,
-                        maxnight=20, windmin=1, h_obs=0.1, new_epw_dir=None,
-                        new_epw_name=None, ref_bem_vector=None, ref_sch_vector=None):
+                        maxnight=20, windmin=1, h_obs=0.1, epw_path=None,
+                        new_epw_dir=None, new_epw_name=None, ref_bem_vector=None,
+                        ref_sch_vector=None):
         """Create an UWG object based on default method arguments.
 
         The default parameters are set from example parameters defined by Bueno et al.
@@ -318,7 +313,8 @@ class UWG(object):
         model.h_obs = h_obs
 
         # check and add reference data
-        refcheck = int(ref_sch_vector is not None) + int(ref_bem_vector is not None)
+        refcheck = int(ref_sch_vector is not None) + \
+            int(ref_bem_vector is not None)
         assert refcheck != 1, 'The ref_sch_vector and ref_bem_vector must both be ' \
             'defined in order to modify the UWG reference data. Only {} is ' \
             'defined.'.format(
@@ -331,7 +327,7 @@ class UWG(object):
         return model
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data, epw_path=None, new_epw_dir=None, new_epw_name=None):
         """Create an UWG object from a dictionary.
 
         Args:
@@ -339,14 +335,22 @@ class UWG(object):
                 this example has been truncated for the sake of brevity. For
                 the full list of required properties in the UWG, see the
                 initialization docstrings.
+            epw_path: Text string for full path of the rural .epw file that will be
+                morphed. If set to None, other input parameters can be assigned but the
+                UWG model cannot be generated from the inputs, which is useful in cases
+                where a UWG model needs to be serialized but the file path structure is
+                not known. (Default: None).
+            new_epw_dir: Optional text string for the destination directory into which
+                the morphed .epw file is written. If None the morphed file will be
+                written into the same directory as the rural .epw file. (Default: None).
+            new_epw_name: Optional text string for the destination file name of the
+                morphed .epw file. If None the morphed file will append '_UWG' to the
+                original file name. (Default: None).
 
         .. code-block:: python
 
             {
             "type": "UWG",
-            "epw_path": "/path/to/epw/SGP_Singapore.486980_IWEC.epw",
-            "new_epw_dir": null,
-            "new_epw_name": null,
             "bldheight": 10,
             "blddensity": 0.5,
             "vertohor": 0.8,
@@ -354,16 +358,16 @@ class UWG(object):
             "h_obs": 0.1,
             "flr_h": 3.5,
             "shgc": None,
-            "ref_sch_vector": [sch.to_dict()]  # Optional vector of SchDef dictionary.
-            "ref_bem_vector": [bem.to_dict()]  # Optional vector of BEMDef dictionary.
+            # Optional vector of SchDef dictionary.
+            "ref_sch_vector": [sch.to_dict()]
+            # Optional vector of BEMDef dictionary.
+            "ref_bem_vector": [bem.to_dict()]
             }
         """
         assert data['type'] == 'UWG', \
             'Expected UWG dictionary. Got {}.'.format(data['type'])
-        assert 'epw_path' in data, \
-            'The epw_path must be defined to create an UWG object.'
 
-        model = UWG(data['epw_path'], data['new_epw_dir'], data['new_epw_name'])
+        model = UWG(epw_path, new_epw_dir, new_epw_name)
 
         # set UWG parameters
         for attr in cls.PARAMETER_LIST:
@@ -395,6 +399,13 @@ class UWG(object):
         """Get full path to rural .epw file to be morphed."""
         return self._epw_path
 
+    @epw_path.setter
+    def epw_path(self, value):
+        if value is not None:
+            assert os.path.exists(
+                value), 'File: "{}" does not exist.'.format(value)
+        self._epw_path = value
+
     @property
     def new_epw_path(self):
         """Get text string for new epw filepath."""
@@ -405,7 +416,8 @@ class UWG(object):
                     self._new_epw_dir = epw_dir
                 if self._new_epw_name is None:
                     self._new_epw_name = epw_name.strip('.epw') + '_UWG.epw'
-            self._new_epw_path = os.path.join(self._new_epw_dir, self._new_epw_name)
+            self._new_epw_path = os.path.join(
+                self._new_epw_dir, self._new_epw_name)
         return self._new_epw_path
 
     @property
@@ -703,57 +715,84 @@ class UWG(object):
 
     @property
     def bld(self):
-        """Get or set matrix representing fraction of urban building stock.
+        """Get or set list of building types, eras, and fractions of urban building stock.
 
-        This property consists of a 16 x 3 matrix referencing the fraction of the urban
-        building stock from 16 building types and 3 built eras representing, in
-        combination with 16 climate zones, 768 building archetypes generated from the
-        Commercial Building Energy Consumption Survey. Each column represent a pre-1980s,
-        post-1980s, or new construction era, and rows represent building types. Custom
-        build types can be added by adding new rows. The sum of the fractional values in
-        the bld matrix must sum to one. For example:
+        This property consists of a list of tuples, each containing a string for the the
+        built era, and a number between 0 and 1, inclusive, defining built stock
+        fraction, i.e ('LargeOffice', 'New', 0.4). The fractions should sum to one.
+
+        768 predefined models are built referencing 16 building types for 3 built eras
+        and 16 climate zones according to models from the Department of Energy (DOE).
+        Choose from the following text identifiers to reference a DOE building type:
+
+        * 'fullservicerestaurant'
+        * 'hospital'
+        * 'largehotel'
+        * 'largeoffice'
+        * 'medoffice'
+        * 'midriseapartment'
+        * 'outpatient'
+        * 'primaryschool'
+        * 'quickservicerestaurant'
+        * 'secondaryschool'
+        * 'smallhotel'
+        * 'smalloffice'
+        * 'standaloneretail'
+        * 'stripmall'
+        * 'supermarket'
+        * 'warehouse'
+
+        Choose from the following built eras:
+
+        * 'pre80'
+        * 'pst80'
+        * 'new'
+
+        Custom building types can also be referenced in this property. For example, a
+        built stock consisting of 40% post-1980's large office, 30% new midrise
+        apartment, and 30% of a pre=1980s custom building type (defined by the user)
+        is referenced as follows:
 
         .. code-block:: python
 
-            # Represent 40% post-1980's LargeOffice, and 60% new construction
-            # MidRiseApartment.
-
-            bld = [[0, 0, 0],  # FullServiceRestaurant
-                   [0, 0, 0],  # Hospital
-                   [0, 0, 0],  # LargeHotel
-                   [0, 0, 0.4],  # LargeOffice
-                   [0, 0, 0],  # MediumOffice
-                   [0, 0, 0.6],  # MidRiseApartment
-                   [0, 0, 0],  # OutPatient
-                   [0, 0, 0],  # PrimarySchool
-                   [0, 0, 0],  # QuickServiceRestaurant
-                   [0, 0, 0],  # SecondarySchool
-                   [0, 0, 0],  # SmallHotel
-                   [0, 0, 0],  # SmallOffice
-                   [0, 0, 0],  # Stand-aloneRetail
-                   [0, 0, 0],  # StripMall
-                   [0, 0, 0],  # SuperMarket
-                   [0, 0, 0]]  # Warehouse
+            bld = [('largeoffice', 'pst80', 0.4),
+                   ('midriseapartment', 'new', 0.3),
+                   ('custombuilding', 'pre80', 0.3)]
         """
         return self._bld
 
     @bld.setter
     def bld(self, value):
 
-        assert isinstance(value, (list, tuple)), 'The bld property must be a list ' \
-            'or tuple. Got {}.'.format(value)
-        type_num = len(value)
-        assert type_num >= 16, 'The bld property must have greater than or equal to ' \
-            '16 rows. Got {} rows.'.format(type_num)
+        assert isinstance(value, (list, tuple)), 'The bld property must be a list. ' \
+            'Got {}.'.format(value)
 
-        self._bld = [[0 for c in range(3)] for r in range(type_num)]
+        # check values and fraction sum.
+        total_frac = 0.0
+        for bld_row in value:
+            assert len(bld_row) == 3, 'Each bld tuple must contain three ' \
+                'items defining building type, era and fraction. Got ' \
+                '{} values.'.format(len(bld_row))
 
-        # Check column number and add value
-        for i in range(type_num):
-            assert len(value[i]) == 3, 'The bld property must be a 16 (or greater) ' \
-                'x 3 matrix. Got {} columns for the row {}.'.format(len(value[i]), i)
-            for j in range(3):
-                self._bld[i][j] = float_in_range(value[i][j])
+            bldtype, builtera, frac = \
+                bld_row[0], bld_row[1], bld_row[2]
+            assert isinstance(bldtype, str), 'The first item in the ' \
+                'bld tuple must be text defining the reference building ' \
+                'type. Got: {}.'.format(bldtype)
+            assert isinstance(builtera, str) and builtera.lower() in REF_BUILTERA_SET, \
+                'The second item in the bld tuple must be text defining the built ' \
+                'era as one of {}. Got: {}.'.format(
+                    REF_BUILTERA, builtera.lower())
+            assert 0.0 <= frac <= 1.0, 'The third item in the bld tuple ' \
+                'must be a value between 0 and 1, inclusive, defining the ' \
+                'fraction of total built stock. Got: {}.'.format(frac)
+            total_frac += frac
+
+        assert total_frac == 1.0, 'The sum of reference building ' \
+            'fractions defined in bld must equal one. Got: {}.'.format(
+                total_frac)
+
+        self._bld = value
 
     @property
     def lattree(self):
@@ -775,32 +814,37 @@ class UWG(object):
 
     @property
     def zone(self):
-        """Get or set number representing an ASHRAE climate zone.
+        """Get or set text representing an ASHRAE climate zone.
 
         Choose from the following:
 
-            1 - 1A (Miami)
-            2 - 2A (Houston)
-            3 - 2B (Phoenix)
-            4 - 3A (Atlanta)
-            5 - 3B-CA (Los Angeles)
-            6 - 3B (Las Vegas)
-            7 - 3C (San Francisco)
-            8 - 4A (Baltimore)
-            9 - 4B (Albuquerque)
-            10 - 4C (Seattle)
-            11 - 5A (Chicago)
-            12 - 5B (Boulder)
-            13 - 6A (Minneapolis)
-            14 - 6B (Helena)
-            15 - 7 (Duluth)
-            16 - 8 (Fairbanks)
+        * '1A' - (i.e Miami)
+        * '2A' - (i.e Houston)
+        * '2B' - (i.e Phoenix)
+        * '3A' - (i.e Atlanta)
+        * '3B-CA' - (i.e Los Angeles)
+        * '3B' - (i.e Las Vegas)
+        * '3C' - (i.e San Francisco)
+        * '4A' - (i.e Baltimore)
+        * '4B' - (i.e Albuquerque)
+        * '4C' - (i.e Seattle)
+        * '5A' - (i.e Chicago)
+        * '5B' - (i.e Boulder)
+        * '6A' - (i.e Minneapolis)
+        * '6B' - (i.e Helena)
+        * '7' - (i.e Duluth)
+        * '8' - (i.e Fairbanks)
         """
         return self._zone
 
     @zone.setter
     def zone(self, value):
-        self._zone = int_in_range(value, 1, 16, 'zone')
+        assert isinstance(value, str), \
+            'zone must be a string. Got: {}.'.format(value)
+        value = value.upper()
+        assert value in REF_ZONETYPE_SET, 'zone must be on of {}. Got: {}.'.format(
+            REF_ZONETYPE, value)
+        self._zone = value
 
     @property
     def vegstart(self):
@@ -1097,9 +1141,6 @@ class UWG(object):
         """
 
         base = {'type': 'UWG'}
-        base['epw_path'] = self.epw_path
-        base['new_epw_dir'] = self._new_epw_dir
-        base['new_epw_name'] = self._new_epw_path
 
         # Add UWG parameters
         for attr in self.PARAMETER_LIST:
@@ -1115,6 +1156,8 @@ class UWG(object):
     def generate(self):
         """Generate all UWG objects after input parameters are set."""
 
+        if not self.epw_path:
+            raise Exception('Cannot generate the UWG while epw_path is None.')
         if self.ref_bem_vector:
             self._customize_reference_data()
         self._read_epw()
@@ -1139,7 +1182,8 @@ class UWG(object):
         * USMData - N x 1 output vector of USM object instance
         """
 
-        self.N = int(self.simTime.days * 24)  # total number of hours in simulation
+        # total number of hours in simulation
+        self.N = int(self.simTime.days * 24)
         n = 0  # weather time step counter
         self.ph = self.simTime.dt / 3600.  # dt (simulation time step) in hours
 
@@ -1152,14 +1196,14 @@ class UWG(object):
 
         print('Simulating new temperature and humidity values for '
               '{} days from {}/{}.'.format(self.nday, self.month, self.day))
-        self.logger.info('Start simulation')
 
         # iterate through every simulation time-step (i.e 5 min) defined by UWG
         for it in range(1, self.simTime.nt, 1):
             # Update water temperature (estimated)
             if self.nSoil < 3:
                 # for BUBBLE/CAPITOUL/Singapore only
-                self.forc.deepTemp = sum(self.forcIP.temp) / float(len(self.forcIP.temp))
+                self.forc.deepTemp = sum(
+                    self.forcIP.temp) / float(len(self.forcIP.temp))
                 self.forc.waterTemp = \
                     sum(self.forcIP.temp) / float(len(self.forcIP.temp)) - 10.0
             else:
@@ -1170,10 +1214,6 @@ class UWG(object):
             # There's probably a better way to update the weather...
             self.simTime.update_date()
 
-            self.logger.info('\n{0} m={1}, d={2}, h={3}, s={4}'.format(
-                __name__, self.simTime.month, self.simTime.day,
-                self.simTime.secDay / 3600., self.simTime.secDay))
-
             # simulation time increment raised to weather time step
             self.ceil_time_step = int(math.ceil(it * self.ph)) - 1
             # minus one to be consistent with forcIP list index
@@ -1183,13 +1223,17 @@ class UWG(object):
             # wind speed (m s-1)
             self.forc.wind = max(self.forcIP.wind[self.ceil_time_step],
                                  self.geoParam.windMin)
-            self.forc.uDir = self.forcIP.uDir[self.ceil_time_step]  # wind direction
+            # wind direction
+            self.forc.uDir = self.forcIP.uDir[self.ceil_time_step]
             # specific humidty (kg kg-1)
             self.forc.hum = self.forcIP.hum[self.ceil_time_step]
-            self.forc.pres = self.forcIP.pres[self.ceil_time_step]  # Pressure (Pa)
-            self.forc.temp = self.forcIP.temp[self.ceil_time_step]  # air temp (C)
+            # Pressure (Pa)
+            self.forc.pres = self.forcIP.pres[self.ceil_time_step]
+            # air temp (C)
+            self.forc.temp = self.forcIP.temp[self.ceil_time_step]
             self.forc.rHum = self.forcIP.rHum[self.ceil_time_step]  # RH (%)
-            self.forc.prec = self.forcIP.prec[self.ceil_time_step]  # Precip (mm h-1)
+            # Precip (mm h-1)
+            self.forc.prec = self.forcIP.prec[self.ceil_time_step]
             # horizontal solar diffuse radiation (W m-2)
             self.forc.dif = self.forcIP.dif[self.ceil_time_step]
             # normal solar direct radiation (W m-2)
@@ -1206,15 +1250,16 @@ class UWG(object):
             # Update building & traffic schedule
             # Assign day type (1 = weekday, 2 = sat, 3 = sun/other)
             if utilities.is_near_zero(self.simTime.julian % 7, 1e-10):
-                self.dayType = 3                                        # Sunday
+                self.dayType = 3  # Sunday
             elif utilities.is_near_zero(self.simTime.julian % 7 - 6., 1e-10):
-                self.dayType = 2                                        # Saturday
+                self.dayType = 2  # Saturday
             else:
-                self.dayType = 1                                        # Weekday
+                self.dayType = 1  # Weekday
 
             # Update anthropogenic heat load for each hour (building & UCM)
             self.UCM.sensAnthrop = \
-                self.sensanth * (self.schtraffic[self.dayType - 1][self.simTime.hourDay])
+                self.sensanth * \
+                (self.schtraffic[self.dayType - 1][self.simTime.hourDay])
 
             # Update the energy components for building types defined in initialize.UWG
             for i in range(len(self.BEM)):
@@ -1238,13 +1283,16 @@ class UWG(object):
                 # Internal Heat Load Schedule (W/m^2 of floor area for Q)
 
                 # Qelec x elec fraction for day
-                self.BEM[i].elec = self.Sch[i].q_elec * self.Sch[i].elec[di][hi]
+                self.BEM[i].elec = self.Sch[i].q_elec * \
+                    self.Sch[i].elec[di][hi]
                 # Qlight x light fraction for day
-                self.BEM[i].light = self.Sch[i].q_light * self.Sch[i].light[di][hi]
+                self.BEM[i].light = self.Sch[i].q_light * \
+                    self.Sch[i].light[di][hi]
                 # Number of occupants x occ fraction for day
                 self.BEM[i].Nocc = self.Sch[i].n_occ * self.Sch[i].occ[di][hi]
                 # Sensible Q occ * fraction occ sensible Q * number of occ
-                self.BEM[i].Qocc = self.sensocc * (1 - self.latfocc) * self.BEM[i].Nocc
+                self.BEM[i].Qocc = self.sensocc * \
+                    (1 - self.latfocc) * self.BEM[i].Nocc
 
                 # SWH and ventilation schedule
 
@@ -1257,7 +1305,8 @@ class UWG(object):
 
                 # This is quite messy, should update
                 # Update internal heat and corresponding fractional loads
-                intHeat = self.BEM[i].light + self.BEM[i].elec + self.BEM[i].Qocc
+                intHeat = self.BEM[i].light + \
+                    self.BEM[i].elec + self.BEM[i].Qocc
                 # W/m2 from light, electricity, occupants
                 self.BEM[i].building.int_heat_day = intHeat
                 self.BEM[i].building.int_heat_night = intHeat
@@ -1287,7 +1336,8 @@ class UWG(object):
             self.UCM, self.UBL, self.BEM = urbflux(
                 self.UCM, self.UBL, self.BEM, self.forc, self.geoParam, self.simTime,
                 self.RSM)
-            self.UCM.UCModel(self.BEM, self.UBL.ublTemp, self.forc, self.geoParam)
+            self.UCM.UCModel(self.BEM, self.UBL.ublTemp,
+                             self.forc, self.geoParam)
             self.UBL.ublmodel(
                 self.UCM, self.RSM, self.rural, self.forc, self.geoParam, self.simTime)
 
@@ -1303,17 +1353,9 @@ class UWG(object):
             # Uforc.temp = copy.copy(self.UCM.canTemp)
             # self.USM.VDM(Uforc,Uroad,self.geoParam,self.simTime)
 
-            self.logger.info('dbT = {}'.format(self.UCM.canTemp-273.15))
-            if n > 0:
-                logging.info('dpT = {}'.format(self.UCM.Tdp))
-                logging.info('RH  = {}'.format(self.UCM.canRHum))
-
             istimestep = utilities.is_near_zero(
                 self.simTime.secDay % self.simTime.timePrint, 1e-10)
             if istimestep and n < self.N:
-
-                self.logger.info(
-                    '{0} ----sim time step = {1}----\n\n'.format(__name__, n))
 
                 self.WeatherData[n] = copy.copy(self.forc)
                 _Tdb, _w, self.UCM.canRHum, _h, self.UCM.Tdp, _v = psychrometrics(
@@ -1322,10 +1364,6 @@ class UWG(object):
                 self.UBLData[n] = copy.copy(self.UBL)
                 self.UCMData[n] = copy.copy(self.UCM)
                 self.RSMData[n] = copy.copy(self.RSM)
-
-                self.logger.info('dbT = {}'.format(self.UCMData[n].canTemp-273.15))
-                self.logger.info('dpT = {}'.format(self.UCMData[n].Tdp))
-                self.logger.info('RH  = {}'.format(self.UCMData[n].canRHum))
 
                 n += 1
 
@@ -1356,7 +1394,8 @@ class UWG(object):
 
         for i in range(8):
             new_epw_line = \
-                '{}\n'.format(reduce(lambda x, y: x + ',' + y, self._header[i]))
+                '{}\n'.format(
+                    reduce(lambda x, y: x + ',' + y, self._header[i]))
             epw_new_id.write(new_epw_line)
 
         for i in range(len(self.epwinput)):
@@ -1384,16 +1423,16 @@ class UWG(object):
         self._init_param_dict = {}
         while count < len(param_data):
             row = param_data[count]
-            row = [row[i].replace(' ', '').lower() for i in range(len(row))]
+            row = [c.replace(' ', '').lower() for c in row]
 
             # optional parameters might be empty so handle separately
             is_optional_parameter = \
-                row[0] in self.OPTIONAL_PARAMETER_SET if len(row) > 0 else False
+                row[0] in self.OPTIONAL_PARAMETER_SET if len(
+                    row) > 0 else False
 
             try:
                 if row == [] or '#' in row[0]:
                     count += 1
-                    continue
                 elif row[0] == 'schtraffic':
                     # SchTraffic: 3 x 24 matrix
                     trafficrows = param_data[count+1:count+4]
@@ -1401,14 +1440,24 @@ class UWG(object):
                         [utilities.str2fl(r[:24]) for r in trafficrows]
                     count += 4
                 elif row[0] == 'bld':
-                    # bld: 17 x 3 matrix
-                    bldrows = param_data[count+1:count+17]
-                    self._init_param_dict[row[0]] = \
-                        [utilities.str2fl(r[:3]) for r in bldrows]
-                    count += 17
+                    # bld: list of (bldtype, builtera, frac)
+                    count += 1
+                    bld = []
+                    nextrow = [c.replace(' ', '').lower()
+                               for c in param_data[count]]
+                    while len(nextrow) > 0 and nextrow[0] in REF_BLDTYPE_SET:
+                        bldtype, builtera, frac = nextrow[0], nextrow[1], nextrow[2]
+                        bld.append((bldtype, builtera, float(frac)))
+                        count += 1
+                        nextrow = [c.replace(' ', '').lower()
+                                   for c in param_data[count]]
+                    self._init_param_dict[row[0]] = bld
+                elif row[0] == 'zone':
+                    self._init_param_dict[row[0]] = row[1]
+                    count += 1
                 elif is_optional_parameter:
-                    self._init_param_dict[row[0]] = \
-                        None if row[1] == '' else float(row[1])
+                    self._init_param_dict[row[0]] = None if row[1] == '' else float(
+                        row[1])
                     count += 1
                 else:
                     self._init_param_dict[row[0]] = float(row[1])
@@ -1420,7 +1469,8 @@ class UWG(object):
         # Set UWG parameters
         for attr in self.PARAMETER_LIST:
             assert attr in self._init_param_dict, 'The {} attribute is not defined in ' \
-                'the {} parameter file.'.format(attr, os.path.split(param_path)[-1])
+                'the {} parameter file.'.format(
+                    attr, os.path.split(param_path)[-1])
             setattr(self, attr, self._init_param_dict[attr])
 
     def _read_epw(self):
@@ -1502,15 +1552,28 @@ class UWG(object):
         self.Sch = []  # list of Schedule objects
 
         # Modify zone to be used as python index
-        zone_idx = self.zone - 1
+        zone_idx = REF_ZONETYPE.index(self.zone)
 
-        for i in range(len(self.refBEM)):  # ~16 building types
-            for j in range(3):  # 3 built eras
-                if self.bld[i][j] > 0.:
+        # Build unique key based on bldtype and builtera strings
+        bld_dict = {bldg[0] + bldg[1]: (bldg[0], REF_BUILTERA.index(bldg[1]), bldg[2])
+                    for bldg in self.bld}
+
+        for i in range(len(self.refBEM)):  # ~16 building types (more w/ custom refs)
+            for j in range(3):  # ~ 3 built eras
+
+                if not self.refBEM[i][j][0]:
+                    # when add custom types some matrix elements are None
+                    continue
+
+                ref_key = \
+                    self.refBEM[i][j][0].bldtype + \
+                    self.refBEM[i][j][0].builtera
+                if ref_key in bld_dict:
                     # Add to BEM list
-                    self.BEM.append(self.refBEM[i][j][zone_idx])
-                    self.BEM[k].frac = self.bld[i][j]
-                    self.BEM[k].fl_area = self.bld[i][j] * total_urban_bld_area
+                    bldtype, builtera_idx, frac = bld_dict[ref_key]
+                    self.BEM.append(self.refBEM[i][builtera_idx][zone_idx])
+                    self.BEM[k].frac = frac
+                    self.BEM[k].fl_area = frac * total_urban_bld_area
 
                     # Overwrite with optional parameters if provided
                     if self.glzr:
@@ -1529,10 +1592,13 @@ class UWG(object):
                     # Keep track of total urban r_glaze, SHGC, and alb_wall for UCM model
                     self.r_glaze_total += \
                         self.BEM[k].frac * self.BEM[k].building.glazing_ratio
-                    self.SHGC_total += self.BEM[k].frac * self.BEM[k].building.shgc
-                    self.alb_wall_total += self.BEM[k].frac * self.BEM[k].wall.albedo
+                    self.SHGC_total += self.BEM[k].frac * \
+                        self.BEM[k].building.shgc
+                    self.alb_wall_total += self.BEM[k].frac * \
+                        self.BEM[k].wall.albedo
                     # Add to schedule list
-                    self.Sch.append(self.refSchedule[i][j][zone_idx])
+                    self.Sch.append(
+                        self.refSchedule[i][builtera_idx][zone_idx])
                     k += 1
 
     def _compute_input(self):
@@ -1559,7 +1625,8 @@ class UWG(object):
         # weather file data for simulation time period
         self.weather = Weather(
             self.epw_path, self.simTime.timeInitial, self.simTime.timeFinal)
-        self.forcIP = Forcing(self.weather.staTemp, self.weather)  # init Forcing obj
+        self.forcIP = Forcing(self.weather.staTemp,
+                              self.weather)  # init Forcing obj
         self.forc = Forcing()  # empty Forcing obj
 
         # Initialize geographic Param and Urban Boundary Layer Objects
@@ -1610,7 +1677,8 @@ class UWG(object):
             self.lat, self.lon, self.gmt, self.h_obs, self.weather.staTemp[0],
             self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
         self.USM = RSMDef(
-            self.lat, self.lon, self.gmt, self.bldheight / 10., self.weather.staTemp[0],
+            self.lat, self.lon, self.gmt, self.bldheight /
+            10., self.weather.staTemp[0],
             self.weather.staPres[0], self.geoParam, self.Z_MESO_PATH)
 
         T_init = self.weather.staTemp[0]
@@ -1633,8 +1701,8 @@ class UWG(object):
             # if soil depth is greater then the thickness of the road
             # we add new slices of soil at max thickness until road is greater or equal
 
-            is_soildepth_equal = \
-                utilities.is_near_zero(self.depth_soil[i][0] - sum(newthickness), 1e-15)
+            is_soildepth_equal = utilities.is_near_zero(
+                self.depth_soil[i][0] - sum(newthickness), 1e-15)
 
             if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
@@ -1649,15 +1717,15 @@ class UWG(object):
             self.road.name)
 
         # Define Rural Element
-        ruralMat, newthickness = \
-            self._procmat(self.rural, self.MAXTHICKNESS, self.MINTHICKNESS)
+        ruralMat, newthickness = self._procmat(
+            self.rural, self.MAXTHICKNESS, self.MINTHICKNESS)
 
         for i in range(self.nSoil):
             # if soil depth is greater then the thickness of the road
             # we add new slices of soil at max thickness until road is greater or equal
 
-            is_soildepth_equal = \
-                utilities.is_near_zero(self.depth_soil[i][0] - sum(newthickness), 1e-15)
+            is_soildepth_equal = utilities.is_near_zero(
+                self.depth_soil[i][0] - sum(newthickness), 1e-15)
 
             if is_soildepth_equal or (self.depth_soil[i][0] > sum(newthickness)):
                 while self.depth_soil[i][0] > sum(newthickness):
@@ -1693,10 +1761,8 @@ class UWG(object):
         Returns:
             Tuple consisting of validated ref_bem_vector and ref_sch_vector.
         """
-        # efficient check for null vector
-        try:
-            reftypeidx = max([ref_bem.bldtype for ref_bem in ref_bem_vector])
-        except ValueError:
+        # check for null vector
+        if ref_bem_vector is None:
             return None, None
 
         assert len(ref_sch_vector) == len(ref_bem_vector), 'The ' \
@@ -1704,27 +1770,30 @@ class UWG(object):
             'length. Got lengths {} and {}, respectively.'.format(
                 len(ref_sch_vector), len(ref_bem_vector))
 
-        assert reftypeidx <= (len(self.bld) - 1), 'The bld matrix should be ' \
-            'extended with additional rows if new bldtypes are being added to the ' \
-            'UWG reference matrices. Currently the bldtype indices in the custom ' \
-            'objects defined in ref_bem_vector and ref_sch_vector are greater ' \
-            'than the number of rows in the bld matrix.'
-
         assert all(isinstance(v, SchDef) for v in ref_sch_vector), 'All items in the ' \
             'ref_sch_vector must be a SchDef object.'
         assert all(isinstance(v, BEMDef) for v in ref_bem_vector), 'All items in the ' \
             'ref_bem_vector must be a BEMDef object.'
+
+        for ref_bem, ref_sch in zip(ref_bem_vector, ref_sch_vector):
+            assert ref_bem.bldtype == ref_sch.bldtype, 'The bldtype for ' \
+                'corresponding items in ref_bem_vector and ref_sch_vector must be the ' \
+                'same. Got {} and {}.'.format(ref_bem.bldtype, ref_sch.bldtype)
+            assert ref_bem.builtera == ref_sch.builtera, 'The builtera for ' \
+                'corresponding items in ref_bem_vector and ref_sch_vector must be the ' \
+                'same. Got {} and {}.'.format(
+                    ref_bem.builtera, ref_sch.builtera)
 
         return ref_bem_vector, ref_sch_vector
 
     def _customize_reference_data(self):
         """Customize refBEM and refSchedule data by extending or overriding DOE reference data.
 
-        The custom BEMDef and SchDef objects must contain bldtype and builtera values
-        referencing a nonzero fraction of urban area in the UWG bld matrix to be used in
-        the UWG model. Also note that this method should be used before calling the
-        generate method, in order to ensure the reference data gets transferred over to
-        the UWG object BEM and Schedule properties.
+        The custom BEMDef and SchDef objects must contain bldtype and builtera
+        identifiers referencing a nonzero fraction of urban area in the UWG bld property
+        to be used in the UWG model. Also note that this method should be used before
+        calling the generate method, in order to ensure the reference data gets
+        transferred over to the UWG object BEM and Schedule properties.
 
         Args:
             ref_bem_vector: List of custom BEMDef objects to override or add to
@@ -1733,34 +1802,40 @@ class UWG(object):
                 the refSchedule matrix according to the SchDef bldtype and builtera
                 values.
         """
-        zi = self.zone - 1
+        zi = REF_ZONETYPE.index(self.zone)
         # Insert or extend refSchedule matrix
         for sch in self.ref_sch_vector:
-            ti, ei = sch.bldtype, sch.builtera
+            ei = REF_BUILTERA.index(sch.builtera)
             try:
-                self.refSchedule[ti][ei][zi] = sch
-            except IndexError:
+                ti = REF_BLDTYPE.index(sch.bldtype)  # will fail if custom type
+                print('Overwrite DOE reference schedule "{} {}" '
+                      'with custom schedule.'.format(sch.builtera, sch.bldtype))
+            except ValueError:
                 # Add new rows based on type index in object
-                new_rows_num = ti + 1 - len(self.refSchedule)
-                for i in range(new_rows_num):
-                    self.refSchedule.append(
-                        [[None for c in range(16)] for r in range(3)])
-                self.refSchedule[ti][ei][zi] = sch
+                ti = len(self.refSchedule)
+                self.refSchedule.append([[None for c in range(16)]
+                                         for r in range(3)])
+                print('Add custom schedule for "{} {}".'.format(
+                    sch.builtera, sch.bldtype))
+            self.refSchedule[ti][ei][zi] = sch
 
         # Insert or extend refBEM matrix
         for bem in self.ref_bem_vector:
-            ti, ei = bem.bldtype, bem.builtera
+            ei = REF_BUILTERA.index(bem.builtera)
             try:
-                self.refBEM[ti][ei][zi] = bem
-            except IndexError:
+                ti = REF_BLDTYPE.index(bem.bldtype)  # will fail if custom type
+                print('Overwrite DOE reference BEM "{} {}" '
+                      'with custom schedule.'.format(bem.builtera, bem.bldtype))
+            except ValueError:
                 # Add new rows based on type index in object
-                new_rows_num = ti + 1 - len(self.refBEM)
-                for i in range(new_rows_num):
-                    self.refBEM.append(
-                        [[None for c in range(16)] for r in range(3)])
-                self.refBEM[ti][ei][zi] = bem
+                ti = len(self.refBEM)
+                self.refBEM.append([[None for c in range(16)]
+                                    for r in range(3)])
+                print('Add custom bem for "{} {}".'.format(
+                    bem.builtera, bem.bldtype))
+            self.refBEM[ti][ei][zi] = bem
 
-    @staticmethod
+    @ staticmethod
     def load_refDOE(refDOE_path=REFDOE_PATH):
         """Static method to deserialize DOE reference data.
 
@@ -1781,7 +1856,7 @@ class UWG(object):
             refSchedule = pickle.load(refDOE_file)
         return refBEM, refSchedule
 
-    @staticmethod
+    @ staticmethod
     def _procmat(materials, max_thickness, min_thickness):
         """Processes material layer slices in Element objects based on layer number and depth.
 
@@ -1798,10 +1873,13 @@ class UWG(object):
             for j in range(len(materials.layer_thickness_lst)):
                 # Break up each layer that's more than max thickness (0.05m)
                 if materials.layer_thickness_lst[j] > max_thickness:
-                    nlayers = math.ceil(materials.layer_thickness_lst[j] / float(max_thickness))
+                    nlayers = math.ceil(
+                        materials.layer_thickness_lst[j] / float(max_thickness))
                     for i in range(int(nlayers)):
-                        newmat.append(Material(k[j], Vhc[j], name=materials.name))
-                        newthickness.append(materials.layer_thickness_lst[j] / float(nlayers))
+                        newmat.append(
+                            Material(k[j], Vhc[j], name=materials.name))
+                        newthickness.append(
+                            materials.layer_thickness_lst[j] / float(nlayers))
                 # Material that's less then min_thickness is not added.
                 elif materials.layer_thickness_lst[j] < min_thickness:
                     print('WARNING: Material layer too thin (less then 2 cm) to process.'
@@ -1815,10 +1893,12 @@ class UWG(object):
 
             # Divide single layer into two (UWG assumes at least 2 layers)
             if materials.layer_thickness_lst[0] > max_thickness:
-                nlayers = math.ceil(materials.layer_thickness_lst[0] / float(max_thickness))
+                nlayers = math.ceil(
+                    materials.layer_thickness_lst[0] / float(max_thickness))
                 for i in range(int(nlayers)):
                     newmat.append(Material(k[0], Vhc[0], name=materials.name))
-                    newthickness.append(materials.layer_thickness_lst[0] / float(nlayers))
+                    newthickness.append(
+                        materials.layer_thickness_lst[0] / float(nlayers))
             # Material should be at least 1cm thick, so if we're here,
             # should give warning and stop. Only warning given for now.
             elif materials.layer_thickness_lst[0] < min_thickness*2:

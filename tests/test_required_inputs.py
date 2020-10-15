@@ -36,8 +36,7 @@ def test_required_inputs_wrong_type():
 
     testuwg.schtraffic = [[0.1 for i in range(24)]] * 3  # length 3 list
 
-    # assert len(self.bld) == 16
     with pytest.raises(AssertionError):
         testuwg.bld = 4543
 
-    testuwg.bld = [[1 / 48.0 for y in range(3)] for x in range(16)]
+    testuwg.bld = [['test', 'pre80', 0.1], ['test2', 'pre80', 0.9]]

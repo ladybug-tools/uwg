@@ -10,9 +10,9 @@ import os
 def test_viz():
     runner = CliRunner()
     result = runner.invoke(viz)
-    assert result.exit_code == 0
-    assert result.output.startswith('vi')
-    assert result.output.endswith('z!\n')
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith('vi'), result.output
+    assert result.output.endswith('z!\n'), result.output
 
 
 def test_model_validate():
@@ -21,11 +21,11 @@ def test_model_validate():
     runner = CliRunner()
     input_uwg = './tests/json/uwg.json'
     result = runner.invoke(validate, ['model', input_uwg])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
     input_uwg = './tests/json/custom_uwg.json'
     result = runner.invoke(validate, ['model', input_uwg])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
 
 def test_param_validate():
@@ -34,11 +34,12 @@ def test_param_validate():
     runner = CliRunner()
     input_uwg = './tests/parameters/initialize_singapore.uwg'
     result = runner.invoke(validate, ['param', input_uwg])
-    assert result.exit_code == 0
+    print(result.output)
+    assert result.exit_code == 0, result.output
 
     input_uwg = './tests/parameters/initialize_singapore_error.uwg'
     result = runner.invoke(validate, ['param', input_uwg])
-    assert result.exit_code == 1
+    assert result.exit_code == 1, result.output
 
 
 def test_uwg_simulate():
@@ -48,9 +49,10 @@ def test_uwg_simulate():
 
     # test with basic command
     input_uwg = './tests/json/uwg.json'
+    epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
 
-    result = runner.invoke(simulate, ['model', input_uwg])
-    assert result.exit_code == 0
+    result = runner.invoke(simulate, ['model', input_uwg, epw_path])
+    assert result.exit_code == 0, result.output
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
     assert os.path.isfile(output_epw)
@@ -59,11 +61,10 @@ def test_uwg_simulate():
     # test with optional arguments
     new_epw_dir = './tests/epw_uwg'
     new_epw_name = 'custom_test_singapore.epw'
-    epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
     result = runner.invoke(
-        simulate, ['model', input_uwg, '--epw-path', epw_path, '--new-epw-dir',
+        simulate, ['model', input_uwg, epw_path, '--new-epw-dir',
                    new_epw_dir, '--new-epw-name', new_epw_name])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
     default_output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
     assert not os.path.isfile(default_output_epw)
@@ -82,8 +83,8 @@ def test_custom_uwg_simulate():
     input_uwg = './tests/json/custom_uwg.json'
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
     result = runner.invoke(
-        simulate, ['model', input_uwg, '--epw-path', epw_path])
-    assert result.exit_code == 0
+        simulate, ['model', input_uwg, epw_path])
+    assert result.exit_code == 0, result.output
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
     assert os.path.isfile(output_epw)
@@ -100,7 +101,7 @@ def test_param_simulate():
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
 
     result = runner.invoke(simulate, ['param', input_uwg, epw_path])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
     assert os.path.isfile(output_epw)

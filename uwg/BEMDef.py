@@ -2,7 +2,7 @@
 
 from .building import Building
 from .element import Element
-from .utilities import float_in_range
+from .utilities import REF_BUILTERA_SET, REF_BUILTERA
 
 
 class BEMDef(object):
@@ -13,19 +13,18 @@ class BEMDef(object):
         mass: Element object representing building internal mass.
         wall: Element object representing building wall.
         roof: Element object representing building roof.
-        frac: Fraction of the urban floor space of this building typology.
-        bldtype: Number between 0 and 15 corresponding to the following building
-            types: FullServiceRestaurant (0), Hospital (1), LargeHotel (2),
-            LargeOffice (3), MediumOffice (4), MidRiseApartment (5), OutPatient (6),
-            PrimarySchool (7), QuickServiceRestaurant (8), SecondarySchool (9),
-            SmallHotel (10), SmallOffice (11), StandaloneRetail (12), StripMall (13),
-            SuperMarket (14), Warehouse (15). Additional building types can be defined
-            with a number greater then 15. This value is used to reference the fraction
-            of urban area the BEMDef object defines in the UWG bld matrix.
-        builtera: Number between 0 and 2 corresponding to the following built eras:
-            Pre-1980s (0), Post1980s (1), New construction (2). This value is used to
-            reference the fraction of urban area the BEMDef object defines in the UWG
-            bld matrix.
+        bldtype: Text referring to a building type. To reference (or
+            overwrite) a DOE reference building, text must be one of the
+            following: 'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
+            'mediumoffice', 'midriseapartment', 'outpatient', 'primaryschool',
+            'quickservicerestaurant', 'secondaryschool', 'smallhotel', 'smalloffice',
+            'standaloneretail', 'stripmall', 'supermarket', or 'warehouse'.
+            This value along with the builtera is used to reference the fraction of
+            urban area the building defines in the UWG bld matrix.
+        builtera: Text defining building built era. Must be one of the following:
+            'pre80' (pre-1980s), 'pst80' (post-1980s), or 'new' (new constrution).
+            This value and the bldtype is used to reference the fraction of urban area
+            the building defines in the UWG bld matrix.
 
     Properties:
         * building -- Building object
@@ -49,14 +48,13 @@ class BEMDef(object):
         * T_roofin -- roof surface temp (int) [K]
     """
 
-    def __init__(self, building, mass, wall, roof, frac, bldtype, builtera):
+    def __init__(self, building, mass, wall, roof, bldtype, builtera):
 
         # Initialization
         self.building = building
         self.mass = mass
         self.wall = wall
         self.roof = roof
-        self.frac = frac
 
         # Properties to be set in readDOE
         self.bldtype = bldtype  # DOE reference building type
@@ -64,6 +62,7 @@ class BEMDef(object):
         self.zonetype = None  # climate zone number (only used in testing).
 
         # Properties to be computed during UWG simulation
+        self.frac = 0.0
         self.fl_area = 0
         self.elec = 0
         self.gas = 0
@@ -90,7 +89,6 @@ class BEMDef(object):
             "mass": mass.to_dict()  # dictionary representation of mass Element.
             "wall": wall.to_dict()  # dictionary representation of wall Element.
             "roof": roof.to_dict()  # dictionary representation of roof Element.
-            "frac": 0.4,  # fraction of urban floor space of this type
             "bldtype": 0,  # building type index
             "builtera": 1,  # built era index
             }
@@ -102,10 +100,9 @@ class BEMDef(object):
         mass = Element.from_dict(data['mass'])
         wall = Element.from_dict(data['wall'])
         roof = Element.from_dict(data['roof'])
-        frac = data['frac']
         bldtype, builtera = data['bldtype'], data['builtera']
 
-        return cls(building, mass, wall, roof, frac, bldtype, builtera)
+        return cls(building, mass, wall, roof, bldtype, builtera)
 
     @property
     def building(self):
@@ -152,13 +149,60 @@ class BEMDef(object):
         self._wall = value
 
     @property
-    def frac(self):
-        """Get or set fraction of the urban floor space of this building typology."""
-        return self._frac
+    def bldtype(self):
+        """Get or set text for bldtype.
 
-    @frac.setter
-    def frac(self, value):
-        self._frac = float_in_range(value, 0, 1, 'frac')
+        By default, 16 building types are defined in the UWG according to models from t
+        he Department of Energy (DOE). Choose from the following to reference a
+        DOE building type:
+
+        * 'fullservicerestaurant'
+        * 'hospital'
+        * 'largehotel'
+        * 'largeoffice'
+        * 'medoffice'
+        * 'midriseapartment'
+        * 'outpatient'
+        * 'primaryschool'
+        * 'quickservicerestaurant'
+        * 'secondaryschool'
+        * 'smallhotel'
+        * 'smalloffice'
+        * 'standaloneretail'
+        * 'stripmall'
+        * 'supermarket'
+        * 'warehouse'
+
+        Custom building types can also be defined with a new name. If a custom BEMDef is
+        defined with the same name as a reference DOE building type from the list above,
+        the reference BEMDef will be overwritten by the custom BEMDef.
+        """
+        return self._bldtype
+
+    @bldtype.setter
+    def bldtype(self, value):
+        assert isinstance(value, str), 'The bldtype must be a string. ' \
+            'Got: {}.'.format(value.lower())
+        self._bldtype = value
+
+    @property
+    def builtera(self):
+        """Get or set text for built era.
+
+        Choose from the following:
+
+        * 'pre80'
+        * 'pst80'
+        * 'new'
+        """
+        return self._builtera
+
+    @builtera.setter
+    def builtera(self, value):
+        assert isinstance(value, str) and value in REF_BUILTERA_SET, \
+            'The builtera must be one of {}.Got: {}.'.format(
+                REF_BUILTERA, value.lower())
+        self._builtera = value
 
     def to_dict(self):
         """BEMDef dictionary representation."""
@@ -167,7 +211,6 @@ class BEMDef(object):
         base['mass'] = self.mass.to_dict()
         base['wall'] = self.wall.to_dict()
         base['roof'] = self.roof.to_dict()
-        base['frac'] = self.frac
         base['bldtype'] = self.bldtype
         base['builtera'] = self.builtera
         return base

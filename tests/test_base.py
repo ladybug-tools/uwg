@@ -27,7 +27,8 @@ def auto_setup_uwg(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PATH,
         setup_log_file(log_file_name, log_level)
 
     if param_path:
-        model = UWG.from_param_file(epw_path, param_path, new_epw_dir=NEW_DIR)
+        model = UWG.from_param_file(
+            param_path, epw_path=epw_path, new_epw_dir=NEW_DIR)
     else:
         model = UWG(epw_path, new_epw_dir=NEW_DIR)
 
@@ -38,7 +39,6 @@ def auto_setup_uwg(epw_path=DEFAULT_EPW_PATH, param_path=DEFAULT_PARAM_PATH,
 
 
 def set_input_manually(model):
-
     """Assign everything manually from ../resources/initialize_singapore.uwg"""
 
     # Define Simulation and Weather parameters
@@ -80,27 +80,11 @@ def set_input_manually(model):
     model.sensanth = 20.
 
     # Define optional Building characteristics
-    model.bld = [
-        [0, 0, 0],    # FullServiceRestaurant
-        [0, 0, 0],    # Hospital
-        [0, 0, 0],    # LargeHotel
-        [0, .4, 0],   # LargeOffice
-        [0, 0, 0],    # MediumOffice
-        [0, .6, 0],   # MidRiseApartment
-        [0, 0, 0],    # OutPatient
-        [0, 0, 0],    # PrimarySchool
-        [0, 0, 0],    # QuickServiceRestaurant
-        [0, 0, 0],    # SecondarySchool
-        [0, 0, 0],    # SmallHotel
-        [0, 0, 0],    # SmallOffice
-        [0, 0, 0],    # Stand-aloneRetail
-        [0, 0, 0],    # StripMall
-        [0, 0, 0],    # SuperMarket
-        [0, 0, 0]     # Warehouse
-    ]
+    model.bld = [('largeoffice', 'pst80', 0.4),
+                 ('midriseapartment', 'pst80', 0.6)]
 
     # climate Zone
-    model.zone = 1.0
+    model.zone = '1A'
 
     # Vegetation parameters
     model.vegstart = 4.0
@@ -138,7 +122,8 @@ def setup_open_matlab_ref(matlab_class_dir, matlab_ref_file_path):
         except ValueError:
             return x
 
-    matlab_path = os.path.join(MATLAB_DIR, matlab_class_dir, matlab_ref_file_path)
+    matlab_path = os.path.join(
+        MATLAB_DIR, matlab_class_dir, matlab_ref_file_path)
     if not os.path.exists(matlab_path):
         raise Exception("Failed to open {}!".format(matlab_path))
 

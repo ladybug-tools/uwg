@@ -8,8 +8,9 @@ def test_param_init():
     """Param init test."""
 
     epw_path = \
-        os.path.join(os.path.dirname(__file__), 'epw', 'SGP_Singapore.486980_IWEC.epw')
-    testuwg = UWG.from_param_args(epw_path, 10, 0.5, 0.5, 1)
+        os.path.join(os.path.dirname(__file__), 'epw',
+                     'SGP_Singapore.486980_IWEC.epw')
+    testuwg = UWG.from_param_args(10, 0.5, 0.5, '1A', epw_path=epw_path)
 
     nightStart = 18.
     nightEnd = 8.

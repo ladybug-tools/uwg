@@ -18,6 +18,25 @@ except AttributeError:
     INFNEG = float('-inf')
 
 
+# DOE References
+REF_BLDTYPE = ('fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
+               'medoffice', 'midriseapartment', 'outpatient', 'primaryschool',
+               'quickservicerestaurant', 'secondaryschool', 'smallhotel',
+               'smalloffice', 'standaloneretail', 'stripmall', 'supermarket',
+               'warehouse')
+REF_BUILTERA = ('pre80', 'pst80', 'new')
+REF_ZONETYPE = ('1A', '2A', '2B', '3A', '3B-CA', '3B', '3C', '4A', '4B', '4C', '5A',
+                '5B', '6A', '6B', '7', '8')
+REF_BLDTYPE_SET = {'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
+                   'medoffice', 'midriseapartment', 'outpatient', 'primaryschool',
+                   'quickservicerestaurant', 'secondaryschool', 'smallhotel',
+                   'smalloffice', 'standaloneretail', 'stripmall', 'supermarket',
+                   'warehouse'}
+REF_ZONETYPE_SET = {'1A', '2A', '2B', '3A', '3B-CA', '3B', '3C', '4A', '4B', '4C', '5A',
+                    '5B', '6A', '6B', '7', '8'}
+REF_BUILTERA_SET = {'pre80', 'pst80', 'new'}
+
+
 def is_near_zero(num, eps=1e-10):
     return abs(float(num)) < eps
 

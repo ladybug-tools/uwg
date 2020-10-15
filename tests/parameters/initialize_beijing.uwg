@@ -37,7 +37,7 @@ sensAnth,20,      # non-building sensible heat at street level [aka. heat from c
 # 7(Duluth)                     15
 # 8(Fairbanks)                  16
 
-zone,8,
+zone,4A,
 
 # Vegetation parameters
 grassCover,0.4,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
@@ -57,23 +57,36 @@ SchTraffic,
 
 # Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
 # Note that sum(bld) must be equal to 1
+# Choose from the following building types:
+# FullServiceRestaurant
+# Hospital
+# LargeHotel
+# LargeOffice
+# MediumOffice
+# MidRiseApartment
+# OutPatient
+# PrimarySchool
+# QuickServiceRestaurant
+# SecondarySchool
+# SmallHotel
+# SmallOffice
+# Stand-aloneRetail
+# StripMall
+# SuperMarket
+# Warehouse
+# Choose from the following built eras:
+# Pre80
+# Pst80
+# New
+
 bld,
-0,0,0,    # FullServiceRestaurant
-0,0,0,    # Hospital
-0,0.2,0,    # LargeHotel
-0,0,0,  # LargeOffice
-0,0,0.2,    # MediumOffice
-0,0,0.2,  # MidRiseApartment
-0,0,0,    # OutPatient
-0.2,0,0,    # PrimarySchool
-0,0,0,    # QuickServiceRestaurant
-0,0,0,    # SecondarySchool
-0,0.2,0,    # SmallHotel
-0,0,0,    # SmallOffice
-0,0,0,    # Stand-aloneRetail
-0,0.2,0,    # StripMall
-0,0,0,    # SuperMarket
-0,0,0,    # Warehouse
+LargeHotel, Pst80, 0.2
+MediumOffice, New, 0.2
+MidRiseApartment, New, 0.2
+PrimarySchool, Pre80, 0.2
+SmallHotel, Pst80, 0.2
+StripMall, Pst80, 0.2
+
 
 # =================================================
 # OPTIONAL URBAN PARAMETERS

@@ -24,4 +24,4 @@ AIR
 220.7100000000000080
 LargeOffice
 Pst80
-1A (Miami)
+1A

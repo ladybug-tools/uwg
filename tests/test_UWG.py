@@ -5,19 +5,20 @@ import pytest
 from copy import deepcopy
 from .test_base import auto_setup_uwg, set_input_manually
 from uwg import SchDef, BEMDef, Building, Element, Material, UWG
-from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg.utilities import is_near_zero
+from uwg.utilities import REF_BLDTYPE, REF_BUILTERA
 
 
 def test_init():
     """Test initialization methods."""
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    param_path = os.path.join(test_dir, 'parameters', 'initialize_singapore.uwg')
+    param_path = os.path.join(test_dir, 'parameters',
+                              'initialize_singapore.uwg')
     epw_path = os.path.join(test_dir, 'epw', 'SGP_Singapore.486980_IWEC.epw')
 
     refBEM, refSch = UWG.load_refDOE()
-    refBEM[0][2][0].frac = 0.9
+    refBEM[0][2][0].building.shgc = 0.9
     ref_bem_vec = [refBEM[0][2][0], refBEM[2][2][0]]
     ref_sch_vec = [refSch[0][2][0], refSch[2][2][0]]
 
@@ -25,36 +26,47 @@ def test_init():
     UWG(epw_path)
 
     # from param_file
-    UWG.from_param_file(epw_path, param_path)
+    UWG.from_param_file(param_path, epw_path)
 
     # from args
-    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1)
-    model = UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=[],
-                                ref_sch_vector=[])
+    UWG.from_param_args(bldheight=10.0, blddensity=0.5, vertohor=0.5, zone='1A',
+                        epw_path=epw_path)
+    model = UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+                                ref_bem_vector=[], ref_sch_vector=[],
+                                epw_path=epw_path)
     model.generate()
-    assert model.ref_bem_vector is None
-    assert model.ref_sch_vector is None
+    assert model.ref_bem_vector == []
+    assert model.ref_sch_vector == []
 
-    UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
-                        ref_sch_vector=ref_sch_vec)
+    UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+                        ref_bem_vector=ref_bem_vec, ref_sch_vector=ref_sch_vec,
+                        epw_path=epw_path)
     with pytest.raises(AssertionError):
-        UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
-                            ref_sch_vector=ref_sch_vec[:1])
+        UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+                            ref_bem_vector=ref_bem_vec, ref_sch_vector=ref_sch_vec[:1])
     with pytest.raises(AssertionError):
-        UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=None,
-                            ref_sch_vector=ref_sch_vec)
+        UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+                            ref_bem_vector=None, ref_sch_vector=ref_sch_vec)
+    with pytest.raises(Exception):
+        # No epw_path
+        model = UWG.from_param_args(
+            bldheight=10.0, blddensity=0.5, vertohor=0.5, zone='1A')
+        model.generate()
 
     # from dict
-    data = UWG.from_param_args(epw_path, 10.0, 0.5, 0.5, 1).to_dict(include_refDOE=False)
+    data = UWG.from_param_args(
+        10.0, 0.5, 0.5, '1A').to_dict(include_refDOE=False)
     UWG.from_dict(data)
     model1 = UWG.from_param_args(
-        epw_path, 10.0, 0.5, 0.5, 1, ref_bem_vector=ref_bem_vec,
+        10.0, 0.5, 0.5, '1A', ref_bem_vector=ref_bem_vec,
         ref_sch_vector=ref_sch_vec)
     data = model1.to_dict(include_refDOE=True)
-    model2 = UWG.from_dict(data)
+    model2 = UWG.from_dict(data, epw_path=epw_path)
     model2.generate()
-    assert model2.ref_bem_vector[0].frac == pytest.approx(0.9, abs=1e-10)
-    assert model2.refBEM[0][2][0].frac == pytest.approx(0.9, abs=1e-10)
+    assert model2.ref_bem_vector[0].building.shgc == pytest.approx(
+        0.9, abs=1e-10)
+    assert model2.refBEM[0][2][0].building.shgc == pytest.approx(
+        0.9, abs=1e-10)
 
 
 def test_dict():
@@ -65,9 +77,8 @@ def test_dict():
     # Set some optional values
     model1.shgc = 0.3
     model1.glzr = 0.5
-    model1.bld = [[0 for c in range(3)] for r in range(16)]
-    model1.bld[6][0] = 0.1
-    model1.bld[6][2] = 0.9
+    model1.bld = [('outpatient', 'pre80', 0.1),
+                  ('outpatient', 'new', 0.9)]
 
     # make dict
     uwgdict = model1.to_dict()
@@ -85,8 +96,8 @@ def test_dict():
     model1.glzr == pytest.approx(model2.glzr, abs=1e-10)
 
     # bld matrix
-    model2.bld[6][0] == pytest.approx(0.1, abs=1e-10)
-    model2.bld[6][2] == pytest.approx(0.9, abs=1e-10)
+    model2.bld[0][2] == pytest.approx(0.1, abs=1e-10)
+    model2.bld[1][2] == pytest.approx(0.9, abs=1e-10)
 
     # Test error
     with pytest.raises(AssertionError):
@@ -100,17 +111,18 @@ def test_sch_refDOE():
     model1 = auto_setup_uwg()
 
     # Set bld matrix and zone
-    model1.bld = [[0 for i in range(3)] for j in range(16)]
-    model1.bld[1][2] = 1
-    model1.zone = 1
+    model1.bld = [('hospital', 'new', 1)]
+    model1.zone = '1A'
 
     # add schedule to type=2, era=3
     testweek = [[0.1 for i in range(24)] for j in range(3)]
-    model1._ref_bem_vector = [model1.refBEM[0][0][0]]
+    refbem = model1.refBEM[0][0][0]
+    refbem.bldtype, refbem.builtera = 'hospital', 'new'
+    model1._ref_bem_vector = [refbem]
     model1._ref_sch_vector = \
         [SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek, cool=testweek,
                 heat=testweek, swh=testweek, q_elec=18.9, q_gas=3.2, q_light=18.9,
-                n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype=1, builtera=2)]
+                n_occ=0.12, vent=0.0013, v_swh=0.2846, bldtype='hospital', builtera='new')]
 
     model1.generate()  # initialize BEM, Sch objects
 
@@ -119,11 +131,11 @@ def test_sch_refDOE():
     assert 'ref_sch_vector' in uwgdict
     assert len(uwgdict['ref_sch_vector']) == 1
 
-    model2 = model1.from_dict(uwgdict)
+    model2 = model1.from_dict(uwgdict, epw_path=model1.epw_path)
     model2.generate()
 
     # Check values
-    assert model2.bld[1][2] == pytest.approx(1, abs=1e-10)
+    assert model2.bld[0][2] == pytest.approx(1, abs=1e-10)
     testsch = model2.refSchedule[1][2][0]
     for i in range(3):
         for j in range(24):
@@ -134,31 +146,32 @@ def test_sch_refDOE():
     model1 = auto_setup_uwg()
 
     # Set bld matrix and zone
-    model1.bld = [[0 for i in range(3)] for j in range(18)]
-    model1.bld[17][2] = 1
-    model1.zone = 1
+    model1.bld = [('customwarehouse', 'new', 1)]
+    model1.zone = '1A'
 
     testweek = [[0.2 for i in range(24)] for j in range(3)]
     newsch = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
                     cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
                     q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
-                    bldtype=17, builtera=2)
+                    bldtype='customwarehouse', builtera='new')
 
     newbem = _generate_bemdef()
+    newbem.bldtype = 'customwarehouse'
+    newbem.builtera = 'new'
     model1.ref_bem_vector = [newbem]
     model1.ref_sch_vector = [newsch]
 
     uwgdict = model1.to_dict(include_refDOE=True)
-    model2 = model1.from_dict(uwgdict)
+    model2 = model1.from_dict(uwgdict, epw_path=model1.epw_path)
     model2.generate()
 
     # check lengths
     assert len(uwgdict['ref_sch_vector']) == 1
-    assert len(model2.refSchedule) == 18
-    assert len(model2.bld) == 18
+    assert len(model2.refSchedule) == 17
+    assert len(model2.bld) == 1
 
     # Check values
-    testsch = model2.refSchedule[17][2][0]
+    testsch = model2.refSchedule[16][2][0]
     for i in range(3):
         for j in range(24):
             assert testsch.elec[i][j] == pytest.approx(0.2, abs=1e-10)
@@ -171,31 +184,31 @@ def test_bem_refDOE():
     model1 = auto_setup_uwg()
 
     # Set bld matrix and zone
-    model1.bld = [[0 for i in range(3)] for j in range(16)]
-    model1.bld[1][2] = 0.814
-    model1.zone = 1
+    model1.bld = [('hospital', 'new', 1)]
+    model1.zone = '1A'
 
     # add schedule to type=1, era=2
     bem = _generate_bemdef()
-    bem.bldtype = 1
-    bem.builtera = 2
+    bem.bldtype = 'hospital'
+    bem.builtera = 'new'
     bem.building.cop = 4000.0
     bem.roof.emissivity = 0.001
+
     model1.ref_bem_vector = [bem]
-    model1.ref_sch_vector = [model1.refSchedule[0][0][0]]
+    model1.ref_sch_vector = [model1.refSchedule[1][2][0]]
 
     # make dict
     uwgdict = model1.to_dict(include_refDOE=True)
     assert 'ref_bem_vector' in uwgdict
     assert len(uwgdict['ref_bem_vector']) == 1
 
-    model2 = model1.from_dict(uwgdict)
+    model2 = model1.from_dict(uwgdict, epw_path=model1.epw_path)
 
     # Test default values being overwritten with compute_BEM
     assert model2.refBEM[1][2][0].frac == pytest.approx(0.0, abs=1e-10)
     model2.generate()
     # Object will be linked therefore modified
-    assert model2.refBEM[1][2][0].frac == pytest.approx(0.814, abs=1e-10)
+    assert model2.refBEM[1][2][0].frac == pytest.approx(1, abs=1e-10)
 
     # Check values
     assert len(model2.BEM) == 1
@@ -209,33 +222,33 @@ def test_customize_reference_data():
     """Test adding reference DOE data to UWG."""
 
     model = auto_setup_uwg()
-    model.zone = 15
-    zi = model.zone - 1
+    model.zone = '7'
+    zi = 14
 
     # make new sched and unrealistic values
     testweek = [[2000.0 for i in range(24)] for j in range(3)]
     newsch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
                      cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
                      q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
-                     bldtype=5, builtera=0)
+                     bldtype='midriseapartment', builtera='pre80')
     testweek = [[1000.0 for i in range(24)] for j in range(3)]
     newsch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
                      cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
                      q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013, v_swh=0.2846,
-                     bldtype=19, builtera=2)
+                     bldtype='customtype', builtera='new')
 
     # make new blds and add unrealistic values
     bem1 = _generate_bemdef()
-    bem1.bldtype = 5
-    bem1.builtera = 0
-    bem1.frac = 0.314
+    bem1.bldtype = 'midriseapartment'
+    bem1.builtera = 'pre80'
+    bem1.frac = 0.314  # will be ovewrtten
     bem1.building.cop = 3000.0
     bem1.roof.emissivity = 0.0
 
     bem2 = deepcopy(_generate_bemdef())
-    bem2.bldtype = 19
-    bem2.builtera = 2
-    bem2.frac = 0.714
+    bem2.bldtype = 'customtype'
+    bem2.builtera = 'new'
+    bem2.frac = 0.714  # will be ovewrtten
     bem2.building.cop = 4000.0
     bem2.roof.emissivity = 0.001
 
@@ -247,22 +260,19 @@ def test_customize_reference_data():
         for hr in day:
             assert not is_near_zero(hr - 2000.0, 1e-10)
 
-    assert not is_near_zero(model.refBEM[5][0][zi].frac - 0.314, 1e-10)
-    assert not is_near_zero(model.refBEM[5][0][zi].building.cop - 3000.0, 1e-10)
-    assert not is_near_zero(model.refBEM[5][0][zi].roof.emissivity - 0.0, 1e-10)
+    assert model.refBEM[5][0][zi].frac == pytest.approx(0, 1e-10)
+    assert not is_near_zero(
+        model.refBEM[5][0][zi].building.cop - 3000.0, 1e-10)
+    assert not is_near_zero(
+        model.refBEM[5][0][zi].roof.emissivity - 0.0, 1e-10)
 
     # run method
     ref_sch_vec = [newsch1, newsch2]
     ref_bem_vec = [bem1, bem2]
 
-    # test bld matrix error
-    with pytest.raises(AssertionError):
-        model._check_reference_data(ref_bem_vec, ref_sch_vec)
-
     # set bld matrix and zone
-    model.bld = [[0 for i in range(3)] for j in range(20)]
-    model.bld[5][0] = 0.5  # test insertion
-    model.bld[19][2] = 0.5  # test extention
+    model.bld = [('midriseapartment', 'pre80', 0.5),  # test insertion
+                 ('customtype', 'new', 0.5)]  # test insertion
 
     model.ref_bem_vector, model.ref_sch_vector = \
         model._check_reference_data(ref_bem_vec, ref_sch_vec)
@@ -275,23 +285,23 @@ def test_customize_reference_data():
     model._customize_reference_data()
 
     # Test customized schedules
-    assert len(model.refSchedule) == 20
+    assert len(model.refSchedule) == 17
     for day in model.refSchedule[5][0][zi].heat:
         for hr in day:
             assert is_near_zero(hr - 2000.0, 1e-10)
-    for day in model.refSchedule[19][2][zi].heat:
+    for day in model.refSchedule[16][2][zi].heat:
         for hr in day:
             assert is_near_zero(hr - 1000.0, 1e-10)
 
     # Test customised bemdefs
-    assert len(model.refBEM) == 20
+    assert len(model.refBEM) == 17
     assert is_near_zero(model.refBEM[5][0][zi].frac - 0.314, 1e-10)
     assert is_near_zero(model.refBEM[5][0][zi].building.cop - 3000.0, 1e-10)
     assert is_near_zero(model.refBEM[5][0][zi].roof.emissivity - 0.0, 1e-10)
 
-    assert is_near_zero(model.refBEM[19][2][zi].frac - 0.714, 1e-10)
-    assert is_near_zero(model.refBEM[19][2][zi].building.cop - 4000.0, 1e-10)
-    assert is_near_zero(model.refBEM[19][2][zi].roof.emissivity - 0.001, 1e-10)
+    assert is_near_zero(model.refBEM[16][2][zi].frac - 0.714, 1e-10)
+    assert is_near_zero(model.refBEM[16][2][zi].building.cop - 4000.0, 1e-10)
+    assert is_near_zero(model.refBEM[16][2][zi].roof.emissivity - 0.001, 1e-10)
 
 
 def test_read_epw():
@@ -337,31 +347,35 @@ def test_read_input():
 
     # test SchTraffic schedule
     # first
-    assert model._init_param_dict['schtraffic'][0][0] == pytest.approx(0.2, abs=1e-6)
+    assert model._init_param_dict['schtraffic'][0][0] == pytest.approx(
+        0.2, abs=1e-6)
     # last
-    assert model._init_param_dict['schtraffic'][2][23] == pytest.approx(0.2, abs=1e-6)
-    assert model._init_param_dict['schtraffic'][0][19] == pytest.approx(0.8, abs=1e-6)
-    assert model._init_param_dict['schtraffic'][1][21] == pytest.approx(0.3, abs=1e-6)
-    assert model._init_param_dict['schtraffic'][2][6] == pytest.approx(0.4, abs=1e-6)
+    assert model._init_param_dict['schtraffic'][2][23] == pytest.approx(
+        0.2, abs=1e-6)
+    assert model._init_param_dict['schtraffic'][0][19] == pytest.approx(
+        0.8, abs=1e-6)
+    assert model._init_param_dict['schtraffic'][1][21] == pytest.approx(
+        0.3, abs=1e-6)
+    assert model._init_param_dict['schtraffic'][2][6] == pytest.approx(
+        0.4, abs=1e-6)
 
     # test bld fraction list
-    assert model._init_param_dict['bld'][0][0] == pytest.approx(0., abs=1e-6)
-    assert model._init_param_dict['bld'][3][1] == pytest.approx(0.4, abs=1e-6)
-    assert model._init_param_dict['bld'][5][1] == pytest.approx(0.6, abs=1e-6)
-    assert model._init_param_dict['bld'][15][2] == pytest.approx(0.0, abs=1e-6)
+    assert len(model._init_param_dict['bld']) == 2
+    assert model._init_param_dict['bld'][0][2] == pytest.approx(0.4, abs=1e-6)
+    assert model._init_param_dict['bld'][1][2] == pytest.approx(0.6, abs=1e-6)
 
     # test BEMs
     assert len(model.BEM) == 2
     # test BEM office (BLD4 in DOE)
-    assert BLDTYPE[model.BEM[0].bldtype] == 'LargeOffice'
-    assert ZONETYPE[model.BEM[0].zonetype] == '1A (Miami)'
-    assert BUILTERA[model.BEM[0].builtera] == 'Pst80'
+    assert model.BEM[0].bldtype == 'largeoffice'
+    assert model.BEM[0].zonetype == '1A'
+    assert model.BEM[0].builtera == 'pst80'
     assert model.BEM[0].frac == 0.4
 
     # test BEM apartment
-    assert BLDTYPE[model.BEM[1].bldtype] == 'MidRiseApartment'
-    assert ZONETYPE[model.BEM[1].zonetype] == '1A (Miami)'
-    assert BUILTERA[model.BEM[1].builtera] == 'Pst80'
+    assert model.BEM[1].bldtype == 'midriseapartment'
+    assert model.BEM[1].zonetype == '1A'
+    assert model.BEM[1].builtera == 'pst80'
     assert model.BEM[1].frac == 0.6
 
     # Check that schedules are called correctly
@@ -373,15 +387,18 @@ def test_read_input():
     assert model.Sch[1].occ[1][11] == pytest.approx(0.25, abs=1e-6)
 
     # Check that soil ground depth is set correctly
-    assert model.depth_soil[model._soilindex1][0] == pytest.approx(0.5, abs=1e-6)
-    assert model.depth_soil[model._soilindex2][0] == pytest.approx(0.5, abs=1e-6)
+    assert model.depth_soil[model._soilindex1][0] == pytest.approx(
+        0.5, abs=1e-6)
+    assert model.depth_soil[model._soilindex2][0] == pytest.approx(
+        0.5, abs=1e-6)
 
     # Check the road layer splitting
     assert len(model.road.layer_thickness_lst) == pytest.approx(11., abs=1e-15)
     assert model.road.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-15)
 
     # Check the road layer splitting for rural
-    assert len(model.rural.layer_thickness_lst) == pytest.approx(11., abs=1e-15)
+    assert len(model.rural.layer_thickness_lst) == pytest.approx(
+        11., abs=1e-15)
     assert model.rural.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-6)
 
 
@@ -391,11 +408,13 @@ def test_optional_blank_parameters():
     model = set_input_manually(model)
     model.generate()
 
-    assert model.BEM[0].building.glazing_ratio == pytest.approx(0.38, abs=1e-15)
+    assert model.BEM[0].building.glazing_ratio == pytest.approx(
+        0.38, abs=1e-15)
     assert model.BEM[0].roof.albedo == pytest.approx(0.2, abs=1e-15)
     assert model.BEM[0].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
     assert model.BEM[1].roof.albedo == pytest.approx(0.2, abs=1e-15)
-    assert model.BEM[1].building.glazing_ratio == pytest.approx(0.1499, abs=1e-15)
+    assert model.BEM[1].building.glazing_ratio == pytest.approx(
+        0.1499, abs=1e-15)
     assert model.BEM[1].roof.vegcoverage == pytest.approx(0.0, abs=1e-15)
 
 
@@ -500,9 +519,9 @@ def test_hvac_autosize():
     # coolCap and heatCap don't retain high accuracy when extracted from the
     # DOE reference csv, so we will reduce the tolerance here
     assert model.BEM[0].building.coolcap == \
-           pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
+        pytest.approx((3525.66904 * 1000.0) / 46320.0, abs=1e-3)
     assert model.BEM[0].building.heat_cap == \
-           pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
+        pytest.approx((2875.97378 * 1000.0) / 46320.0, abs=1e-3)
     assert model.BEM[1].building.coolcap \
         == pytest.approx((252.20895 * 1000.0) / 3135., abs=1e-2)
     assert model.BEM[1].building.heat_cap \
@@ -527,8 +546,10 @@ def test_simulate():
     # dtSim = 300;            % simulation time step (s)
     # dtWeather = 3600;       % weather time step (s)
 
-    assert model.N == pytest.approx(744., abs=1e-6)       # total hours in simulation
-    assert model.ph == pytest.approx(0.083333, abs=1e-6)  # dt (sim time step) hours
+    # total hours in simulation
+    assert model.N == pytest.approx(744., abs=1e-6)
+    assert model.ph == pytest.approx(
+        0.083333, abs=1e-6)  # dt (sim time step) hours
 
     # test the weather data time series is equal to time step
     assert len(model.forcIP.infra) == \
@@ -576,6 +597,7 @@ def _generate_bemdef():
 
     bld = Building(floor_height=3.5, int_heat_night=1, int_heat_day=1, int_heat_frad=0.1,
                    int_heat_flat=0.1, infil=0.26, vent=0.0005, glazing_ratio=0.4,
-                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, coolcap=76, heateff=0.7, initial_temp=293)
+                   u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2, coolcap=76,
+                   heateff=0.7, initial_temp=293)
 
-    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
+    return BEMDef(bld, floor, wall, roof, bldtype='fullservicerestaurant', builtera='pst80')

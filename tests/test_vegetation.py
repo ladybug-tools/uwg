@@ -7,15 +7,16 @@ from uwg import UWG, solarcalcs
 
 
 EPW_PATH = \
-        os.path.join(os.path.dirname(__file__), 'epw', 'SGP_Singapore.486980_IWEC.epw')
+    os.path.join(os.path.dirname(__file__), 'epw',
+                 'SGP_Singapore.486980_IWEC.epw')
 
 
 def test_tree_vegetation_ratio():
     """Test road vegetation fractions."""
 
     model = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, grasscover=0,
-        treecover=0)
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', grasscover=0,
+        treecover=0, epw_path=EPW_PATH)
 
     with pytest.raises(AssertionError):
         model.blddensity = 0.5
@@ -53,14 +54,14 @@ def test_tree_drybulb():
     # Double tree fraction, and increase veg fraction.
     nday = 31
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, nday=nday,
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', nday=nday,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=nday,
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=nday,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     # override model1
     model1.blddensity = 0.5
@@ -98,7 +99,8 @@ def test_tree_drybulb():
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
 
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
 
     # confirm if increasing trees result in lower temps
     assert mean_temps1 > mean_temps2
@@ -109,14 +111,14 @@ def test_veg_drybulb():
 
     # Double grass fraction, and increase veg fraction.
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, nday=7,
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', nday=7,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=7,
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=7,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     # override model1
     model1.blddensity = 0.5
@@ -154,7 +156,8 @@ def test_veg_drybulb():
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
 
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
 
     # confirm if increasing grass result in lower temps
     assert mean_temps1 > mean_temps2
@@ -169,12 +172,14 @@ def test_tree_only_drybulb():
 
     # Double tree fraction, and subtract grass fraction.
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=7,
-        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0)
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=7,
+        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0,
+        epw_path=EPW_PATH)
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=7,
-        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0)
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=7,
+        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0,
+        epw_path=EPW_PATH)
 
     # override model1
     model1.blddensity = 0.5
@@ -216,7 +221,8 @@ def test_tree_only_drybulb():
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
 
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
 
     # increasing trees result in higher temps due to long-wave radiation
     # print(mean_temps1, mean_temps2)
@@ -228,13 +234,14 @@ def test_veg_only_drybulb():
 
     # Double grass fraction, and maintain veg fraction.
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, nday=7,
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', nday=7,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=7,
-        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0)
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=7,
+        vegstart=1, vegend=12, albveg=0.5, treecover=0, grasscover=0,
+        epw_path=EPW_PATH)
 
     # override model1
     model1.blddensity = 0.5
@@ -276,7 +283,8 @@ def test_veg_only_drybulb():
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
 
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
 
     # confirm if increasing grass result in lower temps
     assert mean_temps1 > mean_temps2
@@ -286,9 +294,9 @@ def test_tree_sens_heat():
     """Test treeSensHeat."""
 
     model = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=3,
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=3,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     # override model1
     model.blddensity = 0.5
@@ -316,9 +324,9 @@ def test_tree_sens_heat():
 
     # with zero coerage
     model = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0, vertohor=0.8, zone=1, nday=3,
+        bldheight=10, blddensity=0, vertohor=0.8, zone='1A', nday=3,
         vegstart=1, vegend=12, latgrss=0.4, lattree=0.6, albveg=0.5,
-        treecover=0, grasscover=0)
+        treecover=0, grasscover=0, epw_path=EPW_PATH)
 
     # override model1
     model.blddensity = 0.5
@@ -344,8 +352,8 @@ def test_veg_element():
     """Test veg Element calcs"""
 
     model = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, nday=1,
-        treecover=0.125, grasscover=0.125)
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', nday=1,
+        treecover=0.125, grasscover=0.125, epw_path=EPW_PATH)
 
     model.vegstart = 1
     model.vegend = 12
@@ -401,20 +409,24 @@ def test_veg_roof_sens():
     """
 
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, month=6,
-        nday=31, treecover=0.0, grasscover=0.0, vegstart=1, vegend=12, dtsim=300)
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', month=6,
+        nday=31, treecover=0.0, grasscover=0.0, vegstart=1, vegend=12, dtsim=300,
+        epw_path=EPW_PATH)
     model1.vegroof = 0.1
     model1.latgrss = 0.4
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.5, vertohor=0.8, zone=1, month=6,
-        nday=31, treecover=0.0, grasscover=0.0, vegstart=1, vegend=12, dtsim=300)
+        bldheight=10, blddensity=0.5, vertohor=0.8, zone='1A', month=6,
+        nday=31, treecover=0.0, grasscover=0.0, vegstart=1, vegend=12, dtsim=300,
+        epw_path=EPW_PATH)
     model2.vegroof = 1
     model2.latgrss = 0.4
 
     # generate
     model1.generate()
     model2.generate()
+
+    print(model1.BEM)
 
     # check fractions
     for i in range(2):
@@ -437,7 +449,8 @@ def test_veg_roof_sens():
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
 
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
 
     # Increasing roof vegetation results in slightly lower temps, as long as
     # latgrss is very low, which means sens heat is > then convection.
@@ -464,8 +477,8 @@ def test_grass_sens():
     """
 
     model1 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.0, vertohor=0.8, zone=1, nday=31,
-        vegstart=1, vegend=12, dtsim=600)
+        bldheight=10, blddensity=0.0, vertohor=0.8, zone='1A', nday=31,
+        vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
     # 100% of open space is grass with 0.9 sensible heat
     model1.vegroof = 0.0
     model1.blddensity = 0.5
@@ -474,8 +487,8 @@ def test_grass_sens():
     model1.latgrss = 0.3
 
     model2 = UWG.from_param_args(
-        EPW_PATH, bldheight=10, blddensity=0.0, vertohor=0.8, zone=1, nday=31,
-        vegstart=1, vegend=12, dtsim=600)
+        bldheight=10, blddensity=0.0, vertohor=0.8, zone='1A', nday=31,
+        vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
     # 100% of open space is grass with 0.1 sensible heat
     model2.vegroof = 0.0
     model2.blddensity = 0.5
@@ -496,20 +509,23 @@ def test_grass_sens():
     # is less heat to canopy.
     qtree1 = [ucm.treeSensHeat for ucm in model1.UCMData]
     qtree2 = [ucm.treeSensHeat for ucm in model2.UCMData]
-    mean_qtree1, mean_qtree2 = sum(qtree1) / len(qtree1), sum(qtree2) / len(qtree2)
+    mean_qtree1, mean_qtree2 = sum(
+        qtree1) / len(qtree1), sum(qtree2) / len(qtree2)
     # print(mean_qtree1, mean_qtree2)
     assert mean_qtree1 > mean_qtree2
 
     # confirm canopy sens heat
     qsens1 = [ucm.sensHeat for ucm in model1.UCMData]
     qsens2 = [ucm.sensHeat for ucm in model2.UCMData]
-    mean_qsens1, mean_qsens2 = sum(qsens1) / len(qsens1), sum(qsens2) / len(qsens2)
+    mean_qsens1, mean_qsens2 = sum(
+        qsens1) / len(qsens1), sum(qsens2) / len(qsens2)
     # print(mean_qsens1, mean_qsens2)
     assert mean_qsens1 > mean_qsens2
 
     # calc drybulb mean
     temps1 = [ucm.canTemp - 273.15 for ucm in model1.UCMData]
     temps2 = [ucm.canTemp - 273.15 for ucm in model2.UCMData]
-    mean_temps1, mean_temps2 = sum(temps1) / len(temps1), sum(temps2) / len(temps2)
+    mean_temps1, mean_temps2 = sum(
+        temps1) / len(temps1), sum(temps2) / len(temps2)
     # print(mean_temps1, mean_temps2)
     assert mean_temps1 > mean_temps2  # higher latent fraction makes cooler temps

@@ -31,10 +31,12 @@ def validate_model(model_json):
     """Validate a UWG model JSON file against the UWG schema.
     \n
     Args:\n
-        model_json: Full path to a UWG model JSON file. Note that this will not check if rural and new .epw file paths are valid since these can be overridden by CLI arguments.\n
+        model_json: Full path to a UWG model JSON file. Note that this will not check if
+rural and new .epw file paths are valid since these can be overridden by CLI arguments.
     """
     try:
-        assert os.path.isfile(model_json), 'No JSON file found at {}.'.format(model_json)
+        assert os.path.isfile(
+            model_json), 'No JSON file found at {}.'.format(model_json)
 
         # validate the Model JSON
         click.echo('Validating Model JSON ...')
@@ -42,11 +44,6 @@ def validate_model(model_json):
         click.echo('Pydantic validation passed.')
         with open(model_json) as json_file:
             data = json.load(json_file)
-        # overwrite epw_path so that it's not checked for validity.
-        # since users may choose to override the path with cli
-        data['epw_path'] = '.'
-        data['new_epw_dir'] = None
-        data['new_epw_name'] = None
         UWG.from_dict(data)
         click.echo('Python re-serialization passed.')
         click.echo('Congratulations! Your UWG model JSON is valid!')
@@ -68,7 +65,7 @@ def validate_param(param_uwg):
     try:
         # validate the Model JSON
         click.echo('Validating .uwg parameter file ...')
-        UWG.from_param_file('.', param_uwg)
+        UWG.from_param_file(param_uwg)
         click.echo('Congratulations! Your .uwg parameter file is valid!')
     except Exception as e:
         print('The .uwg parameter file validation failed.\n{}'.format(e))

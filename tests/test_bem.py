@@ -8,7 +8,6 @@ except NameError:
 
 import pytest
 from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
-from uwg.readDOE import BLDTYPE, BUILTERA, ZONETYPE
 from uwg import BEMDef, Building, Element, Material
 
 
@@ -47,7 +46,8 @@ def _bemdef():
                    u_value=5.8, shgc=0.2, condtype='AIR', cop=5.2,
                    coolcap=76, heateff=0.7, initial_temp=293)
 
-    return BEMDef(bld, floor, wall, roof, frac=0.1, bldtype=0, builtera=1)
+    return BEMDef(bld, floor, wall, roof, bldtype='fullservicerestaurant',
+                  builtera='pst80')
 
 
 def test_bem_init_manual():
@@ -115,9 +115,9 @@ def test_bem_building_init_largeoffice_readDOE():
         testuwg.BEM[0].building.indoor_temp,
         testuwg.BEM[0].building.indoor_hum,
         testuwg.BEM[0].building.FanMax,
-        BLDTYPE[testuwg.BEM[0].bldtype],
-        BUILTERA[testuwg.BEM[0].builtera],
-        ZONETYPE[testuwg.BEM[0].zonetype]]
+        testuwg.BEM[0].bldtype,
+        testuwg.BEM[0].builtera,
+        testuwg.BEM[0].zonetype]
 
     uwg_matlab_val = setup_open_matlab_ref(
         'matlab_bem', 'matlab_ref_bem_building_init_largeoffice.txt')
@@ -126,9 +126,9 @@ def test_bem_building_init_largeoffice_readDOE():
     assert len(uwg_matlab_val) == len(uwg_python_val)
     for i in range(len(uwg_matlab_val)):
         if isinstance(uwg_python_val[i], (str, unicode)):
-            assert ''.join(uwg_python_val[i].split()) == \
-                ''.join(uwg_matlab_val[i].split()
-                        ), 'error at index={}'.format(i)
+            assert ''.join(uwg_python_val[i].lower().split()) == \
+                ''.join(uwg_matlab_val[i].lower().split()), \
+                'error at index={}'.format(i)
         else:
             tol = calculate_tolerance(uwg_python_val[i], 14.0)
             assert uwg_python_val[i] == \

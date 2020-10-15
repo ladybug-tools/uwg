@@ -7,7 +7,6 @@ except NameError:
     pass
 
 import math
-import logging
 
 
 class SolarCalcs(object):
@@ -49,9 +48,6 @@ class SolarCalcs(object):
         self.parameter = parameter
         self.rural = rural
 
-        # Logger will be disabled by default unless explicitly called in tests
-        self.logger = logging.getLogger(__name__)
-
     def solarcalcs(self):
         """ Solar Calculation.
 
@@ -66,12 +62,11 @@ class SolarCalcs(object):
         * rural -- Rural road Element object
         """
 
-        self.dir = self.forc.dir  # Direct sunlight (perpendicular to the sun's ray)
+        # Direct sunlight (perpendicular to the sun's ray)
+        self.dir = self.forc.dir
         self.dif = self.forc.dif  # Diffuse sunlight
 
         if (self.dir + self.dif) > 0.:
-
-            self.logger.debug("{} Solar radiation > 0".format(__name__))
 
             # calculate zenith tangent, and critOrient solar angles
             self.solarangles()
@@ -81,11 +76,11 @@ class SolarCalcs(object):
             # Fractional terms for wall & road
             self.Kw_term = (
                 min(abs(1. / self.UCM.canAspect*(0.5 - self.critOrient / math.pi) + 1 /
-                    math.pi * self.tanzen * (1 - math.cos(self.critOrient))), 1.))
+                        math.pi * self.tanzen * (1 - math.cos(self.critOrient))), 1.))
             self.Kr_term = (
                 min(abs(2. * self.critOrient / math.pi -
-                    (2 / math.pi * self.UCM.canAspect * self.tanzen) *
-                    (1 - math.cos(self.critOrient))),
+                        (2 / math.pi * self.UCM.canAspect * self.tanzen) *
+                        (1 - math.cos(self.critOrient))),
                     1 - 2 * self.UCM.canAspect * self.Kw_term))
 
             # Direct and diffuse solar radiation
@@ -100,7 +95,7 @@ class SolarCalcs(object):
                 alb_road = self.UCM.road.albedo
             else:
                 alb_road = self.UCM.road.albedo * (1. - self.UCM.road.vegcoverage) + \
-                           self.parameter.vegAlbedo * self.UCM.road.vegcoverage
+                    self.parameter.vegAlbedo * self.UCM.road.vegcoverage
 
             # First set of reflections
             rr = alb_road * self.roadSol
@@ -119,7 +114,8 @@ class SolarCalcs(object):
 
             # Receiving solar, including bounces (W m-2)
             # Includes road covered by vegetation.
-            self.UCM.road.solRec = self.roadSol + (1 - self.UCM.roadConf) * self.mw
+            self.UCM.road.solRec = self.roadSol + \
+                (1 - self.UCM.roadConf) * self.mw
 
             for j in range(len(self.BEM)):
                 self.BEM[j].roof.solRec = self.horSol + self.dif
@@ -167,8 +163,6 @@ class SolarCalcs(object):
                 self.UCM.SolRecRoad * grasscover)
 
         else:  # No Sun
-
-            self.logger.debug("{} Solar radiation = 0".format(__name__))
 
             self.UCM.road.solRec = 0.
             self.rural.solRec = 0.
