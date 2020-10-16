@@ -25,18 +25,22 @@ class SchDef(object):
             property will be a weekly schedule of zero values, as default.
         v_swh: Optional property for maximum volumetric hot water rate per unit area
             [L/hr/m2]. (Default: 0).
-        bldtype: Text referring to a building type. To reference (or
-            overwrite) a DOE reference building, text must be one of the
-            following: 'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
+        bldtype: Text referring to a building type. By default, 16 building types are
+            defined in the UWG according to models from the Department of Energy (DOE).
+            Custom building types can also be defined with a new name. Note that this
+            value along with the BEMDef builtera must exactly match the identifiers in
+            the UWG bld list in order to specify the fraction of total built stock the
+            building occupies in the UWG simulation. Choose from the following to
+            reference or overwrite a BEM associated with a DOE reference building type:
+            'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffice',
             'mediumoffice', 'midriseapartment', 'outpatient', 'primaryschool',
             'quickservicerestaurant', 'secondaryschool', 'smallhotel', 'smalloffice',
             'standaloneretail', 'stripmall', 'supermarket', or 'warehouse'.
-            This value along with the builtera is used to reference the fraction of
-            urban area the building defines in the UWG bld matrix.
         builtera: Text defining building built era. Must be one of the following:
-            'pre80' (pre-1980s), 'pst80' (post-1980s), or 'new' (new constrution).
-            This value and the bldtype is used to reference the fraction of urban area
-            the building defines in the UWG bld matrix.
+            "pre80" (pre-1980s), "pst80" (post-1980s), or "new" (new construction).
+            This value along with the bldtype must exactly match the identifiers in
+            the bld array in order to specify the fraction of total built stock the
+            building occupies in the UWG simulation.
 
     Properties:
         * elec
@@ -225,11 +229,11 @@ class SchDef(object):
 
     @property
     def bldtype(self):
-        """Get or set text for bldtype.
+        """Get or set text for building type.
 
         By default, 16 building types are defined in the UWG according to models from
-        the Department of Energy (DOE). Choose from the following to reference a
-        DOE building type:
+        the Department of Energy (DOE). Choose from the following to reference or
+        overwrite a schedule associated with a DOE reference building type:
 
         * 'fullservicerestaurant'
         * 'hospital'
@@ -250,7 +254,10 @@ class SchDef(object):
 
         Custom building types can also be defined with a new name. If a custom SchDef is
         defined with the same name as a reference DOE building type from the list above,
-        the reference SchDef will be overwritten by the custom SchDef.
+        the reference SchDef will be overwritten by the custom SchDef. Note that this
+        value along with the SchDef builtera must exactly match the identifiers in the
+        UWG bld list in order to specify the fraction of total built stock the building
+        occupies in the UWG simulation.
         """
         return self._bldtype
 
@@ -264,11 +271,15 @@ class SchDef(object):
     def builtera(self):
         """Get or set text for built era.
 
-        Choose from the following:
+        Must be one of the following:
 
-        * 'pre80'
-        * 'pst80'
-        * 'new'
+        * 'pre80' - pre-1980s
+        * 'pst80' - post-1980s
+        * 'new' - new construction
+
+        This value along with the bldtype must exactly match the identifiers in
+        the bld array in order to specify the fraction of total built stock the
+        building occupies in the UWG simulation.
         """
         return self._builtera
 

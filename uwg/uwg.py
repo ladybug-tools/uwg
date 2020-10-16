@@ -750,7 +750,7 @@ class UWG(object):
 
         Custom building types can also be referenced in this property. For example, a
         built stock consisting of 40% post-1980's large office, 30% new midrise
-        apartment, and 30% of a pre=1980s custom building type (defined by the user)
+        apartment, and 30% of a pre-1980s custom building type (defined by the user)
         is referenced as follows:
 
         .. code-block:: python
@@ -788,7 +788,7 @@ class UWG(object):
                 'fraction of total built stock. Got: {}.'.format(frac)
             total_frac += frac
 
-        assert total_frac == 1.0, 'The sum of reference building ' \
+        assert abs(total_frac - 1.0) < 1e-10, 'The sum of reference building ' \
             'fractions defined in bld must equal one. Got: {}.'.format(
                 total_frac)
 
@@ -815,6 +815,10 @@ class UWG(object):
     @property
     def zone(self):
         """Get or set text representing an ASHRAE climate zone.
+
+        This value is used to specify climate zone-specific construction, and
+        HVAC parameters for the DOE reference building types. This will not effect
+        the simulation if only custom reference buildings are used.
 
         Choose from the following:
 
