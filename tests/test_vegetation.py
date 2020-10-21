@@ -477,8 +477,8 @@ def test_grass_sens():
     """
 
     model1 = UWG.from_param_args(
-        bldheight=10, blddensity=0.0, vertohor=0.8, zone='1A', nday=31,
-        vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
+        bldheight=10, blddensity=0.0, vertohor=0.8, grasscover=0.1, treecover=0.1,
+        zone='1A', nday=31, vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
     # 100% of open space is grass with 0.9 sensible heat
     model1.vegroof = 0.0
     model1.blddensity = 0.5
@@ -487,8 +487,8 @@ def test_grass_sens():
     model1.latgrss = 0.3
 
     model2 = UWG.from_param_args(
-        bldheight=10, blddensity=0.0, vertohor=0.8, zone='1A', nday=31,
-        vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
+        bldheight=10, blddensity=0.0, vertohor=0.8, grasscover=0.1, treecover=0.1,
+        zone='1A', nday=31, vegstart=1, vegend=12, dtsim=600, epw_path=EPW_PATH)
     # 100% of open space is grass with 0.1 sensible heat
     model2.vegroof = 0.0
     model2.blddensity = 0.5

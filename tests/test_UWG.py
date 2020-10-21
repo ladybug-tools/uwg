@@ -6,7 +6,6 @@ from copy import deepcopy
 from .test_base import auto_setup_uwg, set_input_manually
 from uwg import SchDef, BEMDef, Building, Element, Material, UWG
 from uwg.utilities import is_near_zero
-from uwg.utilities import REF_BLDTYPE, REF_BUILTERA
 
 
 def test_init():
@@ -30,35 +29,36 @@ def test_init():
 
     # from args
     UWG.from_param_args(bldheight=10.0, blddensity=0.5, vertohor=0.5, zone='1A',
-                        epw_path=epw_path)
-    model = UWG.from_param_args(10.0, 0.5, 0.5, '1A',
-                                ref_bem_vector=[], ref_sch_vector=[],
+                        treecover=0.1, grasscover=0.1, epw_path=epw_path)
+    model = UWG.from_param_args(10.0, 0.5, 0.5, treecover=0.1, grasscover=0.1,
+                                zone='1A', ref_bem_vector=[], ref_sch_vector=[],
                                 epw_path=epw_path)
     model.generate()
     assert model.ref_bem_vector == []
     assert model.ref_sch_vector == []
 
-    UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+    UWG.from_param_args(10.0, 0.5, 0.5, 0.1, 0.1, '1A',
                         ref_bem_vector=ref_bem_vec, ref_sch_vector=ref_sch_vec,
                         epw_path=epw_path)
     with pytest.raises(AssertionError):
-        UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+        UWG.from_param_args(10.0, 0.5, 0.5, 0.1, 0.1, '1A',
                             ref_bem_vector=ref_bem_vec, ref_sch_vector=ref_sch_vec[:1])
     with pytest.raises(AssertionError):
-        UWG.from_param_args(10.0, 0.5, 0.5, '1A',
+        UWG.from_param_args(10.0, 0.5, 0.5, 0.1, 0.1, '1A',
                             ref_bem_vector=None, ref_sch_vector=ref_sch_vec)
     with pytest.raises(Exception):
         # No epw_path
         model = UWG.from_param_args(
-            bldheight=10.0, blddensity=0.5, vertohor=0.5, zone='1A')
+            bldheight=10.0, blddensity=0.5, vertohor=0.5, grasscover=0.1,
+            treecover=0.1, zone='1A')
         model.generate()
 
     # from dict
     data = UWG.from_param_args(
-        10.0, 0.5, 0.5, '1A').to_dict(include_refDOE=False)
+        10.0, 0.5, 0.5, 0.1, 0.1, '1A').to_dict(include_refDOE=False)
     UWG.from_dict(data)
     model1 = UWG.from_param_args(
-        10.0, 0.5, 0.5, '1A', ref_bem_vector=ref_bem_vec,
+        10.0, 0.5, 0.5, 0.1, 0.1, '1A', ref_bem_vector=ref_bem_vec,
         ref_sch_vector=ref_sch_vec)
     data = model1.to_dict(include_refDOE=True)
     model2 = UWG.from_dict(data, epw_path=epw_path)

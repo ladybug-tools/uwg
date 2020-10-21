@@ -242,13 +242,13 @@ class UWG(object):
         return model
 
     @classmethod
-    def from_param_args(cls, bldheight, blddensity, vertohor, zone, month=1,
-                        day=1, nday=31, dtsim=300, dtweather=3600, autosize=False,
+    def from_param_args(cls, bldheight, blddensity, vertohor, grasscover,
+                        treecover, zone, month=1, day=1, nday=31, dtsim=300,
+                        dtweather=3600, bld=DEFAULT_BLD, autosize=False,
                         h_mix=1, sensocc=100, latfocc=0.3, radfocc=0.2, radfequip=0.5,
-                        radflight=0.7, bld=DEFAULT_BLD, charlength=1000, albroad=0.1,
-                        droad=0.5, sensanth=20, kroad=1, croad=1600000, grasscover=0.1,
-                        treecover=0.1, vegstart=4, vegend=10, albveg=0.25,
-                        rurvegcover=0.9, latgrss=0.4, lattree=0.6,
+                        radflight=0.7, charlength=1000, albroad=0.1,
+                        droad=0.5, kroad=1, croad=1600000, rurvegcover=0.9, vegstart=4, vegend=10,
+                        albveg=0.25, latgrss=0.4, lattree=0.6, sensanth=20,
                         schtraffic=DEFAULT_SCHTRAFFIC, h_ubl1=1000, h_ubl2=80, h_ref=150,
                         h_temp=2, h_wind=10, c_circ=1.2, c_exch=1, maxday=150,
                         maxnight=20, windmin=1, h_obs=0.1, epw_path=None,

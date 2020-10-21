@@ -10,7 +10,8 @@ def test_param_init():
     epw_path = \
         os.path.join(os.path.dirname(__file__), 'epw',
                      'SGP_Singapore.486980_IWEC.epw')
-    testuwg = UWG.from_param_args(10, 0.5, 0.5, '1A', epw_path=epw_path)
+    testuwg = UWG.from_param_args(
+        10, 0.5, 0.5, 0.1, 0.1, '1A', epw_path=epw_path)
 
     nightStart = 18.
     nightEnd = 8.
