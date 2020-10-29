@@ -8,7 +8,7 @@
 # =================================================
 
 # Urban characteristics
-bldHeight,10,     # average building height (m)
+bldXHeight,10,     # average building height (m)
 bldDensity,0.5,   # urban area building plan density (0-1)
 verToHor,0.8,     # urban area vertical to horizontal ratio
 h_mix,1,           # fraction of building HVAC waste heat set to the street canyon [as opposed to the roof]
@@ -40,15 +40,14 @@ sensAnth,20,      # non-building sensible heat at street level [aka. heat from c
 zone,1,
 
 # Vegetation parameters
-# Vegetation parameters
-vegCover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
-treeCoverage,0.1, # Fraction of the urban ground covered in trees (0-1)
+grassover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
+treeCover,0.1, # Fraction of the urban ground covered in trees (0-1)
 vegStart,4,       # The month in which vegetation starts to evapotranspire (leaves are out)
 vegEnd,10,        # The month in which vegetation stops evapotranspiring (leaves fall)
 albVeg,0.25,      # Vegetation albedo
+latGrss,0.4,      # Fraction of the heat absorbed by grass that is latent (goes to evaporating water)
+latTree,0.6,      # Fraction of the heat absorbed by trees that is latent (goes to evaporating water)
 rurVegCover,0.9,  # Fraction of the rural ground covered by vegetation
-latGrss,0.4,      # Fraction of the heat absorbed by grass that is latent. Used in UWG only to calculate sensible heat fraction.
-latTree,0.6,      # Fraction of the heat absorbed by trees that is latent. Used in UWG only to calculate sensible heat fraction.
 
 # Traffic schedule [1 to 24 hour],
 SchTraffic,
@@ -85,19 +84,18 @@ vegRoof,,  # Fraction of the roofs covered in grass/shrubs (0 - 1)
 glzR,,     # Glazing Ratio (0 - 1)
 SHGC,,     # Solar Heat Gain Coefficient (0 - 1)
 albWall,,  # wall albedo (0 - 1)
+flr_h,,    # average building floor height
 
-# =================================================
+# =================================================,
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
-# =================================================
-
+# =================================================,
 # Simulation parameters,
-Month,12,        # starting month (1-12)
+Month,1,        # starting month (1-12)
 Day,1,          # starting day (1-31)
 nDay,31,        # number of days to run simultion
 dtSim,300,      # simulation time step (s)
 dtWeather,3600, # weather time step (s)
 
-# HVAC system and internal loads
 autosize,0,     # autosize HVAC (1 for yes; 0 for no)
 sensOcc,100,    # Sensible heat per occupant (W)
 LatFOcc,0.3,    # Latent heat fraction from occupant (normally 0.3)

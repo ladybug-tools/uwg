@@ -37,11 +37,11 @@ sensAnth,20,      # non-building sensible heat at street level [aka. heat from c
 # 7(Duluth)                     15
 # 8(Fairbanks)                  16
 
-zone,1,
+zone,1A,
 
 # Vegetation parameters
-vegCover,0,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
-treeCoverage,0, # Fraction of the urban ground covered in trees (0-1)
+grasscover,0,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
+treeCover,0, # Fraction of the urban ground covered in trees (0-1)
 vegStart,4,       # The month in which vegetation starts to evapotranspire (leaves are out)
 vegEnd,10,        # The month in which vegetation stops evapotranspiring (leaves fall)
 albVeg,0.25,      # Vegetation albedo
@@ -57,23 +57,30 @@ SchTraffic,
 
 # Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
 # Note that sum(bld) must be equal to 1
+# Choose from the following building types:
+# FullServiceRestaurant
+# Hospital
+# LargeHotel
+# LargeOffice
+# MediumOffice
+# MidRiseApartment
+# OutPatient
+# PrimarySchool
+# QuickServiceRestaurant
+# SecondarySchool
+# SmallHotel
+# SmallOffice
+# Stand-aloneRetail
+# StripMall
+# SuperMarket
+# Warehouse
+# Choose from the following built eras:
+# Pre80
+# Pst80
+# New
+
 bld,
-0,0,0,    # FullServiceRestaurant
-0,0,0,    # Hospital
-0,0,0,    # LargeHotel
-0,1,0,  # LargeOffice
-0,0,0,    # MediumOffice
-0,0,0,  # MidRiseApartment
-0,0,0,    # OutPatient
-0,0,0,    # PrimarySchool
-0,0,0,    # QuickServiceRestaurant
-0,0,0,    # SecondarySchool
-0,0,0,    # SmallHotel
-0,0,0,    # SmallOffice
-0,0,0,    # Stand-aloneRetail
-0,0,0,    # StripMall
-0,0,0,    # SuperMarket
-0,0,0,    # Warehouse
+LargeOffice, Pst80, 1
 
 # =================================================
 # OPTIONAL URBAN PARAMETERS

@@ -1,104 +1,92 @@
-try:
-    range = xrange
-except NameError:
-    pass
-
-from functools import reduce
+"""Tests for UBLDef object."""
 
 import pytest
-import uwg
-import os
-import math
-import pprint
-import decimal
-from .test_base import TestBase
-
-dd = decimal.Decimal.from_float
-
-class TestUBLDef(TestBase):
-
-    def test_ubl_init(self):
-        """ test ubl constructor """
-
-        self.setup_uwg_integration()
-        self.uwg.read_epw()
-        self.uwg.set_input()
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-
-        # Get uwg_python values
-        uwg_python_val = [
-            self.uwg.UBL.charLength,          # characteristic length of the urban area (m)
-            self.uwg.UBL.perimeter,
-            self.uwg.UBL.urbArea,             # horizontal urban area (m2)
-            self.uwg.UBL.orthLength,          # length of the side of the urban area orthogonal to wind dir (m)
-            self.uwg.UBL.paralLength,         # length of the side of the urban area parallel to wind dir (m)
-            self.uwg.UBL.ublTemp,             # urban boundary layer temperature (K)
-            reduce(lambda x,y:x+y, self.uwg.UBL.ublTempdx), # urban boundary layer temperature discretization (K)
-            self.uwg.UBL.dayBLHeight,         # daytime mixing height, orig = 700
-            self.uwg.UBL.nightBLHeight        # Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m); orig 80
-        ]
-
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ubl","matlab_ref_ubl_init.txt")
-
-        # matlab ref checking
-        assert len(uwg_matlab_val) == len(uwg_python_val), "matlab={}, python={}".format(len(uwg_matlab_val), len(uwg_python_val))
-
-        for i in range(len(uwg_matlab_val)):
-            #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
-
-    def test_ublmodel(self):
-        """ test ubl constructor """
-
-        self.setup_uwg_integration()
-        self.uwg.read_epw()
-        self.uwg.set_input()
-
-        # Test Jan 1 (winter, no vegetation coverage)
-        self.uwg.Month = 1
-        self.uwg.Day = 1
-        self.uwg.nDay = 1
-
-        # set_input
-        self.uwg.init_BEM_obj()
-        self.uwg.init_input_obj()
-
-        # In order to avoid integration effects. Test only first time step
-        # Subtract timestep to stop at 300 sec
-        self.uwg.simTime.nt -= (23*12 + 11)
-
-        # Run simulation
-        self.uwg.hvac_autosize()
-        self.uwg.simulate()
-
-        # check date
-        #print self.uwg.simTime
-        assert self.uwg.simTime.month == 1
-        assert self.uwg.simTime.day == 1
-        assert self.uwg.simTime.secDay == pytest.approx(300.0,abs=1e-15)
-
-        # Get uwg_python values
-        uwg_python_val = [
-            self.uwg.UBL.ublTemp,               # urban boundary layer temperature (K)
-            reduce(lambda x,y:x+y,self.uwg.UBL.ublTempdx), # urban boundary layer temperature discretaization (K)
-            self.uwg.UBL.dayBLHeight,         # night boundary layer height (m)
-            self.uwg.UBL.nightBLHeight         # night boundary layer height (m)
-        ]
-
-        uwg_matlab_val = self.setup_open_matlab_ref("matlab_ubl","matlab_ref_ublmodel.txt")
-
-        # matlab ref checking
-        assert len(uwg_matlab_val) == len(uwg_python_val)
-
-        for i in range(len(uwg_matlab_val)):
-            #print uwg_python_val[i], uwg_matlab_val[i]
-            tol = self.CALCULATE_TOLERANCE(uwg_python_val[i],15.0)
-            assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), "error at index={}".format(i)
+from .test_base import auto_setup_uwg, setup_open_matlab_ref, calculate_tolerance
+from functools import reduce
 
 
-if __name__ == "__main__":
-    ubl = TestUBLDef()
-    ubl.test_ubl_init()
-    ubl.test_ublmodel()
+def test_ubl_init():
+    """Test ubl constructor."""
+
+    testuwg = auto_setup_uwg()
+    testuwg.generate()
+    testuwg.UBL.__repr__()
+
+    # Get uwg_python values
+    uwg_python_val = [
+        # characteristic length of the urban area (m)
+        testuwg.UBL.charLength,
+        testuwg.UBL.perimeter,
+        # horizontal urban area (m2)
+        testuwg.UBL.urbArea,
+        # length of the side of the urban area orthogonal to wind dir (m)
+        testuwg.UBL.orthLength,
+        # length of the side of the urban area parallel to wind dir (m)
+        testuwg.UBL.paralLength,
+        # urban boundary layer temperature (K)
+        testuwg.UBL.ublTemp,
+        # urban boundary layer temperature discretization (K)
+        reduce(lambda x, y: x + y, testuwg.UBL.ublTempdx),
+        testuwg.UBL.dayBLHeight,  # daytime mixing height, orig = 700
+        # Sing: 80, Bub-Cap: 50, nighttime boundary-layer height (m); orig 80
+        testuwg.UBL.nightBLHeight]
+
+    uwg_matlab_val = testuwg = setup_open_matlab_ref(
+        'matlab_ubl', 'matlab_ref_ubl_init.txt')
+
+    # matlab ref checking
+    assert len(uwg_matlab_val) == len(uwg_python_val), \
+        'matlab={}, python={}'.format(len(uwg_matlab_val), len(uwg_python_val))
+
+    for i in range(len(uwg_matlab_val)):
+        tol = calculate_tolerance(uwg_python_val[i], 15.0)
+        assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), \
+            'error at index={}'.format(i)
+
+
+def test_ublmodel():
+    """Test ubl constructor."""
+
+    testuwg = auto_setup_uwg()
+
+    # Test Jan 1 (winter, no vegetation coverage)
+    testuwg.month = 1
+    testuwg.day = 1
+    testuwg.nday = 1
+
+    # set_input
+    testuwg.generate()
+
+    # In order to avoid integration effects. Test only first time step
+    # Subtract timestep to stop at 300 sec
+    testuwg.simTime.nt -= (23 * 12 + 11)
+
+    # Run simulation
+    testuwg.simulate()
+
+    # check date
+    assert testuwg.simTime.month == 1
+    assert testuwg.simTime.day == 1
+    assert testuwg.simTime.secDay == pytest.approx(300.0, abs=1e-15)
+
+    # Get uwg_python values
+    uwg_python_val = [
+        # urban boundary layer temperature (K)
+        testuwg.UBL.ublTemp,
+        # urban boundary layer temperature discretaization (K)
+        reduce(lambda x, y: x + y, testuwg.UBL.ublTempdx),
+        # night boundary layer height (m)
+        testuwg.UBL.dayBLHeight,
+        # night boundary layer height (m)
+        testuwg.UBL.nightBLHeight]
+
+    uwg_matlab_val = setup_open_matlab_ref(
+        'matlab_ubl', 'matlab_ref_ublmodel.txt')
+
+    # matlab ref checking
+    assert len(uwg_matlab_val) == len(uwg_python_val)
+
+    for i in range(len(uwg_matlab_val)):
+        tol = calculate_tolerance(uwg_python_val[i], 15.0)
+        assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], tol), \
+            'error at index={}'.format(i)

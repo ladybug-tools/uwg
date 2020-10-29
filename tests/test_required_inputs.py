@@ -1,67 +1,42 @@
+"""Test for uwg.py"""
 import os
 import pytest
-import uwg
-import math
-from .test_base import TestBase
+from .test_base import auto_setup_uwg
 
-from pprint import pprint
-from decimal import Decimal
-pp = pprint
-dd = Decimal.from_float
-
-class TestRequiredParams(TestBase):
-    """Test for uwg.py
-    """
-
-    def test_required_inputs_from_file(self):
-        # From a .uwg file
-        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
-        self.uwg.set_input()
-        self.uwg.check_required_inputs()
-
-    def test_required_inputs_wrong_type(self):
-        # Test that we can catch wrong types, list lengths etc
-        self.setup_uwg_integration("SGP_Singapore.486980_IWEC.epw", "initialize_singapore.uwg")
-        self.uwg.set_input()
-
-        with pytest.raises(AssertionError):
-            self.uwg.h_temp = 6
-            self.uwg.check_required_inputs()
-        self.uwg.h_temp = 2.0
-        self.uwg.check_required_inputs()
-
-        with pytest.raises(AssertionError):
-            self.uwg.windMin = 100
-            self.uwg.check_required_inputs()
-        self.uwg.windMin = 2.0
-        self.uwg.check_required_inputs()
-
-        # assert type(self.Day) == float or type(self.Day) == int
-        with pytest.raises(AssertionError):
-            self.uwg.Day = "a"
-            self.uwg.check_required_inputs()
-        self.uwg.Day = 2
-        self.uwg.check_required_inputs()
-        self.uwg.Day = 4.0
-        self.uwg.check_required_inputs()
-
-        # assert isinstance(self.SchTraffic, list)
-        with pytest.raises(AssertionError):
-            self.uwg.SchTraffic = 76
-            self.uwg.check_required_inputs()
-        self.uwg.SchTraffic = [0] * 3 # length 3 list
-        self.uwg.check_required_inputs()
-
-        # assert len(self.bld) == 16
-        with pytest.raises(AssertionError):
-            self.uwg.bld = 4543
-            self.uwg.check_required_inputs()
-        self.uwg.bld = [0] * 16
-        self.uwg.check_required_inputs()
+DIR_CURR = os.path.abspath(os.path.dirname(__file__))
+DEFAULT_EPW_PATH = os.path.join(
+    DIR_CURR, 'epw', 'SGP_Singapore.486980_IWEC.epw')
+DEFAULT_PARAM_PATH = os.path.join(
+    DIR_CURR, 'parameters', 'initialize_singapore.uwg')
 
 
+def test_required_inputs_wrong_type():
+    """Test that we can catch wrong types, list lengths etc."""
 
-if __name__ == "__main__":
-    pass
-    #testreq = TestRequiredParams()
-    #testreq.test_required_inputs_from_file()
+    testuwg = auto_setup_uwg(DEFAULT_EPW_PATH, DEFAULT_PARAM_PATH)
+
+    with pytest.raises(AssertionError):
+        testuwg.h_temp = -6
+    testuwg.h_temp = 2.0
+
+    with pytest.raises(AssertionError):
+        testuwg.windmin = -100
+    testuwg.windmin = 2.0
+
+    # assert type(self.Day) == float or type(self.Day) == int
+    with pytest.raises(ValueError):
+        testuwg.day = 'a'
+
+    testuwg.day = 2
+    testuwg.day = 4.0
+
+    # assert isinstance(self.SchTraffic, list)
+    with pytest.raises(AssertionError):
+        testuwg.schtraffic = 76
+
+    testuwg.schtraffic = [[0.1 for i in range(24)]] * 3  # length 3 list
+
+    with pytest.raises(AssertionError):
+        testuwg.bld = 4543
+
+    testuwg.bld = [['test', 'pre80', 0.1], ['test2', 'pre80', 0.9]]

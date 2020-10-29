@@ -19,29 +19,29 @@ kRoad,1,          # road pavement conductivity (W/m K)
 cRoad,1600000,    # road volumetric heat capacity (J/m^3 K)
 sensAnth,20,      # non-building sensible heat at street level [aka. heat from cars, pedestrians, street cooking, etc. ] (W/m^2)
 
-# Climate Zone (Eg. City)   Zone number
-# 1A(Miami)                     1
-# 2A(Houston)                   2
-# 2B(Phoenix)                   3
-# 3A(Atlanta)                   4
-# 3B-CA(Los Angeles)            5
-# 3B(Las Vegas)                 6
-# 3C(San Francisco)             7
-# 4A(Baltimore)                 8
-# 4B(Albuquerque)               9
-# 4C(Seattle)                   10
-# 5A(Chicago)                   11
-# 5B(Boulder)                   12
-# 6A(Minneapolis)               13
-# 6B(Helena)                    14
-# 7(Duluth)                     15
-# 8(Fairbanks)                  16
+# Climate Zone (Eg. City)
+# 1A(Miami)
+# 2A(Houston)
+# 2B(Phoenix)
+# 3A(Atlanta)
+# 3B-CA(Los Angeles)
+# 3B(Las Vegas)
+# 3C(San Francisco)
+# 4A(Baltimore)
+# 4B(Albuquerque)
+# 4C(Seattle)
+# 5A(Chicago)
+# 5B(Boulder)
+# 6A(Minneapolis)
+# 6B(Helena)
+# 7(Duluth)
+# 8(Fairbanks)
 
-zone,1,
+zone,1A,
 
 # Vegetation parameters
-vegCover,0.2,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
-treeCoverage,0.1, # Fraction of the urban ground covered in trees (0-1)
+grasscover,0.1,     # Fraction of the urban ground covered in grass/shrubs only (0-1)
+treeCover,0.1, # Fraction of the urban ground covered in trees (0-1)
 vegStart,4,       # The month in which vegetation starts to evapotranspire (leaves are out)
 vegEnd,10,        # The month in which vegetation stops evapotranspiring (leaves fall)
 albVeg,0.25,      # Vegetation albedo
@@ -57,23 +57,31 @@ SchTraffic,
 
 # Fraction of building stock for each DOE Building type (pre-80's build, 80's-present build, new)
 # Note that sum(bld) must be equal to 1
+# Choose from the following building types:
+# FullServiceRestaurant
+# Hospital
+# LargeHotel
+# LargeOffice
+# MediumOffice
+# MidRiseApartment
+# OutPatient
+# PrimarySchool
+# QuickServiceRestaurant
+# SecondarySchool
+# SmallHotel
+# SmallOffice
+# Stand-aloneRetail
+# StripMall
+# SuperMarket
+# Warehouse
+# Choose from the following built eras:
+# Pre80
+# Pst80
+# New
+
 bld,
-0,0,0,    # FullServiceRestaurant
-0,0,0,    # Hospital
-0,0,0,    # LargeHotel
-0,0.4,0,  # LargeOffice
-0,0,0,    # MediumOffice
-0,0.6,0,  # MidRiseApartment
-0,0,0,    # OutPatient
-0,0,0,    # PrimarySchool
-0,0,0,    # QuickServiceRestaurant
-0,0,0,    # SecondarySchool
-0,0,0,    # SmallHotel
-0,0,0,    # SmallOffice
-0,0,0,    # Stand-aloneRetail
-0,0,0,    # StripMall
-0,0,0,    # SuperMarket
-0,0,0,    # Warehouse
+LargeOffice, Pst80, 0.4
+MidRiseApartment, Pst80, 0.6
 
 # =================================================
 # OPTIONAL URBAN PARAMETERS
@@ -84,6 +92,7 @@ vegRoof,,  # Fraction of the roofs covered in grass/shrubs (0 - 1)
 glzR,,     # Glazing Ratio (0 - 1)
 SHGC,,     # Solar Heat Gain Coefficient (0 - 1)
 albWall,,  # wall albedo (0 - 1)
+flr_h,,    # average building floor height
 
 # =================================================,
 # OPTIONAL PARAMETERS FOR SIMULATION CONTROL,
