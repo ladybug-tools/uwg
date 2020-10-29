@@ -5,6 +5,7 @@ from uwg.cli.validate import validate
 from uwg.cli import viz
 
 import os
+import sys
 
 
 def test_viz():
@@ -18,28 +19,30 @@ def test_viz():
 def test_model_validate():
     """Test uwg validation."""
 
-    runner = CliRunner()
-    input_uwg = './tests/json/uwg.json'
-    result = runner.invoke(validate, ['model', input_uwg])
-    assert result.exit_code == 0, result.output
+    if (sys.version_info >= (3, 7)):
+        runner = CliRunner()
+        input_uwg = './tests/json/uwg.json'
+        result = runner.invoke(validate, ['model', input_uwg])
+        assert result.exit_code == 0, result.output
 
-    input_uwg = './tests/json/custom_uwg.json'
-    result = runner.invoke(validate, ['model', input_uwg])
-    assert result.exit_code == 0, result.output
+        input_uwg = './tests/json/custom_uwg.json'
+        result = runner.invoke(validate, ['model', input_uwg])
+        assert result.exit_code == 0, result.output
 
 
 def test_param_validate():
     """Test uwg validation."""
 
-    runner = CliRunner()
-    input_uwg = './tests/parameters/initialize_singapore.uwg'
-    result = runner.invoke(validate, ['param', input_uwg])
-    print(result.output)
-    assert result.exit_code == 0, result.output
+    if (sys.version_info >= (3, 7)):
+        runner = CliRunner()
+        input_uwg = './tests/parameters/initialize_singapore.uwg'
+        result = runner.invoke(validate, ['param', input_uwg])
+        print(result.output)
+        assert result.exit_code == 0, result.output
 
-    input_uwg = './tests/parameters/initialize_singapore_error.uwg'
-    result = runner.invoke(validate, ['param', input_uwg])
-    assert result.exit_code == 1, result.output
+        input_uwg = './tests/parameters/initialize_singapore_error.uwg'
+        result = runner.invoke(validate, ['param', input_uwg])
+        assert result.exit_code == 1, result.output
 
 
 def test_uwg_simulate():
