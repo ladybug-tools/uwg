@@ -4,6 +4,11 @@ from .building import Building
 from .element import Element
 from .utilities import REF_BUILTERA_SET, REF_BUILTERA
 
+try:
+    str = basestring
+except NameError:
+    pass
+
 
 class BEMDef(object):
     """Building Energy Model (BEM) definition.

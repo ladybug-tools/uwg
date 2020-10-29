@@ -10,6 +10,11 @@ import math
 from .utilities import is_near_zero, float_in_range, float_positive
 from .material import Material
 
+try:
+    str = basestring
+except NameError:
+    pass
+
 
 class Element(object):
     """Element object defines wall, and roof constructions.
@@ -56,7 +61,8 @@ class Element(object):
 
         self.albedo = albedo  #
         self.emissivity = emissivity  # outer surface emissivity.
-        self.layer_thickness_lst = layer_thickness_lst  # list of layer thickness [m]
+        # list of layer thickness [m]
+        self.layer_thickness_lst = layer_thickness_lst
         self.material_lst = material_lst  #
         self.vegcoverage = vegcoverage  #
         self.t_init = t_init  #
@@ -64,7 +70,8 @@ class Element(object):
         self._name = name
 
         # layerThermaCond:
-        self.layerThermalCond = [material.thermalcond for material in material_lst]
+        self.layerThermalCond = [
+            material.thermalcond for material in material_lst]
         # layerVolHeat:
         self.layerVolHeat = [material.volheat for material in material_lst]
         # layerTemp: #
@@ -138,7 +145,6 @@ class Element(object):
     def vegcoverage(self, value):
         self._vegcoverage = float_in_range(value, 0, 1, 'vegcoverage')
 
-
     @property
     def t_init(self):
         """Get or set initial temperature of Element [K]."""
@@ -210,8 +216,10 @@ class Element(object):
         # Calculated per unit area [m^2]
 
         # dens: air density (kgd m-3)
-        dens = forc.pres / (1000 * 0.287042 * tempRef * (1. + 1.607858 * humRef))
-        self.aeroCond = 5.8 + 3.7 * windRef  # convection coef (ref: uwg, eq. 12))
+        dens = forc.pres / (1000 * 0.287042 * tempRef *
+                            (1. + 1.607858 * humRef))
+        # convection coef (ref: uwg, eq. 12))
+        self.aeroCond = 5.8 + 3.7 * windRef
 
         if self.horizontal:
             # For roof, mass, road
@@ -222,7 +230,8 @@ class Element(object):
                 # difficulty of validation, and lack of reliability of precipitation
                 # data from EPW files.Therefore this condition is never run because all
                 # elements have had their waterStorage hardcoded to 0.
-                qtsat = self.qsat([self.layerTemp[0]], [forc.pres], parameter)[0]
+                qtsat = self.qsat([self.layerTemp[0]], [
+                                  forc.pres], parameter)[0]
                 eg = self.aeroCond * parameter.colburn * dens * \
                     (qtsat - humRef) / parameter.waterDens / parameter.cp
                 self.waterStorage = \
@@ -270,7 +279,8 @@ class Element(object):
 
             # Sensible & net heat flux
             self.sens = vegSen + self.aeroCond * (self.layerTemp[0] - tempRef)
-            self.flux = self.solAbs + self.infra - self.lat - self.sens  # [W m-2]
+            self.flux = self.solAbs + self.infra - \
+                self.lat - self.sens  # [W m-2]
 
         else:
             # For vertical surfaces (wall)
@@ -279,10 +289,12 @@ class Element(object):
 
             # Sensible & net heat flux
             self.sens = self.aeroCond * (self.layerTemp[0] - tempRef)
-            self.flux = self.solAbs + self.infra - self.lat - self.sens  # [W m-2]
+            self.flux = self.solAbs + self.infra - \
+                self.lat - self.sens  # [W m-2]
 
         self.layerTemp = \
-            self.Conduction(simTime.dt, self.flux, boundCond, forc.deepTemp, intFlux)
+            self.Conduction(simTime.dt, self.flux, boundCond,
+                            forc.deepTemp, intFlux)
         self.T_ext = self.layerTemp[0]
         self.T_int = self.layerTemp[-1]
 
@@ -300,8 +312,10 @@ class Element(object):
             A 1d vector of element layer temperatures.
         """
         t = self.layerTemp          # vector of layer temperatures (K)
-        hc = self.layerVolHeat      # vector of layer volumetric heat (J m-3 K-1)
-        tc = self.layerThermalCond  # vector of layer thermal conductivities (W m-1 K-1)
+        # vector of layer volumetric heat (J m-3 K-1)
+        hc = self.layerVolHeat
+        # vector of layer thermal conductivities (W m-1 K-1)
+        tc = self.layerThermalCond
         d = self.layer_thickness_lst     # vector of layer thicknesses (m)
 
         fimp = 0.5                  # implicit coefficient
@@ -338,7 +352,8 @@ class Element(object):
             za[j][1] = hcp[j] / dt + fimp * (tcp[j] + tcp[j+1])
             za[j][2] = fimp * (-tcp[j+1])
             zy[j] = hcp[j] / dt * t[j] + fexp * \
-                (tcp[j] * t[j - 1] - tcp[j] * t[j] - tcp[j+1] * t[j] + tcp[j+1] * t[j+1])
+                (tcp[j] * t[j - 1] - tcp[j] * t[j] -
+                 tcp[j+1] * t[j] + tcp[j+1] * t[j+1])
 
         # --------------------------------------------------------------------------
         # Boundary conditions
@@ -386,10 +401,12 @@ class Element(object):
 
         for i in range(len(temp)):
             # saturation vapor pressure
-            foes_lst[i] = math.exp(alpw - (betaw / temp[i]) - (gamw * math.log(temp[i])))
+            foes_lst[i] = math.exp(
+                alpw - (betaw / temp[i]) - (gamw * math.log(temp[i])))
             work1_lst[i] = foes_lst[i] / pres[i]
             # saturation humidity
-            qsat_lst[i] = work2 * work1_lst[i] / (1. + ((work2 - 1.) * work1_lst[i]))
+            qsat_lst[i] = work2 * work1_lst[i] / \
+                (1. + ((work2 - 1.) * work1_lst[i]))
 
         return qsat_lst
 

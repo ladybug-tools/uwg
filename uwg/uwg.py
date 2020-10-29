@@ -19,6 +19,11 @@ try:
 except NameError:
     pass
 
+try:
+    str = basestring
+except NameError:
+    pass
+
 import os
 import math
 import copy

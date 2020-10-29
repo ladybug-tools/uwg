@@ -2,6 +2,11 @@
 
 from .utilities import float_in_range_excl_incl
 
+try:
+    str = basestring
+except NameError:
+    pass
+
 
 class Material(object):
     """Material class.
@@ -15,6 +20,7 @@ class Material(object):
         * thermalcond
         * volheat
     """
+
     def __init__(self, thermalcond, volheat, name):
         self._name = name
         self.thermalcond = thermalcond
@@ -42,7 +48,8 @@ class Material(object):
 
     @volheat.setter
     def volheat(self, value):
-        self._volheat = float_in_range_excl_incl(value, mi=0, input_name='volheat')
+        self._volheat = float_in_range_excl_incl(
+            value, mi=0, input_name='volheat')
 
     @classmethod
     def from_dict(cls, data):

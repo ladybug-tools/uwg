@@ -3,6 +3,12 @@
 from .utilities import float_positive, REF_BUILTERA_SET, REF_BUILTERA
 
 
+try:
+    str = basestring
+except NameError:
+    pass
+
+
 class SchDef(object):
     """Schedule definition class.
 

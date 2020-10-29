@@ -33,16 +33,15 @@ def test_model_validate():
 def test_param_validate():
     """Test uwg validation."""
 
-    if (sys.version_info >= (3, 7)):
-        runner = CliRunner()
-        input_uwg = './tests/parameters/initialize_singapore.uwg'
-        result = runner.invoke(validate, ['param', input_uwg])
-        print(result.output)
-        assert result.exit_code == 0, result.output
+    runner = CliRunner()
+    input_uwg = './tests/parameters/initialize_singapore.uwg'
+    result = runner.invoke(validate, ['param', input_uwg])
+    print(result.output)
+    assert result.exit_code == 0, result.output
 
-        input_uwg = './tests/parameters/initialize_singapore_error.uwg'
-        result = runner.invoke(validate, ['param', input_uwg])
-        assert result.exit_code == 1, result.output
+    input_uwg = './tests/parameters/initialize_singapore_error.uwg'
+    result = runner.invoke(validate, ['param', input_uwg])
+    assert result.exit_code == 1, result.output
 
 
 def test_uwg_simulate():
