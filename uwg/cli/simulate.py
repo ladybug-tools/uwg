@@ -31,7 +31,7 @@ def simulate():
               'of the morphed .epw file. The argument passed here will overwrite the '
               'new_epw_name specified in the UWG JSON model file.',
               default=None, show_default=True)
-def simulate_model(model_json, epw_path, new_epw_dir, new_epw_name):
+def simulate_json_model(model_json, epw_path, new_epw_dir, new_epw_name):
     """Simulate a UWG model from a JSON model file.
     \n
     Args:\n
@@ -67,7 +67,7 @@ def simulate_model(model_json, epw_path, new_epw_dir, new_epw_name):
 @click.option('--new-epw-name', help='Optional argumetn for The destination file name '
               'of the morphed .epw file.',
               default=None, show_default=True)
-def simulate_model(param_uwg, epw_path, new_epw_dir, new_epw_name):
+def simulate_uwg_param_model(param_uwg, epw_path, new_epw_dir, new_epw_name):
     """Simulate a UWG model from a .uwg parameter file.
     \n
     Args:\n
