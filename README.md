@@ -24,17 +24,18 @@ This repository is a Python translation of the original [MATLAB Urban Weather Ge
 Here is a Python example that shows how to create and run an Urban Weather Generator object. The example script is available [at resources/uwg_example.py](https://github.com/ladybug-tools/uwg/blob/master/resources/uwg_example.py). Run it through your command prompt in the main uwg directory with the following: ```python -m resources.uwg_example```
 
 ```python
-from uwg import uwg
+from uwg.uwg import UWG
 
 # Define the .epw, .uwg filenames to create an uwg object.
 # uwg will look for the .epw file in the uwg/resources/epw folder,
 # and the .uwg file in the uwg/resources/parameters folder.
-epw_filename = "SGP_Singapore.486980_IWEC.epw"      # .epw file name
-param_filename = "initialize_singapore.uwg"         # .uwg file name
+epw_filename = "SGP_Singapore.486980_IWEC.epw"  # .epw file name
+param_filename = "initialize_singapore.uwg"  # .uwg file name
 
 # Initialize the UWG object and run the simulation
-uwg_ = uwg(epw_filename, param_filename)
-uwg_.run()
+model = UWG.from_param_file(param_filename, epw_filename)
+model.generate()
+model.simulate()
 ```
 
 ## Installation
