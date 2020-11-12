@@ -1218,7 +1218,7 @@ class UWG(object):
             else:
                 # soil temperature by depth, by month
                 self.forc.deepTemp = self.Tsoil[self._soilindex1][self.simTime.month - 1]
-                self.forc.waterTemp = self.Tsoil[2][self.simTime.month-1]
+                self.forc.waterTemp = self.Tsoil[2][self.simTime.month - 1]
 
             # There's probably a better way to update the weather...
             self.simTime.update_date()
@@ -1444,7 +1444,7 @@ class UWG(object):
                     count += 1
                 elif row[0] == 'schtraffic':
                     # SchTraffic: 3 x 24 matrix
-                    trafficrows = param_data[count+1:count+4]
+                    trafficrows = param_data[count + 1:count + 4]
                     self._init_param_dict[row[0]] = \
                         [utilities.str2fl(r[:24]) for r in trafficrows]
                     count += 4
@@ -1471,7 +1471,8 @@ class UWG(object):
                 else:
                     self._init_param_dict[row[0]] = float(row[1])
                     count += 1
-            except ValueError:
+            except (ValueError, IndexError) as e:
+                print(e)
                 print('Error while reading parameter at row {}. Got: {}.'.format(
                     count, row))
 
@@ -1666,7 +1667,7 @@ class UWG(object):
         road_tree_coverage = self.grasscover / (1 - self.blddensity)
 
         # define road layers
-        road_layer_num = int(math.ceil(self.droad/0.05))
+        road_layer_num = int(math.ceil(self.droad / 0.05))
         # 0.5/0.05 ~ 10 x 1 matrix of 0.05 thickness
         thickness_vector = [0.05 for r in range(road_layer_num)]
         material_vector = [asphalt for r in range(road_layer_num)]
@@ -1910,8 +1911,8 @@ class UWG(object):
                         materials.layer_thickness_lst[0] / float(nlayers))
             # Material should be at least 1cm thick, so if we're here,
             # should give warning and stop. Only warning given for now.
-            elif materials.layer_thickness_lst[0] < min_thickness*2:
-                newthickness = [min_thickness/2., min_thickness/2.]
+            elif materials.layer_thickness_lst[0] < min_thickness * 2:
+                newthickness = [min_thickness / 2., min_thickness / 2.]
                 newmat = [Material(k[0], Vhc[0], name=materials.name),
                           Material(k[0], Vhc[0], name=materials.name)]
                 print('WARNING: Material layer less then 2 cm is found.'
