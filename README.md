@@ -24,7 +24,7 @@ This repository is a Python translation of the original [MATLAB Urban Weather Ge
 Here is a Python example that shows how to create and run an Urban Weather Generator object. 
 
 ```python
-from uwg.uwg import UWG
+from uwg import UWG
 
 # Define the .epw, .uwg filenames to create an uwg object.
 # uwg will look for the .epw file in the uwg/resources/epw folder,
