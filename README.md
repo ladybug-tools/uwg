@@ -27,10 +27,10 @@ Here is a Python example that shows how to create and run an Urban Weather Gener
 from uwg import UWG
 
 # Define the .epw, .uwg filenames to create an uwg object.
-# uwg will look for the .epw file in the uwg/resources/epw folder,
-# and the .uwg file in the uwg/resources/parameters folder.
-epw_filename = "SGP_Singapore.486980_IWEC.epw"      # .epw file name
-param_filename = "initialize_singapore.uwg"         # .uwg file name
+# The initialize_singapore.uwg file referenced here is available in the 
+# resources directory.
+epw_filename = "resources/SGP_Singapore.486980_IWEC.epw"  # .epw file name
+param_filename = "initialize_singapore.uwg"  # .uwg file name
 
 # Initialize the UWG object and run the simulation
 model = UWG.from_param_file(param_filename, epw_filename)
