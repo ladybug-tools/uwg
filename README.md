@@ -26,14 +26,18 @@ Here is a Python example that shows how to create and run an Urban Weather Gener
 ```python
 from uwg import UWG
 
-# Define the .epw, .uwg filenames to create an uwg object.
-# The initialize_singapore.uwg file referenced here is available in the 
-# resources directory.
-epw_filename = "resources/SGP_Singapore.486980_IWEC.epw"  # .epw file name
-param_filename = "initialize_singapore.uwg"  # .uwg file name
+# Define the .epw, .uwg paths to create an uwg object.
+epw_path = "SGP_Singapore.486980_IWEC.epw"
+  
 
-# Initialize the UWG object and run the simulation
-model = UWG.from_param_file(param_filename, epw_filename)
+# Initialize the UWG model by passing parameters as arguments, or relying on defaults
+model = UWG.from_param_args(bldheight=10, blddensity=0.5, vertohor=0.8, grasscover=0.1, 
+                            treecover=0.1, zone='1A')
+
+# Uncomment these lines to initialize the UWG model using a .uwg parameter file
+# param_path = "initialize_singapore.uwg"  # available in the resources directory.
+# model = UWG.from_param_file(param_path, epw_path=epw_path)
+
 model.generate()
 model.simulate()
 
