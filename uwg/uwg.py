@@ -159,7 +159,7 @@ class UWG(object):
     WGMAX = 0.005  # maximum film water depth on horizontal surfaces (m)
 
     # UWG object constants
-    PARAMETER_LIST = ['month', 'day', 'nday', 'dtsim', 'dtweather', 'autosize',
+    PARAMETER_LIST = ('month', 'day', 'nday', 'dtsim', 'dtweather', 'autosize',
                       'sensocc', 'latfocc', 'radfocc', 'radfequip', 'radflight',
                       'h_ubl1', 'h_ubl2', 'h_ref', 'h_temp', 'h_wind', 'c_circ',
                       'c_exch', 'maxday', 'maxnight', 'windmin', 'h_obs', 'bldheight',
@@ -167,18 +167,18 @@ class UWG(object):
                       'droad', 'sensanth', 'zone', 'grasscover', 'treecover',
                       'vegstart', 'vegend', 'albveg', 'rurvegcover', 'latgrss',
                       'lattree', 'schtraffic', 'kroad', 'croad', 'bld', 'shgc',
-                      'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h']
+                      'albroof', 'glzr', 'vegroof', 'albwall', 'flr_h')
     OPTIONAL_PARAMETER_SET = {'shgc', 'albroof',
                               'glzr', 'vegroof', 'albwall', 'flr_h'}
-    DEFAULT_BLD = [('largeoffice', 'pst80', 0.4),
-                   ('midriseapartment', 'pst80', 0.6)]
-    DEFAULT_SCHTRAFFIC = [
-        [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.7, 0.9, 0.9, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.8,
-         0.9, 0.9, 0.8, 0.8, 0.7, 0.3, 0.2, 0.2],  # Weekday
-        [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.6, 0.7,
-         0.7, 0.7, 0.7, 0.5, 0.4, 0.3, 0.2, 0.2],  # Saturday
-        [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
-         0.4, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2]]  # Sunday
+    DEFAULT_BLD = (('largeoffice', 'pst80', 0.4),
+                   ('midriseapartment', 'pst80', 0.6))
+    DEFAULT_SCHTRAFFIC = (
+        (0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.7, 0.9, 0.9, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.8,
+         0.9, 0.9, 0.8, 0.8, 0.7, 0.3, 0.2, 0.2),  # Weekday
+        (0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.6, 0.7,
+         0.7, 0.7, 0.7, 0.5, 0.4, 0.3, 0.2, 0.2),  # Saturday
+        (0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4,
+         0.4, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2))  # Sunday
 
     # Constant file paths
     CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -217,7 +217,7 @@ class UWG(object):
                         new_epw_name=None):
         """Create a UWG object from the .uwg parameter file.
 
-        Note: this method of initializating the UWG object doesn't permit adding custom
+        Note: this method of initializing the UWG object doesn't permit adding custom
         reference data.
 
         Args:
