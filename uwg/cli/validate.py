@@ -29,10 +29,12 @@ def validate():
 @click.argument('model-json')
 def validate_model(model_json):
     """Validate a UWG model JSON file against the UWG schema.
-    \n
-    Args:\n
-        model_json: Full path to a UWG model JSON file. Note that this will not check if
-rural and new .epw file paths are valid since these can be overridden by CLI arguments.
+
+    \b
+    Args:
+        model_json: Full path to a UWG model JSON file. Note that this will
+            not check if rural and new .epw file paths are valid since these
+            can be overridden by CLI arguments.
     """
     try:
         assert os.path.isfile(
@@ -58,8 +60,9 @@ rural and new .epw file paths are valid since these can be overridden by CLI arg
 @click.argument('param-uwg')
 def validate_param(param_uwg):
     """Validate a .uwg parameter file.
-    \n
-    Args:\n
+
+    \b
+    Args:
         param_uwg: Full path to a .uwg parameter file.
     """
     try:
