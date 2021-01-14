@@ -263,7 +263,7 @@ class UWG(object):
 
         The default parameters are set from example parameters defined by Bueno et al.
         (2012a)[1] for Singapore. The original file can be accessed here:
-        https://github.com/ladybug-tools/uwg/tree/master/resources/resources/initialize_singapore.uwg.
+        https://github.com/ladybug-tools/uwg/blob/master/resources/initialize_singapore.uwg.
 
         Note:
             [1] Bueno, Bruno; Norford, Leslie; Hidalgo, Julia; Pigeon, Gregoire (2012a).
