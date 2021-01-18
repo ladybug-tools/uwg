@@ -1207,7 +1207,10 @@ class UWG(object):
               '{} days from {}/{}.'.format(self.nday, self.month, self.day))
 
         # iterate through every simulation time-step (i.e 5 min) defined by UWG
+        day_step = int((1 / self.ph) * 24)
         for it in range(1, self.simTime.nt, 1):
+            if it % day_step == 0:
+                print('Simulating Day {}'.format(int(it / day_step)))
             # Update water temperature (estimated)
             if self.nSoil < 3:
                 # for BUBBLE/CAPITOUL/Singapore only
