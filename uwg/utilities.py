@@ -32,8 +32,8 @@ REF_BLDTYPE_SET = {'fullservicerestaurant', 'hospital', 'largehotel', 'largeoffi
                    'quickservicerestaurant', 'secondaryschool', 'smallhotel',
                    'smalloffice', 'standaloneretail', 'stripmall', 'supermarket',
                    'warehouse'}
-REF_ZONETYPE_SET = {'1A', '2A', '2B', '3A', '3B-CA', '3B', '3C', '4A', '4B', '4C', '5A',
-                    '5B', '6A', '6B', '7', '8'}
+REF_ZONETYPE_SET = {'1A', '1B', '2A', '2B', '3A', '3B-CA', '3B', '3C', '4A', '4B', '4C',
+                    '5A', '5B', '5C', '6A', '6B', '7', '8'}
 REF_BUILTERA_SET = {'pre80', 'pst80', 'new'}
 
 
