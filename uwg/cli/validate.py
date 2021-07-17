@@ -17,7 +17,7 @@ import json
 try:
     import uwg_schema.model as schema_model
 except ImportError:
-    print('uwg_schema is not installed. Try `pip install . [cli]` command.')
+    pass  # uwg_schema is not installed
 
 
 @click.group(help='Commands for validating UWG JSON and .uwg files.')
@@ -37,6 +37,11 @@ def validate_model(model_json):
             can be overridden by CLI arguments.
     """
     try:
+        try:
+            schema_model
+        except Exception:
+            raise ImportError(
+                'uwg_schema is not installed. Try `pip install . [cli]` command.')
         assert os.path.isfile(
             model_json), 'No JSON file found at {}.'.format(model_json)
 
@@ -66,6 +71,12 @@ def validate_param(param_uwg):
         param_uwg: Full path to a .uwg parameter file.
     """
     try:
+        try:
+            schema_model
+        except Exception:
+            raise ImportError(
+                'uwg_schema is not installed. Try `pip install . [cli]` command.')
+
         # validate the Model JSON
         click.echo('Validating .uwg parameter file ...')
         UWG.from_param_file(param_uwg)

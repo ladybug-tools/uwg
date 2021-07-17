@@ -828,6 +828,7 @@ class UWG(object):
         Choose from the following:
 
         * '1A' - (i.e Miami)
+        * '1B' - (i.e Kuwait)
         * '2A' - (i.e Houston)
         * '2B' - (i.e Phoenix)
         * '3A' - (i.e Atlanta)
@@ -839,6 +840,7 @@ class UWG(object):
         * '4C' - (i.e Seattle)
         * '5A' - (i.e Chicago)
         * '5B' - (i.e Boulder)
+        * '5C' - (i.e Bremerton)
         * '6A' - (i.e Minneapolis)
         * '6B' - (i.e Helena)
         * '7' - (i.e Duluth)
@@ -851,7 +853,7 @@ class UWG(object):
         assert isinstance(value, str), \
             'zone must be a string. Got: {}.'.format(value)
         value = value.upper()
-        assert value in REF_ZONETYPE_SET, 'zone must be on of {}. Got: {}.'.format(
+        assert value in REF_ZONETYPE_SET, 'zone must be one of {}. Got: {}.'.format(
             REF_ZONETYPE, value)
         self._zone = value
 
@@ -1565,7 +1567,8 @@ class UWG(object):
         self.Sch = []  # list of Schedule objects
 
         # Modify zone to be used as python index
-        zone_idx = REF_ZONETYPE.index(self.zone)
+        bld_z = '1A' if self.zone == '1B' else '5B' if self.zone == '5C' else self.zone
+        zone_idx = REF_ZONETYPE.index(bld_z)
 
         # Build unique key based on bldtype and builtera strings
         bld_dict = {bldg[0] + bldg[1]: (bldg[0], REF_BUILTERA.index(bldg[1]), bldg[2])
@@ -1815,7 +1818,8 @@ class UWG(object):
                 the refSchedule matrix according to the SchDef bldtype and builtera
                 values.
         """
-        zi = REF_ZONETYPE.index(self.zone)
+        bld_z = '1A' if self.zone == '1B' else '5B' if self.zone == '5C' else self.zone
+        zi = REF_ZONETYPE.index(bld_z)
         # Insert or extend refSchedule matrix
         for sch in self.ref_sch_vector:
             ei = REF_BUILTERA.index(sch.builtera)
