@@ -1,5 +1,5 @@
 click==7.1.2
-uwg-schema==0.2.7;python_version>='3.6'
+uwg-schema==0.2.8;python_version>='3.6'
 coverage==5.5
 coveralls==1.7.0;python_version<'3.0'
 coveralls==2.2.0;python_version>='3.6'
