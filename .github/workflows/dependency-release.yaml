@@ -19,7 +19,7 @@ jobs:
         VERSION: ${{ github.event.client_payload.version }}
       run: |
         export CLEAN_VERSION=$(echo $VERSION | sed 's/v//g')
-        sed -i --regexp-extended 's/(uwg-schema==).*/uwg-schema=='"$CLEAN_VERSION"'/' cli-requirements.txt
+        sed -i --regexp-extended 's/(uwg-schema==).*;/uwg-schema=='"$CLEAN_VERSION"';/' cli-requirements.txt
     - name: "Commit and Push Changes"
       id: push
       env:
