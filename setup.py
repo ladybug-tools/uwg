@@ -6,6 +6,9 @@ with open("README.md", "r") as fh:
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
+with open('cli-requirements.txt') as f:
+    cli_requirements = f.read().splitlines()
+
 setuptools.setup(
     name="uwg",
     use_scm_version=True,
@@ -20,7 +23,7 @@ setuptools.setup(
     include_package_data=True,
     install_requires=requirements,
     extras_require={
-        'cli': ['click==7.1.2', "uwg-schema==0.2.8;python_version>='3.6'"]
+        'cli': cli_requirements
     },
     entry_points={
         "console_scripts": ["uwg = uwg.cli:main"]
