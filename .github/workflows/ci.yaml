@@ -58,12 +58,29 @@ jobs:
         run:
           npm install @semantic-release/exec
       - name: run semantic release
-        run:
+        id: new_release
+        run: |
+          nextRelease="`npx semantic-release --dryRun | grep -oP 'Published release \K.*? ' || true`"
           npx semantic-release
+          echo "::set-output name=tag::$nextRelease"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+      - name: sleep for 10 minutes for PyPI update
+        if: contains(steps.new_release.outputs.tag, '.')
+        run: sleep 600s
+        shell: bash
+      - name: Update dragonfly-uwg
+        if: contains(steps.new_release.outputs.tag, '.')
+        env:
+          DISPATCH_REPO: ladybug-tools/dragonfly-uwg
+          DEPS_TOKEN: ${{ secrets.DEPS_UPDATING }}
+        run: |
+          curl -X POST https://api.github.com/repos/$DISPATCH_REPO/dispatches \
+          -H "Accept: application/vnd.github.everest-preview+json" \
+          -d '{"event_type": "uwg_release", "client_payload": {"version": "${{ steps.new_release.outputs.tag }}"}}' \
+          -u ladybugbot:$DEPS_TOKEN
 
   docs:
     name: Generate docs

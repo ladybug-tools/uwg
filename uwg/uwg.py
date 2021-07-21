@@ -1668,9 +1668,9 @@ class UWG(object):
         road_T_init = 293.
         road_horizontal = 1
         # fraction of vegetation (tree & grass) coverage on unbuilt surface
-        road_veg_coverage = self.vegcover / (1 - self.blddensity)
-        road_grass_coverage = self.treecover / (1 - self.blddensity)
-        road_tree_coverage = self.grasscover / (1 - self.blddensity)
+        road_veg_coverage = self.vegcover / (1 - self.blddensity) 
+        road_grass_coverage = self.grasscover / (1 - self.blddensity)
+        road_tree_coverage = self.treecover / (1 - self.blddensity)
 
         # define road layers
         road_layer_num = int(math.ceil(self.droad / 0.05))
