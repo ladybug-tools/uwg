@@ -1414,7 +1414,7 @@ class UWG(object):
 
         for i in range(len(self.epwinput)):
             printme = ''
-            for ei in range(34):
+            for ei in range(len(self.epwinput[i])):
                 printme += "{}".format(self.epwinput[i][ei]) + ','
             printme = printme + "{}".format(self.epwinput[i][ei])
             new_epw_line = '{0}\n'.format(printme)
