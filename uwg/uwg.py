@@ -793,7 +793,7 @@ class UWG(object):
                 'fraction of total built stock. Got: {}.'.format(frac)
             total_frac += frac
 
-        assert abs(total_frac - 1.0) < 1e-10, 'The sum of reference building ' \
+        assert abs(total_frac - 1.0) < 1e-2, 'The sum of reference building ' \
             'fractions defined in bld must equal one. Got: {}.'.format(
                 total_frac)
 
