@@ -215,9 +215,11 @@ class RSMDef(object):
         # Python will throw an exception. Negative value occurs here if
         # VDM is run for average obstacle height ~ 4m.
         for iz in range(self.nzref):
-            self.windProf[iz] = \
-                ustarRur / parameter.vk * \
-                log((self.z[iz] - self.disp) / self.z0r)
+            try:
+                self.windProf[iz] = ustarRur / parameter.vk * \
+                    log((self.z[iz] - self.disp) / self.z0r)
+            except ValueError:  # math domain error occurred
+                self.windProf[iz] = 0
 
         # Average pressure
         self.ublPres = 0.
