@@ -1,5 +1,7 @@
 """uwg simulation running commands."""
-
+import sys
+import json
+import logging
 try:
     import click
 except ImportError:
@@ -9,8 +11,7 @@ except ImportError:
 
 from uwg import UWG
 
-import sys
-import json
+_logger = logging.getLogger(__name__)
 
 
 @click.group(help='Commands for simulating UWG models.')
@@ -49,7 +50,7 @@ def simulate_json_model(model_json, epw_path, new_epw_dir, new_epw_name):
         uwg_model.simulate()
         uwg_model.write_epw()
     except Exception as e:
-        print('UWG model simulation failed.\n{}'.format(e))
+        _logger.exception('UWG model simulation failed.\n{}'.format(e))
         sys.exit(1)
     else:
         sys.exit(0)
@@ -81,7 +82,7 @@ def simulate_uwg_param_model(param_uwg, epw_path, new_epw_dir, new_epw_name):
         uwg_model.simulate()
         uwg_model.write_epw()
     except Exception as e:
-        print('UWG model simulation failed.\n{}'.format(e))
+        _logger.exception('UWG model simulation failed.\n{}'.format(e))
         sys.exit(1)
     else:
         sys.exit(0)
