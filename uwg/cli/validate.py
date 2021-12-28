@@ -1,6 +1,9 @@
 
 """UWG JSON model validation commands."""
-
+import sys
+import os
+import json
+import logging
 try:
     import click
 except ImportError:
@@ -10,14 +13,12 @@ except ImportError:
 
 from uwg import UWG
 
-import sys
-import os
-import json
-
 try:
     import uwg_schema.model as schema_model
 except ImportError:
     pass  # uwg_schema is not installed
+
+_logger = logging.getLogger(__name__)
 
 
 @click.group(help='Commands for validating UWG JSON and .uwg files.')
@@ -55,7 +56,7 @@ def validate_model(model_json):
         click.echo('Python re-serialization passed.')
         click.echo('Congratulations! Your UWG model JSON is valid!')
     except Exception as e:
-        print('Model validation failed.\n{}'.format(e))
+        _logger.exception('Model validation failed.\n{}'.format(e))
         sys.exit(1)
     else:
         sys.exit(0)
@@ -82,7 +83,7 @@ def validate_param(param_uwg):
         UWG.from_param_file(param_uwg)
         click.echo('Congratulations! Your .uwg parameter file is valid!')
     except Exception as e:
-        print('The .uwg parameter file validation failed.\n{}'.format(e))
+        _logger.exception('The .uwg parameter file validation failed.\n{}'.format(e))
         sys.exit(1)
     else:
         sys.exit(0)
