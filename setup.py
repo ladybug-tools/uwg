@@ -3,9 +3,6 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
-
 with open('cli-requirements.txt') as f:
     cli_requirements = f.read().splitlines()
 
@@ -21,7 +18,7 @@ setuptools.setup(
     url="https://github.com/ladybug-tools/uwg",
     packages=setuptools.find_packages(exclude=["tests*", "resources*"]),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[],
     extras_require={
         'cli': cli_requirements
     },
