@@ -1,2 +1,2 @@
-click==7.1.2
+click>=7.1.2
 uwg-schema==0.2.11;python_version>='3.7'
