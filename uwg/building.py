@@ -89,7 +89,8 @@ class Building(object):
     """
 
     TEMP_COEF_CONFLICT_MSG = \
-        'FATAL ERROR! Try reducing the simulation timstep to fix this error.'
+        'FATAL ERROR! Try running a shorter simulation (for a fraction of the year)\n' \
+        'or try increasing the simulation timesteps per hour'
 
     def __init__(self, floor_height, int_heat_night, int_heat_day, int_heat_frad,
                  int_heat_flat, infil, vent, glazing_ratio, u_value, shgc, condtype, cop,
@@ -369,8 +370,8 @@ class Building(object):
             self.int_heat = self.int_heat_day * self.nFloor
 
         # Indoor convection heat transfer coefficients
-        zac_in_wall = 3.076  # wall heat convection coefficeint
-        zac_in_mass = 3.076  # mass heat convection coefficeint
+        zac_in_wall = 3.076  # wall heat convection coefficient
+        zac_in_mass = 3.076  # mass heat convection coefficient
 
         # Check that T_ceil and T_indoor within reasonable bounds
         converge_hi = 100.0 + 273.15
@@ -381,12 +382,14 @@ class Building(object):
             chk_tce = converge_lo <= T_ceil <= converge_hi
 
             if chk_tin is not True or chk_tce is not True:
-                raise Exception("{}.\n Error at {}/{} {}s for bld {}.".format(
-                    self.TEMP_COEF_CONFLICT_MSG, simTime.month, simTime.day,
-                    simTime.secDay, BEM))
+                raise Exception(
+                    "{}.\n Error at {}/{} {}s\nT_INDOOR: {}C\nT_CEILING: {}C\n{}.".format(
+                        self.TEMP_COEF_CONFLICT_MSG,
+                        simTime.month, simTime.day, simTime.secDay,
+                        T_indoor, T_ceil, BEM))
 
         except ValueError:
-            raise Exception("{}.\n Error at {}/{} {}s for bld {}".format(
+            raise Exception("{}.\n Error at {}/{} {}s\n{}".format(
                 self.TEMP_COEF_CONFLICT_MSG, simTime.month, simTime.day,
                 simTime.secDay, BEM))
 
