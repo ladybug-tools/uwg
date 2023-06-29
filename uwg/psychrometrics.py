@@ -49,7 +49,10 @@ def psychrometrics(Tdb_in, w_in, P):
 
     # dew point calculation from w
     _pw = (w * P) / (0.621945 + w)  # water vapor partial pressure in kPa
-    alpha = log(_pw)
+    try:
+        alpha = log(_pw)
+    except ValueError:  # case of zero humidity
+        alpha = -3  # just assume a very low value
 
     Tdp = 6.54 + 14.526 * alpha + pow(alpha, 2) * 0.7389 + pow(alpha, 3) * 0.09486 + \
         pow(_pw, 0.1984) * 0.4569  # valid for Tdp between 0 C and 93 C
