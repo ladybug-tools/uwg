@@ -86,7 +86,8 @@ def test_custom_uwg_simulate():
     epw_path = './tests/epw/SGP_Singapore.486980_IWEC.epw'
     result = runner.invoke(
         simulate, ['model', input_uwg, epw_path])
-    assert result.exit_code == 0, result.output
+    assert result.exit_code == 0
+    print(result.output)
 
     output_epw = './tests/epw/SGP_Singapore.486980_IWEC_UWG.epw'
     assert os.path.isfile(output_epw)
