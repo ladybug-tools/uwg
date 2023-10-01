@@ -420,7 +420,10 @@ class UWG(object):
                 if self._new_epw_dir is None:
                     self._new_epw_dir = epw_dir
                 if self._new_epw_name is None:
-                    self._new_epw_name = epw_name.strip('.epw') + '_UWG.epw'
+                    nepw_name = epw_name
+                    if nepw_name.lower().endswith('.epw'):
+                        nepw_name = nepw_name[:-4]
+                    self._new_epw_name = nepw_name + '_UWG.epw'
             self._new_epw_path = os.path.join(
                 self._new_epw_dir, self._new_epw_name)
         return self._new_epw_path
