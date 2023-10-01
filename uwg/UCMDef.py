@@ -283,7 +283,7 @@ class UCMDef(object):
             self.Q_traffic + self.treeSensHeat + self.Q_roof)
 
         # Error checking
-        if self.canTemp > 350. or self.canTemp < 250:
+        if self.canTemp > 350. or self.canTemp < 200:
             raise Exception('Got canyon temperature at {} C. Something obviously went '
                             'wrong (UCMDef.py).'.format(self.canTemp - 273.15))
 
