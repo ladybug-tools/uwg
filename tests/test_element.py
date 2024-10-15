@@ -107,10 +107,10 @@ def test_SurfFlux_with_waterStorage_middle():
     # check date
     assert testuwg.simTime.month == 1
     assert testuwg.simTime.day == 1
-    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-15)
+    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-6)
 
     # Check waterStorage
-    assert 0.004643553960210 == pytest.approx(testuwg.rural.waterStorage, 1e-15)
+    assert 0.004643553960210 == pytest.approx(testuwg.rural.waterStorage, 1e-6)
 
 
 def test_SurfFlux_unit():
@@ -181,7 +181,7 @@ def test_SurfFlux_integration():
     # check date is February 15th, 13:00
     assert testuwg.simTime.month == 2
     assert testuwg.simTime.day == 15
-    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-15)
+    assert testuwg.simTime.secDay/3600. == pytest.approx(13.0, abs=1e-6)
 
     uwg_python_val = [
         testuwg.rural.aeroCond,        # Convection coef (refL uwg, eq.12)

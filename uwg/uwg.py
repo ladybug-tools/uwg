@@ -24,6 +24,7 @@ try:
 except NameError:
     pass
 
+import sys
 import os
 import math
 import copy
@@ -1894,7 +1895,7 @@ class UWG(object):
                 # Break up each layer that's more than max thickness (0.05m)
                 if materials.layer_thickness_lst[j] > max_thickness:
                     nlayers = math.ceil(
-                        materials.layer_thickness_lst[j] / float(max_thickness))
+                        (materials.layer_thickness_lst[j] / float(max_thickness)))
                     for i in range(int(nlayers)):
                         newmat.append(
                             Material(k[j], Vhc[j], name=materials.name))
@@ -1914,7 +1915,7 @@ class UWG(object):
             # Divide single layer into two (UWG assumes at least 2 layers)
             if materials.layer_thickness_lst[0] > max_thickness:
                 nlayers = math.ceil(
-                    materials.layer_thickness_lst[0] / float(max_thickness))
+                    (materials.layer_thickness_lst[0] / float(max_thickness)))
                 for i in range(int(nlayers)):
                     newmat.append(Material(k[0], Vhc[0], name=materials.name))
                     newthickness.append(
