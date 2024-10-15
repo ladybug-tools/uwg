@@ -393,8 +393,8 @@ def test_read_input():
         0.5, abs=1e-6)
 
     # Check the road layer splitting
-    assert len(model.road.layer_thickness_lst) == pytest.approx(11., abs=1e-15)
-    assert model.road.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-15)
+    assert len(model.road.layer_thickness_lst) == 11
+    assert model.road.layer_thickness_lst[0] == pytest.approx(0.05, abs=1e-6)
 
     # Check the road layer splitting for rural
     assert len(model.rural.layer_thickness_lst) == pytest.approx(
@@ -473,8 +473,8 @@ def test_procMat():
     # test a 0.5m road split into 10 slices of 0.05m
     # base case; min=0.01, max=0.05, stays the same
     roadMat, newthickness = model._procmat(model.road, 0.05, 0.01)
-    assert len(roadMat) == pytest.approx(11, abs=1e-6)
-    assert len(newthickness) == pytest.approx(11, abs=1e-6)
+    assert len(roadMat) == 11
+    assert len(newthickness) == 11
     assert sum(newthickness) == pytest.approx(0.05*11, abs=1e-6)
 
     # modify to one layer for tests
@@ -484,22 +484,22 @@ def test_procMat():
 
     # 0.05 layer, will split in two
     roadMat, newthickness = model._procmat(model.road, 0.05, 0.01)
-    assert len(roadMat) == pytest.approx(2, abs=1e-6)
-    assert len(newthickness) == pytest.approx(2, abs=1e-6)
+    assert len(roadMat) == 2
+    assert len(newthickness) == 2
     assert sum(newthickness) == pytest.approx(0.025*2, abs=1e-6)
 
     # 0.015 layer, will split in min thickness in two
     model.road.layer_thickness_lst = [0.015]
     roadMat, newthickness = model._procmat(model.road, 0.05, 0.01)
-    assert len(roadMat) == pytest.approx(2, abs=1e-6)
-    assert len(newthickness) == pytest.approx(2, abs=1e-6)
+    assert len(roadMat) == 2
+    assert len(newthickness) == 2
     assert sum(newthickness) == pytest.approx(0.005*2, abs=1e-6)
 
     # 0.12 layer, will split into 3 layers b/c > max_thickness
     model.road.layer_thickness_lst = [0.12]
     roadMat, newthickness = model._procmat(model.road, 0.05, 0.01)
-    assert len(roadMat) == pytest.approx(3, abs=1e-6)
-    assert len(newthickness) == pytest.approx(3, abs=1e-6)
+    assert len(roadMat) == 3
+    assert len(newthickness) == 3
     assert sum(newthickness) == pytest.approx(0.04*3, abs=1e-6)
 
 

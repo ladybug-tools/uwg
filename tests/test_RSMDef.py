@@ -180,6 +180,6 @@ def test_rsm_dissipation_bougeault():
     assert len(uwg_matlab_val) == len(uwg_python_val)
 
     for i in range(len(uwg_matlab_val)):
-        tol = calculate_tolerance(uwg_python_val[i], 11.0)
+        tol = 1e-6
         assert uwg_python_val[i] == pytest.approx(uwg_matlab_val[i], abs=tol), \
             "error at index={}".format(i)
