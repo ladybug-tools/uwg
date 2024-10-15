@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>uwg.weather &#8212; uwg  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css?v=0bf093e7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bfd3c5a7" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<link rel="icon" type="image/x-icon" href="https://github.com/ladybug-tools/artwork/raw/refs/heads/master/icons_bugs/ico/uwg.ico">
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          uwg</a>
+        <span class="navbar-text navbar-version pull-left"><b></b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../cli/index.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cli/index.html#commands">Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../cli/validate.html">validate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../cli/validate.html#uwg-validate">uwg validate</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/validate.html#uwg-validate-model">model</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/validate.html#uwg-validate-param">param</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../cli/simulate.html">simulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate">uwg simulate</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate-model">model</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate-param">param</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../uwg.html">uwg package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.cli.html">uwg.cli package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.cli.html#submodules">Submodules</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.cli.simulate.html">uwg.cli.simulate module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.cli.validate.html">uwg.cli.validate module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.cli.html#module-uwg.cli">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.BEMDef.html">uwg.BEMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef"><code class="docutils literal notranslate"><span class="pre">BEMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.from_dict"><code class="docutils literal notranslate"><span class="pre">BEMDef.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.to_dict"><code class="docutils literal notranslate"><span class="pre">BEMDef.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.bldtype"><code class="docutils literal notranslate"><span class="pre">BEMDef.bldtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.building"><code class="docutils literal notranslate"><span class="pre">BEMDef.building</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.builtera"><code class="docutils literal notranslate"><span class="pre">BEMDef.builtera</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.mass"><code class="docutils literal notranslate"><span class="pre">BEMDef.mass</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.roof"><code class="docutils literal notranslate"><span class="pre">BEMDef.roof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.wall"><code class="docutils literal notranslate"><span class="pre">BEMDef.wall</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.RSMDef.html">uwg.RSMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef"><code class="docutils literal notranslate"><span class="pre">RSMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.diffusion_coefficient"><code class="docutils literal notranslate"><span class="pre">RSMDef.diffusion_coefficient()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.diffusion_equation"><code class="docutils literal notranslate"><span class="pre">RSMDef.diffusion_equation()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.dissipation_bougeault"><code class="docutils literal notranslate"><span class="pre">RSMDef.dissipation_bougeault()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.invert"><code class="docutils literal notranslate"><span class="pre">RSMDef.invert()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.length_bougeault"><code class="docutils literal notranslate"><span class="pre">RSMDef.length_bougeault()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.load_z_meso"><code class="docutils literal notranslate"><span class="pre">RSMDef.load_z_meso()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.vdm"><code class="docutils literal notranslate"><span class="pre">RSMDef.vdm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.UBLDef.html">uwg.UBLDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef"><code class="docutils literal notranslate"><span class="pre">UBLDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef.nightforc"><code class="docutils literal notranslate"><span class="pre">UBLDef.nightforc()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef.ublmodel"><code class="docutils literal notranslate"><span class="pre">UBLDef.ublmodel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.UCMDef.html">uwg.UCMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.UCMDef.html#uwg.UCMDef.UCMDef"><code class="docutils literal notranslate"><span class="pre">UCMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UCMDef.html#uwg.UCMDef.UCMDef.UCModel"><code class="docutils literal notranslate"><span class="pre">UCMDef.UCModel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.building.html">uwg.building module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building"><code class="docutils literal notranslate"><span class="pre">Building</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.BEMCalc"><code class="docutils literal notranslate"><span class="pre">Building.BEMCalc()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.from_dict"><code class="docutils literal notranslate"><span class="pre">Building.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.to_dict"><code class="docutils literal notranslate"><span class="pre">Building.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.TEMP_COEF_CONFLICT_MSG"><code class="docutils literal notranslate"><span class="pre">Building.TEMP_COEF_CONFLICT_MSG</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.condtype"><code class="docutils literal notranslate"><span class="pre">Building.condtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.coolcap"><code class="docutils literal notranslate"><span class="pre">Building.coolcap</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.cop"><code class="docutils literal notranslate"><span class="pre">Building.cop</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.floor_height"><code class="docutils literal notranslate"><span class="pre">Building.floor_height</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.glazing_ratio"><code class="docutils literal notranslate"><span class="pre">Building.glazing_ratio</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.heateff"><code class="docutils literal notranslate"><span class="pre">Building.heateff</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.infil"><code class="docutils literal notranslate"><span class="pre">Building.infil</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.initial_temp"><code class="docutils literal notranslate"><span class="pre">Building.initial_temp</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_flat"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_flat</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_frad"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_frad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_night"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_night</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.shgc"><code class="docutils literal notranslate"><span class="pre">Building.shgc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.u_value"><code class="docutils literal notranslate"><span class="pre">Building.u_value</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.vent"><code class="docutils literal notranslate"><span class="pre">Building.vent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.element.html">uwg.element module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element"><code class="docutils literal notranslate"><span class="pre">Element</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.Conduction"><code class="docutils literal notranslate"><span class="pre">Element.Conduction()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.SurfFlux"><code class="docutils literal notranslate"><span class="pre">Element.SurfFlux()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.from_dict"><code class="docutils literal notranslate"><span class="pre">Element.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.invert"><code class="docutils literal notranslate"><span class="pre">Element.invert()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.qsat"><code class="docutils literal notranslate"><span class="pre">Element.qsat()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.to_dict"><code class="docutils literal notranslate"><span class="pre">Element.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.albedo"><code class="docutils literal notranslate"><span class="pre">Element.albedo</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.emissivity"><code class="docutils literal notranslate"><span class="pre">Element.emissivity</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.horizontal"><code class="docutils literal notranslate"><span class="pre">Element.horizontal</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.layer_thickness_lst"><code class="docutils literal notranslate"><span class="pre">Element.layer_thickness_lst</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.material_lst"><code class="docutils literal notranslate"><span class="pre">Element.material_lst</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.name"><code class="docutils literal notranslate"><span class="pre">Element.name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.t_init"><code class="docutils literal notranslate"><span class="pre">Element.t_init</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.vegcoverage"><code class="docutils literal notranslate"><span class="pre">Element.vegcoverage</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.forcing.html">uwg.forcing module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.forcing.html#uwg.forcing.Forcing"><code class="docutils literal notranslate"><span class="pre">Forcing</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.infracalcs.html">uwg.infracalcs module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.infracalcs.html#uwg.infracalcs.infracalcs"><code class="docutils literal notranslate"><span class="pre">infracalcs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.material.html">uwg.material module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material"><code class="docutils literal notranslate"><span class="pre">Material</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.from_dict"><code class="docutils literal notranslate"><span class="pre">Material.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.to_dict"><code class="docutils literal notranslate"><span class="pre">Material.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.name"><code class="docutils literal notranslate"><span class="pre">Material.name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.thermalcond"><code class="docutils literal notranslate"><span class="pre">Material.thermalcond</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.volheat"><code class="docutils literal notranslate"><span class="pre">Material.volheat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.param.html">uwg.param module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.param.html#uwg.param.Param"><code class="docutils literal notranslate"><span class="pre">Param</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.psychrometrics.html">uwg.psychrometrics module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.hum_from_rhum_temp"><code class="docutils literal notranslate"><span class="pre">hum_from_rhum_temp()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.moist_air_density"><code class="docutils literal notranslate"><span class="pre">moist_air_density()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.psychrometrics"><code class="docutils literal notranslate"><span class="pre">psychrometrics()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.saturation_pressure"><code class="docutils literal notranslate"><span class="pre">saturation_pressure()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.readDOE.html">uwg.readDOE module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.readDOE.html#uwg.readDOE.readDOE"><code class="docutils literal notranslate"><span class="pre">readDOE()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.schdef.html">uwg.schdef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef"><code class="docutils literal notranslate"><span class="pre">SchDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.check_week_validity"><code class="docutils literal notranslate"><span class="pre">SchDef.check_week_validity()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.from_dict"><code class="docutils literal notranslate"><span class="pre">SchDef.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.to_dict"><code class="docutils literal notranslate"><span class="pre">SchDef.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.DEFAULT_SWH"><code class="docutils literal notranslate"><span class="pre">SchDef.DEFAULT_SWH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.bldtype"><code class="docutils literal notranslate"><span class="pre">SchDef.bldtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.builtera"><code class="docutils literal notranslate"><span class="pre">SchDef.builtera</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.cool"><code class="docutils literal notranslate"><span class="pre">SchDef.cool</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.elec"><code class="docutils literal notranslate"><span class="pre">SchDef.elec</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.gas"><code class="docutils literal notranslate"><span class="pre">SchDef.gas</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.heat"><code class="docutils literal notranslate"><span class="pre">SchDef.heat</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.light"><code class="docutils literal notranslate"><span class="pre">SchDef.light</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.n_occ"><code class="docutils literal notranslate"><span class="pre">SchDef.n_occ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.occ"><code class="docutils literal notranslate"><span class="pre">SchDef.occ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_elec"><code class="docutils literal notranslate"><span class="pre">SchDef.q_elec</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_gas"><code class="docutils literal notranslate"><span class="pre">SchDef.q_gas</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_light"><code class="docutils literal notranslate"><span class="pre">SchDef.q_light</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.swh"><code class="docutils literal notranslate"><span class="pre">SchDef.swh</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.v_swh"><code class="docutils literal notranslate"><span class="pre">SchDef.v_swh</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.vent"><code class="docutils literal notranslate"><span class="pre">SchDef.vent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.simparam.html">uwg.simparam module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam"><code class="docutils literal notranslate"><span class="pre">SimParam</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam.update_date"><code class="docutils literal notranslate"><span class="pre">SimParam.update_date()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam.TIMESTEP_CONFLICT_MSG"><code class="docutils literal notranslate"><span class="pre">SimParam.TIMESTEP_CONFLICT_MSG</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.solarcalcs.html">uwg.solarcalcs module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs"><code class="docutils literal notranslate"><span class="pre">SolarCalcs</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs.solarangles"><code class="docutils literal notranslate"><span class="pre">SolarCalcs.solarangles()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs.solarcalcs"><code class="docutils literal notranslate"><span class="pre">SolarCalcs.solarcalcs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.urbflux.html">uwg.urbflux module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.urbflux.html#uwg.urbflux.urbflux"><code class="docutils literal notranslate"><span class="pre">urbflux()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.utilities.html">uwg.utilities module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range"><code class="docutils literal notranslate"><span class="pre">float_in_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_excl"><code class="docutils literal notranslate"><span class="pre">float_in_range_excl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_excl_incl"><code class="docutils literal notranslate"><span class="pre">float_in_range_excl_incl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_incl_excl"><code class="docutils literal notranslate"><span class="pre">float_in_range_incl_excl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_positive"><code class="docutils literal notranslate"><span class="pre">float_positive()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.int_in_range"><code class="docutils literal notranslate"><span class="pre">int_in_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.int_positive"><code class="docutils literal notranslate"><span class="pre">int_positive()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.is_near_zero"><code class="docutils literal notranslate"><span class="pre">is_near_zero()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.read_csv"><code class="docutils literal notranslate"><span class="pre">read_csv()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.str2fl"><code class="docutils literal notranslate"><span class="pre">str2fl()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.uwg.html">uwg.uwg module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG"><code class="docutils literal notranslate"><span class="pre">UWG</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ToString"><code class="docutils literal notranslate"><span class="pre">UWG.ToString()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_dict"><code class="docutils literal notranslate"><span class="pre">UWG.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_param_args"><code class="docutils literal notranslate"><span class="pre">UWG.from_param_args()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_param_file"><code class="docutils literal notranslate"><span class="pre">UWG.from_param_file()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.generate"><code class="docutils literal notranslate"><span class="pre">UWG.generate()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.load_refDOE"><code class="docutils literal notranslate"><span class="pre">UWG.load_refDOE()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.simulate"><code class="docutils literal notranslate"><span class="pre">UWG.simulate()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.to_dict"><code class="docutils literal notranslate"><span class="pre">UWG.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.write_epw"><code class="docutils literal notranslate"><span class="pre">UWG.write_epw()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.B"><code class="docutils literal notranslate"><span class="pre">UWG.B</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CL"><code class="docutils literal notranslate"><span class="pre">UWG.CL</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CM"><code class="docutils literal notranslate"><span class="pre">UWG.CM</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.COLBURN"><code class="docutils literal notranslate"><span class="pre">UWG.COLBURN</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CP"><code class="docutils literal notranslate"><span class="pre">UWG.CP</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CPV"><code class="docutils literal notranslate"><span class="pre">UWG.CPV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CURRENT_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.CURRENT_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.DEFAULT_BLD"><code class="docutils literal notranslate"><span class="pre">UWG.DEFAULT_BLD</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.DEFAULT_SCHTRAFFIC"><code class="docutils literal notranslate"><span class="pre">UWG.DEFAULT_SCHTRAFFIC</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ESTT"><code class="docutils literal notranslate"><span class="pre">UWG.ESTT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.G"><code class="docutils literal notranslate"><span class="pre">UWG.G</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.LV"><code class="docutils literal notranslate"><span class="pre">UWG.LV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.LVTT"><code class="docutils literal notranslate"><span class="pre">UWG.LVTT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.MAXTHICKNESS"><code class="docutils literal notranslate"><span class="pre">UWG.MAXTHICKNESS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.MINTHICKNESS"><code class="docutils literal notranslate"><span class="pre">UWG.MINTHICKNESS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.OPTIONAL_PARAMETER_SET"><code class="docutils literal notranslate"><span class="pre">UWG.OPTIONAL_PARAMETER_SET</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.PARAMETER_LIST"><code class="docutils literal notranslate"><span class="pre">UWG.PARAMETER_LIST</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.R"><code class="docutils literal notranslate"><span class="pre">UWG.R</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.REFDOE_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.REFDOE_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.RV"><code class="docutils literal notranslate"><span class="pre">UWG.RV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SIGMA"><code class="docutils literal notranslate"><span class="pre">UWG.SIGMA</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOIL"><code class="docutils literal notranslate"><span class="pre">UWG.SOIL</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOILTCOND"><code class="docutils literal notranslate"><span class="pre">UWG.SOILTCOND</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOILVOLHEAT"><code class="docutils literal notranslate"><span class="pre">UWG.SOILVOLHEAT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.TT"><code class="docutils literal notranslate"><span class="pre">UWG.TT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.VK"><code class="docutils literal notranslate"><span class="pre">UWG.VK</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.WATERDENS"><code class="docutils literal notranslate"><span class="pre">UWG.WATERDENS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.WGMAX"><code class="docutils literal notranslate"><span class="pre">UWG.WGMAX</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.Z_MESO_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.Z_MESO_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albroad"><code class="docutils literal notranslate"><span class="pre">UWG.albroad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albroof"><code class="docutils literal notranslate"><span class="pre">UWG.albroof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albveg"><code class="docutils literal notranslate"><span class="pre">UWG.albveg</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albwall"><code class="docutils literal notranslate"><span class="pre">UWG.albwall</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.autosize"><code class="docutils literal notranslate"><span class="pre">UWG.autosize</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.bld"><code class="docutils literal notranslate"><span class="pre">UWG.bld</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.blddensity"><code class="docutils literal notranslate"><span class="pre">UWG.blddensity</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.bldheight"><code class="docutils literal notranslate"><span class="pre">UWG.bldheight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.c_circ"><code class="docutils literal notranslate"><span class="pre">UWG.c_circ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.c_exch"><code class="docutils literal notranslate"><span class="pre">UWG.c_exch</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.charlength"><code class="docutils literal notranslate"><span class="pre">UWG.charlength</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.croad"><code class="docutils literal notranslate"><span class="pre">UWG.croad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.day"><code class="docutils literal notranslate"><span class="pre">UWG.day</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.droad"><code class="docutils literal notranslate"><span class="pre">UWG.droad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.dtsim"><code class="docutils literal notranslate"><span class="pre">UWG.dtsim</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.dtweather"><code class="docutils literal notranslate"><span class="pre">UWG.dtweather</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.epw_path"><code class="docutils literal notranslate"><span class="pre">UWG.epw_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.flr_h"><code class="docutils literal notranslate"><span class="pre">UWG.flr_h</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.glzr"><code class="docutils literal notranslate"><span class="pre">UWG.glzr</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.grasscover"><code class="docutils literal notranslate"><span class="pre">UWG.grasscover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_mix"><code class="docutils literal notranslate"><span class="pre">UWG.h_mix</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_obs"><code class="docutils literal notranslate"><span class="pre">UWG.h_obs</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ref"><code class="docutils literal notranslate"><span class="pre">UWG.h_ref</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_temp"><code class="docutils literal notranslate"><span class="pre">UWG.h_temp</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ubl1"><code class="docutils literal notranslate"><span class="pre">UWG.h_ubl1</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ubl2"><code class="docutils literal notranslate"><span class="pre">UWG.h_ubl2</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_wind"><code class="docutils literal notranslate"><span class="pre">UWG.h_wind</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.kroad"><code class="docutils literal notranslate"><span class="pre">UWG.kroad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.latfocc"><code class="docutils literal notranslate"><span class="pre">UWG.latfocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.latgrss"><code class="docutils literal notranslate"><span class="pre">UWG.latgrss</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.lattree"><code class="docutils literal notranslate"><span class="pre">UWG.lattree</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.maxday"><code class="docutils literal notranslate"><span class="pre">UWG.maxday</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.maxnight"><code class="docutils literal notranslate"><span class="pre">UWG.maxnight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.month"><code class="docutils literal notranslate"><span class="pre">UWG.month</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.nday"><code class="docutils literal notranslate"><span class="pre">UWG.nday</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.new_epw_path"><code class="docutils literal notranslate"><span class="pre">UWG.new_epw_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radfequip"><code class="docutils literal notranslate"><span class="pre">UWG.radfequip</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radflight"><code class="docutils literal notranslate"><span class="pre">UWG.radflight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radfocc"><code class="docutils literal notranslate"><span class="pre">UWG.radfocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.refBEM"><code class="docutils literal notranslate"><span class="pre">UWG.refBEM</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.refSchedule"><code class="docutils literal notranslate"><span class="pre">UWG.refSchedule</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ref_bem_vector"><code class="docutils literal notranslate"><span class="pre">UWG.ref_bem_vector</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ref_sch_vector"><code class="docutils literal notranslate"><span class="pre">UWG.ref_sch_vector</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.rurvegcover"><code class="docutils literal notranslate"><span class="pre">UWG.rurvegcover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.schtraffic"><code class="docutils literal notranslate"><span class="pre">UWG.schtraffic</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.sensanth"><code class="docutils literal notranslate"><span class="pre">UWG.sensanth</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.sensocc"><code class="docutils literal notranslate"><span class="pre">UWG.sensocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.shgc"><code class="docutils literal notranslate"><span class="pre">UWG.shgc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.treecover"><code class="docutils literal notranslate"><span class="pre">UWG.treecover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegcover"><code class="docutils literal notranslate"><span class="pre">UWG.vegcover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegend"><code class="docutils literal notranslate"><span class="pre">UWG.vegend</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegroof"><code class="docutils literal notranslate"><span class="pre">UWG.vegroof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegstart"><code class="docutils literal notranslate"><span class="pre">UWG.vegstart</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vertohor"><code class="docutils literal notranslate"><span class="pre">UWG.vertohor</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.windmin"><code class="docutils literal notranslate"><span class="pre">UWG.windmin</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.zone"><code class="docutils literal notranslate"><span class="pre">UWG.zone</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.weather.html">uwg.weather module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.weather.html#uwg.weather.Weather"><code class="docutils literal notranslate"><span class="pre">Weather</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#module-uwg">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-4">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a></li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-8 content" role="main">
+      
+  <h1>Source code for uwg.weather</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class for Weather data from EPW.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">str2fl</span>
+<span class="kn">from</span> <span class="nn">.psychrometrics</span> <span class="kn">import</span> <span class="n">hum_from_rhum_temp</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">xrange</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Weather">
+<a class="viewcode-back" href="../../uwg.weather.html#uwg.weather.Weather">[docs]</a>
+<span class="k">class</span> <span class="nc">Weather</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read EPW file[1] and store weather timeseries data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        climate_file: Text string for the name of the rural epw file that will be</span>
+<span class="sd">            morphed.</span>
+<span class="sd">        HI: Number for initial EPW row based on final Julian data.</span>
+<span class="sd">        HF: Number for final EPW row based on start Julian data.</span>
+
+<span class="sd">    Properties:</span>
+<span class="sd">        * location -- location row from EPW file.</span>
+<span class="sd">        * staTemp --  drybulb (K)</span>
+<span class="sd">        * staTdp -- dewpoint (C)</span>
+<span class="sd">        * staRhum -- air RH (%)</span>
+<span class="sd">        * staPres -- air pressure (Pa)</span>
+<span class="sd">        * staInfra -- horizontal Infrared Radiation Intensity (W m-2)</span>
+<span class="sd">        * staHor -- horizontal radiation [W m-2]</span>
+<span class="sd">        * staDir -- normal solar direct radiation (W m-2)</span>
+<span class="sd">        * staDif -- horizontal solar diffuse radiation (W m-2)</span>
+<span class="sd">        * staUdir -- wind direction</span>
+<span class="sd">        * staUmod -- wind speed (m s-1)</span>
+<span class="sd">        * staRobs -- precipitation (mm h-1)</span>
+<span class="sd">        * staHum -- specific humidty (kgH20 kgN202-1)</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        [1] EPW CSV Format (In/Out). Retrieved August 26, 2020,</span>
+<span class="sd">        from http://bigladdersoftware.com/epx/docs/8-2/auxiliary-programs/epw-csv-format-inout.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epw_path</span><span class="p">,</span> <span class="n">HI</span><span class="p">,</span> <span class="n">HF</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_climate_data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">epw_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to read .epw file! </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_climate_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_climate_data</span><span class="p">[</span><span class="n">HI</span><span class="p">:</span><span class="n">HF</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staTdp</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staRhum</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">8</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staPres</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">9</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="c1"># staInfra:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staInfra</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">12</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="c1"># staHor:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staHor</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">13</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="c1"># staDir:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staDir</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">14</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="c1"># staDif:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staDif</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">15</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staUdir</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">20</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staUmod</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">21</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cd</span><span class="p">))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staHum</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">staHum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">hum_from_rhum_temp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staRhum</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">staPres</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="o">+</span> <span class="mf">273.15</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">]</span>  <span class="c1"># air temperature (K)</span>
+
+        <span class="c1"># Set precipitation to array of zeros. This is done to avoid errors</span>
+        <span class="c1"># for EPW files with incomplete or missing precipitation data. The</span>
+        <span class="c1"># current implementation of the UWG doesn&#39;t use precipitation data</span>
+        <span class="c1"># due to the difficulty in validating latent heat impact, the poor</span>
+        <span class="c1"># quality precipitation data from weather sensors, and the marginal</span>
+        <span class="c1"># impact it has on UHI.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staRobs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Weather,</span><span class="se">\n</span><span class="s1"> City: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">, Max Tdb: </span><span class="si">{}</span><span class="s1">C</span><span class="se">\n</span><span class="s1">, Min Tdb: </span><span class="si">{}</span><span class="s1">C</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">)</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staTemp</span><span class="p">)</span> <span class="o">-</span> <span class="mf">273.15</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2024, Ladybug Tools.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.0.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

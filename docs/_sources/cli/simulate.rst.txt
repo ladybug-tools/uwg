@@ -1,0 +1,6 @@
+simulate
+========
+
+.. click:: uwg.cli.simulate:simulate
+   :prog: uwg simulate
+   :show-nested:

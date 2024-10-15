@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>uwg.readDOE &#8212; uwg  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bootstrap-sphinx.css?v=0bf093e7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=bfd3c5a7" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<link rel="icon" type="image/x-icon" href="https://github.com/ladybug-tools/artwork/raw/refs/heads/master/icons_bugs/ico/uwg.ico">
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          uwg</a>
+        <span class="navbar-text navbar-version pull-left"><b></b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../cli/index.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cli/index.html#commands">Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../cli/validate.html">validate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../cli/validate.html#uwg-validate">uwg validate</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/validate.html#uwg-validate-model">model</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/validate.html#uwg-validate-param">param</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../cli/simulate.html">simulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate">uwg simulate</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate-model">model</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../cli/simulate.html#uwg-simulate-param">param</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../uwg.html">uwg package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.cli.html">uwg.cli package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.cli.html#submodules">Submodules</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.cli.simulate.html">uwg.cli.simulate module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.cli.validate.html">uwg.cli.validate module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.cli.html#module-uwg.cli">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.BEMDef.html">uwg.BEMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef"><code class="docutils literal notranslate"><span class="pre">BEMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.from_dict"><code class="docutils literal notranslate"><span class="pre">BEMDef.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.to_dict"><code class="docutils literal notranslate"><span class="pre">BEMDef.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.bldtype"><code class="docutils literal notranslate"><span class="pre">BEMDef.bldtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.building"><code class="docutils literal notranslate"><span class="pre">BEMDef.building</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.builtera"><code class="docutils literal notranslate"><span class="pre">BEMDef.builtera</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.mass"><code class="docutils literal notranslate"><span class="pre">BEMDef.mass</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.roof"><code class="docutils literal notranslate"><span class="pre">BEMDef.roof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.BEMDef.html#uwg.BEMDef.BEMDef.wall"><code class="docutils literal notranslate"><span class="pre">BEMDef.wall</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.RSMDef.html">uwg.RSMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef"><code class="docutils literal notranslate"><span class="pre">RSMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.diffusion_coefficient"><code class="docutils literal notranslate"><span class="pre">RSMDef.diffusion_coefficient()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.diffusion_equation"><code class="docutils literal notranslate"><span class="pre">RSMDef.diffusion_equation()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.dissipation_bougeault"><code class="docutils literal notranslate"><span class="pre">RSMDef.dissipation_bougeault()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.invert"><code class="docutils literal notranslate"><span class="pre">RSMDef.invert()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.length_bougeault"><code class="docutils literal notranslate"><span class="pre">RSMDef.length_bougeault()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.load_z_meso"><code class="docutils literal notranslate"><span class="pre">RSMDef.load_z_meso()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.RSMDef.html#uwg.RSMDef.RSMDef.vdm"><code class="docutils literal notranslate"><span class="pre">RSMDef.vdm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.UBLDef.html">uwg.UBLDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef"><code class="docutils literal notranslate"><span class="pre">UBLDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef.nightforc"><code class="docutils literal notranslate"><span class="pre">UBLDef.nightforc()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UBLDef.html#uwg.UBLDef.UBLDef.ublmodel"><code class="docutils literal notranslate"><span class="pre">UBLDef.ublmodel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.UCMDef.html">uwg.UCMDef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.UCMDef.html#uwg.UCMDef.UCMDef"><code class="docutils literal notranslate"><span class="pre">UCMDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.UCMDef.html#uwg.UCMDef.UCMDef.UCModel"><code class="docutils literal notranslate"><span class="pre">UCMDef.UCModel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.building.html">uwg.building module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building"><code class="docutils literal notranslate"><span class="pre">Building</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.BEMCalc"><code class="docutils literal notranslate"><span class="pre">Building.BEMCalc()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.from_dict"><code class="docutils literal notranslate"><span class="pre">Building.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.to_dict"><code class="docutils literal notranslate"><span class="pre">Building.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.TEMP_COEF_CONFLICT_MSG"><code class="docutils literal notranslate"><span class="pre">Building.TEMP_COEF_CONFLICT_MSG</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.condtype"><code class="docutils literal notranslate"><span class="pre">Building.condtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.coolcap"><code class="docutils literal notranslate"><span class="pre">Building.coolcap</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.cop"><code class="docutils literal notranslate"><span class="pre">Building.cop</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.floor_height"><code class="docutils literal notranslate"><span class="pre">Building.floor_height</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.glazing_ratio"><code class="docutils literal notranslate"><span class="pre">Building.glazing_ratio</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.heateff"><code class="docutils literal notranslate"><span class="pre">Building.heateff</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.infil"><code class="docutils literal notranslate"><span class="pre">Building.infil</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.initial_temp"><code class="docutils literal notranslate"><span class="pre">Building.initial_temp</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_flat"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_flat</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_frad"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_frad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.int_heat_night"><code class="docutils literal notranslate"><span class="pre">Building.int_heat_night</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.shgc"><code class="docutils literal notranslate"><span class="pre">Building.shgc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.u_value"><code class="docutils literal notranslate"><span class="pre">Building.u_value</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.building.html#uwg.building.Building.vent"><code class="docutils literal notranslate"><span class="pre">Building.vent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.element.html">uwg.element module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element"><code class="docutils literal notranslate"><span class="pre">Element</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.Conduction"><code class="docutils literal notranslate"><span class="pre">Element.Conduction()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.SurfFlux"><code class="docutils literal notranslate"><span class="pre">Element.SurfFlux()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.from_dict"><code class="docutils literal notranslate"><span class="pre">Element.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.invert"><code class="docutils literal notranslate"><span class="pre">Element.invert()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.qsat"><code class="docutils literal notranslate"><span class="pre">Element.qsat()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.to_dict"><code class="docutils literal notranslate"><span class="pre">Element.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.albedo"><code class="docutils literal notranslate"><span class="pre">Element.albedo</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.emissivity"><code class="docutils literal notranslate"><span class="pre">Element.emissivity</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.horizontal"><code class="docutils literal notranslate"><span class="pre">Element.horizontal</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.layer_thickness_lst"><code class="docutils literal notranslate"><span class="pre">Element.layer_thickness_lst</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.material_lst"><code class="docutils literal notranslate"><span class="pre">Element.material_lst</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.name"><code class="docutils literal notranslate"><span class="pre">Element.name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.t_init"><code class="docutils literal notranslate"><span class="pre">Element.t_init</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.element.html#uwg.element.Element.vegcoverage"><code class="docutils literal notranslate"><span class="pre">Element.vegcoverage</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.forcing.html">uwg.forcing module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.forcing.html#uwg.forcing.Forcing"><code class="docutils literal notranslate"><span class="pre">Forcing</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.infracalcs.html">uwg.infracalcs module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.infracalcs.html#uwg.infracalcs.infracalcs"><code class="docutils literal notranslate"><span class="pre">infracalcs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.material.html">uwg.material module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material"><code class="docutils literal notranslate"><span class="pre">Material</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.from_dict"><code class="docutils literal notranslate"><span class="pre">Material.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.to_dict"><code class="docutils literal notranslate"><span class="pre">Material.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.name"><code class="docutils literal notranslate"><span class="pre">Material.name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.thermalcond"><code class="docutils literal notranslate"><span class="pre">Material.thermalcond</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.material.html#uwg.material.Material.volheat"><code class="docutils literal notranslate"><span class="pre">Material.volheat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.param.html">uwg.param module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.param.html#uwg.param.Param"><code class="docutils literal notranslate"><span class="pre">Param</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.psychrometrics.html">uwg.psychrometrics module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.hum_from_rhum_temp"><code class="docutils literal notranslate"><span class="pre">hum_from_rhum_temp()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.moist_air_density"><code class="docutils literal notranslate"><span class="pre">moist_air_density()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.psychrometrics"><code class="docutils literal notranslate"><span class="pre">psychrometrics()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.psychrometrics.html#uwg.psychrometrics.saturation_pressure"><code class="docutils literal notranslate"><span class="pre">saturation_pressure()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.readDOE.html">uwg.readDOE module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.readDOE.html#uwg.readDOE.readDOE"><code class="docutils literal notranslate"><span class="pre">readDOE()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.schdef.html">uwg.schdef module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef"><code class="docutils literal notranslate"><span class="pre">SchDef</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.check_week_validity"><code class="docutils literal notranslate"><span class="pre">SchDef.check_week_validity()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.from_dict"><code class="docutils literal notranslate"><span class="pre">SchDef.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.to_dict"><code class="docutils literal notranslate"><span class="pre">SchDef.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.DEFAULT_SWH"><code class="docutils literal notranslate"><span class="pre">SchDef.DEFAULT_SWH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.bldtype"><code class="docutils literal notranslate"><span class="pre">SchDef.bldtype</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.builtera"><code class="docutils literal notranslate"><span class="pre">SchDef.builtera</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.cool"><code class="docutils literal notranslate"><span class="pre">SchDef.cool</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.elec"><code class="docutils literal notranslate"><span class="pre">SchDef.elec</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.gas"><code class="docutils literal notranslate"><span class="pre">SchDef.gas</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.heat"><code class="docutils literal notranslate"><span class="pre">SchDef.heat</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.light"><code class="docutils literal notranslate"><span class="pre">SchDef.light</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.n_occ"><code class="docutils literal notranslate"><span class="pre">SchDef.n_occ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.occ"><code class="docutils literal notranslate"><span class="pre">SchDef.occ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_elec"><code class="docutils literal notranslate"><span class="pre">SchDef.q_elec</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_gas"><code class="docutils literal notranslate"><span class="pre">SchDef.q_gas</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.q_light"><code class="docutils literal notranslate"><span class="pre">SchDef.q_light</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.swh"><code class="docutils literal notranslate"><span class="pre">SchDef.swh</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.v_swh"><code class="docutils literal notranslate"><span class="pre">SchDef.v_swh</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.schdef.html#uwg.schdef.SchDef.vent"><code class="docutils literal notranslate"><span class="pre">SchDef.vent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.simparam.html">uwg.simparam module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam"><code class="docutils literal notranslate"><span class="pre">SimParam</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam.update_date"><code class="docutils literal notranslate"><span class="pre">SimParam.update_date()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.simparam.html#uwg.simparam.SimParam.TIMESTEP_CONFLICT_MSG"><code class="docutils literal notranslate"><span class="pre">SimParam.TIMESTEP_CONFLICT_MSG</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.solarcalcs.html">uwg.solarcalcs module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs"><code class="docutils literal notranslate"><span class="pre">SolarCalcs</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs.solarangles"><code class="docutils literal notranslate"><span class="pre">SolarCalcs.solarangles()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.solarcalcs.html#uwg.solarcalcs.SolarCalcs.solarcalcs"><code class="docutils literal notranslate"><span class="pre">SolarCalcs.solarcalcs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.urbflux.html">uwg.urbflux module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.urbflux.html#uwg.urbflux.urbflux"><code class="docutils literal notranslate"><span class="pre">urbflux()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.utilities.html">uwg.utilities module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range"><code class="docutils literal notranslate"><span class="pre">float_in_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_excl"><code class="docutils literal notranslate"><span class="pre">float_in_range_excl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_excl_incl"><code class="docutils literal notranslate"><span class="pre">float_in_range_excl_incl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_in_range_incl_excl"><code class="docutils literal notranslate"><span class="pre">float_in_range_incl_excl()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.float_positive"><code class="docutils literal notranslate"><span class="pre">float_positive()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.int_in_range"><code class="docutils literal notranslate"><span class="pre">int_in_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.int_positive"><code class="docutils literal notranslate"><span class="pre">int_positive()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.is_near_zero"><code class="docutils literal notranslate"><span class="pre">is_near_zero()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.read_csv"><code class="docutils literal notranslate"><span class="pre">read_csv()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.utilities.html#uwg.utilities.str2fl"><code class="docutils literal notranslate"><span class="pre">str2fl()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.uwg.html">uwg.uwg module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG"><code class="docutils literal notranslate"><span class="pre">UWG</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ToString"><code class="docutils literal notranslate"><span class="pre">UWG.ToString()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_dict"><code class="docutils literal notranslate"><span class="pre">UWG.from_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_param_args"><code class="docutils literal notranslate"><span class="pre">UWG.from_param_args()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.from_param_file"><code class="docutils literal notranslate"><span class="pre">UWG.from_param_file()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.generate"><code class="docutils literal notranslate"><span class="pre">UWG.generate()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.load_refDOE"><code class="docutils literal notranslate"><span class="pre">UWG.load_refDOE()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.simulate"><code class="docutils literal notranslate"><span class="pre">UWG.simulate()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.to_dict"><code class="docutils literal notranslate"><span class="pre">UWG.to_dict()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.write_epw"><code class="docutils literal notranslate"><span class="pre">UWG.write_epw()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.B"><code class="docutils literal notranslate"><span class="pre">UWG.B</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CL"><code class="docutils literal notranslate"><span class="pre">UWG.CL</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CM"><code class="docutils literal notranslate"><span class="pre">UWG.CM</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.COLBURN"><code class="docutils literal notranslate"><span class="pre">UWG.COLBURN</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CP"><code class="docutils literal notranslate"><span class="pre">UWG.CP</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CPV"><code class="docutils literal notranslate"><span class="pre">UWG.CPV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.CURRENT_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.CURRENT_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.DEFAULT_BLD"><code class="docutils literal notranslate"><span class="pre">UWG.DEFAULT_BLD</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.DEFAULT_SCHTRAFFIC"><code class="docutils literal notranslate"><span class="pre">UWG.DEFAULT_SCHTRAFFIC</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ESTT"><code class="docutils literal notranslate"><span class="pre">UWG.ESTT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.G"><code class="docutils literal notranslate"><span class="pre">UWG.G</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.LV"><code class="docutils literal notranslate"><span class="pre">UWG.LV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.LVTT"><code class="docutils literal notranslate"><span class="pre">UWG.LVTT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.MAXTHICKNESS"><code class="docutils literal notranslate"><span class="pre">UWG.MAXTHICKNESS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.MINTHICKNESS"><code class="docutils literal notranslate"><span class="pre">UWG.MINTHICKNESS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.OPTIONAL_PARAMETER_SET"><code class="docutils literal notranslate"><span class="pre">UWG.OPTIONAL_PARAMETER_SET</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.PARAMETER_LIST"><code class="docutils literal notranslate"><span class="pre">UWG.PARAMETER_LIST</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.R"><code class="docutils literal notranslate"><span class="pre">UWG.R</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.REFDOE_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.REFDOE_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.RV"><code class="docutils literal notranslate"><span class="pre">UWG.RV</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SIGMA"><code class="docutils literal notranslate"><span class="pre">UWG.SIGMA</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOIL"><code class="docutils literal notranslate"><span class="pre">UWG.SOIL</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOILTCOND"><code class="docutils literal notranslate"><span class="pre">UWG.SOILTCOND</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.SOILVOLHEAT"><code class="docutils literal notranslate"><span class="pre">UWG.SOILVOLHEAT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.TT"><code class="docutils literal notranslate"><span class="pre">UWG.TT</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.VK"><code class="docutils literal notranslate"><span class="pre">UWG.VK</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.WATERDENS"><code class="docutils literal notranslate"><span class="pre">UWG.WATERDENS</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.WGMAX"><code class="docutils literal notranslate"><span class="pre">UWG.WGMAX</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.Z_MESO_PATH"><code class="docutils literal notranslate"><span class="pre">UWG.Z_MESO_PATH</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albroad"><code class="docutils literal notranslate"><span class="pre">UWG.albroad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albroof"><code class="docutils literal notranslate"><span class="pre">UWG.albroof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albveg"><code class="docutils literal notranslate"><span class="pre">UWG.albveg</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.albwall"><code class="docutils literal notranslate"><span class="pre">UWG.albwall</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.autosize"><code class="docutils literal notranslate"><span class="pre">UWG.autosize</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.bld"><code class="docutils literal notranslate"><span class="pre">UWG.bld</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.blddensity"><code class="docutils literal notranslate"><span class="pre">UWG.blddensity</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.bldheight"><code class="docutils literal notranslate"><span class="pre">UWG.bldheight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.c_circ"><code class="docutils literal notranslate"><span class="pre">UWG.c_circ</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.c_exch"><code class="docutils literal notranslate"><span class="pre">UWG.c_exch</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.charlength"><code class="docutils literal notranslate"><span class="pre">UWG.charlength</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.croad"><code class="docutils literal notranslate"><span class="pre">UWG.croad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.day"><code class="docutils literal notranslate"><span class="pre">UWG.day</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.droad"><code class="docutils literal notranslate"><span class="pre">UWG.droad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.dtsim"><code class="docutils literal notranslate"><span class="pre">UWG.dtsim</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.dtweather"><code class="docutils literal notranslate"><span class="pre">UWG.dtweather</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.epw_path"><code class="docutils literal notranslate"><span class="pre">UWG.epw_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.flr_h"><code class="docutils literal notranslate"><span class="pre">UWG.flr_h</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.glzr"><code class="docutils literal notranslate"><span class="pre">UWG.glzr</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.grasscover"><code class="docutils literal notranslate"><span class="pre">UWG.grasscover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_mix"><code class="docutils literal notranslate"><span class="pre">UWG.h_mix</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_obs"><code class="docutils literal notranslate"><span class="pre">UWG.h_obs</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ref"><code class="docutils literal notranslate"><span class="pre">UWG.h_ref</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_temp"><code class="docutils literal notranslate"><span class="pre">UWG.h_temp</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ubl1"><code class="docutils literal notranslate"><span class="pre">UWG.h_ubl1</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_ubl2"><code class="docutils literal notranslate"><span class="pre">UWG.h_ubl2</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.h_wind"><code class="docutils literal notranslate"><span class="pre">UWG.h_wind</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.kroad"><code class="docutils literal notranslate"><span class="pre">UWG.kroad</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.latfocc"><code class="docutils literal notranslate"><span class="pre">UWG.latfocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.latgrss"><code class="docutils literal notranslate"><span class="pre">UWG.latgrss</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.lattree"><code class="docutils literal notranslate"><span class="pre">UWG.lattree</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.maxday"><code class="docutils literal notranslate"><span class="pre">UWG.maxday</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.maxnight"><code class="docutils literal notranslate"><span class="pre">UWG.maxnight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.month"><code class="docutils literal notranslate"><span class="pre">UWG.month</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.nday"><code class="docutils literal notranslate"><span class="pre">UWG.nday</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.new_epw_path"><code class="docutils literal notranslate"><span class="pre">UWG.new_epw_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radfequip"><code class="docutils literal notranslate"><span class="pre">UWG.radfequip</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radflight"><code class="docutils literal notranslate"><span class="pre">UWG.radflight</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.radfocc"><code class="docutils literal notranslate"><span class="pre">UWG.radfocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.refBEM"><code class="docutils literal notranslate"><span class="pre">UWG.refBEM</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.refSchedule"><code class="docutils literal notranslate"><span class="pre">UWG.refSchedule</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ref_bem_vector"><code class="docutils literal notranslate"><span class="pre">UWG.ref_bem_vector</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.ref_sch_vector"><code class="docutils literal notranslate"><span class="pre">UWG.ref_sch_vector</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.rurvegcover"><code class="docutils literal notranslate"><span class="pre">UWG.rurvegcover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.schtraffic"><code class="docutils literal notranslate"><span class="pre">UWG.schtraffic</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.sensanth"><code class="docutils literal notranslate"><span class="pre">UWG.sensanth</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.sensocc"><code class="docutils literal notranslate"><span class="pre">UWG.sensocc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.shgc"><code class="docutils literal notranslate"><span class="pre">UWG.shgc</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.treecover"><code class="docutils literal notranslate"><span class="pre">UWG.treecover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegcover"><code class="docutils literal notranslate"><span class="pre">UWG.vegcover</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegend"><code class="docutils literal notranslate"><span class="pre">UWG.vegend</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegroof"><code class="docutils literal notranslate"><span class="pre">UWG.vegroof</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vegstart"><code class="docutils literal notranslate"><span class="pre">UWG.vegstart</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.vertohor"><code class="docutils literal notranslate"><span class="pre">UWG.vertohor</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.windmin"><code class="docutils literal notranslate"><span class="pre">UWG.windmin</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../uwg.uwg.html#uwg.uwg.UWG.zone"><code class="docutils literal notranslate"><span class="pre">UWG.zone</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../uwg.weather.html">uwg.weather module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../uwg.weather.html#uwg.weather.Weather"><code class="docutils literal notranslate"><span class="pre">Weather</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../uwg.html#module-uwg">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-4">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cli/index.html">CLI Docs</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">uwg</a></li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-8 content" role="main">
+      
+  <h1>Source code for uwg.readDOE</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="n">xrange</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">.building</span> <span class="kn">import</span> <span class="n">Building</span>
+<span class="kn">from</span> <span class="nn">.material</span> <span class="kn">import</span> <span class="n">Material</span>
+<span class="kn">from</span> <span class="nn">.element</span> <span class="kn">import</span> <span class="n">Element</span>
+<span class="kn">from</span> <span class="nn">.BEMDef</span> <span class="kn">import</span> <span class="n">BEMDef</span>
+<span class="kn">from</span> <span class="nn">.schdef</span> <span class="kn">import</span> <span class="n">SchDef</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">str2fl</span>
+<span class="c1"># to avoid circular imports load from util</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">REF_BLDTYPE</span><span class="p">,</span> <span class="n">REF_BUILTERA</span><span class="p">,</span> <span class="n">REF_ZONETYPE</span>
+
+
+<span class="n">DIR_CURR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="n">DIR_DOE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DIR_CURR</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="s2">&quot;DOERefBuildings&quot;</span><span class="p">)</span>
+
+<span class="c1"># Define standards: 16 buiding types, 3 built eras, 16 climate zones</span>
+
+
+<div class="viewcode-block" id="readDOE">
+<a class="viewcode-back" href="../../uwg.readDOE.html#uwg.readDOE.readDOE">[docs]</a>
+<span class="k">def</span> <span class="nf">readDOE</span><span class="p">(</span><span class="n">serialize_output</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read csv files of DOE buildings</span>
+<span class="sd">    Sheet 1 = BuildingSummary</span>
+<span class="sd">    Sheet 2 = ZoneSummary</span>
+<span class="sd">    Sheet 3 = LocationSummary</span>
+<span class="sd">    Sheet 4 = Schedules</span>
+<span class="sd">    Note BLD8 &amp; 10 = school</span>
+
+
+<span class="sd">    Then make matrix of ref data as nested nested lists [16, 3, 16]:</span>
+<span class="sd">    matrix refDOE = Building objs</span>
+<span class="sd">    matrix Schedule = SchDef objs</span>
+<span class="sd">    matrix refBEM (16,3,16) = BEMDef</span>
+<span class="sd">    where:</span>
+<span class="sd">        [16,3,16] is Type = 1-16, Era = 1-3, climate zone = 1-16</span>
+<span class="sd">        i.e.</span>
+<span class="sd">        Type: FullServiceRestaurant, Era: Pre80, Zone: 6A Minneapolis</span>
+<span class="sd">    Nested tree:</span>
+<span class="sd">    [TYPE_1:</span>
+<span class="sd">        ERA_1:</span>
+<span class="sd">            CLIMATE_ZONE_1</span>
+<span class="sd">            ...</span>
+<span class="sd">            CLIMATE_ZONE_16</span>
+<span class="sd">        ERA_2:</span>
+<span class="sd">            CLIMATE_ZONE_1</span>
+<span class="sd">            ...</span>
+<span class="sd">            CLIMATE_ZONE_16</span>
+<span class="sd">        ...</span>
+<span class="sd">        ERA_3:</span>
+<span class="sd">            CLIMATE_ZONE_1</span>
+<span class="sd">            ...</span>
+<span class="sd">            CLIMATE_ZONE_16]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># 16 x 3 x 16 matrix of Building, SchDef, BEMDef objects</span>
+    <span class="n">refDOE</span> <span class="o">=</span> <span class="p">[[[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+              <span class="k">for</span> <span class="n">j_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)]</span>  <span class="c1"># refDOE: Building</span>
+    <span class="c1"># Schedule: SchDef</span>
+    <span class="n">Schedule</span> <span class="o">=</span> <span class="p">[[[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="k">for</span> <span class="n">j_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)]</span>
+    <span class="n">refBEM</span> <span class="o">=</span> <span class="p">[[[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="k">for</span> <span class="n">k_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+              <span class="k">for</span> <span class="n">j_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)]</span>  <span class="c1"># refBEM: BEMDef</span>
+
+    <span class="c1"># Purpose: Loop through every DOE reference csv and extract building data</span>
+    <span class="c1"># Nested loop = 16 types, 3 era, 16 zones = time complexity O(n*m*k) = 768</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+
+        <span class="c1"># i = 16 types of buildings</span>
+        <span class="c1"># print &quot;\tType: {} @i={}&quot;.format(BLDTYPE[i], i)</span>
+
+        <span class="c1"># Read building summary (Sheet 1)</span>
+        <span class="n">file_doe_name_bld</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DIR_DOE_PATH</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">_BuildingSummary.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">list_doe1</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_doe_name_bld</span><span class="p">)</span>
+        <span class="c1"># listof(listof 3 era values)</span>
+        <span class="c1"># Number of Floors, this will be list of floats and str if &quot;basement&quot;</span>
+        <span class="n">nFloor</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">(</span><span class="n">list_doe1</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+        <span class="n">glazing</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">(</span><span class="n">list_doe1</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>      <span class="c1"># [?] Total</span>
+        <span class="n">hCeiling</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">(</span><span class="n">list_doe1</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>      <span class="c1"># [m] Ceiling height</span>
+        <span class="n">ver2hor</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">(</span><span class="n">list_doe1</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>      <span class="c1"># Wall to Skin Ratio</span>
+        <span class="c1"># [m2] Gross Dimensions - Total area</span>
+        <span class="n">AreaRoof</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">(</span><span class="n">list_doe1</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+
+        <span class="c1"># Read zone summary (Sheet 2)</span>
+        <span class="n">file_doe_name_zone</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">DIR_DOE_PATH</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">_ZoneSummary.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">list_doe2</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_doe_name_zone</span><span class="p">)</span>
+        <span class="c1"># listof(listof 3 eras)</span>
+        <span class="n">AreaFloor</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                            <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">5</span><span class="p">]])</span>       <span class="c1"># [m2]</span>
+        <span class="n">Volume</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span>
+                         <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">6</span><span class="p">]])</span>       <span class="c1"># [m3]</span>
+        <span class="n">AreaWall</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">8</span><span class="p">],</span>
+                           <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">8</span><span class="p">]])</span>       <span class="c1"># [m2]</span>
+        <span class="n">AreaWindow</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">9</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                             <span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">9</span><span class="p">]])</span>       <span class="c1"># [m2]</span>
+        <span class="n">Occupant</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">11</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">11</span><span class="p">],</span>
+                           <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">11</span><span class="p">]])</span>    <span class="c1"># Number of People</span>
+        <span class="n">Light</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">12</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="p">[</span><span class="mi">12</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">12</span><span class="p">]])</span>    <span class="c1"># [W/m2]</span>
+        <span class="c1"># [W/m2] Electric Plug and Process</span>
+        <span class="n">Elec</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">13</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">13</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">13</span><span class="p">]])</span>
+        <span class="c1"># [W/m2] Gas Plug and Process</span>
+        <span class="n">Gas</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">14</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">14</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">14</span><span class="p">]])</span>
+        <span class="c1"># [Litres/hr] Peak Service Hot Water</span>
+        <span class="n">SHW</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">15</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">15</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">15</span><span class="p">]])</span>
+        <span class="c1"># [L/s/m2] Ventilation</span>
+        <span class="n">Vent</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">17</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">17</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">17</span><span class="p">]])</span>
+        <span class="c1"># Air Changes Per Hour (ACH) Infiltration</span>
+        <span class="n">Infil</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe2</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">20</span><span class="p">]])</span>
+
+        <span class="c1"># Read location summary (Sheet 3)</span>
+        <span class="n">file_doe_name_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">DIR_DOE_PATH</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">_LocationSummary.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">list_doe3</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_doe_name_location</span><span class="p">)</span>
+        <span class="c1"># (listof (listof 3 eras (listof 16 climate types)))</span>
+        <span class="n">TypeWall</span> <span class="o">=</span> <span class="p">[</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">14</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                    <span class="n">list_doe3</span><span class="p">[</span><span class="mi">25</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]]</span>            <span class="c1"># Construction type</span>
+        <span class="n">RvalWall</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+                           <span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">26</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>     <span class="c1"># [m2*K/W] R-value</span>
+        <span class="n">TypeRoof</span> <span class="o">=</span> <span class="p">[</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">16</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                    <span class="n">list_doe3</span><span class="p">[</span><span class="mi">27</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]]</span>            <span class="c1"># Construction type</span>
+        <span class="n">RvalRoof</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>
+                           <span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">28</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>     <span class="c1"># [m2*K/W] R-value</span>
+        <span class="n">Uwindow</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span>
+                          <span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">29</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>     <span class="c1"># [W/m2*K] U-factor</span>
+        <span class="n">SHGC</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">19</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                       <span class="n">list_doe3</span><span class="p">[</span><span class="mi">30</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>     <span class="c1"># [-] coefficient</span>
+        <span class="n">HVAC</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">20</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                       <span class="n">list_doe3</span><span class="p">[</span><span class="mi">31</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>     <span class="c1"># [kW] Air Conditioning</span>
+        <span class="n">HEAT</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">21</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                       <span class="n">list_doe3</span><span class="p">[</span><span class="mi">32</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>    <span class="c1"># [kW] Heating</span>
+        <span class="n">COP</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">11</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">22</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span>
+                      <span class="n">list_doe3</span><span class="p">[</span><span class="mi">33</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>    <span class="c1"># [-] Air Conditioning COP</span>
+        <span class="c1"># [%] Heating Efficiency</span>
+        <span class="n">EffHeat</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">12</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">23</span><span class="p">]</span>
+                          <span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">34</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>
+        <span class="c1"># [m3/s] Fan Max Flow Rate</span>
+        <span class="n">FanFlow</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe3</span><span class="p">[</span><span class="mi">13</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">24</span><span class="p">]</span>
+                          <span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">],</span> <span class="n">list_doe3</span><span class="p">[</span><span class="mi">35</span><span class="p">][</span><span class="mi">4</span><span class="p">:</span><span class="mi">20</span><span class="p">]])</span>
+
+        <span class="c1"># Read Schedules (Sheet 4)</span>
+        <span class="n">file_doe_name_schedules</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">DIR_DOE_PATH</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;BLD</span><span class="si">{}</span><span class="s2">_Schedules.csv&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">list_doe4</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_doe_name_schedules</span><span class="p">)</span>
+
+        <span class="c1"># listof(listof weekday, sat, sun (list of 24 fractions)))</span>
+        <span class="c1"># Equipment Schedule 24 hrs</span>
+        <span class="n">SchEquip</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                           <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Light Schedule 24 hrs; Wkday=Sat=Sun=Hol</span>
+        <span class="n">SchLight</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                           <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Occupancy Schedule 24 hrs</span>
+        <span class="n">SchOcc</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                         <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Cooling Setpoint Schedule 24 hrs</span>
+        <span class="n">SetCool</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+                          <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">12</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Heating Setpoint Schedule 24 hrs; summer design</span>
+        <span class="n">SetHeat</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">13</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span>
+                          <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">15</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Gas Equipment Schedule 24 hrs; wkday=sat</span>
+        <span class="n">SchGas</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">16</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>
+                         <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">18</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+        <span class="c1"># Solar Water Heating Schedule 24 hrs; wkday=summerdesign, sat=winterdesgin</span>
+        <span class="n">SchSWH</span> <span class="o">=</span> <span class="n">str2fl</span><span class="p">([</span><span class="n">list_doe4</span><span class="p">[</span><span class="mi">19</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span>
+                         <span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">],</span> <span class="n">list_doe4</span><span class="p">[</span><span class="mi">21</span><span class="p">][</span><span class="mi">6</span><span class="p">:</span><span class="mi">30</span><span class="p">]])</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+
+            <span class="c1"># j = 3 built eras</span>
+            <span class="c1"># print&quot;\tEra: {} @j={}&quot;.format(BUILTERA[j], j)</span>
+
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
+
+                <span class="c1"># k = 16 climate zones</span>
+                <span class="c1"># print &quot;\tClimate zone: {} @k={}&quot;.format(ZONETYPE[k], k)</span>
+
+                <span class="n">B</span> <span class="o">=</span> <span class="n">Building</span><span class="p">(</span>
+                    <span class="n">hCeiling</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>                        <span class="c1"># floorHeight by era</span>
+                    <span class="mi">1</span><span class="p">,</span>                                  <span class="c1"># intHeatNight</span>
+                    <span class="mi">1</span><span class="p">,</span>                                  <span class="c1"># intHeatDay</span>
+                    <span class="mf">0.1</span><span class="p">,</span>                                <span class="c1"># intHeatFRad</span>
+                    <span class="mf">0.1</span><span class="p">,</span>                                <span class="c1"># intHeatFLat</span>
+                    <span class="n">Infil</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>                           <span class="c1"># infil (ACH) by era</span>
+                    <span class="c1"># vent (m^3/s/m^2) by era, converted from liters</span>
+                    <span class="n">Vent</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.</span><span class="p">,</span>
+                    <span class="n">glazing</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>                         <span class="c1"># glazing ratio by era</span>
+                    <span class="c1"># uValue by era, by climate type</span>
+                    <span class="n">Uwindow</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+                    <span class="c1"># SHGC, by era, by climate type</span>
+                    <span class="n">SHGC</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+                    <span class="s1">&#39;AIR&#39;</span><span class="p">,</span>                              <span class="c1"># cooling condensation system type: AIR, WATER</span>
+                    <span class="c1"># cop by era, climate type</span>
+                    <span class="n">COP</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+                    <span class="c1"># coolCap converted to W/m2 by era, climate type</span>
+                    <span class="p">(</span><span class="n">HVAC</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="mf">1000.0</span><span class="p">)</span><span class="o">/</span><span class="n">AreaFloor</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                    <span class="c1"># heatEff by era, climate type</span>
+                    <span class="n">EffHeat</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+                    <span class="mi">293</span><span class="p">)</span>                                <span class="c1"># initialTemp at 20 C</span>
+
+                <span class="c1"># Not defined in the constructor</span>
+                <span class="c1"># heating Capacity converted to W/m2 by era, climate type</span>
+                <span class="n">B</span><span class="o">.</span><span class="n">heat_cap</span> <span class="o">=</span> <span class="p">(</span><span class="n">HEAT</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">AreaFloor</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">refDOE</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span>
+
+                <span class="c1"># Define wall, mass(floor), roof</span>
+                <span class="c1"># Reference from E+ for conductivity, thickness (reference below)</span>
+
+                <span class="c1"># Material: (thermalCond, volHeat = specific heat * density)</span>
+                <span class="n">Concrete</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">1.311</span><span class="p">,</span> <span class="mf">836.8</span> <span class="o">*</span> <span class="mi">2240</span><span class="p">,</span> <span class="s2">&quot;Concrete&quot;</span><span class="p">)</span>
+                <span class="n">Insulation</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">0.049</span><span class="p">,</span> <span class="mf">836.8</span> <span class="o">*</span> <span class="mf">265.0</span><span class="p">,</span> <span class="s2">&quot;Insulation&quot;</span><span class="p">)</span>
+                <span class="n">Gypsum</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">830.0</span> <span class="o">*</span> <span class="mf">784.9</span><span class="p">,</span> <span class="s2">&quot;Gypsum&quot;</span><span class="p">)</span>
+                <span class="n">Wood</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">0.11</span><span class="p">,</span> <span class="mf">1210.0</span> <span class="o">*</span> <span class="mf">544.62</span><span class="p">,</span> <span class="s2">&quot;Wood&quot;</span><span class="p">)</span>
+                <span class="n">Stucco</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">0.6918</span><span class="p">,</span>  <span class="mf">837.0</span> <span class="o">*</span> <span class="mf">1858.0</span><span class="p">,</span> <span class="s2">&quot;Stucco&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Wall (1 in stucco, concrete, insulation, gypsum)</span>
+                <span class="c1"># Check TypWall by era, by climate</span>
+                <span class="k">if</span> <span class="n">TypeWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;MassWall&quot;</span><span class="p">:</span>
+                    <span class="c1"># Construct wall based on R value of Wall from refDOE and properties defined above</span>
+                    <span class="c1"># 1&quot; stucco, 8&quot; concrete, tbd insulation, 1/2&quot; gypsum</span>
+                    <span class="n">Rbase</span> <span class="o">=</span> <span class="mf">0.271087</span>  <span class="c1"># R val based on stucco, concrete, gypsum</span>
+                    <span class="n">Rins</span> <span class="o">=</span> <span class="n">RvalWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">Rbase</span>  <span class="c1"># find insulation value</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="n">Rins</span> <span class="o">*</span> <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span>  <span class="c1"># depth of ins from m2*K/W * W/m*K = m</span>
+                    <span class="k">if</span> <span class="n">D_ins</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0254</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span>
+                                     <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Stucco</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span>
+                                  <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># if it&#39;s less then 1 cm don&#39;t include in layers</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0254</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span>
+                                     <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Stucco</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span>
+                                  <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+
+                    <span class="n">wall</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span>
+                                   <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;MassWall&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># If mass wall, assume mass floor (4&quot; concrete)</span>
+                    <span class="c1"># Mass (assume 4&quot; concrete);</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.054</span><span class="p">,</span> <span class="mf">0.054</span><span class="p">]</span>
+                    <span class="n">concrete</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">1.31</span><span class="p">,</span> <span class="mf">2240.0</span><span class="o">*</span><span class="mf">836.8</span><span class="p">,</span> <span class="s1">&#39;Concrete&#39;</span><span class="p">)</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="p">[</span>
+                                   <span class="n">concrete</span><span class="p">,</span> <span class="n">concrete</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">293</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;MassFloor&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">TypeWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;WoodFrame&quot;</span><span class="p">:</span>
+                    <span class="c1"># 0.01m wood siding, tbd insulation, 1/2&quot; gypsum</span>
+                    <span class="n">Rbase</span> <span class="o">=</span> <span class="mf">0.170284091</span>    <span class="c1"># based on wood siding, gypsum</span>
+                    <span class="n">Rins</span> <span class="o">=</span> <span class="n">RvalWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">Rbase</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="n">Rins</span> <span class="o">*</span> <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span>  <span class="c1"># depth of insulatino</span>
+
+                    <span class="k">if</span> <span class="n">D_ins</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Wood</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Wood</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+
+                    <span class="n">wall</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span>
+                                   <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;WoodFrameWall&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># If wood frame wall, assume wooden floor</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+                    <span class="n">wood</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">1.31</span><span class="p">,</span> <span class="mf">2240.0</span><span class="o">*</span><span class="mf">836.8</span><span class="p">,</span> <span class="s1">&#39;Wood&#39;</span><span class="p">)</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="p">[</span>
+                                   <span class="n">wood</span><span class="p">,</span> <span class="n">wood</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="s2">&quot;WoodFloor&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">TypeWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SteelFrame&quot;</span><span class="p">:</span>
+                    <span class="c1"># 1&quot; stucco, 8&quot; concrete, tbd insulation, 1/2&quot; gypsum</span>
+                    <span class="n">Rbase</span> <span class="o">=</span> <span class="mf">0.271087</span>  <span class="c1"># based on stucco, concrete, gypsum</span>
+                    <span class="n">Rins</span> <span class="o">=</span> <span class="n">RvalWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">Rbase</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="n">Rins</span> <span class="o">*</span> <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span>
+                    <span class="k">if</span> <span class="n">D_ins</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0254</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span>
+                                     <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Stucco</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span>
+                                  <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>    <span class="c1"># If insulation is too thin, assume no insulation</span>
+                        <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0254</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span>
+                                     <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0508</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">Stucco</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span>
+                                  <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+                    <span class="n">wall</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span>
+                                   <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;SteelFrame&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># If mass wall, assume mass foor</span>
+                    <span class="c1"># Mass (assume 4&quot; concrete),</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.93</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="p">[</span>
+                                   <span class="n">Concrete</span><span class="p">,</span> <span class="n">Concrete</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="s2">&quot;MassFloor&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">TypeWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;MetalWall&quot;</span><span class="p">:</span>
+                    <span class="c1"># metal siding, insulation, 1/2&quot; gypsum</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="c1"># use derived insul thickness or 0.01 based on max</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">RvalWall</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="n">D_ins</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">,</span> <span class="mf">0.0127</span><span class="p">]</span>
+                    <span class="n">materials</span> <span class="o">=</span> <span class="p">[</span><span class="n">Insulation</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">,</span> <span class="n">Gypsum</span><span class="p">]</span>
+                    <span class="n">wall</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span>
+                                   <span class="n">materials</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">293</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;MetalWall&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Mass (assume 4&quot; concrete);</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+                    <span class="n">concrete</span> <span class="o">=</span> <span class="n">Material</span><span class="p">(</span><span class="mf">1.31</span><span class="p">,</span> <span class="mf">2240.0</span><span class="o">*</span><span class="mf">836.8</span><span class="p">,</span> <span class="s1">&#39;Concrete&#39;</span><span class="p">)</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="p">[</span>
+                                   <span class="n">concrete</span><span class="p">,</span> <span class="n">concrete</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="s2">&quot;MassFloor&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Roof</span>
+                <span class="k">if</span> <span class="n">TypeRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;IEAD&quot;</span><span class="p">:</span>  <span class="c1"># Insulation Entirely Above Deck</span>
+                    <span class="c1"># IEAD-&gt; membrane, insulation, decking</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.93</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RvalRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span>
+                                <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">roof</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="p">[</span><span class="n">D_ins</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">],</span> <span class="p">[</span>
+                                   <span class="n">Insulation</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;IEAD&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">TypeRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Attic&quot;</span><span class="p">:</span>
+                    <span class="c1"># IEAD-&gt; membrane, insulation, decking</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RvalRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span>
+                                <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">roof</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="p">[</span><span class="n">D_ins</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">],</span> <span class="p">[</span>
+                                   <span class="n">Insulation</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Attic&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">TypeRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;MetalRoof&quot;</span><span class="p">:</span>
+                    <span class="c1"># IEAD-&gt; membrane, insulation, decking</span>
+                    <span class="n">alb</span> <span class="o">=</span> <span class="mf">0.2</span>
+                    <span class="n">emis</span> <span class="o">=</span> <span class="mf">0.9</span>
+                    <span class="n">D_ins</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RvalRoof</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span>
+                                <span class="n">Insulation</span><span class="o">.</span><span class="n">thermalcond</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">roof</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">alb</span><span class="p">,</span> <span class="n">emis</span><span class="p">,</span> <span class="p">[</span><span class="n">D_ins</span><span class="p">,</span> <span class="n">D_ins</span><span class="p">],</span> <span class="p">[</span>
+                                   <span class="n">Insulation</span><span class="p">,</span> <span class="n">Insulation</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">293.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;MetalRoof&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Define bulding energy model, set fraction of the urban floor space of this typology to zero</span>
+                <span class="n">bldtype</span><span class="p">,</span> <span class="n">builtera</span><span class="p">,</span> <span class="n">zonetype</span> <span class="o">=</span> \
+                    <span class="n">REF_BLDTYPE</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">REF_BUILTERA</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">REF_ZONETYPE</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">refBEM</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">BEMDef</span><span class="p">(</span><span class="n">building</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="n">mass</span><span class="p">,</span> <span class="n">wall</span><span class="o">=</span><span class="n">wall</span><span class="p">,</span> <span class="n">roof</span><span class="o">=</span><span class="n">roof</span><span class="p">,</span>
+                                         <span class="n">bldtype</span><span class="o">=</span><span class="n">bldtype</span><span class="p">,</span> <span class="n">builtera</span><span class="o">=</span><span class="n">builtera</span><span class="p">)</span>
+                <span class="n">refBEM</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">zonetype</span> <span class="o">=</span> <span class="n">zonetype</span>  <span class="c1"># for testing</span>
+                <span class="c1"># max fan flow rate (m^3/s) per DOE</span>
+                <span class="n">refBEM</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">building</span><span class="o">.</span><span class="n">FanMax</span> <span class="o">=</span> <span class="n">FanFlow</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+
+                <span class="c1"># Calculate internal heat loads for schedule</span>
+                <span class="c1"># W/m^2 (max) for electrical plug process</span>
+                <span class="n">q_elec</span> <span class="o">=</span> <span class="n">Elec</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">q_light</span> <span class="o">=</span> <span class="n">Light</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>                 <span class="c1"># W/m^2 (max) for light</span>
+                <span class="n">n_occ</span> <span class="o">=</span> <span class="n">Occupant</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">AreaFloor</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>   <span class="c1"># Person/m^2</span>
+                <span class="n">q_gas</span> <span class="o">=</span> <span class="n">Gas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>                     <span class="c1"># W/m^2 (max) for gas</span>
+                <span class="n">vent</span> <span class="o">=</span> <span class="n">Vent</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.0</span>             <span class="c1"># m^3/s/m^2</span>
+                <span class="n">v_swh</span> <span class="o">=</span> <span class="n">SHW</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">AreaFloor</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>        <span class="c1"># L/hr/m2</span>
+
+                <span class="n">Schedule</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">SchDef</span><span class="p">(</span><span class="n">elec</span><span class="o">=</span><span class="n">SchEquip</span><span class="p">,</span> <span class="n">gas</span><span class="o">=</span><span class="n">SchGas</span><span class="p">,</span> <span class="n">light</span><span class="o">=</span><span class="n">SchLight</span><span class="p">,</span> <span class="n">occ</span><span class="o">=</span><span class="n">SchOcc</span><span class="p">,</span> <span class="n">cool</span><span class="o">=</span><span class="n">SetCool</span><span class="p">,</span>
+                                           <span class="n">heat</span><span class="o">=</span><span class="n">SetHeat</span><span class="p">,</span> <span class="n">swh</span><span class="o">=</span><span class="n">SchSWH</span><span class="p">,</span> <span class="n">q_elec</span><span class="o">=</span><span class="n">q_elec</span><span class="p">,</span> <span class="n">q_gas</span><span class="o">=</span><span class="n">q_gas</span><span class="p">,</span> <span class="n">q_light</span><span class="o">=</span><span class="n">q_light</span><span class="p">,</span>
+                                           <span class="n">n_occ</span><span class="o">=</span><span class="n">n_occ</span><span class="p">,</span> <span class="n">vent</span><span class="o">=</span><span class="n">vent</span><span class="p">,</span> <span class="n">v_swh</span><span class="o">=</span><span class="n">v_swh</span><span class="p">,</span> <span class="n">bldtype</span><span class="o">=</span><span class="n">bldtype</span><span class="p">,</span> <span class="n">builtera</span><span class="o">=</span><span class="n">builtera</span><span class="p">)</span>
+                <span class="n">Schedule</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">zonetype</span> <span class="o">=</span> <span class="n">zonetype</span>  <span class="c1"># for testing only.</span>
+
+    <span class="c1"># if not test serialize refDOE,refBEM,Schedule and store in resources</span>
+    <span class="k">if</span> <span class="n">serialize_output</span><span class="p">:</span>
+
+        <span class="c1"># create a binary file for serialized obj</span>
+        <span class="n">pkl_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DIR_CURR</span><span class="p">,</span> <span class="s1">&#39;refdata&#39;</span><span class="p">,</span> <span class="s1">&#39;readDOE.pkl&#39;</span><span class="p">)</span>
+        <span class="n">pickle_readDOE</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl_file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+
+        <span class="c1"># dump in ../resources</span>
+        <span class="c1"># Pickle objects, protocol 1 b/c binary file</span>
+        <span class="c1"># pickle.dump(refDOE, pickle_readDOE,1)  # Not used. Commented out.</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">refBEM</span><span class="p">,</span> <span class="n">pickle_readDOE</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">Schedule</span><span class="p">,</span> <span class="n">pickle_readDOE</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">pickle_readDOE</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">refBEM</span><span class="p">,</span> <span class="n">Schedule</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># Set to True only if you want create new .pkls of DOE refs</span>
+    <span class="c1"># Use --serialize switch to serialize the readDOE data</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--serialize&quot;</span><span class="p">:</span>
+        <span class="n">refBEM</span><span class="p">,</span> <span class="n">Schedule</span> <span class="o">=</span> <span class="n">readDOE</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">refBEM</span><span class="p">,</span> <span class="n">Schedule</span> <span class="o">=</span> <span class="n">readDOE</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="c1"># Material ref from E+</span>
+<span class="c1">#     1/2IN Gypsum,            !- Name</span>
+<span class="c1">#     Smooth,                  !- Roughness</span>
+<span class="c1">#     0.0127,                  !- Thickness {m}</span>
+<span class="c1">#     0.1600,                  !- Conductivity {W/m-K}</span>
+<span class="c1">#     784.9000,                !- Density {kg/m3}</span>
+<span class="c1">#     830.0000,                !- Specific Heat {J/kg-K}</span>
+<span class="c1">#     0.9000,                  !- Thermal Absorptance</span>
+<span class="c1">#     0.9200,                  !- Solar Absorptance</span>
+<span class="c1">#     0.9200;                  !- Visible Absorptance</span>
+<span class="c1">#</span>
+<span class="c1"># Material,</span>
+<span class="c1">#     1IN Stucco,              !- Name</span>
+<span class="c1">#     Smooth,                  !- Roughness</span>
+<span class="c1">#     0.0253,                  !- Thickness</span>
+<span class="c1">#     0.6918,                  !- Conductivity</span>
+<span class="c1">#     1858.0000,               !- Density</span>
+<span class="c1">#     837.0000,                !- Specific Heat</span>
+<span class="c1">#     0.9000,                  !- Thermal Absorptance</span>
+<span class="c1">#     0.9200,                  !- Solar Absorptance</span>
+<span class="c1">#     0.9200;                  !- Visible Absorptance</span>
+<span class="c1">#</span>
+<span class="c1"># Material,</span>
+<span class="c1">#     8IN CONCRETE HW,  !- Name</span>
+<span class="c1">#     Rough,                   !- Roughness</span>
+<span class="c1">#     0.2032,                  !- Thickness {m}</span>
+<span class="c1">#     1.3110,                  !- Conductivity {W/m-K}</span>
+<span class="c1">#     2240.0000,               !- Density {kg/m3}</span>
+<span class="c1">#     836.8000,                !- Specific Heat {J/kg-K}</span>
+<span class="c1">#     0.9000,                  !- Thermal Absorptance</span>
+<span class="c1">#     0.7000,                  !- Solar Absorptance</span>
+<span class="c1">#     0.7000;                  !- Visible Absorptance</span>
+<span class="c1">#</span>
+<span class="c1"># Material,</span>
+<span class="c1">#     Mass NonRes Wall Insulation, !- Name</span>
+<span class="c1">#     MediumRough,             !- Roughness</span>
+<span class="c1">#     0.0484268844343858,      !- Thickness {m}</span>
+<span class="c1">#     0.049,                   !- Conductivity {W/m-K}</span>
+<span class="c1">#     265.0000,                !- Density {kg/m3}</span>
+<span class="c1">#     836.8000,                !- Specific Heat {J/kg-K}</span>
+<span class="c1">#     0.9000,                  !- Thermal Absorptance</span>
+<span class="c1">#     0.7000,                  !- Solar Absorptance</span>
+<span class="c1">#     0.7000;                  !- Visible Absorptance</span>
+<span class="c1">#</span>
+<span class="c1"># Material,</span>
+<span class="c1">#     Std Wood 6inch,          !- Name</span>
+<span class="c1">#     MediumSmooth,            !- Roughness</span>
+<span class="c1">#     0.15,                    !- Thickness {m}</span>
+<span class="c1">#     0.12,                    !- Conductivity {W/m-K}</span>
+<span class="c1">#     540.0000,                !- Density {kg/m3}</span>
+<span class="c1">#     1210,                    !- Specific Heat {J/kg-K}</span>
+<span class="c1">#     0.9000000,               !- Thermal Absorptance</span>
+<span class="c1">#     0.7000000,               !- Solar Absorptance</span>
+<span class="c1">#     0.7000000;               !- Visible Absorptance! Common Materials</span>
+<span class="c1">#</span>
+<span class="c1"># Material,</span>
+<span class="c1">#     Wood Siding,             !- Name</span>
+<span class="c1">#     MediumSmooth,            !- Roughness</span>
+<span class="c1">#     0.0100,                  !- Thickness {m}</span>
+<span class="c1">#     0.1100,                  !- Conductivity {W/m-K}</span>
+<span class="c1">#     544.6200,                !- Density {kg/m3}</span>
+<span class="c1">#     1210.0000,               !- Specific Heat {J/kg-K}</span>
+<span class="c1">#     0.9000,                  !- Thermal Absorptance</span>
+<span class="c1">#     0.7800,                  !- Solar Absorptance</span>
+<span class="c1">#     0.7800;                  !- Visible Absorptance</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2024, Ladybug Tools.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.0.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+validate
+========
+
+.. click:: uwg.cli.validate:validate
+   :prog: uwg validate
+   :show-nested:
