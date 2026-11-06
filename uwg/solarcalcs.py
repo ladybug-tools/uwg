@@ -213,7 +213,7 @@ class SolarCalcs(object):
         date = day + inobis[month-1] - 1  # Julian day of the year
         # divide circle by 365 days, multiply by elapsed days + hours
         # ad: fractional year (radians)
-        self.ad = 2.0 * math.pi / 365. * (date - 1 + (self.ut - (12 / 24.)))
+        self.ad = 2.0 * math.pi / 365. * (date + (self.ut - 12.) / 24.)
 
         self.eqtime = (
             229.18 * (0.000075 + 0.001868 * math.cos(self.ad) - 0.032077 *
@@ -226,7 +226,7 @@ class SolarCalcs(object):
             0.006758 * math.cos(2. * self.ad) + 0.000907 * math.sin(2. * self.ad) -
             0.002697 * math.cos(3. * self.ad) + 0.00148 * math.sin(3. * self.ad))
 
-        time_offset = self.eqtime - 4. * lon + 60 * GMT
+        time_offset = self.eqtime + 4. * lon - 60 * GMT
         tst = secDay + time_offset * 60
 
         ha = (tst / 4. / 60. - 180.) * math.pi / 180.
