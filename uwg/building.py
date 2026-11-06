@@ -333,6 +333,7 @@ class Building(object):
         self.dehumDemand = 0.0  # dehumidification energy (W m-2)
         self.Qhvac = 0.0  # Total heat removed (sensible + latent)
         Qdehum = 0.0
+        Qcool = 0.0  # Sensible heat actually removed per building footprint.
         # dens: Moist air density given dry bulb temp, humidity ratio, and pressure
         dens = moist_air_density(
             forc.pres, self.indoor_temp, self.indoor_hum)  # kgv/m3
@@ -474,6 +475,7 @@ class Building(object):
             else:
                 self.Qhvac = self.dehumDemand + self.sensCoolDemand
 
+            Qcool = self.sensCoolDemand
             Qdehum = VolCool * dens * parameter.lv * \
                 (self.indoor_hum - 0.9 * 0.0078)
             self.coolConsump = \
@@ -513,7 +515,7 @@ class Building(object):
         # -------------------------------------------------------------
         # wall, mass, roof, intload, infil, vent, hvac, heat, window
 
-        Q = self.int_heat + winTrans + self.Qheat - self.sensCoolDemand
+        Q = self.int_heat + winTrans + self.Qheat - Qcool
 
         H1 = (T_wall * wallArea * zac_in_wall +
               T_mass * massArea * zac_in_mass +
