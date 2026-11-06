@@ -563,6 +563,55 @@ def test_simulate():
     assert model.dayType == pytest.approx(1., abs=1e-3)
     assert model.schtraffic[model.dayType - 1][model.simTime.hourDay] == \
         pytest.approx(0.2, abs=1e-6)
+    assert len(model.UCM.windProf) == model.RSM.nzref
+
+
+def test_custom_ref_bem_non_default_zone():
+    """Test generate() with custom ref_bem_vector in zone 4A (#291)."""
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    epw_path = os.path.join(test_dir, 'epw', 'SGP_Singapore.486980_IWEC.epw')
+
+    testweek = [[0.5 for _ in range(24)] for _ in range(3)]
+    sch1 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                  cool=testweek, heat=testweek, swh=testweek, q_elec=18.9,
+                  q_gas=3.2, q_light=18.9, n_occ=0.12, vent=0.0013,
+                  v_swh=0.2846, bldtype='midriseapartment', builtera='pre80')
+    sch2 = SchDef(elec=testweek, gas=testweek, light=testweek, occ=testweek,
+                  cool=testweek, heat=testweek, swh=testweek, q_elec=15.0,
+                  q_gas=2.0, q_light=12.0, n_occ=0.1, vent=0.001, v_swh=0.2,
+                  bldtype='customtype', builtera='new')
+
+    bem1 = _generate_bemdef()
+    bem1.bldtype = 'midriseapartment'
+    bem1.builtera = 'pre80'
+    bem1.building.cop = 3000.0
+
+    bem2 = deepcopy(_generate_bemdef())
+    bem2.bldtype = 'customtype'
+    bem2.builtera = 'new'
+    bem2.building.cop = 4000.0
+
+    model = UWG.from_param_args(
+        bldheight=10.0, blddensity=0.5, vertohor=0.5, grasscover=0.1,
+        treecover=0.1, zone='4A', nday=1,
+        bld=[('midriseapartment', 'pre80', 0.4), ('customtype', 'new', 0.6)],
+        ref_bem_vector=[bem1, bem2], ref_sch_vector=[sch1, sch2],
+        epw_path=epw_path)
+    model.generate()
+
+    assert len(model.BEM) == 2
+    assert len(model.Sch) == 2
+    assert model.BEM[0].bldtype == 'midriseapartment'
+    assert model.BEM[0].frac == pytest.approx(0.4, abs=1e-10)
+    assert model.BEM[0].building.cop == pytest.approx(3000.0, abs=1e-10)
+    assert model.BEM[1].bldtype == 'customtype'
+    assert model.BEM[1].frac == pytest.approx(0.6, abs=1e-10)
+    assert model.BEM[1].building.cop == pytest.approx(4000.0, abs=1e-10)
+    assert model.Sch[1].q_elec == pytest.approx(15.0, abs=1e-10)
+
+    model.simTime.nt = 5
+    model.simulate()
+    assert len(model.UCM.windProf) == model.RSM.nzref
 
 
 def _generate_bemdef():

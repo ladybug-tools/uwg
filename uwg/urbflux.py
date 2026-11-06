@@ -158,6 +158,7 @@ def urbflux(UCM, UBL, BEM, forc, parameter, simTime, RSM):
     UCM.turbW = 1.3 * UCM.ustarMod
 
     # Urban wind profile
+    UCM.windProf = []
     for iz in range(RSM.nzref):
         UCM.windProf.append(
             UCM.ustar / parameter.vk * log((RSM.z[iz] + UCM.bldHeight - UCM.l_disp) /

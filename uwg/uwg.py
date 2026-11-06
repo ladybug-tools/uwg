@@ -1220,10 +1220,8 @@ class UWG(object):
             # Update water temperature (estimated)
             if self.nSoil < 3:
                 # for BUBBLE/CAPITOUL/Singapore only
-                self.forc.deepTemp = sum(
-                    self.forcIP.temp) / float(len(self.forcIP.temp))
-                self.forc.waterTemp = \
-                    sum(self.forcIP.temp) / float(len(self.forcIP.temp)) - 10.0
+                self.forc.deepTemp = self.forcIP.deepTemp
+                self.forc.waterTemp = self.forcIP.waterTemp - 10.0
             else:
                 # soil temperature by depth, by month
                 self.forc.deepTemp = self.Tsoil[self._soilindex1][self.simTime.month - 1]
@@ -1575,23 +1573,31 @@ class UWG(object):
         zone_idx = REF_ZONETYPE.index(bld_z)
 
         # Build unique key based on bldtype and builtera strings
-        bld_dict = {bldg[0] + bldg[1]: (bldg[0], REF_BUILTERA.index(bldg[1]), bldg[2])
-                    for bldg in self.bld}
+        bld_dict = {
+            bldg[0].lower() + bldg[1].lower(): (
+                bldg[0], REF_BUILTERA.index(bldg[1].lower()), bldg[2])
+            for bldg in self.bld}
 
         for i in range(len(self.refBEM)):  # ~16 building types (more w/ custom refs)
             for j in range(3):  # ~ 3 built eras
-
-                if not self.refBEM[i][j][0]:
+                ref_bem = self.refBEM[i][j][zone_idx]
+                if not ref_bem:
+                    ref_bem = next(
+                        (b for b in self.refBEM[i][j] if b is not None), None)
+                if not ref_bem:
                     # when add custom types some matrix elements are None
                     continue
 
-                ref_key = \
-                    self.refBEM[i][j][0].bldtype + \
-                    self.refBEM[i][j][0].builtera
+                ref_key = ref_bem.bldtype.lower() + ref_bem.builtera.lower()
                 if ref_key in bld_dict:
                     # Add to BEM list
                     bldtype, builtera_idx, frac = bld_dict[ref_key]
-                    self.BEM.append(self.refBEM[i][builtera_idx][zone_idx])
+                    bem = self.refBEM[i][builtera_idx][zone_idx]
+                    if bem is None:
+                        bem = next(
+                            (b for b in self.refBEM[i][builtera_idx]
+                             if b is not None), ref_bem)
+                    self.BEM.append(bem)
                     self.BEM[k].frac = frac
                     self.BEM[k].fl_area = frac * total_urban_bld_area
 
@@ -1617,8 +1623,12 @@ class UWG(object):
                     self.alb_wall_total += self.BEM[k].frac * \
                         self.BEM[k].wall.albedo
                     # Add to schedule list
-                    self.Sch.append(
-                        self.refSchedule[i][builtera_idx][zone_idx])
+                    sch = self.refSchedule[i][builtera_idx][zone_idx]
+                    if sch is None:
+                        sch = next(
+                            (s for s in self.refSchedule[i][builtera_idx]
+                             if s is not None), None)
+                    self.Sch.append(sch)
                     k += 1
 
     def _compute_input(self):
