@@ -462,15 +462,10 @@ class Building(object):
             if (self.dehumDemand + self.sensCoolDemand) > (self.coolcap * self.nFloor):
                 # if cooling demand greater then hvac cooling capacity
                 self.Qhvac = self.coolcap * self.nFloor
-                VolCool = (
-                    VolCool / (self.dehumDemand + self.sensCoolDemand) *
-                    (self.coolcap * self.nFloor))
-                self.sensCoolDemand = (
-                    self.sensCoolDemand * (self.coolcap * self.nFloor) /
-                    (self.dehumDemand + self.sensCoolDemand))
-                self.dehumDemand = (
-                    self.dehumDemand * (self.coolcap * self.nFloor) /
-                    (self.dehumDemand + self.sensCoolDemand))
+                cooling_fraction = self.Qhvac / (self.dehumDemand + self.sensCoolDemand)
+                VolCool *= cooling_fraction
+                self.sensCoolDemand *= cooling_fraction
+                self.dehumDemand *= cooling_fraction
             else:
                 self.Qhvac = self.dehumDemand + self.sensCoolDemand
 
