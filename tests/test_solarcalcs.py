@@ -1,7 +1,10 @@
 """Tests for SolarCalcs object."""
 
+import json
+import os
+
 import pytest
-from .test_base import auto_setup_uwg, setup_open_matlab_ref
+from .test_base import auto_setup_uwg
 from uwg import SolarCalcs
 
 
@@ -22,7 +25,7 @@ def test_solarangles():
     # test simtime for solar after 1.5 days
     assert solar.ut == pytest.approx(12.0, abs=1e-15)
     assert solar.simTime.day == pytest.approx(2.0, abs=1e-15)
-    assert solar.ad == pytest.approx(0.197963373, abs=1e-8)
+    assert solar.ad == pytest.approx(2 * 3.141592653589793 / 365, abs=1e-12)
 
     # Recalculate solar angles with new time simulation, add to previous time increment
     # Increment time to 22 days, 13hrs, 30min = Jan 22 at 1330
@@ -45,15 +48,17 @@ def test_solarangles():
         solar.tanzen,
         solar.critOrient]
 
-    # open matlab ref file
-    uwg_matlab_val = \
-        setup_open_matlab_ref('matlab_solarcalcs', 'matlab_ref_solarangles.txt')
+    # The historical MATLAB angles encode the equations corrected against NOAA.
+    # Keep the fixed-time geometry regression; the external equation checks are
+    # in test_solar_noaa_regression.py.
+    with open(os.path.join(os.path.dirname(__file__), 'solar_corrected_reference.json')) as stream:
+        solar_reference = json.load(stream)['angles']
 
-    # matlab ref checking
-    assert len(uwg_matlab_val) == len(uwg_python_val)
-    for i in range(len(uwg_matlab_val)):
+    # corrected solar reference checking
+    assert len(solar_reference) == len(uwg_python_val)
+    for i in range(len(solar_reference)):
         assert uwg_python_val[i] == \
-            pytest.approx(uwg_matlab_val[i], abs=1e-15), 'error at index={}'.format(i)
+            pytest.approx(solar_reference[i], abs=1e-15), 'error at index={}'.format(i)
 
 
 def test_solarcalcs():
@@ -77,12 +82,13 @@ def test_solarcalcs():
     # Manual checking
 
     # Total Radiation (W m-2) at 13:00 on Jan 31 w/o reflected sunlight
-    assert model.solar.bldSol == pytest.approx(170.4189961148073, abs=1e-12)
-    assert model.solar.roadSol == pytest.approx(307.4032644249752, abs=1e-12)
+    assert model.solar.bldSol == pytest.approx(157.56521874370145, abs=1e-12)
+    assert model.solar.roadSol == pytest.approx(351.3780296908984, abs=1e-12)
 
-    # Matlab Checking
-    uwg_matlab_val = setup_open_matlab_ref(
-        'matlab_solarcalcs', 'matlab_ref_solarcalcs.txt')
+    # Only directly affected solar flux point expectations are updated here.
+    # Other building/model MATLAB reference files are unchanged.
+    with open(os.path.join(os.path.dirname(__file__), 'solar_corrected_reference.json')) as stream:
+        solar_reference = json.load(stream)['solar']
 
     # Modify treeSensHeat based on changes to veg/tree heat balance 10/20
     # grassSensHeat = (
@@ -114,8 +120,8 @@ def test_solarcalcs():
         treeSensHeat,  # 13
         treeLatHeat]  # 14
 
-    # matlab ref checking
-    assert len(uwg_matlab_val) == len(uwg_python_val)
-    for i in range(len(uwg_matlab_val)):
+    # corrected solar reference checking
+    assert len(solar_reference) == len(uwg_python_val)
+    for i in range(len(solar_reference)):
         assert uwg_python_val[i] == \
-            pytest.approx(uwg_matlab_val[i], abs=1e-15), 'error at index={}'.format(i)
+            pytest.approx(solar_reference[i], abs=1e-15), 'error at index={}'.format(i)
