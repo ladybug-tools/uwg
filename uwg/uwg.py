@@ -1220,8 +1220,10 @@ class UWG(object):
             # Update water temperature (estimated)
             if self.nSoil < 3:
                 # for BUBBLE/CAPITOUL/Singapore only
-                self.forc.deepTemp = self.forcIP.deepTemp
-                self.forc.waterTemp = self.forcIP.waterTemp - 10.0
+                self.forc.deepTemp = sum(
+                    self.forcIP.temp) / float(len(self.forcIP.temp))
+                self.forc.waterTemp = \
+                    sum(self.forcIP.temp) / float(len(self.forcIP.temp)) - 10.0
             else:
                 # soil temperature by depth, by month
                 self.forc.deepTemp = self.Tsoil[self._soilindex1][self.simTime.month - 1]

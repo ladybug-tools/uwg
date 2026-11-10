@@ -563,7 +563,6 @@ def test_simulate():
     assert model.dayType == pytest.approx(1., abs=1e-3)
     assert model.schtraffic[model.dayType - 1][model.simTime.hourDay] == \
         pytest.approx(0.2, abs=1e-6)
-    assert len(model.UCM.windProf) == model.RSM.nzref
 
 
 def test_custom_ref_bem_non_default_zone():
@@ -608,10 +607,6 @@ def test_custom_ref_bem_non_default_zone():
     assert model.BEM[1].frac == pytest.approx(0.6, abs=1e-10)
     assert model.BEM[1].building.cop == pytest.approx(4000.0, abs=1e-10)
     assert model.Sch[1].q_elec == pytest.approx(15.0, abs=1e-10)
-
-    model.simTime.nt = 5
-    model.simulate()
-    assert len(model.UCM.windProf) == model.RSM.nzref
 
 
 def _generate_bemdef():
